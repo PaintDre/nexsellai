@@ -15,7 +15,7 @@ import { Badge } from "@/components/ui/badge";
 
 type Product = Tables<"products">;
 
-const planLimits: Record<string, number> = { free: 1, starter: 10, pro: 999999 };
+const planLimits: Record<string, number> = { free: 1, starter: 10, pro: 100 };
 
 const GenerateLanding = () => {
   const { id } = useParams();
@@ -141,7 +141,7 @@ const GenerateLanding = () => {
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>Landings usadas:</span>
             <Badge variant={canGenerate ? "secondary" : "destructive"}>
-              {used} / {limit === 999999 ? "∞" : limit}
+              {used} / {limit}
             </Badge>
           </div>
 

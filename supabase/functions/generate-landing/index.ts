@@ -41,7 +41,7 @@ serve(async (req) => {
       .single();
 
     // Check plan limits
-    const limits: Record<string, number> = { free: 1, starter: 10, pro: 999999 };
+    const limits: Record<string, number> = { free: 1, starter: 10, pro: 100 };
     if ((profile.landings_used || 0) >= (limits[profile.plan] || 1)) {
       return new Response(JSON.stringify({ error: "Landing limit reached" }), {
         status: 403,
