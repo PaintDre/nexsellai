@@ -36,7 +36,7 @@ const Index = () => {
   const [demoDescription, setDemoDescription] = useState("");
   const [demoAudience, setDemoAudience] = useState("");
   const [generating, setGenerating] = useState(false);
-  const [demoBlocks, setDemoBlocks] = useState<any[] | null>(null);
+  
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [demoImage, setDemoImage] = useState<File | null>(null);
   const [demoImagePreview, setDemoImagePreview] = useState<string | null>(null);
@@ -90,8 +90,12 @@ const Index = () => {
 
       if (error) throw error;
 
-      setDemoBlocks(data.blocks || []);
       localStorage.setItem("nexsell_demo_used", "true");
+      localStorage.setItem("nexsell_preview_data", JSON.stringify({
+        blocks: data.blocks || [],
+        product,
+        imagePreview: demoImagePreview,
+      }));
 
       // Store in demo_landings
       const sessionId = localStorage.getItem("nexsell_session") || crypto.randomUUID();
@@ -99,6 +103,7 @@ const Index = () => {
       await supabase.from("demo_landings" as any).insert({ session_id: sessionId, blocks: data.blocks, product_data: product });
 
       toast({ title: "¡Landing demo generada!" });
+      navigate("/landing/preview");
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
@@ -106,19 +111,6 @@ const Index = () => {
     }
   };
 
-  const blockTypeLabels: Record<string, string> = {
-    hero: "🎯 Hero",
-    benefits: "✨ Beneficios",
-    features: "📋 Características",
-    testimonials: "💬 Testimonios",
-    objections: "🛡️ Objeciones",
-    offer: "🏷️ Oferta",
-    urgency: "⏰ Urgencia",
-    cta: "🚀 Llamada a Acción",
-    guarantee: "✅ Garantía",
-    faq: "❓ FAQ",
-    microcopy: "📝 Microcopy",
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -261,45 +253,7 @@ const Index = () => {
             <p className="text-muted-foreground mt-2">Genera 1 landing gratis sin crear cuenta</p>
           </div>
 
-          {demoBlocks ? (
-            <div className="space-y-6">
-              <div className="text-center">
-                <Badge className="bg-accent text-accent-foreground mb-4">Landing generada</Badge>
-              </div>
-              <div className="space-y-4">
-                {demoBlocks.map((block: any, i: number) => (
-                  <Card key={i}>
-                    <CardContent className="p-5">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="outline" className="text-xs">{blockTypeLabels[block.type] || block.type}</Badge>
-                        <span className="text-xs text-muted-foreground">Bloque {block.order || i + 1}</span>
-                      </div>
-                      <h3 className="font-display font-semibold text-lg">{block.title}</h3>
-                      {Array.isArray(block.content) ? (
-                        <ul className="mt-2 space-y-1">
-                          {block.content.map((item: string, j: number) => (
-                            <li key={j} className="text-sm text-muted-foreground flex items-start gap-2">
-                              <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 shrink-0" />
-                              {item}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="mt-2 text-sm text-muted-foreground">{block.content}</p>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              <div className="text-center space-y-3">
-                <p className="text-muted-foreground">Para exportar o descargar esta landing, crea una cuenta.</p>
-                <Button size="lg" asChild>
-                  <Link to="/register"><ArrowRight className="h-4 w-4 mr-2" /> Crear cuenta y exportar</Link>
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <Card>
+          <Card>
               <CardContent className="p-6">
                 <form onSubmit={handleDemo} className="space-y-5">
                   <div className="grid md:grid-cols-2 gap-4">
@@ -373,7 +327,6 @@ const Index = () => {
                 </form>
               </CardContent>
             </Card>
-          )}
         </div>
       </section>
 

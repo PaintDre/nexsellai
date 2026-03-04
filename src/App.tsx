@@ -15,6 +15,7 @@ import GenerateLanding from "./pages/GenerateLanding";
 import Landings from "./pages/Landings";
 import Pricing from "./pages/Pricing";
 import SettingsPage from "./pages/SettingsPage";
+import LandingPreview from "./pages/LandingPreview";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/landing/preview" element={<LandingPreview />} />
             <Route element={<ProtectedLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/products" element={<Products />} />
