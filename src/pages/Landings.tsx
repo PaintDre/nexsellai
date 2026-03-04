@@ -22,7 +22,7 @@ const Landings = () => {
     setExportingId(landing.id);
     try {
       const { data: product } = await supabase.from("products").select("*").eq("id", landing.product_id).single();
-      const html = generateLandingHTML(landing.blocks as any[], product, landing.name);
+      const html = generateLandingHTML(landing.blocks as any[], product, landing.name, "clean");
       const blob = new Blob([html], { type: "text/html" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");

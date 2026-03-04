@@ -30,6 +30,7 @@ const GenerateLanding = () => {
   const [hasOffer, setHasOffer] = useState(false);
   const [guarantee, setGuarantee] = useState("Garantía de satisfacción de 30 días");
   const [generating, setGenerating] = useState(false);
+  const [theme, setTheme] = useState<LandingTheme>("clean");
 
   useEffect(() => {
     if (!user || !id) return;
@@ -125,7 +126,7 @@ const GenerateLanding = () => {
 
           <div className="space-y-2">
             <Label>Tema visual</Label>
-            <Select value="clean" onValueChange={() => {}}>
+            <Select value={theme} onValueChange={(v) => setTheme(v as LandingTheme)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 {Object.entries(themes).map(([key, cfg]) => (
