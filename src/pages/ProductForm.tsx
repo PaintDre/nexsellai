@@ -7,12 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Upload, X, Loader2 } from "lucide-react";
-import { Constants } from "@/integrations/supabase/types";
+import AudienceSelector from "@/components/AudienceSelector";
 
-const categories = Constants.public.Enums.product_category;
+const categories = ["home", "fitness", "beauty", "gadget", "pets"];
+
+interface Audience {
+  id: string;
+  name: string;
+  usage_count: number;
+}
 
 const ProductForm = () => {
   const { id } = useParams();
@@ -24,7 +30,7 @@ const ProductForm = () => {
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>("home");
   const [price, setPrice] = useState("");
-  const [targetAudience, setTargetAudience] = useState("");
+  const [selectedAudiences, setSelectedAudiences] = useState<Audience[]>([]);
   const [description, setDescription] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -32,14 +38,36 @@ const ProductForm = () => {
 
   useEffect(() => {
     if (!isEdit || !user) return;
-    supabase.from("products").select("*").eq("id", id).eq("user_id", user.id).single().then(({ data, error }) => {
+    supabase.from("products").select("*").eq("id", id).eq("user_id", user.id).single().then(async ({ data, error }) => {
       if (error || !data) { navigate("/dashboard"); return; }
       setName(data.name);
       setCategory(data.category);
       setPrice(data.price.toString());
-      setTargetAudience(data.target_audience);
       setDescription(data.description || "");
       setImages(data.images);
+
+      // Load existing audiences for this product
+      const { data: paData } = await supabase
+        .from("product_audiences" as any)
+        .select("audience_id")
+        .eq("product_id", id);
+
+      if (paData && paData.length > 0) {
+        const ids = paData.map((pa: any) => pa.audience_id);
+        const { data: audiences } = await supabase
+          .from("target_audiences" as any)
+          .select("*")
+          .in("id", ids);
+        if (audiences) setSelectedAudiences(audiences as any);
+      } else if (data.target_audience) {
+        // Backward compat: parse comma-separated string
+        const names = data.target_audience.split(",").map((s: string) => s.trim()).filter(Boolean);
+        const { data: matched } = await supabase
+          .from("target_audiences" as any)
+          .select("*")
+          .in("name", names);
+        if (matched) setSelectedAudiences(matched as any);
+      }
     });
   }, [id, user]);
 
@@ -73,27 +101,55 @@ const ProductForm = () => {
       toast({ title: "Se requiere al menos 1 imagen", variant: "destructive" });
       return;
     }
+    if (selectedAudiences.length === 0) {
+      toast({ title: "Selecciona al menos 1 público objetivo", variant: "destructive" });
+      return;
+    }
     setSaving(true);
+
+    const targetAudienceString = selectedAudiences.map((a) => a.name).join(", ");
 
     const productData = {
       name,
       category: category as any,
       price: parseInt(price),
-      target_audience: targetAudience,
+      target_audience: targetAudienceString,
       description: description || null,
       images,
       user_id: user.id,
     };
 
+    let productId = id;
+
     if (isEdit) {
       const { error } = await supabase.from("products").update(productData).eq("id", id);
-      if (error) toast({ title: "Error al actualizar", description: error.message, variant: "destructive" });
-      else { toast({ title: "Producto actualizado" }); navigate("/dashboard"); }
+      if (error) { toast({ title: "Error al actualizar", description: error.message, variant: "destructive" }); setSaving(false); return; }
     } else {
-      const { error } = await supabase.from("products").insert(productData);
-      if (error) toast({ title: "Error al crear", description: error.message, variant: "destructive" });
-      else { toast({ title: "Producto creado" }); navigate("/dashboard"); }
+      const { data: newProduct, error } = await supabase.from("products").insert(productData).select("id").single();
+      if (error) { toast({ title: "Error al crear", description: error.message, variant: "destructive" }); setSaving(false); return; }
+      productId = newProduct.id;
     }
+
+    // Sync product_audiences
+    if (productId) {
+      await supabase.from("product_audiences" as any).delete().eq("product_id", productId);
+      if (selectedAudiences.length > 0) {
+        await supabase.from("product_audiences" as any).insert(
+          selectedAudiences.map((a) => ({ product_id: productId, audience_id: a.id }))
+        );
+      }
+
+      // Increment usage_count for selected audiences
+      for (const a of selectedAudiences) {
+        await supabase
+          .from("target_audiences" as any)
+          .update({ usage_count: a.usage_count + 1 })
+          .eq("id", a.id);
+      }
+    }
+
+    toast({ title: isEdit ? "Producto actualizado" : "Producto creado" });
+    navigate("/dashboard");
     setSaving(false);
   };
 
@@ -157,10 +213,8 @@ const ProductForm = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="target">Público objetivo *</Label>
-              <Input id="target" value={targetAudience} onChange={(e) => setTargetAudience(e.target.value)} placeholder="Ej: Mujeres 25-45, dolor de espalda, oficina" required />
-            </div>
+            {/* Target Audience Selector */}
+            <AudienceSelector selected={selectedAudiences} onChange={setSelectedAudiences} />
 
             <div className="space-y-2">
               <Label htmlFor="desc">Descripción (opcional)</Label>
