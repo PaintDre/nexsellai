@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Sparkles, Zap, Code2, ShoppingCart, ArrowRight, Loader2,
   CheckCircle2, Upload, Wand2, Download, ChevronDown, ChevronUp,
-  Monitor, Store, FilePlus, Send,
+  Monitor, Store, FilePlus, Send, ImagePlus, X,
 } from "lucide-react";
 
 const categories = ["home", "fitness", "beauty", "gadget", "pets"];
@@ -38,6 +38,31 @@ const Index = () => {
   const [generating, setGenerating] = useState(false);
   const [demoBlocks, setDemoBlocks] = useState<any[] | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [demoImage, setDemoImage] = useState<File | null>(null);
+  const [demoImagePreview, setDemoImagePreview] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setImageError("La imagen no puede superar los 5MB.");
+      setDemoImage(null);
+      setDemoImagePreview(null);
+      return;
+    }
+    setImageError(null);
+    setDemoImage(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setDemoImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setDemoImage(null);
+    setDemoImagePreview(null);
+    setImageError(null);
+  };
 
   const demoUsed = typeof window !== "undefined" && localStorage.getItem("nexsell_demo_used") === "true";
 
@@ -218,12 +243,6 @@ const Index = () => {
             ))}
           </div>
 
-          <div className="mt-12 text-center space-y-3">
-            <p className="text-sm text-muted-foreground">Exporta tu landing como HTML listo para usar en Shopify</p>
-            <Button size="lg" variant="outline" className="text-base">
-              <Download className="h-5 w-5 mr-2" /> Descargar landing para Shopify
-            </Button>
-          </div>
 
           <div className="mt-16 text-center">
             <h3 className="text-2xl md:text-3xl font-bold font-display mb-4">
