@@ -124,6 +124,19 @@ const GenerateLanding = () => {
           </div>
 
           <div className="space-y-2">
+            <Label>Tema visual</Label>
+            <Select value="clean" onValueChange={() => {}}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {Object.entries(themes).map(([key, cfg]) => (
+                  <SelectItem key={key} value={key}>{cfg.name} — {cfg.description}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">Puedes cambiar el tema después en la vista previa</p>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="guarantee">Garantía</Label>
             <Input id="guarantee" value={guarantee} onChange={(e) => setGuarantee(e.target.value)} />
           </div>
