@@ -159,11 +159,10 @@ serve(async (req) => {
     const discountedPrice = Math.round(originalPrice * 0.7);
     const discountPercent = 30;
 
-    // Extract benefits from landing block content if available
-    const { blockContent } = await req.json().catch(() => ({ blockContent: null }));
-
     let benefitsText = "";
-    if (product.description) {
+    if (blockContent && Array.isArray(blockContent)) {
+      benefitsText = `\nSection content/benefits to include on the banner:\n${blockContent.map((item: any) => typeof item === "string" ? `- ${item}` : `- ${JSON.stringify(item)}`).join("\n")}`;
+    } else if (product.description) {
       benefitsText = `\nKey benefits to highlight:\n- ${product.description}`;
     }
 
