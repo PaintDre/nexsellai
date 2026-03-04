@@ -196,6 +196,27 @@ export type Database = {
         }
         Relationships: []
       }
+      system_config: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string | null
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       target_audiences: {
         Row: {
           created_at: string
@@ -217,14 +238,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "user" | "admin" | "super_admin"
       landing_intensity: "soft" | "medium" | "hard"
       landing_mode: "aida" | "standard"
       product_category: "home" | "fitness" | "beauty" | "gadget" | "pets"
@@ -356,6 +402,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["user", "admin", "super_admin"],
       landing_intensity: ["soft", "medium", "hard"],
       landing_mode: ["aida", "standard"],
       product_category: ["home", "fitness", "beauty", "gadget", "pets"],
