@@ -18,6 +18,7 @@ import LandingView from "./pages/LandingView";
 import Pricing from "./pages/Pricing";
 import SettingsPage from "./pages/SettingsPage";
 import LandingPreview from "./pages/LandingPreview";
+import LandingFullPreview from "./pages/LandingFullPreview";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import SuperAdminConfig from "./pages/SuperAdminConfig";
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="/products/:id/generate" element={<GenerateLanding />} />
               <Route path="/landings" element={<Landings />} />
               <Route path="/landings/:id" element={<LandingView />} />
+              <Route path="/landings/:id/preview" element={<LandingFullPreview />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
