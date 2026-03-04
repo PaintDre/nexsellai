@@ -5,6 +5,7 @@ interface Block {
   type: string;
   title?: string;
   content?: string | string[] | Array<{ q: string; a: string }>;
+  image_url?: string;
 }
 
 interface ThemeColors {
@@ -119,8 +120,14 @@ export function generateLandingHTML(
 
   const sections: string[] = [];
 
+  // Helper to render section banner image
+  const sectionBannerHTML = (block: Block) => {
+    if (!block.image_url) return "";
+    return `<div style="width:100%;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1);margin-bottom:32px;"><img src="${block.image_url}" alt="${block.title || block.type}" style="width:100%;height:auto;display:block;" /></div>`;
+  };
+
   // HERO
-  const heroImgSrc = imageLocalPath || imageUrl;
+  const heroImgSrc = hero?.image_url || imageLocalPath || imageUrl;
   if (hero) {
     sections.push(`
       <section style="padding:80px 24px;background:${t.heroBg};color:${t.heroText};">
