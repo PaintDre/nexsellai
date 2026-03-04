@@ -50,11 +50,6 @@ const GenerateLanding = () => {
       return;
     }
 
-    if (!profile.openai_api_key) {
-      toast({ title: "Configura tu API Key", description: "Ve a Ajustes y agrega tu API Key de OpenAI.", variant: "destructive" });
-      return;
-    }
-
     setGenerating(true);
 
     try {

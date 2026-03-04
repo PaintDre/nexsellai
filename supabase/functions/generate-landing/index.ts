@@ -26,18 +26,19 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
     if (userError || !user) throw new Error("Unauthorized");
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("openai_api_key, plan, landings_used")
-      .eq("user_id", user.id)
-      .single();
-
-    if (!profile?.openai_api_key) {
-      return new Response(JSON.stringify({ error: "No API key configured" }), {
-        status: 400,
+    const openaiKey = Deno.env.get("NexsellAi");
+    if (!openaiKey) {
+      return new Response(JSON.stringify({ error: "Server API key not configured" }), {
+        status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("plan, landings_used")
+      .eq("user_id", user.id)
+      .single();
 
     // Check plan limits
     const limits: Record<string, number> = { free: 1, starter: 10, pro: 999999 };
@@ -126,7 +127,7 @@ Return ONLY valid JSON. No markdown. No explanations.`;
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${profile.openai_api_key}`,
+        Authorization: `Bearer ${openaiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
