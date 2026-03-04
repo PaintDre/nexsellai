@@ -200,7 +200,7 @@ const LandingView = () => {
     );
   }
 
-  const blocks = landing.blocks as BlockWithImage[];
+  const blocks = landing.blocks as unknown as BlockWithImage[];
   const imageableSections = blocks.filter(b => 
     ["hero", "benefits", "offer", "features", "testimonials", "cta"].includes(b.type)
   );
