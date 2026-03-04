@@ -1,4 +1,5 @@
 import type { LandingTheme } from "@/components/landing/themes";
+import JSZip from "jszip";
 
 interface Block {
   type: string;
@@ -82,7 +83,9 @@ export function generateLandingHTML(
   blocks: Block[],
   product: { name: string; price: number } | null,
   landingName: string,
-  theme: LandingTheme = "clean"
+  theme: LandingTheme = "clean",
+  imageUrl?: string | null,
+  imageLocalPath?: string | null
 ): string {
   const t = themeCSS[theme];
   const getBlock = (type: string) => blocks.find((b) => b.type === type);
