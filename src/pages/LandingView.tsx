@@ -145,6 +145,10 @@ const LandingView = () => {
     if (!landing || !product || !selectedSection) return;
     setGeneratingImage(true);
     try {
+      // Find the block content to pass context to the AI
+      const targetBlock = blocks.find(b => b.type === selectedSection);
+      const blockContent = targetBlock?.content;
+
       const { data, error } = await supabase.functions.invoke("generate-banner", {
         body: {
           product: {
@@ -161,6 +165,7 @@ const LandingView = () => {
           sectionType: selectedSection,
           sectionTitle: selectedSectionTitle,
           landingId: landing.id,
+          blockContent,
         },
       });
 

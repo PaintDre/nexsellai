@@ -6,19 +6,74 @@ const corsHeaders = {
 };
 
 const templatePrompts: Record<string, string> = {
-  "oferta-directa": "Create a bold promotional sales banner with a large discount badge, original price crossed out, sale price prominent, urgency elements like 'OFERTA LIMITADA', red and yellow color accents on a clean background. The product should be the centerpiece.",
-  "hero-producto": "Create a clean, elegant product showcase banner with the product as hero element, minimalist background with subtle gradient, key benefit text overlay in modern typography. Premium feel, lots of white space.",
-  "social-proof": "Create a testimonial-style banner with star ratings (5 stars), a customer quote overlay, the product visible, warm trustworthy colors. Include elements like '⭐⭐⭐⭐⭐ +500 clientes satisfechos'.",
-  "beneficios-grid": "Create a benefits-focused banner with the product in the center and 3-4 benefit icons/badges arranged around it. Clean layout with iconography, modern flat design style.",
-  "flash-sale": "Create an urgent flash sale banner with dark/black background, bold neon or electric accent colors, large countdown timer aesthetic, massive discount percentage, 'FLASH SALE' or 'VENTA FLASH' text. High energy, high contrast.",
-  "lifestyle": "Create a lifestyle-oriented banner showing the product in use context, warm natural tones, aspirational feeling, subtle text overlay with product name and a short tagline. Instagram-worthy aesthetic.",
+  "oferta-directa": `Create a bold promotional ecommerce sales banner. Requirements:
+- Show the product name in LARGE bold text at the top
+- Include a social proof bar at the very top: "⭐⭐⭐⭐⭐ 4.9/5 MÁS DE 5,000 CLIENTES SATISFECHOS"
+- Show a compelling subtitle describing the main benefit
+- Display crossed-out original price and new discounted price in large text ("Antes $X (tachado) AHORA $Y")
+- List 3 key product benefits with small icons/checkmarks on the left side
+- Place the product image prominently in the center-right area
+- Use warm gradient background (pink/coral tones)
+- Add urgency element like "OFERTA LIMITADA" or "ÚLTIMAS UNIDADES"
+- Professional ecommerce aesthetic, clean typography, high contrast`,
+
+  "hero-producto": `Create a premium product showcase banner for ecommerce. Requirements:
+- Product name in bold, modern typography at the top
+- Social proof badge: "⭐⭐⭐⭐⭐ 4.9/5 +5,000 clientes satisfechos"
+- Clean subtitle with the main value proposition
+- Product image large and centered as the hero element
+- List 2-3 key benefits with icons alongside the product
+- Minimalist gradient background (light to white)
+- Price displayed clearly at the bottom
+- Premium, aspirational feel with lots of white space`,
+
+  "social-proof": `Create a testimonial-focused ecommerce banner. Requirements:
+- Large 5-star rating display at the top: "⭐⭐⭐⭐⭐ 4.9/5"
+- Counter: "MÁS DE 5,000 CLIENTES SATISFECHOS"
+- Product name in bold
+- 1-2 short customer testimonial quotes overlaid
+- Product image visible and prominent
+- Trust badges: "Envío Gratis", "Garantía 30 días", "Pago Seguro"
+- Warm, trustworthy colors (amber/gold tones)
+- Professional ecommerce layout`,
+
+  "beneficios-grid": `Create a benefits-focused ecommerce banner. Requirements:
+- Product name at the top in bold
+- Social proof: "⭐⭐⭐⭐⭐ +5,000 clientes satisfechos"
+- Product image in the center
+- 3-4 benefit callouts arranged around the product with small icons
+- Each benefit has an icon and 1-2 line description
+- Clean layout with modern flat design
+- Gradient background
+- Price displayed at the bottom with CTA text`,
+
+  "flash-sale": `Create an urgent flash sale ecommerce banner. Requirements:
+- "VENTA FLASH" or "OFERTA RELÁMPAGO" in bold neon text
+- Dark/black background with electric accent colors (neon green, cyan, or magenta)
+- Product name in large bold text
+- Massive discount display: "ANTES $X → AHORA $Y" with original price crossed out
+- Large percentage badge: "-30%" or "-50%"
+- Countdown timer aesthetic element
+- Product image with glow effect
+- "ÚLTIMAS UNIDADES" urgency text
+- High energy, high contrast design`,
+
+  "lifestyle": `Create a lifestyle ecommerce banner. Requirements:
+- Product shown in natural use context/environment
+- Warm, aspirational color palette (earth tones, soft pastels)
+- Product name and short tagline in elegant typography
+- Social proof: "⭐ 4.9/5 — Miles de clientes felices"
+- 2-3 subtle benefit callouts
+- Price displayed naturally
+- Instagram-worthy aesthetic
+- Aspirational, emotional feel`,
 };
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { product, templateId, outputSize, sectionType, sectionTitle, landingId } = await req.json();
+    const { product, templateId, outputSize, sectionType, sectionTitle, landingId, blockContent } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -99,22 +154,43 @@ serve(async (req) => {
       if (sectionTitle) sectionContext += `\nSection title: "${sectionTitle}"`;
     }
 
+    // Calculate offer prices for the prompt
+    const originalPrice = product.price;
+    const discountedPrice = Math.round(originalPrice * 0.7);
+    const discountPercent = 30;
+
+    let benefitsText = "";
+    if (blockContent && Array.isArray(blockContent)) {
+      benefitsText = `\nSection content/benefits to include on the banner:\n${blockContent.map((item: any) => typeof item === "string" ? `- ${item}` : `- ${JSON.stringify(item)}`).join("\n")}`;
+    } else if (product.description) {
+      benefitsText = `\nKey benefits to highlight:\n- ${product.description}`;
+    }
+
     const textPrompt = `Generate a professional ecommerce marketing banner image for the following product:
 
 Product Name: ${product.name}
-Price: $${product.price} CLP
+Original Price: $${originalPrice.toLocaleString("es-CL")} CLP
+Discounted Price: $${discountedPrice.toLocaleString("es-CL")} CLP (${discountPercent}% OFF)
 Category: ${product.category}
 Description: ${product.description || "N/A"}
 Target Audience: ${product.target_audience}
+${benefitsText}
 
-Style instructions: ${templateStyle}
+COPYWRITING STYLE INSTRUCTIONS:
+${templateStyle}
 ${sectionContext}
 
-The banner must be ${width}x${height} pixels. 
-Text on the banner should be in Spanish.
-Include the product name "${product.name}" and price "$${product.price}" on the banner.
-Make the design look professional, high-quality, suitable for social media advertising.
-Do NOT include any watermarks or AI generation notices.`;
+CRITICAL DESIGN RULES:
+- The banner dimensions are ${width}x${height} pixels
+- ALL text on the banner MUST be in Spanish (Chile)
+- Include the product name "${product.name}" prominently
+- Show pricing: "Antes $${originalPrice.toLocaleString("es-CL")}" (crossed out) and "AHORA $${discountedPrice.toLocaleString("es-CL")}"
+- Add social proof element at top: "⭐⭐⭐⭐⭐ 4.9/5  MÁS DE 5,000 CLIENTES SATISFECHOS"
+- Include at least 2-3 key product benefits with small icons
+- Use professional ecommerce aesthetic with clean typography
+- NO watermarks, NO AI notices, NO stock photo text
+- The design should look like a real ecommerce promotion banner from a professional Chilean store
+- Make text readable and high contrast against the background`;
 
     // Build messages with product image if available
     const userContent: any[] = [{ type: "text", text: textPrompt }];
