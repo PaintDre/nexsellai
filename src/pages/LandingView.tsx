@@ -6,11 +6,17 @@ import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Download, Loader2 } from "lucide-react";
-import { generateLandingHTML } from "@/lib/exportLanding";
+import { ArrowLeft, Download, Loader2, FileArchive, FileCode } from "lucide-react";
+import { exportLandingAsHTML, exportLandingAsZip } from "@/lib/exportLanding";
 import LandingRenderer from "@/components/landing/LandingRenderer";
 import { themes, type LandingTheme } from "@/components/landing/themes";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type Landing = Tables<"landings">;
 type Product = Tables<"products">;
@@ -27,6 +33,7 @@ const LandingView = () => {
   const [exporting, setExporting] = useState(false);
   const [theme, setTheme] = useState<LandingTheme>("clean");
   const [productImage, setProductImage] = useState<string | null>(null);
+  const [allImageUrls, setAllImageUrls] = useState<string[]>([]);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -40,15 +47,19 @@ const LandingView = () => {
         .from("products").select("*").eq("id", l.product_id).single();
       setProduct(p);
 
-      // Get first product image if available
+      // Get all product images
       if (p && p.images && p.images.length > 0) {
-        const imgPath = p.images[0];
-        if (imgPath.startsWith("http")) {
-          setProductImage(imgPath);
-        } else {
-          const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(imgPath);
-          if (urlData?.publicUrl) setProductImage(urlData.publicUrl);
+        const urls: string[] = [];
+        for (const imgPath of p.images) {
+          if (imgPath.startsWith("http")) {
+            urls.push(imgPath);
+          } else {
+            const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(imgPath);
+            if (urlData?.publicUrl) urls.push(urlData.publicUrl);
+          }
         }
+        setAllImageUrls(urls);
+        if (urls.length > 0) setProductImage(urls[0]);
       }
 
       setLoading(false);
@@ -56,23 +67,44 @@ const LandingView = () => {
     load();
   }, [id, user]);
 
-  const handleExport = async () => {
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportHTML = async () => {
     if (!landing) return;
     setExporting(true);
     try {
-      const html = generateLandingHTML(landing.blocks as any[], product, landing.name, theme);
-      const blob = new Blob([html], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${landing.name.replace(/\s+/g, "-").toLowerCase()}.html`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      toast({ title: "Landing exportada correctamente" });
+      const blob = exportLandingAsHTML(
+        landing.blocks as any[], product, landing.name, theme, productImage
+      );
+      downloadBlob(blob, `${landing.name.replace(/\s+/g, "-").toLowerCase()}.html`);
+      toast({ title: "HTML exportado correctamente" });
     } catch {
       toast({ title: "Error al exportar", variant: "destructive" });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleExportZip = async () => {
+    if (!landing) return;
+    setExporting(true);
+    try {
+      const blob = await exportLandingAsZip(
+        landing.blocks as any[], product, landing.name, theme, allImageUrls
+      );
+      downloadBlob(blob, `${landing.name.replace(/\s+/g, "-").toLowerCase()}.zip`);
+      toast({ title: "ZIP exportado con imágenes" });
+    } catch {
+      toast({ title: "Error al exportar ZIP", variant: "destructive" });
     } finally {
       setExporting(false);
     }
@@ -116,11 +148,28 @@ const LandingView = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Badge variant="secondary" className="text-xs">{landing.name}</Badge>
-            <Button variant="outline" size="sm" onClick={handleExport} disabled={exporting}>
-              {exporting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Download className="h-4 w-4 mr-1" />}
-              Exportar HTML
-            </Button>
+            <Badge variant="secondary" className="text-xs hidden sm:inline-flex">{landing.name}</Badge>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={exporting}>
+                  {exporting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Download className="h-4 w-4 mr-1" />}
+                  Exportar
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleExportHTML}>
+                  <FileCode className="h-4 w-4 mr-2" />
+                  Solo HTML
+                  <span className="text-xs text-muted-foreground ml-2">(imágenes URL)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportZip}>
+                  <FileArchive className="h-4 w-4 mr-2" />
+                  ZIP con imágenes
+                  <span className="text-xs text-muted-foreground ml-2">(HTML + archivos)</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
