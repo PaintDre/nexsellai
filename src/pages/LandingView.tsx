@@ -26,6 +26,7 @@ const LandingView = () => {
   const [error, setError] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [theme, setTheme] = useState<LandingTheme>("clean");
+  const [productImage, setProductImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -38,6 +39,18 @@ const LandingView = () => {
       const { data: p } = await supabase
         .from("products").select("*").eq("id", l.product_id).single();
       setProduct(p);
+
+      // Get first product image if available
+      if (p && p.images && p.images.length > 0) {
+        const imgPath = p.images[0];
+        if (imgPath.startsWith("http")) {
+          setProductImage(imgPath);
+        } else {
+          const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(imgPath);
+          if (urlData?.publicUrl) setProductImage(urlData.publicUrl);
+        }
+      }
+
       setLoading(false);
     };
     load();
@@ -115,6 +128,7 @@ const LandingView = () => {
       <LandingRenderer
         blocks={landing.blocks as any[]}
         product={product ? { name: product.name, price: product.price } : null}
+        imagePreview={productImage}
         theme={theme}
       />
     </div>

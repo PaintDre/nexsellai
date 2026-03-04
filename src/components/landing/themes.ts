@@ -7,6 +7,11 @@ export interface ThemeConfig {
   heroText: string;
   sectionBg: string;
   sectionAltBg: string;
+  sectionAltHeading: string;
+  sectionAltBody: string;
+  sectionAltMuted: string;
+  sectionAltCardBg: string;
+  sectionAltCardBorder: string;
   ctaBg: string;
   ctaText: string;
   ctaHover: string;
@@ -33,6 +38,11 @@ export const themes: Record<LandingTheme, ThemeConfig> = {
     heroText: "text-gray-900",
     sectionBg: "bg-white",
     sectionAltBg: "bg-gray-50",
+    sectionAltHeading: "text-gray-900",
+    sectionAltBody: "text-gray-700",
+    sectionAltMuted: "text-gray-500",
+    sectionAltCardBg: "bg-white",
+    sectionAltCardBorder: "border-gray-100",
     ctaBg: "bg-gray-900",
     ctaText: "text-white",
     ctaHover: "hover:bg-gray-800",
@@ -57,6 +67,11 @@ export const themes: Record<LandingTheme, ThemeConfig> = {
     heroText: "text-white",
     sectionBg: "bg-white",
     sectionAltBg: "bg-gray-950",
+    sectionAltHeading: "text-white",
+    sectionAltBody: "text-gray-300",
+    sectionAltMuted: "text-gray-400",
+    sectionAltCardBg: "bg-gray-900",
+    sectionAltCardBorder: "border-gray-800",
     ctaBg: "bg-emerald-500",
     ctaText: "text-white",
     ctaHover: "hover:bg-emerald-600",
@@ -81,6 +96,11 @@ export const themes: Record<LandingTheme, ThemeConfig> = {
     heroText: "text-gray-900",
     sectionBg: "bg-white",
     sectionAltBg: "bg-slate-50",
+    sectionAltHeading: "text-slate-900",
+    sectionAltBody: "text-slate-600",
+    sectionAltMuted: "text-slate-400",
+    sectionAltCardBg: "bg-white",
+    sectionAltCardBorder: "border-slate-100",
     ctaBg: "bg-blue-600",
     ctaText: "text-white",
     ctaHover: "hover:bg-blue-700",
@@ -105,6 +125,11 @@ export const themes: Record<LandingTheme, ThemeConfig> = {
     heroText: "text-amber-950",
     sectionBg: "bg-white",
     sectionAltBg: "bg-orange-50/50",
+    sectionAltHeading: "text-amber-950",
+    sectionAltBody: "text-amber-900",
+    sectionAltMuted: "text-amber-700",
+    sectionAltCardBg: "bg-white",
+    sectionAltCardBorder: "border-orange-100",
     ctaBg: "bg-orange-500",
     ctaText: "text-white",
     ctaHover: "hover:bg-orange-600",
