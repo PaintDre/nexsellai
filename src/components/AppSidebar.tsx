@@ -1,16 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Package, FileText, CreditCard, Settings, LogOut, Zap } from "lucide-react";
+import { LayoutDashboard, Package, FileText, CreditCard, Settings, LogOut, Zap, Shield, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-
-const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-  { label: "Productos", icon: Package, href: "/products" },
-  { label: "Landings", icon: FileText, href: "/landings" },
-  { label: "Planes", icon: CreditCard, href: "/pricing" },
-  { label: "Ajustes", icon: Settings, href: "/settings" },
-];
 
 const planColors: Record<string, string> = {
   free: "bg-muted text-muted-foreground",
@@ -20,7 +12,22 @@ const planColors: Record<string, string> = {
 
 export const AppSidebar = () => {
   const { pathname } = useLocation();
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, role, isAdmin, isSuperAdmin } = useAuth();
+
+  const navItems = [
+    { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
+    { label: "Productos", icon: Package, href: "/products" },
+    { label: "Landings", icon: FileText, href: "/landings" },
+    { label: "Planes", icon: CreditCard, href: "/pricing" },
+    { label: "Ajustes", icon: Settings, href: "/settings" },
+  ];
+
+  if (isAdmin()) {
+    navItems.push({ label: "Admin", icon: Shield, href: "/admin" });
+  }
+  if (isSuperAdmin()) {
+    navItems.push({ label: "Sistema", icon: ShieldCheck, href: "/admin/config" });
+  }
 
   return (
     <aside className="flex h-screen w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
