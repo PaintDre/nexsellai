@@ -22,6 +22,8 @@ import LandingFullPreview from "./pages/LandingFullPreview";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUsers from "./pages/AdminUsers";
 import SuperAdminConfig from "./pages/SuperAdminConfig";
+import GenerateBanner from "./pages/GenerateBanner";
+import Banners from "./pages/Banners";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +49,8 @@ const App = () => (
               <Route path="/landings" element={<Landings />} />
               <Route path="/landings/:id" element={<LandingView />} />
               <Route path="/landings/:id/preview" element={<LandingFullPreview />} />
+              <Route path="/products/:id/banner" element={<GenerateBanner />} />
+              <Route path="/banners" element={<Banners />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
