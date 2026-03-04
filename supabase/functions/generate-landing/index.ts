@@ -51,7 +51,6 @@ serve(async (req) => {
 
       userPlan = profile.plan;
     } else {
-      // Demo mode: force free plan constraints
       userPlan = "free";
     }
 
@@ -69,8 +68,15 @@ Return ONLY valid JSON: { "blocks": [...] }.
 Return a JSON object with a "blocks" array. Each block must include:
 - "type" (string)
 - "title" (string)
-- "content" (string OR array of strings)
+- "content" (string OR array — see specific rules below)
 - "order" (number)
+
+## FAQ block format
+For blocks of type "faq", the "content" MUST be an array of objects with "q" (question) and "a" (answer) keys:
+\`\`\`json
+{ "type": "faq", "title": "Preguntas frecuentes", "content": [{"q": "¿Pregunta?", "a": "Respuesta detallada."}], "order": 8 }
+\`\`\`
+Each FAQ item MUST have both a question AND a detailed answer. Generate 4-6 relevant Q&A pairs.
 
 ## Allowed block types
 hero, benefits, features, testimonials, objections, offer, urgency, guarantee, faq, cta, comparison, bundles, microcopy, short_version, saas_hero, saas_benefits, saas_how_it_works, saas_pricing, saas_demo, saas_faq, saas_cta
@@ -97,8 +103,8 @@ ${guarantee ? `Guarantee: "${guarantee}" — include it in a guarantee block.` :
 ## PLAN RULES
 Plan: ${userPlan}
 - free: 1 landing total, simple copy, NO advanced persuasion extras. Generate exactly 3 blocks: hero (1 hook), benefits, cta.
-- starter: up to 10 landings, improved hooks, basic objections, editable urgency, FAQs. Generate: hero with 3 hooks (pick the best but show the 3 as options), benefits, features, testimonials (basic), objections (basic), faq, urgency, cta.
-- pro: up to 100 landings, full persuasion system. Generate: hero with multiple psychological angles + ad hooks, benefits, features, testimonials, strong objections, offer + urgency (or urgency only), bundles suggestions, comparison vs competitors, microcopy for checkout, CTA variants, short_version for product page.
+- starter: up to 10 landings, improved hooks, basic objections, editable urgency, FAQs. Generate: hero with 3 hooks (pick the best but show the 3 as options), benefits, features, testimonials (basic), objections (basic), faq (with Q&A pairs), urgency, cta.
+- pro: up to 100 landings, full persuasion system. Generate: hero with multiple psychological angles + ad hooks, benefits, features, testimonials, strong objections, offer + urgency (or urgency only), bundles suggestions, comparison vs competitors, faq (with detailed Q&A pairs), microcopy for checkout, CTA variants, short_version for product page.
 
 Never mention plan names inside the landing copy.
 
