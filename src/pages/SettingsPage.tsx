@@ -6,20 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Save } from "lucide-react";
+import { Save } from "lucide-react";
 
 const SettingsPage = () => {
   const { user, profile, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [fullName, setFullName] = useState("");
-  const [apiKey, setApiKey] = useState("");
-  const [showKey, setShowKey] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || "");
-      setApiKey(profile.openai_api_key || "");
     }
   }, [profile]);
 
@@ -28,7 +25,7 @@ const SettingsPage = () => {
     setSaving(true);
     const { error } = await supabase
       .from("profiles")
-      .update({ full_name: fullName, openai_api_key: apiKey })
+      .update({ full_name: fullName })
       .eq("user_id", user.id);
     setSaving(false);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
