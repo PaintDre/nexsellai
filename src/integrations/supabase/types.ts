@@ -14,7 +14,131 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      landings: {
+        Row: {
+          blocks: Json
+          created_at: string
+          guarantee: string | null
+          has_offer: boolean
+          id: string
+          intensity: Database["public"]["Enums"]["landing_intensity"]
+          mode: Database["public"]["Enums"]["landing_mode"]
+          name: string
+          product_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          blocks?: Json
+          created_at?: string
+          guarantee?: string | null
+          has_offer?: boolean
+          id?: string
+          intensity?: Database["public"]["Enums"]["landing_intensity"]
+          mode?: Database["public"]["Enums"]["landing_mode"]
+          name: string
+          product_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          blocks?: Json
+          created_at?: string
+          guarantee?: string | null
+          has_offer?: boolean
+          id?: string
+          intensity?: Database["public"]["Enums"]["landing_intensity"]
+          mode?: Database["public"]["Enums"]["landing_mode"]
+          name?: string
+          product_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          category: Database["public"]["Enums"]["product_category"]
+          created_at: string
+          description: string | null
+          id: string
+          images: string[]
+          name: string
+          price: number
+          target_audience: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["product_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          name: string
+          price: number
+          target_audience: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["product_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          images?: string[]
+          name?: string
+          price?: number
+          target_audience?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          landings_reset_at: string | null
+          landings_used: number
+          openai_api_key: string | null
+          plan: Database["public"]["Enums"]["user_plan"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          landings_reset_at?: string | null
+          landings_used?: number
+          openai_api_key?: string | null
+          plan?: Database["public"]["Enums"]["user_plan"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          landings_reset_at?: string | null
+          landings_used?: number
+          openai_api_key?: string | null
+          plan?: Database["public"]["Enums"]["user_plan"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +147,10 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      landing_intensity: "soft" | "medium" | "hard"
+      landing_mode: "aida" | "standard"
+      product_category: "home" | "fitness" | "beauty" | "gadget"
+      user_plan: "free" | "starter" | "pro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +277,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      landing_intensity: ["soft", "medium", "hard"],
+      landing_mode: ["aida", "standard"],
+      product_category: ["home", "fitness", "beauty", "gadget"],
+      user_plan: ["free", "starter", "pro"],
+    },
   },
 } as const
