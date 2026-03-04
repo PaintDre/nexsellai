@@ -48,35 +48,71 @@ serve(async (req) => {
       });
     }
 
-    // Build the prompt based on plan features
-    const planFeatures: Record<string, string> = {
-      free: "Generate a simple landing with: 1 hero section with 1 hook, 1 benefits section, 1 CTA section. No objection handling, no urgency, no bundles, no upsell.",
-      starter: "Generate a landing with: hero with 3 different hooks (pick best), benefits, basic objections section, editable urgency block, simple FAQs, CTA section.",
-      pro: "Generate a comprehensive landing with: hero with multiple psychological angles, ad hooks, benefit sections, strong objection handling, urgency section, bundle suggestions, comparison vs competitors section, checkout microcopy, CTA variants, short version for product page.",
-    };
+    const intensityMap: Record<string, string> = { soft: "low", medium: "medium", hard: "high" };
+    const mappedIntensity = intensityMap[intensity] || "medium";
 
-    const systemPrompt = `You are a landing page copywriter expert for dropshipping products in Chile. 
-Write in Spanish (Chilean). Prices are in CLP. 
-Return a JSON object with a "blocks" array. Each block has: "type" (string), "title" (string), "content" (string or array of strings), "order" (number).
+    const systemPrompt = `You are a conversion copywriter expert specialized in ecommerce / dropshipping in Chile.
 
-Block types: hero, benefits, features, objections, urgency, testimonials, guarantee, faq, cta, comparison, bundles, microcopy, short_version
+Write in Spanish (Chilean). Prices are in CLP.
 
-Mode: ${mode === "aida" ? "AIDA framework (Attention, Interest, Desire, Action)" : "Standard sections"}
-Intensity: ${intensity}
-${hasOffer ? "Include a special offer with discounted price." : "No special offer."}
-Guarantee text: "${guarantee}"
+Return ONLY valid JSON: { "blocks": [...] }.
 
-${planFeatures[plan] || planFeatures.free}
+## Output format
 
-Product info:
+Return a JSON object with a "blocks" array. Each block must include:
+- "type" (string)
+- "title" (string)
+- "content" (string OR array of strings)
+- "order" (number)
+
+## Allowed block types
+hero, benefits, features, testimonials, objections, offer, urgency, guarantee, faq, cta, comparison, bundles, microcopy, short_version, saas_hero, saas_benefits, saas_how_it_works, saas_pricing, saas_demo, saas_faq, saas_cta
+
+## Important conversion rule (DEFAULT SALES STRUCTURE)
+Unless explicitly told otherwise, every PRODUCT landing MUST include these 7 sales-optimized sections in this order:
+1) hero 2) benefits 3) features 4) testimonials 5) objections 6) offer (or urgency if no offer) 7) cta
+
+If information is missing, write plausible but safe copy without inventing technical facts (no fake certifications, no medical claims, no guaranteed outcomes).
+If the product is health-related, avoid medical promises; use softer wording (e.g., "ayuda", "puede ayudar", "muchos usuarios").
+
+## Framework
+Mode: ${mode === "aida" ? 'AIDA — structure each block content in AIDA style internally (Attention, Interest, Desire, Action), but still output the same blocks.' : 'Standard — standard direct-response sections.'}
+
+Intensity: ${mappedIntensity}
+- low = softer, informative
+- medium = persuasive with social proof
+- high = strong direct-response, urgency, objections, tighter CTAs (without scams)
+
+## Offers / Guarantee
+${hasOffer ? 'hasOffer = true: Include an offer with discounted price + anchor price + savings in CLP.' : 'hasOffer = false: No discount; still add urgency based on stock/time WITHOUT lying. Use "por tiempo limitado" only.'}
+${guarantee ? `Guarantee: "${guarantee}" — include it in a guarantee block.` : 'No guarantee text provided — omit guarantee block.'}
+
+## PLAN RULES
+Plan: ${plan}
+- free: 1 landing total, simple copy, NO advanced persuasion extras. Generate exactly 3 blocks: hero (1 hook), benefits, cta.
+- starter: up to 10 landings, improved hooks, basic objections, editable urgency, FAQs. Generate: hero with 3 hooks (pick the best but show the 3 as options), benefits, features, testimonials (basic), objections (basic), faq, urgency, cta.
+- pro: up to 100 landings, full persuasion system. Generate: hero with multiple psychological angles + ad hooks, benefits, features, testimonials, strong objections, offer + urgency (or urgency only), bundles suggestions, comparison vs competitors, microcopy for checkout, CTA variants, short_version for product page.
+
+Never mention plan names inside the landing copy.
+
+${product.category === "saas" ? `## SAAS MARKETING LANDING CONTEXT
+Generate a landing that SELLS THE APP with these sections:
+1) saas_hero: clear promise + CTA "Probar gratis"
+2) saas_benefits: 3-6 bullets on outcomes
+3) saas_how_it_works: 3 steps
+4) saas_demo: explain free trial with limits
+5) saas_pricing: show 3 plans (Free: 1 landing, Starter: 10, Pro: 100)
+6) saas_faq
+7) saas_cta: "Crear cuenta y exportar"` : ''}
+
+## Product info
 - Name: ${product.name}
 - Category: ${product.category}
 - Price: $${product.price} CLP
 - Target audience: ${product.target_audience}
 - Description: ${product.description || "N/A"}
 
-Return ONLY valid JSON with the blocks array.`;
-
+Return ONLY valid JSON. No markdown. No explanations.`;
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
