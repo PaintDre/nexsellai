@@ -26,7 +26,6 @@ serve(async (req) => {
 
     let userPlan = plan || "free";
 
-    // If not demo, verify auth and check limits
     if (!demo) {
       const authHeader = req.headers.get("Authorization");
       if (!authHeader) throw new Error("No auth header");
@@ -57,6 +56,45 @@ serve(async (req) => {
     const intensityMap: Record<string, string> = { soft: "low", medium: "medium", hard: "high" };
     const mappedIntensity = intensityMap[intensity] || "medium";
 
+    // Plan-specific section definitions
+    const planSections: Record<string, string> = {
+      free: `Generate EXACTLY these 3 blocks in this order:
+1. hero (order: 1) — One powerful headline + short description. Simple and direct.
+2. benefits (order: 2) — 3 key benefits as an array of strings.
+3. cta (order: 3) — Final call to action with urgency text.
+
+Do NOT generate any other blocks. Keep copy simple and informative.`,
+
+      starter: `Generate EXACTLY these 8 blocks in this order:
+1. hero (order: 1) — Strong headline with emotional hook + compelling description. Include 3 hook variations in the content (pick the best as title, put alternatives in content).
+2. benefits (order: 2) — 4-6 benefits as array of strings. Each benefit should highlight an outcome, not just a feature.
+3. features (order: 3) — 4-6 product features as array of strings with specific details.
+4. testimonials (order: 4) — 3 realistic customer testimonials as array of strings. Chilean names/context.
+5. objections (order: 5) — 3-4 common objections addressed as array of strings.
+6. faq (order: 6) — 4-6 FAQ items as array of {q, a} objects with detailed answers.
+7. urgency (order: 7) — Urgency message as string (stock-based or time-based, no lies).
+8. cta (order: 8) — Strong final CTA with benefit reminder.
+
+Include improved hooks, editable urgency, and basic social proof in testimonials.`,
+
+      pro: `Generate EXACTLY these 13 blocks in this order:
+1. hero (order: 1) — Premium headline with multiple psychological angles. Title = best hook. Content = compelling description with emotional triggers. Include power words.
+2. benefits (order: 2) — 6 outcome-focused benefits as array of strings. Use "Imagina..." or "¿Sabías que...?" framing.
+3. features (order: 3) — 6-8 detailed features as array of strings. Technical + emotional.
+4. testimonials (order: 4) — 4-6 detailed testimonials as array of strings. Include specific results ("En 2 semanas noté...").
+5. objections (order: 5) — 5-6 objections demolished with evidence, as array of strings.
+6. comparison (order: 6) — 6 comparison points as array of strings. First half = our advantages, second half = competitor weaknesses.
+7. bundles (order: 7) — 3 bundle/pack suggestions as array of strings with pricing hints.
+8. offer (order: 8) — Special offer block with discounted price, savings amount, and deadline.
+9. urgency (order: 9) — Multiple urgency triggers (stock + time + social proof).
+10. guarantee (order: 10) — Detailed guarantee with specific terms.
+11. faq (order: 11) — 6-8 detailed FAQ items as array of {q, a} objects.
+12. microcopy (order: 12) — 4-6 trust signals as array of strings ("Pago 100% seguro", "Envío en 24-48h", etc.).
+13. cta (order: 13) — Premium CTA with multiple benefit reminders and final urgency push.
+
+Full persuasion system: advanced hooks, strong objections, bundles, comparison vs competitors, checkout microcopy.`
+    };
+
     const systemPrompt = `You are a conversion copywriter expert specialized in ecommerce / dropshipping in Chile.
 
 Write in Spanish (Chilean). Prices are in CLP.
@@ -76,17 +114,19 @@ For blocks of type "faq", the "content" MUST be an array of objects with "q" (qu
 \`\`\`json
 { "type": "faq", "title": "Preguntas frecuentes", "content": [{"q": "¿Pregunta?", "a": "Respuesta detallada."}], "order": 8 }
 \`\`\`
-Each FAQ item MUST have both a question AND a detailed answer. Generate 4-6 relevant Q&A pairs.
 
-## Allowed block types
-hero, benefits, features, testimonials, objections, offer, urgency, guarantee, faq, cta, comparison, bundles, microcopy, short_version, saas_hero, saas_benefits, saas_how_it_works, saas_pricing, saas_demo, saas_faq, saas_cta
+## PLAN-SPECIFIC SECTIONS (MANDATORY)
+Plan: ${userPlan}
 
-## Important conversion rule (DEFAULT SALES STRUCTURE)
-Unless explicitly told otherwise, every PRODUCT landing MUST include these 7 sales-optimized sections in this order:
-1) hero 2) benefits 3) features 4) testimonials 5) objections 6) offer (or urgency if no offer) 7) cta
+${planSections[userPlan] || planSections.free}
 
-If information is missing, write plausible but safe copy without inventing technical facts (no fake certifications, no medical claims, no guaranteed outcomes).
-If the product is health-related, avoid medical promises; use softer wording (e.g., "ayuda", "puede ayudar", "muchos usuarios").
+## Style & tone rules
+- Every landing must feel like a professional Chilean ecommerce sales page
+- Use conversational but professional Spanish (Chilean)
+- Include emotional triggers: fear of missing out, social validation, aspiration
+- Benefits > Features: always lead with what the customer GETS, not what the product HAS
+- Prices always in CLP format ($XX.XXX)
+- Never mention plan names inside the landing copy
 
 ## Framework
 Mode: ${mode === "aida" ? 'AIDA — structure each block content in AIDA style internally (Attention, Interest, Desire, Action), but still output the same blocks.' : 'Standard — standard direct-response sections.'}
@@ -98,35 +138,18 @@ Intensity: ${mappedIntensity}
 
 ## Offers / Guarantee
 ${hasOffer ? 'hasOffer = true: Include an offer with discounted price + anchor price + savings in CLP.' : 'hasOffer = false: No discount; still add urgency based on stock/time WITHOUT lying. Use "por tiempo limitado" only.'}
-${guarantee ? `Guarantee: "${guarantee}" — include it in a guarantee block.` : 'No guarantee text provided — omit guarantee block.'}
+${guarantee ? `Guarantee: "${guarantee}" — include it in a guarantee block.` : 'No guarantee text provided — omit guarantee block or use generic satisfaction guarantee.'}
 
-## PLAN RULES
-Plan: ${userPlan}
-- free: 1 landing total, simple copy, NO advanced persuasion extras. Generate exactly 3 blocks: hero (1 hook), benefits, cta.
-- starter: up to 10 landings, improved hooks, basic objections, editable urgency, FAQs. Generate: hero with 3 hooks (pick the best but show the 3 as options), benefits, features, testimonials (basic), objections (basic), faq (with Q&A pairs), urgency, cta.
-- pro: up to 100 landings, full persuasion system. Generate: hero with multiple psychological angles + ad hooks, benefits, features, testimonials, strong objections, offer + urgency (or urgency only), bundles suggestions, comparison vs competitors, faq (with detailed Q&A pairs), microcopy for checkout, CTA variants, short_version for product page.
+## Safety rules
+If information is missing, write plausible but safe copy without inventing technical facts (no fake certifications, no medical claims, no guaranteed outcomes).
+If the product is health-related, avoid medical promises; use softer wording (e.g., "ayuda", "puede ayudar", "muchos usuarios").
 
-Never mention plan names inside the landing copy.
+## MICROCOPY (ALL PLANS)
+For ALL plans, include trust signals in the CTA block content or as a separate microcopy block: "Pago 100% seguro", "Envío en 24-48h", "Garantía de satisfacción".
 
-## FEATURE GATING FOR PRODUCT LANDINGS (Context A)
-For ALL product landings (any plan), also include a "microcopy" block with trust signals and checkout notes (e.g., "Pago 100% seguro", "Envío en 24-48h", "Garantía de satisfacción"). This block is always generated regardless of plan.
-
-${product.category === "saas" ? `## SAAS MARKETING LANDING CONTEXT (Context B)
-Generate a landing that SELLS THE APP with these sections:
-1) saas_hero: clear promise + CTA "Probar gratis"
-2) saas_benefits: 3-6 bullets on outcomes (más ventas, más rápido, mayor conversión)
-3) saas_how_it_works: 3 steps (sube imagen + prompt → genera landing → exporta al crear cuenta)
-4) saas_demo: explain that the user can try WITHOUT creating an account with FREE limits:
-   - Can generate 1 landing demo without registering
-   - Cannot export or download until account is created
-   - Once account is created, export/download becomes available based on their plan (Free: 1, Starter: 10, Pro: 100)
-5) saas_pricing: show 3 plans with limits clearly:
-   - Free: 1 landing
-   - Starter: 10 landings
-   - Pro: 100 landings
-6) saas_faq
-7) saas_cta: "Crear cuenta y exportar"
-The SaaS landing must focus on conversion but remain honest, no fake claims.` : ''}
+${product.category === "saas" ? `## SAAS MARKETING LANDING CONTEXT
+Generate a landing that SELLS THE APP with saas-prefixed block types:
+1) saas_hero 2) saas_benefits 3) saas_how_it_works 4) saas_pricing 5) saas_demo 6) saas_faq 7) saas_cta` : ''}
 
 ## Product info
 - Name: ${product.name}
