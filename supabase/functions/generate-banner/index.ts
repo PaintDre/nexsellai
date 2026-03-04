@@ -18,7 +18,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { product, templateId, outputSize } = await req.json();
+    const { product, templateId, outputSize, sectionType, sectionTitle, landingId } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -41,13 +41,13 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userId = claimsData.claims.sub;
+    const userId = user.id;
 
     // Check plan
     const { data: profile } = await supabase
@@ -81,9 +81,23 @@ serve(async (req) => {
       });
     }
 
-    // Build prompt
+    // Build prompt - adapt for section-specific or standalone banner
     const templateStyle = templatePrompts[templateId] || templatePrompts["oferta-directa"];
     const [width, height] = (outputSize || "1080x1080").split("x").map(Number);
+
+    let sectionContext = "";
+    if (sectionType) {
+      const sectionDescriptions: Record<string, string> = {
+        hero: "This is for the HERO section of a landing page. Create an impactful header-style banner that grabs attention.",
+        benefits: "This is for the BENEFITS section. Show the product with benefit highlights visually represented.",
+        offer: "This is for the OFFER/SALE section. Emphasize the deal, discount, and urgency.",
+        testimonials: "This is for the TESTIMONIALS section. Create a social-proof focused banner with trust elements.",
+        features: "This is for the FEATURES section. Showcase key product features in a clean visual layout.",
+        cta: "This is for the CALL TO ACTION section. Create a compelling visual that drives the user to buy.",
+      };
+      sectionContext = `\n\nSection context: ${sectionDescriptions[sectionType] || `This is for the "${sectionType}" section of a landing page.`}`;
+      if (sectionTitle) sectionContext += `\nSection title: "${sectionTitle}"`;
+    }
 
     const textPrompt = `Generate a professional ecommerce marketing banner image for the following product:
 
@@ -94,6 +108,7 @@ Description: ${product.description || "N/A"}
 Target Audience: ${product.target_audience}
 
 Style instructions: ${templateStyle}
+${sectionContext}
 
 The banner must be ${width}x${height} pixels. 
 Text on the banner should be in Spanish.
@@ -179,6 +194,31 @@ Do NOT include any watermarks or AI generation notices.`;
       template_id: templateId,
       output_size: outputSize || "1080x1080",
     });
+
+    // If this is for a landing section, update the landing blocks
+    if (landingId && sectionType) {
+      const { data: landing } = await supabase
+        .from("landings")
+        .select("blocks")
+        .eq("id", landingId)
+        .eq("user_id", userId)
+        .single();
+
+      if (landing && Array.isArray(landing.blocks)) {
+        const updatedBlocks = (landing.blocks as any[]).map((block: any) => {
+          if (block.type === sectionType) {
+            return { ...block, image_url: publicUrl.publicUrl };
+          }
+          return block;
+        });
+
+        await supabase
+          .from("landings")
+          .update({ blocks: updatedBlocks })
+          .eq("id", landingId)
+          .eq("user_id", userId);
+      }
+    }
 
     return new Response(JSON.stringify({ imageUrl: publicUrl.publicUrl }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

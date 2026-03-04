@@ -13,6 +13,7 @@ interface Block {
   type: string;
   title?: string;
   content?: string | string[] | Array<{ q: string; a: string }>;
+  image_url?: string;
 }
 
 interface LandingRendererProps {
@@ -95,6 +96,21 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
     </section>
   );
 
+  // Section banner image component
+  const SectionBanner = ({ block, className = "" }: { block: Block; className?: string }) => {
+    if (!block.image_url) return null;
+    return (
+      <div className={`w-full rounded-2xl overflow-hidden shadow-lg mb-8 ${className}`}>
+        <img
+          src={block.image_url}
+          alt={block.title || block.type}
+          className="w-full h-auto object-cover"
+          loading="lazy"
+        />
+      </div>
+    );
+  };
+
   const featureIcons = [Zap, Gift, Award, CheckCircle2, Star, ShieldCheck];
 
   const parseFaqItems = (content: Block["content"]): Array<{ q: string; a: string }> => {
@@ -108,6 +124,9 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
 
   const avatarColors = ["bg-blue-500", "bg-emerald-500", "bg-purple-500", "bg-amber-500", "bg-rose-500", "bg-cyan-500"];
 
+  // Determine hero image: use block's generated image_url first, then product image
+  const heroImage = hero?.image_url || imagePreview;
+
   return (
     <div className="min-h-screen landing-container" style={{ fontFamily: "'Inter', sans-serif" }}>
 
@@ -115,7 +134,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
       {hero && (
         <Section className={`py-20 md:py-28 ${t.heroBg}`}>
           <div className="mx-auto max-w-6xl px-6">
-            <div className={`grid ${imagePreview ? "lg:grid-cols-2" : ""} gap-12 items-center`}>
+            <div className={`grid ${heroImage ? "lg:grid-cols-2" : ""} gap-12 items-center`}>
               <div className="space-y-8">
                 <h1
                   className={`text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] ${t.heroText}`}
@@ -131,11 +150,11 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
                 <SocialProof theme={theme} />
                 <CTAWithTrust className="items-start" trustColor={theme === "bold" ? "text-gray-500" : undefined} />
               </div>
-              {imagePreview && (
+              {heroImage && (
                 <div className="flex justify-center lg:justify-end">
                   <div className="relative">
                     <img
-                      src={imagePreview}
+                      src={heroImage}
                       alt={productName}
                       className="rounded-2xl shadow-2xl max-h-[480px] object-cover w-full max-w-md ring-1 ring-black/5"
                     />
@@ -155,6 +174,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
         <Section className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={100}>
           <div className="mx-auto max-w-5xl px-6">
             <SectionTitle alt>{benefits.title || "Beneficios"}</SectionTitle>
+            <SectionBanner block={benefits} />
             {Array.isArray(benefits.content) ? (
               <div className="grid sm:grid-cols-2 gap-5">
                 {(benefits.content as string[]).map((item, i) => {
@@ -181,6 +201,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
         <Section className={`py-16 md:py-24 ${t.sectionBg}`} delay={200}>
           <div className="mx-auto max-w-4xl px-6">
             <SectionTitle>{features.title || "Características"}</SectionTitle>
+            <SectionBanner block={features} />
             {Array.isArray(features.content) ? (
               <ul className="space-y-4">
                 {(features.content as string[]).map((item, i) => (
@@ -202,6 +223,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
         <Section className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={300}>
           <div className="mx-auto max-w-5xl px-6">
             <SectionTitle alt>{testimonials.title || "Lo que dicen nuestros clientes"}</SectionTitle>
+            <SectionBanner block={testimonials} />
             {Array.isArray(testimonials.content) ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {(testimonials.content as string[]).map((item, i) => (
@@ -341,6 +363,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
       {(offer || urgency) && (
         <Section className={`py-16 md:py-24 ${t.accentBg}`}>
           <div className="mx-auto max-w-3xl px-6 text-center space-y-6">
+            {offer && <SectionBanner block={offer} />}
             {urgency && (
               <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${t.urgencyBg} ${t.urgencyText}`}>
                 <Clock className="h-4 w-4" />
@@ -398,6 +421,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
       {/* ═══ FINAL CTA ═══ */}
       <Section className={`py-20 md:py-28 ${t.sectionAltBg}`}>
         <div className="mx-auto max-w-2xl px-6 text-center space-y-8">
+          {cta && <SectionBanner block={cta} />}
           <h2
             className={`text-3xl md:text-4xl font-bold tracking-tight ${getHeading(true)}`}
             style={{ fontFamily: "'Space Grotesk', sans-serif" }}

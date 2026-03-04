@@ -6,7 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2 } from "lucide-react";
+import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2, ImagePlus, Sparkles } from "lucide-react";
 import { exportLandingAsHTML, exportLandingAsZip } from "@/lib/exportLanding";
 import LandingRenderer from "@/components/landing/LandingRenderer";
 import { themes, type LandingTheme } from "@/components/landing/themes";
@@ -17,14 +17,29 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { TemplateGallery } from "@/components/banner/TemplateGallery";
+import { bannerSizes } from "@/components/banner/templates";
 
 type Landing = Tables<"landings">;
 type Product = Tables<"products">;
 
+interface BlockWithImage {
+  type: string;
+  title?: string;
+  content?: any;
+  image_url?: string;
+}
+
 const LandingView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
   const [landing, setLanding] = useState<Landing | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
@@ -34,6 +49,16 @@ const LandingView = () => {
   const [theme, setTheme] = useState<LandingTheme>("clean");
   const [productImage, setProductImage] = useState<string | null>(null);
   const [allImageUrls, setAllImageUrls] = useState<string[]>([]);
+
+  // Section image generation state
+  const [showImageDialog, setShowImageDialog] = useState(false);
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [selectedSectionTitle, setSelectedSectionTitle] = useState<string>("");
+  const [templateId, setTemplateId] = useState("hero-producto");
+  const [outputSize, setOutputSize] = useState("1200x628");
+  const [generatingImage, setGeneratingImage] = useState(false);
+
+  const isPaidPlan = profile?.plan === "starter" || profile?.plan === "pro";
 
   useEffect(() => {
     if (!user || !id) return;
@@ -48,7 +73,6 @@ const LandingView = () => {
         .from("products").select("*").eq("id", l.product_id).single();
       setProduct(p);
 
-      // Get all product images
       if (p && p.images && p.images.length > 0) {
         const urls: string[] = [];
         for (const imgPath of p.images) {
@@ -111,6 +135,52 @@ const LandingView = () => {
     }
   };
 
+  const openImageGenerator = (sectionType: string, sectionTitle: string) => {
+    setSelectedSection(sectionType);
+    setSelectedSectionTitle(sectionTitle);
+    setShowImageDialog(true);
+  };
+
+  const handleGenerateSectionImage = async () => {
+    if (!landing || !product || !selectedSection) return;
+    setGeneratingImage(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-banner", {
+        body: {
+          product: {
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            category: product.category,
+            description: product.description,
+            target_audience: product.target_audience,
+            images: allImageUrls,
+          },
+          templateId,
+          outputSize,
+          sectionType: selectedSection,
+          sectionTitle: selectedSectionTitle,
+          landingId: landing.id,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      // Refresh landing data to get updated blocks
+      const { data: updatedLanding } = await supabase
+        .from("landings").select("*").eq("id", landing.id).single();
+      if (updatedLanding) setLanding(updatedLanding);
+
+      toast({ title: "¡Imagen generada!", description: `Imagen agregada a la sección "${selectedSectionTitle}"` });
+      setShowImageDialog(false);
+    } catch (err: any) {
+      toast({ title: "Error al generar imagen", description: err.message, variant: "destructive" });
+    } finally {
+      setGeneratingImage(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -129,6 +199,11 @@ const LandingView = () => {
       </div>
     );
   }
+
+  const blocks = landing.blocks as BlockWithImage[];
+  const imageableSections = blocks.filter(b => 
+    ["hero", "benefits", "offer", "features", "testimonials", "cta"].includes(b.type)
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -151,6 +226,31 @@ const LandingView = () => {
             </Select>
             <Badge variant="secondary" className="text-xs hidden sm:inline-flex">{landing.name}</Badge>
             
+            {isPaidPlan && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <ImagePlus className="h-4 w-4 mr-1" />
+                    <span className="hidden sm:inline">Imágenes IA</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {imageableSections.map((block) => (
+                    <DropdownMenuItem
+                      key={block.type}
+                      onClick={() => openImageGenerator(block.type, block.title || block.type)}
+                    >
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      {block.title || block.type}
+                      {block.image_url && (
+                        <Badge variant="secondary" className="ml-2 text-[10px]">✓</Badge>
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
             <Button variant="outline" size="sm" asChild>
               <Link to={`/landings/${landing.id}/preview`}>
                 <Maximize2 className="h-4 w-4 mr-1" /> Vista completa
@@ -181,11 +281,58 @@ const LandingView = () => {
       </div>
 
       <LandingRenderer
-        blocks={landing.blocks as any[]}
+        blocks={blocks}
         product={product ? { name: product.name, price: product.price } : null}
         imagePreview={productImage}
         theme={theme}
       />
+
+      {/* Image Generation Dialog */}
+      <Dialog open={showImageDialog} onOpenChange={setShowImageDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              Generar imagen para: {selectedSectionTitle}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6">
+            <div>
+              <p className="text-sm font-medium mb-3">Elige una plantilla visual</p>
+              <TemplateGallery selected={templateId} onSelect={setTemplateId} />
+            </div>
+
+            <div>
+              <p className="text-sm font-medium mb-2">Tamaño de salida</p>
+              <Select value={outputSize} onValueChange={setOutputSize}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {bannerSizes.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>
+                      {s.label} ({s.width}×{s.height})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button
+              onClick={handleGenerateSectionImage}
+              disabled={generatingImage}
+              className="w-full"
+              size="lg"
+            >
+              {generatingImage ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generando imagen...</>
+              ) : (
+                <><Sparkles className="h-4 w-4 mr-2" /> Generar Imagen con IA</>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
