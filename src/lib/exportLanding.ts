@@ -120,13 +120,17 @@ export function generateLandingHTML(
   const sections: string[] = [];
 
   // HERO
+  const heroImgSrc = imageLocalPath || imageUrl;
   if (hero) {
     sections.push(`
       <section style="padding:80px 24px;background:${t.heroBg};color:${t.heroText};">
-        <div style="max-width:1152px;margin:0 auto;">
-          <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,5vw,60px);font-weight:800;line-height:1.1;margin-bottom:20px;">${hero.title || ""}</h1>
-          ${hero.content ? `<p style="font-size:18px;line-height:1.7;max-width:600px;margin-bottom:32px;opacity:0.85;">${typeof hero.content === "string" ? hero.content : ""}</p>` : ""}
-          ${ctaWithTrust}
+        <div style="max-width:1152px;margin:0 auto;${heroImgSrc ? "display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;" : ""}">
+          <div>
+            <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,5vw,60px);font-weight:800;line-height:1.1;margin-bottom:20px;">${hero.title || ""}</h1>
+            ${hero.content ? `<p style="font-size:18px;line-height:1.7;max-width:600px;margin-bottom:32px;opacity:0.85;">${typeof hero.content === "string" ? hero.content : ""}</p>` : ""}
+            ${ctaWithTrust}
+          </div>
+          ${heroImgSrc ? `<div style="text-align:center;"><img src="${heroImgSrc}" alt="${productName}" style="max-height:480px;width:100%;max-width:400px;object-fit:cover;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);" /></div>` : ""}
         </div>
       </section>`);
   }
