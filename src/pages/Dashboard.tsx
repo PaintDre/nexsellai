@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, FileText, Plus, Zap } from "lucide-react";
+import { Package, FileText, Plus, Zap, Pencil, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 type Product = Tables<"products">;
@@ -97,26 +97,32 @@ const Dashboard = () => {
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {products.slice(0, 6).map((product) => (
-              <Link key={product.id} to={`/products/${product.id}`}>
-                <Card className="hover:shadow-md transition-shadow cursor-pointer group">
-                  <div className="aspect-video overflow-hidden rounded-t-lg bg-muted">
-                    {product.images[0] ? (
-                      <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform" />
-                    ) : (
-                      <div className="h-full w-full flex items-center justify-center">
-                        <Package className="h-8 w-8 text-muted-foreground/40" />
-                      </div>
-                    )}
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-semibold truncate">{product.name}</h3>
-                      <Badge variant="secondary" className="capitalize text-xs">{product.category}</Badge>
+              <Card key={product.id} className="hover:shadow-md transition-shadow group">
+                <div className="aspect-video overflow-hidden rounded-t-lg bg-muted">
+                  {product.images[0] ? (
+                    <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center">
+                      <Package className="h-8 w-8 text-muted-foreground/40" />
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">${product.price.toLocaleString("es-CL")}</p>
-                  </CardContent>
-                </Card>
-              </Link>
+                  )}
+                </div>
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold truncate">{product.name}</h3>
+                    <Badge variant="secondary" className="capitalize text-xs">{product.category}</Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">${product.price.toLocaleString("es-CL")}</p>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" asChild className="flex-1">
+                      <Link to={`/products/${product.id}/edit`}><Pencil className="h-3 w-3 mr-1" /> Editar</Link>
+                    </Button>
+                    <Button size="sm" asChild className="flex-1">
+                      <Link to={`/products/${product.id}/generate`}><Sparkles className="h-3 w-3 mr-1" /> Generar</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
