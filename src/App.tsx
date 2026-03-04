@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedLayout } from "@/components/ProtectedRoute";
+import { AdminLayout, SuperAdminLayout } from "@/components/AdminRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -16,6 +17,9 @@ import Landings from "./pages/Landings";
 import Pricing from "./pages/Pricing";
 import SettingsPage from "./pages/SettingsPage";
 import LandingPreview from "./pages/LandingPreview";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
+import SuperAdminConfig from "./pages/SuperAdminConfig";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +45,13 @@ const App = () => (
               <Route path="/landings" element={<Landings />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/settings" element={<SettingsPage />} />
+            </Route>
+            <Route element={<AdminLayout />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+            </Route>
+            <Route element={<SuperAdminLayout />}>
+              <Route path="/admin/config" element={<SuperAdminConfig />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
