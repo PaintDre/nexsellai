@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Sparkles, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { themes, type LandingTheme } from "@/components/landing/themes";
 
 type Product = Tables<"products">;
 
@@ -120,6 +121,19 @@ const GenerateLanding = () => {
               <p className="text-sm text-muted-foreground">Agrega precio tachado y descuento</p>
             </div>
             <Switch checked={hasOffer} onCheckedChange={setHasOffer} />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Tema visual</Label>
+            <Select value="clean" onValueChange={() => {}}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {Object.entries(themes).map(([key, cfg]) => (
+                  <SelectItem key={key} value={key}>{cfg.name} — {cfg.description}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">Puedes cambiar el tema después en la vista previa</p>
           </div>
 
           <div className="space-y-2">
