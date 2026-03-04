@@ -14,6 +14,7 @@ import Products from "./pages/Products";
 import ProductForm from "./pages/ProductForm";
 import GenerateLanding from "./pages/GenerateLanding";
 import Landings from "./pages/Landings";
+import LandingView from "./pages/LandingView";
 import Pricing from "./pages/Pricing";
 import SettingsPage from "./pages/SettingsPage";
 import LandingPreview from "./pages/LandingPreview";
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="/products/:id/edit" element={<ProductForm />} />
               <Route path="/products/:id/generate" element={<GenerateLanding />} />
               <Route path="/landings" element={<Landings />} />
+              <Route path="/landings/:id" element={<LandingView />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
