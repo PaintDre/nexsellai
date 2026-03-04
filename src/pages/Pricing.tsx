@@ -40,7 +40,7 @@ const plans = [
     price: 14990,
     description: "Para correr ads diario",
     features: [
-      "Landings ilimitadas",
+      "100 landings / mes",
       "Múltiples ángulos psicológicos",
       "Hooks para ads incluidos",
       "Variantes de CTA",

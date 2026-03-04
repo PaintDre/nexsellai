@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 type Product = Tables<"products">;
 type Landing = Tables<"landings">;
 
-const planLimits: Record<string, number> = { free: 1, starter: 10, pro: 999999 };
+const planLimits: Record<string, number> = { free: 1, starter: 10, pro: 100 };
 
 const Dashboard = () => {
   const { user, profile } = useAuth();
@@ -59,7 +59,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold font-display">
-              {used} <span className="text-lg text-muted-foreground font-normal">/ {limit === 999999 ? "∞" : limit}</span>
+              {used} <span className="text-lg text-muted-foreground font-normal">/ {limit}</span>
             </div>
           </CardContent>
         </Card>

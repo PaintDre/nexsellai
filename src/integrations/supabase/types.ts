@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      demo_landings: {
+        Row: {
+          blocks: Json
+          created_at: string
+          id: string
+          product_data: Json
+          session_id: string
+        }
+        Insert: {
+          blocks?: Json
+          created_at?: string
+          id?: string
+          product_data?: Json
+          session_id: string
+        }
+        Update: {
+          blocks?: Json
+          created_at?: string
+          id?: string
+          product_data?: Json
+          session_id?: string
+        }
+        Relationships: []
+      }
       landings: {
         Row: {
           blocks: Json
@@ -57,6 +81,39 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "landings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_audiences: {
+        Row: {
+          audience_id: string
+          id: string
+          product_id: string
+        }
+        Insert: {
+          audience_id: string
+          id?: string
+          product_id: string
+        }
+        Update: {
+          audience_id?: string
+          id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_audiences_audience_id_fkey"
+            columns: ["audience_id"]
+            isOneToOne: false
+            referencedRelation: "target_audiences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_audiences_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
@@ -139,6 +196,27 @@ export type Database = {
         }
         Relationships: []
       }
+      target_audiences: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          usage_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          usage_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -149,7 +227,7 @@ export type Database = {
     Enums: {
       landing_intensity: "soft" | "medium" | "hard"
       landing_mode: "aida" | "standard"
-      product_category: "home" | "fitness" | "beauty" | "gadget"
+      product_category: "home" | "fitness" | "beauty" | "gadget" | "pets"
       user_plan: "free" | "starter" | "pro"
     }
     CompositeTypes: {
@@ -280,7 +358,7 @@ export const Constants = {
     Enums: {
       landing_intensity: ["soft", "medium", "hard"],
       landing_mode: ["aida", "standard"],
-      product_category: ["home", "fitness", "beauty", "gadget"],
+      product_category: ["home", "fitness", "beauty", "gadget", "pets"],
       user_plan: ["free", "starter", "pro"],
     },
   },
