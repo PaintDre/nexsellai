@@ -6,6 +6,8 @@ import {
 } from "lucide-react";
 import TrustBadges from "./TrustBadges";
 import { themes, type LandingTheme, type ThemeConfig } from "./themes";
+import SectionDivider from "./SectionDivider";
+import SocialProof from "./SocialProof";
 
 interface Block {
   type: string;
@@ -55,9 +57,6 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
       : []
     : [];
 
-  // Determine if a section is "alt" (dark in bold theme)
-  const isAltSection = (bg: string) => bg === t.sectionAltBg;
-
   const getHeading = (alt: boolean) => alt ? t.sectionAltHeading : t.headingColor;
   const getBody = (alt: boolean) => alt ? t.sectionAltBody : t.bodyColor;
   const getMuted = (alt: boolean) => alt ? t.sectionAltMuted : t.mutedColor;
@@ -66,7 +65,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
 
   const CTAButton = ({ className = "" }: { className?: string }) => (
     <button
-      className={`inline-flex items-center justify-center px-10 py-4 text-lg font-bold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 animate-[pulse-glow_2s_ease-in-out_infinite] ${t.ctaBg} ${t.ctaText} ${t.ctaHover} ${className}`}
+      className={`inline-flex items-center justify-center px-10 py-4 text-lg font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 animate-[pulse-glow_2s_ease-in-out_infinite] ${t.ctaBg} ${t.ctaText} ${t.ctaHover} ${className}`}
     >
       Comprar ahora — {formattedPrice}
     </button>
@@ -87,28 +86,34 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
     </h2>
   );
 
+  const Section = ({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) => (
+    <section
+      className={`landing-section ${className}`}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      {children}
+    </section>
+  );
+
   const featureIcons = [Zap, Gift, Award, CheckCircle2, Star, ShieldCheck];
 
-  // Parse FAQ items - support both string[] and {q,a}[]
   const parseFaqItems = (content: Block["content"]): Array<{ q: string; a: string }> => {
     if (!Array.isArray(content)) return [];
     return content.map((item) => {
-      if (typeof item === "string") {
-        return { q: item, a: "" };
-      }
-      if (typeof item === "object" && item !== null && "q" in item) {
-        return { q: (item as any).q, a: (item as any).a || "" };
-      }
+      if (typeof item === "string") return { q: item, a: "" };
+      if (typeof item === "object" && item !== null && "q" in item) return { q: (item as any).q, a: (item as any).a || "" };
       return { q: String(item), a: "" };
     });
   };
 
+  const avatarColors = ["bg-blue-500", "bg-emerald-500", "bg-purple-500", "bg-amber-500", "bg-rose-500", "bg-cyan-500"];
+
   return (
-    <div className="min-h-screen" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen landing-container" style={{ fontFamily: "'Inter', sans-serif" }}>
 
       {/* ═══ HERO ═══ */}
       {hero && (
-        <section className={`py-20 md:py-28 ${t.heroBg}`}>
+        <Section className={`py-20 md:py-28 ${t.heroBg}`}>
           <div className="mx-auto max-w-6xl px-6">
             <div className={`grid ${imagePreview ? "lg:grid-cols-2" : ""} gap-12 items-center`}>
               <div className="space-y-8">
@@ -123,25 +128,31 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
                     {typeof hero.content === "string" ? hero.content : ""}
                   </p>
                 )}
+                <SocialProof theme={theme} />
                 <CTAWithTrust className="items-start" trustColor={theme === "bold" ? "text-gray-500" : undefined} />
               </div>
               {imagePreview && (
                 <div className="flex justify-center lg:justify-end">
-                  <img
-                    src={imagePreview}
-                    alt={productName}
-                    className="rounded-2xl shadow-2xl max-h-[480px] object-cover w-full max-w-md"
-                  />
+                  <div className="relative">
+                    <img
+                      src={imagePreview}
+                      alt={productName}
+                      className="rounded-2xl shadow-2xl max-h-[480px] object-cover w-full max-w-md ring-1 ring-black/5"
+                    />
+                    <div className="absolute -inset-1 rounded-2xl bg-gradient-to-tr from-black/5 to-transparent pointer-events-none" />
+                  </div>
                 </div>
               )}
             </div>
           </div>
-        </section>
+        </Section>
       )}
+
+      <SectionDivider theme={theme} from="hero" to="alt" />
 
       {/* ═══ BENEFITS ═══ */}
       {benefits && (
-        <section className={`py-16 md:py-24 ${t.sectionAltBg}`}>
+        <Section className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={100}>
           <div className="mx-auto max-w-5xl px-6">
             <SectionTitle alt>{benefits.title || "Beneficios"}</SectionTitle>
             {Array.isArray(benefits.content) ? (
@@ -149,7 +160,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
                 {(benefits.content as string[]).map((item, i) => {
                   const Icon = featureIcons[i % featureIcons.length];
                   return (
-                    <div key={i} className={`flex items-start gap-4 p-6 rounded-xl ${getCard(true)} border ${getCardBorder(true)} shadow-sm`}>
+                    <div key={i} className={`flex items-start gap-4 p-6 rounded-xl ${getCard(true)} border ${getCardBorder(true)} shadow-sm hover:shadow-md transition-shadow duration-300`}>
                       <div className={`h-10 w-10 rounded-lg ${t.accentBg} flex items-center justify-center shrink-0`}>
                         <Icon className={`h-5 w-5 ${getHeading(true)}`} />
                       </div>
@@ -162,12 +173,12 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               <p className={`text-center text-lg ${getBody(true)}`}>{benefits.content as string}</p>
             )}
           </div>
-        </section>
+        </Section>
       )}
 
       {/* ═══ FEATURES ═══ */}
       {features && (
-        <section className={`py-16 md:py-24 ${t.sectionBg}`}>
+        <Section className={`py-16 md:py-24 ${t.sectionBg}`} delay={200}>
           <div className="mx-auto max-w-4xl px-6">
             <SectionTitle>{features.title || "Características"}</SectionTitle>
             {Array.isArray(features.content) ? (
@@ -183,18 +194,18 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               <p className={`text-lg leading-relaxed ${t.bodyColor}`}>{features.content as string}</p>
             )}
           </div>
-        </section>
+        </Section>
       )}
 
       {/* ═══ TESTIMONIALS ═══ */}
       {testimonials && (
-        <section className={`py-16 md:py-24 ${t.sectionAltBg}`}>
+        <Section className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={300}>
           <div className="mx-auto max-w-5xl px-6">
             <SectionTitle alt>{testimonials.title || "Lo que dicen nuestros clientes"}</SectionTitle>
             {Array.isArray(testimonials.content) ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {(testimonials.content as string[]).map((item, i) => (
-                  <div key={i} className={`p-6 rounded-xl ${getCard(true)} border ${getCardBorder(true)} shadow-sm relative`}>
+                  <div key={i} className={`p-6 rounded-xl ${getCard(true)} border ${getCardBorder(true)} shadow-sm hover:shadow-md transition-shadow duration-300 relative`}>
                     <Quote className={`h-8 w-8 opacity-10 absolute top-4 right-4 ${getBody(true)}`} />
                     <div className="flex gap-0.5 mb-4">
                       {[...Array(5)].map((_, j) => (
@@ -203,7 +214,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
                     </div>
                     <p className={`text-sm leading-relaxed italic ${getMuted(true)}`}>"{item}"</p>
                     <div className="mt-4 flex items-center gap-3">
-                      <div className={`h-8 w-8 rounded-full ${t.accentBg} flex items-center justify-center text-xs font-bold ${getHeading(true)}`}>
+                      <div className={`h-8 w-8 rounded-full ${avatarColors[i % avatarColors.length]} flex items-center justify-center text-xs font-bold text-white`}>
                         {String.fromCharCode(65 + (i % 26))}
                       </div>
                       <span className={`text-xs font-medium ${getMuted(true)}`}>Cliente verificado</span>
@@ -215,18 +226,18 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               <p className={`text-center italic ${getMuted(true)}`}>{testimonials.content as string}</p>
             )}
           </div>
-        </section>
+        </Section>
       )}
 
       {/* ═══ OBJECTIONS ═══ */}
       {objections && (
-        <section className={`py-16 md:py-24 ${t.sectionBg}`}>
+        <Section className={`py-16 md:py-24 ${t.sectionBg}`} delay={400}>
           <div className="mx-auto max-w-3xl px-6">
             <SectionTitle>{objections.title || "¿Aún tienes dudas?"}</SectionTitle>
             {Array.isArray(objections.content) ? (
               <div className="space-y-3">
                 {(objections.content as string[]).map((item, i) => (
-                  <div key={i} className={`flex items-start gap-4 p-5 rounded-xl ${t.cardBg} border ${t.cardBorder}`}>
+                  <div key={i} className={`flex items-start gap-4 p-5 rounded-xl ${t.cardBg} border ${t.cardBorder} hover:shadow-sm transition-shadow`}>
                     <ShieldCheck className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
                     <p className={`text-base ${t.bodyColor}`}>{item}</p>
                   </div>
@@ -236,24 +247,18 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               <p className={`text-center ${t.bodyColor}`}>{objections.content as string}</p>
             )}
           </div>
-        </section>
+        </Section>
       )}
 
       {/* ═══ FAQ ═══ */}
       {faq && Array.isArray(faq.content) && (
-        <section className={`py-16 md:py-24 ${t.sectionAltBg}`}>
+        <Section className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={500}>
           <div className="mx-auto max-w-2xl px-6">
             <SectionTitle alt>{faq.title || "Preguntas frecuentes"}</SectionTitle>
             <div className="space-y-2">
               {parseFaqItems(faq.content).map((item, i) => (
-                <div
-                  key={i}
-                  className={`rounded-xl ${getCard(true)} border ${getCardBorder(true)} transition-all overflow-hidden`}
-                >
-                  <button
-                    className="w-full text-left p-5"
-                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  >
+                <div key={i} className={`rounded-xl ${getCard(true)} border ${getCardBorder(true)} transition-all overflow-hidden`}>
+                  <button className="w-full text-left p-5" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
                     <div className="flex items-center justify-between gap-4">
                       <span className={`font-medium text-sm ${getHeading(true)}`}>{item.q}</span>
                       {openFaq === i
@@ -271,12 +276,12 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               ))}
             </div>
           </div>
-        </section>
+        </Section>
       )}
 
       {/* ═══ COMPARISON ═══ */}
       {comparison && Array.isArray(comparison.content) && (
-        <section className={`py-16 md:py-24 ${t.sectionBg}`}>
+        <Section className={`py-16 md:py-24 ${t.sectionBg}`}>
           <div className="mx-auto max-w-4xl px-6">
             <SectionTitle>{comparison.title || "¿Por qué elegirnos?"}</SectionTitle>
             <div className="grid sm:grid-cols-2 gap-6">
@@ -310,29 +315,31 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               </div>
             </div>
           </div>
-        </section>
+        </Section>
       )}
 
       {/* ═══ BUNDLES ═══ */}
       {bundles && Array.isArray(bundles.content) && (
-        <section className={`py-16 md:py-24 ${t.sectionAltBg}`}>
+        <Section className={`py-16 md:py-24 ${t.sectionAltBg}`}>
           <div className="mx-auto max-w-4xl px-6">
             <SectionTitle alt>{bundles.title || "Packs disponibles"}</SectionTitle>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {(bundles.content as string[]).map((item, i) => (
-                <div key={i} className={`p-6 rounded-xl ${getCard(true)} border ${getCardBorder(true)} shadow-sm text-center`}>
+                <div key={i} className={`p-6 rounded-xl ${getCard(true)} border ${getCardBorder(true)} shadow-sm text-center hover:shadow-md transition-shadow`}>
                   <Layers className={`h-8 w-8 mx-auto mb-3 ${getHeading(true)}`} />
                   <p className={`text-sm leading-relaxed ${getBody(true)}`}>{item}</p>
                 </div>
               ))}
             </div>
           </div>
-        </section>
+        </Section>
       )}
+
+      <SectionDivider theme={theme} from="main" to="accent" />
 
       {/* ═══ OFFER / URGENCY ═══ */}
       {(offer || urgency) && (
-        <section className={`py-16 md:py-24 ${t.accentBg}`}>
+        <Section className={`py-16 md:py-24 ${t.accentBg}`}>
           <div className="mx-auto max-w-3xl px-6 text-center space-y-6">
             {urgency && (
               <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${t.urgencyBg} ${t.urgencyText}`}>
@@ -353,36 +360,28 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
                     {typeof offer.content === "string" ? offer.content : ""}
                   </p>
                 )}
-                {/* Price comparison */}
                 <div className="flex items-center justify-center gap-4">
-                  <span className={`text-2xl line-through ${t.mutedColor}`}>
-                    {formattedPrice}
-                  </span>
-                  <span className={`text-4xl font-extrabold text-emerald-600`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  <span className={`text-2xl line-through ${t.mutedColor}`}>{formattedPrice}</span>
+                  <span className="text-4xl font-extrabold text-emerald-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                     {`$${Math.round(price * 0.7).toLocaleString("es-CL")}`}
                   </span>
-                  <span className="inline-block bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">
-                    -30%
-                  </span>
+                  <span className="inline-block bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">-30%</span>
                 </div>
               </>
             )}
             <CTAWithTrust />
           </div>
-        </section>
+        </Section>
       )}
 
       {/* ═══ GUARANTEE ═══ */}
       {guarantee && (
-        <section className={`py-12 md:py-16 ${t.sectionBg}`}>
+        <Section className={`py-12 md:py-16 ${t.sectionBg}`}>
           <div className="mx-auto max-w-2xl px-6">
             <div className={`flex items-start gap-5 p-6 rounded-2xl ${t.guaranteeBg} border ${t.guaranteeBorder}`}>
               <ShieldCheck className="h-8 w-8 text-emerald-600 shrink-0 mt-1" />
               <div>
-                <h3
-                  className={`font-bold text-lg mb-1 ${t.headingColor}`}
-                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                >
+                <h3 className={`font-bold text-lg mb-1 ${t.headingColor}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                   {guarantee.title || "Garantía"}
                 </h3>
                 <p className={t.bodyColor}>
@@ -391,11 +390,13 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               </div>
             </div>
           </div>
-        </section>
+        </Section>
       )}
 
+      <SectionDivider theme={theme} from="alt" to="cta" />
+
       {/* ═══ FINAL CTA ═══ */}
-      <section className={`py-20 md:py-28 ${t.sectionAltBg}`}>
+      <Section className={`py-20 md:py-28 ${t.sectionAltBg}`}>
         <div className="mx-auto max-w-2xl px-6 text-center space-y-8">
           <h2
             className={`text-3xl md:text-4xl font-bold tracking-tight ${getHeading(true)}`}
@@ -410,24 +411,31 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
           )}
           <CTAWithTrust trustColor={theme === "bold" ? "text-gray-500" : undefined} />
         </div>
-      </section>
+      </Section>
 
       {/* ═══ STICKY MOBILE CTA ═══ */}
       <div className="fixed bottom-0 left-0 right-0 md:hidden z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200 p-3 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
-        <button
-          className={`w-full py-3.5 text-base font-bold rounded-lg ${t.ctaBg} ${t.ctaText} shadow-md`}
-        >
+        <button className={`w-full py-3.5 text-base font-bold rounded-xl ${t.ctaBg} ${t.ctaText} shadow-md`}>
           Comprar ahora — {formattedPrice}
         </button>
       </div>
 
-      {/* Bottom padding for sticky CTA on mobile */}
       <div className="h-16 md:hidden" />
 
       <style>{`
         @keyframes pulse-glow {
           0%, 100% { box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
           50% { box-shadow: 0 4px 24px rgba(0,0,0,0.25); }
+        }
+        @keyframes landing-fade-in {
+          from { opacity: 0; transform: translateY(16px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .landing-section {
+          animation: landing-fade-in 0.6s ease-out both;
+        }
+        .landing-container {
+          overflow-x: hidden;
         }
       `}</style>
     </div>

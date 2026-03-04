@@ -43,6 +43,7 @@ const LandingView = () => {
         .from("landings").select("*").eq("id", id).eq("user_id", user.id).single();
       if (le || !l) { setError("No se encontró la landing."); setLoading(false); return; }
       setLanding(l);
+      setTheme(((l as any).theme || "clean") as LandingTheme);
       const { data: p } = await supabase
         .from("products").select("*").eq("id", l.product_id).single();
       setProduct(p);
