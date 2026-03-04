@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Sparkles, Zap, Code2, ShoppingCart, ArrowRight, Loader2,
   CheckCircle2, Upload, Wand2, Download, ChevronDown, ChevronUp,
+  Monitor, Store, FilePlus, Send,
 } from "lucide-react";
 
 const categories = ["home", "fitness", "beauty", "gadget", "pets"];
@@ -182,7 +183,58 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Demo */}
+      {/* Shopify Tutorial */}
+      <section className="py-20">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <div className="text-center mb-4">
+            <Badge variant="secondary" className="mb-4 text-sm px-4 py-1">Integración Shopify</Badge>
+            <h2 className="text-3xl md:text-4xl font-bold font-display">
+              Cómo subir tu landing a Shopify en menos de 2 minutos
+            </h2>
+            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
+              No necesitas saber programar. Solo descarga tu landing generada y súbela a tu tienda Shopify en pocos pasos.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 mt-12">
+            {[
+              { icon: Monitor, step: "1", title: "Abre tu panel de Shopify", desc: "Inicia sesión en tu cuenta de Shopify y accede al panel de administración." },
+              { icon: Store, step: "2", title: "Online Store → Pages", desc: "En el menú lateral, ve a Online Store y luego haz clic en Pages." },
+              { icon: FilePlus, step: "3", title: "Crea una nueva página", desc: "Haz clic en 'Add page' para crear una página nueva en tu tienda." },
+              { icon: Send, step: "4", title: "Pega el HTML y publica", desc: "Pega el código HTML de tu landing generada en el editor y haz clic en Publicar." },
+            ].map(({ icon: Icon, step, title, desc }) => (
+              <Card key={step} className="text-center border-none bg-card shadow-sm">
+                <CardContent className="pt-8 pb-6 px-5">
+                  <div className="h-14 w-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4 text-2xl font-display font-bold">
+                    {step}
+                  </div>
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                    <Icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-display font-semibold text-base mb-2">{title}</h3>
+                  <p className="text-muted-foreground text-sm">{desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="mt-12 text-center space-y-3">
+            <p className="text-sm text-muted-foreground">Exporta tu landing como HTML listo para usar en Shopify</p>
+            <Button size="lg" variant="outline" className="text-base">
+              <Download className="h-5 w-5 mr-2" /> Descargar landing para Shopify
+            </Button>
+          </div>
+
+          <div className="mt-16 text-center">
+            <h3 className="text-2xl md:text-3xl font-bold font-display mb-4">
+              Crea tu primera landing y publícala en Shopify hoy
+            </h3>
+            <Button size="lg" className="text-base px-8" asChild>
+              <a href="#demo"><Sparkles className="h-5 w-5 mr-2" /> Probar generador gratis</a>
+            </Button>
+          </div>
+        </div>
+      </section>
       <section id="demo" className="py-20 bg-muted/50">
         <div className="container mx-auto px-4 max-w-4xl">
           <div className="text-center mb-10">
