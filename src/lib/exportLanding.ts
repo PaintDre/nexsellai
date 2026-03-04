@@ -149,7 +149,7 @@ export function generateLandingHTML(
       <section style="padding:64px 24px;background:${t.sectionAltBg};">
         <div style="max-width:960px;margin:0 auto;">
           <h2 style="font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;text-align:center;margin-bottom:40px;color:${t.sectionAltText};">${benefits.title || "Beneficios"}</h2>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;">
+          ${sectionBannerHTML(benefits)}
             ${items.map((item) => `
               <div style="display:flex;align-items:flex-start;gap:16px;padding:24px;background:${t.sectionAltCardBg};border:1px solid ${t.sectionAltCardBorder};border-radius:12px;">
                 <span style="font-size:20px;color:#10b981;">✓</span>
