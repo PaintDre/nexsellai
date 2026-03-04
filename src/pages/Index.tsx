@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Sparkles, Zap, Code2, ShoppingCart, ArrowRight, Loader2,
   CheckCircle2, Upload, Wand2, Download, ChevronDown, ChevronUp,
-  Monitor, Store, FilePlus, Send,
+  Monitor, Store, FilePlus, Send, ImagePlus, X,
 } from "lucide-react";
 
 const categories = ["home", "fitness", "beauty", "gadget", "pets"];
@@ -38,6 +38,31 @@ const Index = () => {
   const [generating, setGenerating] = useState(false);
   const [demoBlocks, setDemoBlocks] = useState<any[] | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [demoImage, setDemoImage] = useState<File | null>(null);
+  const [demoImagePreview, setDemoImagePreview] = useState<string | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setImageError("La imagen no puede superar los 5MB.");
+      setDemoImage(null);
+      setDemoImagePreview(null);
+      return;
+    }
+    setImageError(null);
+    setDemoImage(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setDemoImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const removeImage = () => {
+    setDemoImage(null);
+    setDemoImagePreview(null);
+    setImageError(null);
+  };
 
   const demoUsed = typeof window !== "undefined" && localStorage.getItem("nexsell_demo_used") === "true";
 
@@ -218,12 +243,6 @@ const Index = () => {
             ))}
           </div>
 
-          <div className="mt-12 text-center space-y-3">
-            <p className="text-sm text-muted-foreground">Exporta tu landing como HTML listo para usar en Shopify</p>
-            <Button size="lg" variant="outline" className="text-base">
-              <Download className="h-5 w-5 mr-2" /> Descargar landing para Shopify
-            </Button>
-          </div>
 
           <div className="mt-16 text-center">
             <h3 className="text-2xl md:text-3xl font-bold font-display mb-4">
@@ -317,7 +336,26 @@ const Index = () => {
                     <Label htmlFor="demo-desc">Descripción (opcional)</Label>
                     <Textarea id="demo-desc" value={demoDescription} onChange={(e) => setDemoDescription(e.target.value)} placeholder="Detalles del producto..." rows={2} />
                   </div>
-                  <Button type="submit" className="w-full" size="lg" disabled={generating || demoUsed}>
+                  <div className="space-y-2">
+                    <Label>Imagen del producto *</Label>
+                    {demoImagePreview ? (
+                      <div className="relative inline-block">
+                        <img src={demoImagePreview} alt="Preview" className="h-28 w-28 object-cover rounded-lg border" />
+                        <button type="button" onClick={removeImage} className="absolute -top-2 -right-2 h-6 w-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label htmlFor="demo-image" className="flex flex-col items-center justify-center h-28 w-full border-2 border-dashed border-input rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+                        <ImagePlus className="h-8 w-8 text-muted-foreground mb-1" />
+                        <span className="text-sm text-muted-foreground">Sube una imagen (JPG, PNG, WEBP · máx 5MB)</span>
+                        <input id="demo-image" type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageChange} />
+                      </label>
+                    )}
+                    {imageError && <p className="text-sm text-destructive">{imageError}</p>}
+                    {!demoImage && !imageError && <p className="text-xs text-muted-foreground">Debes subir una imagen para generar la landing.</p>}
+                  </div>
+                  <Button type="submit" className="w-full" size="lg" disabled={generating || demoUsed || !demoImage}>
                     {generating ? (
                       <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generando con IA...</>
                     ) : demoUsed ? (

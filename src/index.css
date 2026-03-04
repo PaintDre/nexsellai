@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 25% 10%;
 
-    --primary: 262 83% 58%;
+    --primary: 152 60% 36%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 14% 92%;
@@ -32,18 +32,18 @@
 
     --border: 220 13% 89%;
     --input: 220 13% 89%;
-    --ring: 262 83% 58%;
+    --ring: 152 60% 36%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 220 25% 10%;
     --sidebar-foreground: 220 14% 85%;
-    --sidebar-primary: 262 83% 58%;
+    --sidebar-primary: 152 60% 36%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 20% 16%;
     --sidebar-accent-foreground: 220 14% 85%;
     --sidebar-border: 220 20% 18%;
-    --sidebar-ring: 262 83% 58%;
+    --sidebar-ring: 152 60% 36%;
 
     --success: 165 82% 51%;
     --warning: 38 92% 50%;
@@ -60,7 +60,7 @@
     --popover: 220 25% 10%;
     --popover-foreground: 220 14% 92%;
 
-    --primary: 262 83% 62%;
+    --primary: 152 56% 44%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 20% 16%;
@@ -77,16 +77,16 @@
 
     --border: 220 20% 18%;
     --input: 220 20% 18%;
-    --ring: 262 83% 62%;
+    --ring: 152 56% 44%;
 
     --sidebar-background: 220 30% 5%;
     --sidebar-foreground: 220 14% 85%;
-    --sidebar-primary: 262 83% 62%;
+    --sidebar-primary: 152 56% 44%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 220 25% 12%;
     --sidebar-accent-foreground: 220 14% 85%;
     --sidebar-border: 220 25% 12%;
-    --sidebar-ring: 262 83% 62%;
+    --sidebar-ring: 152 56% 44%;
   }
 }
 
