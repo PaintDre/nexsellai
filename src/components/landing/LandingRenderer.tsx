@@ -96,21 +96,6 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
     </section>
   );
 
-  // Section banner image component
-  const SectionBanner = ({ block, className = "" }: { block: Block; className?: string }) => {
-    if (!block.image_url) return null;
-    return (
-      <div className={`w-full rounded-2xl overflow-hidden shadow-lg mb-8 ${className}`}>
-        <img
-          src={block.image_url}
-          alt={block.title || block.type}
-          className="w-full h-auto object-cover"
-          loading="lazy"
-        />
-      </div>
-    );
-  };
-
   const featureIcons = [Zap, Gift, Award, CheckCircle2, Star, ShieldCheck];
 
   const parseFaqItems = (content: Block["content"]): Array<{ q: string; a: string }> => {
@@ -132,38 +117,67 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
 
       {/* ═══ HERO ═══ */}
       {hero && (
-        <Section className={`py-20 md:py-28 ${t.heroBg}`}>
-          <div className="mx-auto max-w-6xl px-6">
-            <div className={`grid ${heroImage ? "lg:grid-cols-2" : ""} gap-12 items-center`}>
-              <div className="space-y-8">
-                <h1
-                  className={`text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] ${t.heroText}`}
-                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                >
-                  {hero.title}
-                </h1>
-                {hero.content && (
-                  <p className={`text-lg md:text-xl leading-relaxed max-w-xl ${theme === "bold" ? "text-gray-300" : t.bodyColor}`}>
-                    {typeof hero.content === "string" ? hero.content : ""}
-                  </p>
-                )}
-                <SocialProof theme={theme} />
-                <CTAWithTrust className="items-start" trustColor={theme === "bold" ? "text-gray-500" : undefined} />
-              </div>
-              {heroImage && (
-                <div className="flex justify-center lg:justify-end">
-                  <div className="relative">
-                    <img
-                      src={heroImage}
-                      alt={productName}
-                      className="rounded-2xl shadow-2xl max-h-[480px] object-cover w-full max-w-md ring-1 ring-black/5"
-                    />
-                    <div className="absolute -inset-1 rounded-2xl bg-gradient-to-tr from-black/5 to-transparent pointer-events-none" />
-                  </div>
+        <Section className={`relative overflow-hidden ${hero.image_url ? 'py-0' : `py-20 md:py-28 ${t.heroBg}`}`}>
+          {/* Hero with banner background */}
+          {hero.image_url ? (
+            <div className="relative min-h-[500px] md:min-h-[600px] flex items-center">
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${hero.image_url})` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
+              <div className="relative z-10 mx-auto max-w-6xl px-6 py-20 md:py-28">
+                <div className="max-w-2xl space-y-8">
+                  <h1
+                    className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] text-white drop-shadow-lg"
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    {hero.title}
+                  </h1>
+                  {hero.content && (
+                    <p className="text-lg md:text-xl leading-relaxed max-w-xl text-gray-200">
+                      {typeof hero.content === "string" ? hero.content : ""}
+                    </p>
+                  )}
+                  <SocialProof theme={theme} />
+                  <CTAWithTrust className="items-start" trustColor="text-gray-400" />
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+          ) : (
+            /* Hero without banner - standard layout */
+            <div className="mx-auto max-w-6xl px-6">
+              <div className={`grid ${imagePreview ? "lg:grid-cols-2" : ""} gap-12 items-center`}>
+                <div className="space-y-8">
+                  <h1
+                    className={`text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] ${t.heroText}`}
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    {hero.title}
+                  </h1>
+                  {hero.content && (
+                    <p className={`text-lg md:text-xl leading-relaxed max-w-xl ${theme === "bold" ? "text-gray-300" : t.bodyColor}`}>
+                      {typeof hero.content === "string" ? hero.content : ""}
+                    </p>
+                  )}
+                  <SocialProof theme={theme} />
+                  <CTAWithTrust className="items-start" trustColor={theme === "bold" ? "text-gray-500" : undefined} />
+                </div>
+                {imagePreview && (
+                  <div className="flex justify-center lg:justify-end">
+                    <div className="relative">
+                      <img
+                        src={imagePreview}
+                        alt={productName}
+                        className="rounded-2xl shadow-2xl max-h-[480px] object-cover w-full max-w-md ring-1 ring-black/5"
+                      />
+                      <div className="absolute -inset-1 rounded-2xl bg-gradient-to-tr from-black/5 to-transparent pointer-events-none" />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </Section>
       )}
 
@@ -174,23 +188,54 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
         <Section className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={100}>
           <div className="mx-auto max-w-5xl px-6">
             <SectionTitle alt>{benefits.title || "Beneficios"}</SectionTitle>
-            <SectionBanner block={benefits} />
-            {Array.isArray(benefits.content) ? (
-              <div className="grid sm:grid-cols-2 gap-5">
-                {(benefits.content as string[]).map((item, i) => {
-                  const Icon = featureIcons[i % featureIcons.length];
-                  return (
-                    <div key={i} className={`flex items-start gap-4 p-6 rounded-xl ${getCard(true)} border ${getCardBorder(true)} shadow-sm hover:shadow-md transition-shadow duration-300`}>
-                      <div className={`h-10 w-10 rounded-lg ${t.accentBg} flex items-center justify-center shrink-0`}>
-                        <Icon className={`h-5 w-5 ${getHeading(true)}`} />
-                      </div>
-                      <p className={`text-base leading-relaxed ${getBody(true)}`}>{item}</p>
-                    </div>
-                  );
-                })}
+            {/* Benefits with banner - 50/50 split layout */}
+            {benefits.image_url ? (
+              <div className="grid lg:grid-cols-2 gap-10 items-center">
+                <div className="rounded-2xl overflow-hidden shadow-xl">
+                  <img
+                    src={benefits.image_url}
+                    alt={benefits.title || "Beneficios"}
+                    className="w-full h-auto object-cover"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="space-y-4">
+                  {Array.isArray(benefits.content) ? (
+                    (benefits.content as string[]).map((item, i) => {
+                      const Icon = featureIcons[i % featureIcons.length];
+                      return (
+                        <div key={i} className={`flex items-start gap-4 p-5 rounded-xl ${getCard(true)} border ${getCardBorder(true)} shadow-sm hover:shadow-md transition-shadow duration-300`}>
+                          <div className={`h-10 w-10 rounded-lg ${t.accentBg} flex items-center justify-center shrink-0`}>
+                            <Icon className={`h-5 w-5 ${getHeading(true)}`} />
+                          </div>
+                          <p className={`text-base leading-relaxed ${getBody(true)}`}>{item}</p>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <p className={`text-lg ${getBody(true)}`}>{benefits.content as string}</p>
+                  )}
+                </div>
               </div>
             ) : (
-              <p className={`text-center text-lg ${getBody(true)}`}>{benefits.content as string}</p>
+              /* Benefits without banner - grid layout */
+              Array.isArray(benefits.content) ? (
+                <div className="grid sm:grid-cols-2 gap-5">
+                  {(benefits.content as string[]).map((item, i) => {
+                    const Icon = featureIcons[i % featureIcons.length];
+                    return (
+                      <div key={i} className={`flex items-start gap-4 p-6 rounded-xl ${getCard(true)} border ${getCardBorder(true)} shadow-sm hover:shadow-md transition-shadow duration-300`}>
+                        <div className={`h-10 w-10 rounded-lg ${t.accentBg} flex items-center justify-center shrink-0`}>
+                          <Icon className={`h-5 w-5 ${getHeading(true)}`} />
+                        </div>
+                        <p className={`text-base leading-relaxed ${getBody(true)}`}>{item}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className={`text-center text-lg ${getBody(true)}`}>{benefits.content as string}</p>
+              )
             )}
           </div>
         </Section>
@@ -201,18 +246,44 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
         <Section className={`py-16 md:py-24 ${t.sectionBg}`} delay={200}>
           <div className="mx-auto max-w-4xl px-6">
             <SectionTitle>{features.title || "Características"}</SectionTitle>
-            <SectionBanner block={features} />
-            {Array.isArray(features.content) ? (
-              <ul className="space-y-4">
-                {(features.content as string[]).map((item, i) => (
-                  <li key={i} className={`flex items-start gap-4 text-base ${t.bodyColor}`}>
-                    <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
+            {features.image_url ? (
+              <div className="grid lg:grid-cols-2 gap-10 items-center">
+                <div className="space-y-4">
+                  {Array.isArray(features.content) ? (
+                    <ul className="space-y-4">
+                      {(features.content as string[]).map((item, i) => (
+                        <li key={i} className={`flex items-start gap-4 text-base ${t.bodyColor}`}>
+                          <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className={`text-lg leading-relaxed ${t.bodyColor}`}>{features.content as string}</p>
+                  )}
+                </div>
+                <div className="rounded-2xl overflow-hidden shadow-xl">
+                  <img
+                    src={features.image_url}
+                    alt={features.title || "Características"}
+                    className="w-full h-auto object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
             ) : (
-              <p className={`text-lg leading-relaxed ${t.bodyColor}`}>{features.content as string}</p>
+              Array.isArray(features.content) ? (
+                <ul className="space-y-4">
+                  {(features.content as string[]).map((item, i) => (
+                    <li key={i} className={`flex items-start gap-4 text-base ${t.bodyColor}`}>
+                      <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className={`text-lg leading-relaxed ${t.bodyColor}`}>{features.content as string}</p>
+              )
             )}
           </div>
         </Section>
@@ -223,7 +294,6 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
         <Section className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={300}>
           <div className="mx-auto max-w-5xl px-6">
             <SectionTitle alt>{testimonials.title || "Lo que dicen nuestros clientes"}</SectionTitle>
-            <SectionBanner block={testimonials} />
             {Array.isArray(testimonials.content) ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {(testimonials.content as string[]).map((item, i) => (
@@ -361,39 +431,77 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
 
       {/* ═══ OFFER / URGENCY ═══ */}
       {(offer || urgency) && (
-        <Section className={`py-16 md:py-24 ${t.accentBg}`}>
-          <div className="mx-auto max-w-3xl px-6 text-center space-y-6">
-            {offer && <SectionBanner block={offer} />}
-            {urgency && (
-              <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${t.urgencyBg} ${t.urgencyText}`}>
-                <Clock className="h-4 w-4" />
-                {typeof urgency.content === "string" ? urgency.content : urgency.title}
-              </span>
-            )}
-            {offer && (
-              <>
+        <Section className={`relative overflow-hidden ${offer?.image_url ? 'py-0' : `py-16 md:py-24 ${t.accentBg}`}`}>
+          {/* Offer with banner background */}
+          {offer?.image_url ? (
+            <div className="relative min-h-[400px] flex items-center">
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url(${offer.image_url})` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40" />
+              <div className="relative z-10 mx-auto max-w-3xl px-6 py-16 md:py-24 text-center space-y-6">
+                {urgency && (
+                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-red-500/90 text-white">
+                    <Clock className="h-4 w-4" />
+                    {typeof urgency.content === "string" ? urgency.content : urgency.title}
+                  </span>
+                )}
                 <h2
-                  className={`text-3xl md:text-4xl font-bold tracking-tight ${t.headingColor}`}
+                  className="text-3xl md:text-4xl font-bold tracking-tight text-white"
                   style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 >
                   {offer.title}
                 </h2>
                 {offer.content && (
-                  <p className={`text-lg ${t.bodyColor}`}>
+                  <p className="text-lg text-gray-200">
                     {typeof offer.content === "string" ? offer.content : ""}
                   </p>
                 )}
                 <div className="flex items-center justify-center gap-4">
-                  <span className={`text-2xl line-through ${t.mutedColor}`}>{formattedPrice}</span>
-                  <span className="text-4xl font-extrabold text-emerald-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  <span className="text-2xl line-through text-gray-400">{formattedPrice}</span>
+                  <span className="text-4xl font-extrabold text-emerald-400" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                     {`$${Math.round(price * 0.7).toLocaleString("es-CL")}`}
                   </span>
                   <span className="inline-block bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">-30%</span>
                 </div>
-              </>
-            )}
-            <CTAWithTrust />
-          </div>
+                <CTAWithTrust trustColor="text-gray-400" />
+              </div>
+            </div>
+          ) : (
+            /* Offer without banner - standard layout */
+            <div className="mx-auto max-w-3xl px-6 text-center space-y-6">
+              {urgency && (
+                <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${t.urgencyBg} ${t.urgencyText}`}>
+                  <Clock className="h-4 w-4" />
+                  {typeof urgency.content === "string" ? urgency.content : urgency.title}
+                </span>
+              )}
+              {offer && (
+                <>
+                  <h2
+                    className={`text-3xl md:text-4xl font-bold tracking-tight ${t.headingColor}`}
+                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                  >
+                    {offer.title}
+                  </h2>
+                  {offer.content && (
+                    <p className={`text-lg ${t.bodyColor}`}>
+                      {typeof offer.content === "string" ? offer.content : ""}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-center gap-4">
+                    <span className={`text-2xl line-through ${t.mutedColor}`}>{formattedPrice}</span>
+                    <span className="text-4xl font-extrabold text-emerald-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                      {`$${Math.round(price * 0.7).toLocaleString("es-CL")}`}
+                    </span>
+                    <span className="inline-block bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">-30%</span>
+                  </div>
+                </>
+              )}
+              <CTAWithTrust />
+            </div>
+          )}
         </Section>
       )}
 
@@ -419,22 +527,45 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
       <SectionDivider theme={theme} from="alt" to="cta" />
 
       {/* ═══ FINAL CTA ═══ */}
-      <Section className={`py-20 md:py-28 ${t.sectionAltBg}`}>
-        <div className="mx-auto max-w-2xl px-6 text-center space-y-8">
-          {cta && <SectionBanner block={cta} />}
-          <h2
-            className={`text-3xl md:text-4xl font-bold tracking-tight ${getHeading(true)}`}
-            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-          >
-            {cta?.title || "¿Listo para probarlo?"}
-          </h2>
-          {cta?.content && (
-            <p className={`text-lg ${getBody(true)}`}>
-              {typeof cta.content === "string" ? cta.content : ""}
-            </p>
-          )}
-          <CTAWithTrust trustColor={theme === "bold" ? "text-gray-500" : undefined} />
-        </div>
+      <Section className={`relative overflow-hidden ${cta?.image_url ? 'py-0' : `py-20 md:py-28 ${t.sectionAltBg}`}`}>
+        {cta?.image_url ? (
+          <div className="relative min-h-[350px] flex items-center">
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${cta.image_url})` }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
+            <div className="relative z-10 mx-auto max-w-2xl px-6 py-20 md:py-28 text-center space-y-8">
+              <h2
+                className="text-3xl md:text-4xl font-bold tracking-tight text-white"
+                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              >
+                {cta?.title || "¿Listo para probarlo?"}
+              </h2>
+              {cta?.content && (
+                <p className="text-lg text-gray-200">
+                  {typeof cta.content === "string" ? cta.content : ""}
+                </p>
+              )}
+              <CTAWithTrust trustColor="text-gray-400" />
+            </div>
+          </div>
+        ) : (
+          <div className="mx-auto max-w-2xl px-6 text-center space-y-8">
+            <h2
+              className={`text-3xl md:text-4xl font-bold tracking-tight ${getHeading(true)}`}
+              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+            >
+              {cta?.title || "¿Listo para probarlo?"}
+            </h2>
+            {cta?.content && (
+              <p className={`text-lg ${getBody(true)}`}>
+                {typeof cta.content === "string" ? cta.content : ""}
+              </p>
+            )}
+            <CTAWithTrust trustColor={theme === "bold" ? "text-gray-500" : undefined} />
+          </div>
+        )}
       </Section>
 
       {/* ═══ STICKY MOBILE CTA ═══ */}

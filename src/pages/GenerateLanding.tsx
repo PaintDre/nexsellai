@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, ImagePlus, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { themes, type LandingTheme } from "@/components/landing/themes";
 
 type Product = Tables<"products">;
@@ -31,6 +32,11 @@ const GenerateLanding = () => {
   const [guarantee, setGuarantee] = useState("Garantía de satisfacción de 30 días");
   const [generating, setGenerating] = useState(false);
   const [theme, setTheme] = useState<LandingTheme>("clean");
+  const [autoImages, setAutoImages] = useState(true);
+  const [generationStep, setGenerationStep] = useState<"idle" | "copy" | "images" | "done">("idle");
+  const [progress, setProgress] = useState(0);
+
+  const isPaidPlan = profile?.plan === "starter" || profile?.plan === "pro";
 
   useEffect(() => {
     if (!user || !id) return;
@@ -44,6 +50,37 @@ const GenerateLanding = () => {
   const used = profile?.landings_used || 0;
   const canGenerate = used < limit;
 
+  const generateBannerForSection = async (
+    landingId: string,
+    block: any,
+    productData: Product,
+    allImageUrls: string[]
+  ) => {
+    try {
+      await supabase.functions.invoke("generate-banner", {
+        body: {
+          product: {
+            id: productData.id,
+            name: productData.name,
+            price: productData.price,
+            category: productData.category,
+            description: productData.description,
+            target_audience: productData.target_audience,
+            images: allImageUrls,
+          },
+          templateId: block.type === "hero" ? "hero-producto" : "oferta-directa",
+          outputSize: "1200x628",
+          sectionType: block.type,
+          sectionTitle: block.title || block.type,
+          landingId,
+          blockContent: block.content,
+        },
+      });
+    } catch (err) {
+      console.error(`Error generating banner for ${block.type}:`, err);
+    }
+  };
+
   const handleGenerate = async () => {
     if (!user || !product || !profile) return;
 
@@ -53,15 +90,21 @@ const GenerateLanding = () => {
     }
 
     setGenerating(true);
+    setGenerationStep("copy");
+    setProgress(10);
 
     try {
+      // Step 1: Generate copy
+      setProgress(20);
       const { data, error } = await supabase.functions.invoke("generate-landing", {
         body: { product, mode, intensity, hasOffer, guarantee, plan: profile.plan },
       });
 
       if (error) throw error;
+      setProgress(50);
 
-      const { error: insertError } = await supabase.from("landings").insert({
+      // Step 2: Insert landing
+      const { data: insertedLanding, error: insertError } = await supabase.from("landings").insert({
         user_id: user.id,
         product_id: product.id,
         name: `${product.name} - ${mode.toUpperCase()}`,
@@ -71,23 +114,77 @@ const GenerateLanding = () => {
         guarantee,
         blocks: data.blocks,
         theme,
-      } as any);
+      } as any).select().single();
 
       if (insertError) throw insertError;
+      setProgress(60);
 
-      // Increment landings_used
+      // Step 3: Auto-generate banners if enabled and paid plan
+      if (autoImages && isPaidPlan && insertedLanding) {
+        setGenerationStep("images");
+        setProgress(65);
+
+        // Get product images
+        const allImageUrls: string[] = [];
+        if (product.images && product.images.length > 0) {
+          for (const imgPath of product.images) {
+            if (imgPath.startsWith("http")) {
+              allImageUrls.push(imgPath);
+            } else {
+              const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(imgPath);
+              if (urlData?.publicUrl) allImageUrls.push(urlData.publicUrl);
+            }
+          }
+        }
+
+        // Generate banners for hero and offer/cta sections
+        const blocks = data.blocks as any[];
+        const heroBlock = blocks.find((b: any) => b.type === "hero");
+        const offerBlock = blocks.find((b: any) => b.type === "offer") || blocks.find((b: any) => b.type === "cta");
+
+        const bannerPromises: Promise<void>[] = [];
+        if (heroBlock) {
+          bannerPromises.push(generateBannerForSection(insertedLanding.id, heroBlock, product, allImageUrls));
+        }
+        setProgress(75);
+
+        if (offerBlock && offerBlock.type !== heroBlock?.type) {
+          bannerPromises.push(generateBannerForSection(insertedLanding.id, offerBlock, product, allImageUrls));
+        }
+
+        await Promise.all(bannerPromises);
+        setProgress(90);
+      }
+
+      // Step 4: Increment landings_used
       await supabase.from("profiles").update({ landings_used: used + 1 }).eq("user_id", user.id);
 
+      setProgress(100);
+      setGenerationStep("done");
+
       toast({ title: "¡Landing generada!" });
-      navigate("/landings");
+
+      // Navigate after a brief moment to show completion
+      setTimeout(() => {
+        navigate(`/landings/${insertedLanding?.id || ""}`);
+      }, 800);
     } catch (err: any) {
       toast({ title: "Error al generar", description: err.message, variant: "destructive" });
+      setGenerationStep("idle");
+      setProgress(0);
     } finally {
       setGenerating(false);
     }
   };
 
   if (!product) return null;
+
+  const stepLabels: Record<string, string> = {
+    idle: "",
+    copy: "Paso 1/2 — Generando copy con IA...",
+    images: "Paso 2/2 — Generando imágenes con IA...",
+    done: "¡Listo! Redirigiendo...",
+  };
 
   return (
     <div className="p-6 lg:p-8 max-w-2xl space-y-6">
@@ -138,6 +235,27 @@ const GenerateLanding = () => {
             <p className="text-xs text-muted-foreground">Puedes cambiar el tema después en la vista previa</p>
           </div>
 
+          {/* Auto-generate images toggle */}
+          <div className={`flex items-center justify-between rounded-lg border p-4 ${!isPaidPlan ? 'opacity-60' : ''}`}>
+            <div className="flex items-start gap-3">
+              <ImagePlus className="h-5 w-5 text-primary mt-0.5" />
+              <div>
+                <Label>Incluir imágenes IA</Label>
+                <p className="text-sm text-muted-foreground">
+                  {isPaidPlan
+                    ? "Genera banners automáticos para Hero y Oferta"
+                    : "Disponible en plan Starter o superior"
+                  }
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={autoImages && isPaidPlan}
+              onCheckedChange={setAutoImages}
+              disabled={!isPaidPlan}
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="guarantee">Garantía</Label>
             <Input id="guarantee" value={guarantee} onChange={(e) => setGuarantee(e.target.value)} />
@@ -150,11 +268,31 @@ const GenerateLanding = () => {
             </Badge>
           </div>
 
+          {/* Generation progress */}
+          {generationStep !== "idle" && (
+            <div className="space-y-3 p-4 rounded-lg border bg-muted/50">
+              <div className="flex items-center gap-2">
+                {generationStep === "done" ? (
+                  <Check className="h-4 w-4 text-emerald-500" />
+                ) : (
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                )}
+                <span className="text-sm font-medium">{stepLabels[generationStep]}</span>
+              </div>
+              <Progress value={progress} className="h-2" />
+              {generationStep === "images" && (
+                <p className="text-xs text-muted-foreground">
+                  Generando banners con IA para las secciones principales...
+                </p>
+              )}
+            </div>
+          )}
+
           <Button onClick={handleGenerate} disabled={generating || !canGenerate} className="w-full" size="lg">
             {generating ? (
-              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generando con IA...</>
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generando...</>
             ) : (
-              <><Sparkles className="h-4 w-4 mr-2" /> Generar Landing</>
+              <><Sparkles className="h-4 w-4 mr-2" /> Generar Landing{autoImages && isPaidPlan ? " + Imágenes" : ""}</>
             )}
           </Button>
         </CardContent>
