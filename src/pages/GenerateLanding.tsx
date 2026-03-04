@@ -70,7 +70,8 @@ const GenerateLanding = () => {
         has_offer: hasOffer,
         guarantee,
         blocks: data.blocks,
-      });
+        theme,
+      } as any);
 
       if (insertError) throw insertError;
 

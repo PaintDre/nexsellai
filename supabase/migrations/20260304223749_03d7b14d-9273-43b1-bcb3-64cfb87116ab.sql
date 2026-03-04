@@ -1,0 +1,1 @@
+ALTER TABLE public.landings ADD COLUMN theme text NOT NULL DEFAULT 'clean';

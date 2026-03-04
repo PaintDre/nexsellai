@@ -6,7 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Download, Loader2, FileArchive, FileCode } from "lucide-react";
+import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2 } from "lucide-react";
 import { exportLandingAsHTML, exportLandingAsZip } from "@/lib/exportLanding";
 import LandingRenderer from "@/components/landing/LandingRenderer";
 import { themes, type LandingTheme } from "@/components/landing/themes";
@@ -43,6 +43,7 @@ const LandingView = () => {
         .from("landings").select("*").eq("id", id).eq("user_id", user.id).single();
       if (le || !l) { setError("No se encontró la landing."); setLoading(false); return; }
       setLanding(l);
+      setTheme(((l as any).theme || "clean") as LandingTheme);
       const { data: p } = await supabase
         .from("products").select("*").eq("id", l.product_id).single();
       setProduct(p);
@@ -150,6 +151,11 @@ const LandingView = () => {
             </Select>
             <Badge variant="secondary" className="text-xs hidden sm:inline-flex">{landing.name}</Badge>
             
+            <Button variant="outline" size="sm" asChild>
+              <Link to={`/landings/${landing.id}/preview`}>
+                <Maximize2 className="h-4 w-4 mr-1" /> Vista completa
+              </Link>
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" disabled={exporting}>
