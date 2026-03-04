@@ -6,13 +6,39 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Pencil, Download } from "lucide-react";
+import { FileText, Eye, Download, Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { generateLandingHTML } from "@/lib/exportLanding";
 
 type Landing = Tables<"landings">;
 
 const Landings = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [landings, setLandings] = useState<Landing[]>([]);
+  const [exportingId, setExportingId] = useState<string | null>(null);
+
+  const handleExport = async (landing: Landing) => {
+    setExportingId(landing.id);
+    try {
+      const { data: product } = await supabase.from("products").select("*").eq("id", landing.product_id).single();
+      const html = generateLandingHTML(landing.blocks as any[], product, landing.name);
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${landing.name.replace(/\s+/g, "-").toLowerCase()}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast({ title: "Landing exportada correctamente" });
+    } catch {
+      toast({ title: "Error al exportar", variant: "destructive" });
+    } finally {
+      setExportingId(null);
+    }
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -46,10 +72,10 @@ const Landings = () => {
                 <p className="text-xs text-muted-foreground">{new Date(landing.created_at).toLocaleDateString("es-CL")}</p>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" asChild className="flex-1">
-                    <Link to={`/landings/${landing.id}/edit`}><Pencil className="h-3 w-3 mr-1" /> Editar</Link>
+                    <Link to={`/landings/${landing.id}`}><Eye className="h-3 w-3 mr-1" /> Ver</Link>
                   </Button>
-                  <Button variant="secondary" size="sm" className="flex-1">
-                    <Download className="h-3 w-3 mr-1" /> Exportar
+                  <Button variant="secondary" size="sm" className="flex-1" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
+                    {exportingId === landing.id ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Download className="h-3 w-3 mr-1" />} Exportar
                   </Button>
                 </div>
               </CardContent>

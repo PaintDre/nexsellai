@@ -103,17 +103,6 @@ const GenerateLanding = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label>Modo de escritura</Label>
-            <Select value={mode} onValueChange={setMode}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="aida">AIDA (Atención → Interés → Deseo → Acción)</SelectItem>
-                <SelectItem value="standard">Standard (Secciones clásicas)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
             <Label>Intensidad comercial</Label>
             <Select value={intensity} onValueChange={setIntensity}>
               <SelectTrigger><SelectValue /></SelectTrigger>

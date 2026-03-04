@@ -19,7 +19,6 @@ export const AppSidebar = () => {
     { label: "Productos", icon: Package, href: "/products" },
     { label: "Landings", icon: FileText, href: "/landings" },
     { label: "Planes", icon: CreditCard, href: "/pricing" },
-    { label: "Ajustes", icon: Settings, href: "/settings" },
   ];
 
   if (isAdmin()) {
@@ -68,10 +67,14 @@ export const AppSidebar = () => {
             <span className="text-xs text-sidebar-foreground truncate">{profile.full_name || "Usuario"}</span>
           </div>
         )}
-        <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-sidebar-foreground hover:text-destructive" onClick={signOut}>
-          <LogOut className="h-4 w-4" />
-          Cerrar sesión
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="sm" className="flex-1 justify-start gap-2 text-sidebar-foreground" asChild>
+            <Link to="/settings"><Settings className="h-4 w-4" /> Ajustes</Link>
+          </Button>
+          <Button variant="ghost" size="icon" className="text-sidebar-foreground hover:text-destructive shrink-0" onClick={signOut}>
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </aside>
   );
