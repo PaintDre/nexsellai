@@ -95,15 +95,25 @@ Plan: ${plan}
 
 Never mention plan names inside the landing copy.
 
-${product.category === "saas" ? `## SAAS MARKETING LANDING CONTEXT
+## FEATURE GATING FOR PRODUCT LANDINGS (Context A)
+For ALL product landings (any plan), also include a "microcopy" block with trust signals and checkout notes (e.g., "Pago 100% seguro", "Envío en 24-48h", "Garantía de satisfacción"). This block is always generated regardless of plan.
+
+${product.category === "saas" ? `## SAAS MARKETING LANDING CONTEXT (Context B)
 Generate a landing that SELLS THE APP with these sections:
 1) saas_hero: clear promise + CTA "Probar gratis"
-2) saas_benefits: 3-6 bullets on outcomes
-3) saas_how_it_works: 3 steps
-4) saas_demo: explain free trial with limits
-5) saas_pricing: show 3 plans (Free: 1 landing, Starter: 10, Pro: 100)
+2) saas_benefits: 3-6 bullets on outcomes (más ventas, más rápido, mayor conversión)
+3) saas_how_it_works: 3 steps (sube imagen + prompt → genera landing → exporta al crear cuenta)
+4) saas_demo: explain that the user can try WITHOUT creating an account with FREE limits:
+   - Can generate 1 landing demo without registering
+   - Cannot export or download until account is created
+   - Once account is created, export/download becomes available based on their plan (Free: 1, Starter: 10, Pro: 100)
+5) saas_pricing: show 3 plans with limits clearly:
+   - Free: 1 landing
+   - Starter: 10 landings
+   - Pro: 100 landings
 6) saas_faq
-7) saas_cta: "Crear cuenta y exportar"` : ''}
+7) saas_cta: "Crear cuenta y exportar"
+The SaaS landing must focus on conversion but remain honest, no fake claims.` : ''}
 
 ## Product info
 - Name: ${product.name}
