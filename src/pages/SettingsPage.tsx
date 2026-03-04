@@ -53,30 +53,6 @@ const SettingsPage = () => {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-display">API Key de OpenAI</CardTitle>
-          <CardDescription>Se usa para generar landings con IA. Tu key se guarda encriptada.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="apikey">API Key</Label>
-            <div className="relative">
-              <Input
-                id="apikey"
-                type={showKey ? "text" : "password"}
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="sk-..."
-              />
-              <button type="button" onClick={() => setShowKey(!showKey)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       <Button onClick={handleSave} disabled={saving}>
         <Save className="h-4 w-4 mr-2" /> {saving ? "Guardando..." : "Guardar cambios"}
       </Button>
