@@ -156,6 +156,7 @@ const LandingView = () => {
                 <Maximize2 className="h-4 w-4 mr-1" /> Vista completa
               </Link>
             </Button>
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" disabled={exporting}>
                   {exporting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Download className="h-4 w-4 mr-1" />}
