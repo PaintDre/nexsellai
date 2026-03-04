@@ -6,7 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Package, Plus, Pencil, Sparkles } from "lucide-react";
+import { Package, Plus, Pencil, Sparkles, ImageIcon } from "lucide-react";
 
 type Product = Tables<"products">;
 
@@ -53,12 +53,17 @@ const Products = () => {
                   <Badge variant="secondary" className="capitalize text-xs">{product.category}</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">${product.price.toLocaleString("es-CL")}</p>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" asChild className="flex-1">
-                    <Link to={`/products/${product.id}/edit`}><Pencil className="h-3 w-3 mr-1" /> Editar</Link>
-                  </Button>
-                  <Button size="sm" asChild className="flex-1">
-                    <Link to={`/products/${product.id}/generate`}><Sparkles className="h-3 w-3 mr-1" /> Generar Landing</Link>
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" asChild className="flex-1">
+                      <Link to={`/products/${product.id}/edit`}><Pencil className="h-3 w-3 mr-1" /> Editar</Link>
+                    </Button>
+                    <Button size="sm" asChild className="flex-1">
+                      <Link to={`/products/${product.id}/generate`}><Sparkles className="h-3 w-3 mr-1" /> Landing</Link>
+                    </Button>
+                  </div>
+                  <Button variant="secondary" size="sm" asChild className="w-full">
+                    <Link to={`/products/${product.id}/banner`}><ImageIcon className="h-3 w-3 mr-1" /> Generar Banner</Link>
                   </Button>
                 </div>
               </CardContent>

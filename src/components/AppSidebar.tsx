@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Package, FileText, CreditCard, Settings, LogOut, Zap, Shield, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Package, FileText, CreditCard, Settings, LogOut, Zap, Shield, ShieldCheck, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -18,6 +18,7 @@ export const AppSidebar = () => {
     { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
     { label: "Productos", icon: Package, href: "/products" },
     { label: "Landings", icon: FileText, href: "/landings" },
+    { label: "Banners", icon: ImageIcon, href: "/banners" },
     { label: "Planes", icon: CreditCard, href: "/pricing" },
   ];
 
