@@ -88,29 +88,43 @@ const AdminUsers = () => {
   const saveAllChanges = async () => {
     setSaving(true);
     const headers = await getHeaders();
-    let hasError = false;
+    const errors: string[] = [];
 
     for (const [userId, changes] of Object.entries(pendingChanges)) {
       if (changes.plan) {
-        const res = await fetch(`${baseUrl}/users/${userId}/plan`, {
-          method: "PATCH",
-          headers,
-          body: JSON.stringify({ plan: changes.plan }),
-        });
-        if (!res.ok) hasError = true;
+        try {
+          const res = await fetch(`${baseUrl}/users/${userId}/plan`, {
+            method: "PATCH",
+            headers,
+            body: JSON.stringify({ plan: changes.plan }),
+          });
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            errors.push(body.error || `Error updating plan for ${userId}`);
+          }
+        } catch (e) {
+          errors.push(`Network error updating plan: ${(e as Error).message}`);
+        }
       }
       if (changes.role) {
-        const res = await fetch(`${baseUrl}/users/${userId}/role`, {
-          method: "PATCH",
-          headers,
-          body: JSON.stringify({ role: changes.role }),
-        });
-        if (!res.ok) hasError = true;
+        try {
+          const res = await fetch(`${baseUrl}/users/${userId}/role`, {
+            method: "PATCH",
+            headers,
+            body: JSON.stringify({ role: changes.role }),
+          });
+          if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            errors.push(body.error || `Error updating role for ${userId}`);
+          }
+        } catch (e) {
+          errors.push(`Network error updating role: ${(e as Error).message}`);
+        }
       }
     }
 
-    if (hasError) {
-      toast({ title: "Algunos cambios no se pudieron guardar", variant: "destructive" });
+    if (errors.length > 0) {
+      toast({ title: "Error al guardar", description: errors.join("; "), variant: "destructive" });
     } else {
       toast({ title: "Cambios guardados correctamente" });
     }
