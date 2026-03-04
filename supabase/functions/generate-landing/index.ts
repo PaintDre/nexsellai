@@ -9,22 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { product, mode, intensity, hasOffer, guarantee, plan } = await req.json();
-
-    // Get user's OpenAI key from profile
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No auth header");
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    // Fetch the user's profile to get their API key
-    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !user) throw new Error("Unauthorized");
+    const { product, mode, intensity, hasOffer, guarantee, plan, demo } = await req.json();
 
     const openaiKey = Deno.env.get("NexsellAi");
     if (!openaiKey) {
@@ -34,19 +19,40 @@ serve(async (req) => {
       });
     }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("plan, landings_used")
-      .eq("user_id", user.id)
-      .single();
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Check plan limits
-    const limits: Record<string, number> = { free: 1, starter: 10, pro: 100 };
-    if ((profile.landings_used || 0) >= (limits[profile.plan] || 1)) {
-      return new Response(JSON.stringify({ error: "Landing limit reached" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    let userPlan = plan || "free";
+
+    // If not demo, verify auth and check limits
+    if (!demo) {
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader) throw new Error("No auth header");
+
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+      if (userError || !user) throw new Error("Unauthorized");
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("plan, landings_used")
+        .eq("user_id", user.id)
+        .single();
+
+      const limits: Record<string, number> = { free: 1, starter: 10, pro: 100 };
+      if ((profile.landings_used || 0) >= (limits[profile.plan] || 1)) {
+        return new Response(JSON.stringify({ error: "Landing limit reached" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      userPlan = profile.plan;
+    } else {
+      // Demo mode: force free plan constraints
+      userPlan = "free";
     }
 
     const intensityMap: Record<string, string> = { soft: "low", medium: "medium", hard: "high" };
@@ -89,7 +95,7 @@ ${hasOffer ? 'hasOffer = true: Include an offer with discounted price + anchor p
 ${guarantee ? `Guarantee: "${guarantee}" — include it in a guarantee block.` : 'No guarantee text provided — omit guarantee block.'}
 
 ## PLAN RULES
-Plan: ${plan}
+Plan: ${userPlan}
 - free: 1 landing total, simple copy, NO advanced persuasion extras. Generate exactly 3 blocks: hero (1 hook), benefits, cta.
 - starter: up to 10 landings, improved hooks, basic objections, editable urgency, FAQs. Generate: hero with 3 hooks (pick the best but show the 3 as options), benefits, features, testimonials (basic), objections (basic), faq, urgency, cta.
 - pro: up to 100 landings, full persuasion system. Generate: hero with multiple psychological angles + ad hooks, benefits, features, testimonials, strong objections, offer + urgency (or urgency only), bundles suggestions, comparison vs competitors, microcopy for checkout, CTA variants, short_version for product page.
@@ -124,6 +130,7 @@ The SaaS landing must focus on conversion but remain honest, no fake claims.` : 
 - Description: ${product.description || "N/A"}
 
 Return ONLY valid JSON. No markdown. No explanations.`;
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
