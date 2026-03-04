@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Users, Ban } from "lucide-react";
+import { Users, Ban, ArrowLeft } from "lucide-react";
 
 interface UserRow {
   user_id: string;
@@ -41,6 +42,8 @@ const AdminUsers = () => {
     if (res.ok) {
       const data = await res.json();
       setUsers(data.users || []);
+    } else {
+      toast({ title: "Error al cargar usuarios", variant: "destructive" });
     }
     setLoading(false);
   };
@@ -101,11 +104,16 @@ const AdminUsers = () => {
 
   return (
     <div className="p-6 md:p-10 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold font-display text-foreground flex items-center gap-2">
-          <Users className="h-7 w-7" /> Gestión de Usuarios
-        </h1>
-        <p className="text-muted-foreground mt-1">{users.length} usuarios registrados</p>
+      <div className="flex items-center gap-4">
+        <Button asChild variant="outline" size="sm">
+          <Link to="/admin"><ArrowLeft className="h-4 w-4 mr-1" /> Volver</Link>
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold font-display text-foreground flex items-center gap-2">
+            <Users className="h-7 w-7" /> Gestión de Usuarios
+          </h1>
+          <p className="text-muted-foreground mt-1">{users.length} usuarios registrados</p>
+        </div>
       </div>
 
       <Card>
@@ -128,7 +136,11 @@ const AdminUsers = () => {
                     <td className="p-3">{u.full_name || "—"}</td>
                     <td className="p-3 text-muted-foreground">{u.email}</td>
                     <td className="p-3">
-                      <Select defaultValue={u.plan} onValueChange={(v) => changePlan(u.user_id, v)}>
+                      <Select
+                        key={`plan-${u.user_id}-${u.plan}`}
+                        defaultValue={u.plan}
+                        onValueChange={(v) => changePlan(u.user_id, v)}
+                      >
                         <SelectTrigger className="w-28 h-8">
                           <SelectValue />
                         </SelectTrigger>
@@ -141,7 +153,11 @@ const AdminUsers = () => {
                     </td>
                     <td className="p-3">
                       {isSuperAdmin() ? (
-                        <Select defaultValue={u.roles[0] || "user"} onValueChange={(v) => changeRole(u.user_id, v)}>
+                        <Select
+                          key={`role-${u.user_id}-${u.roles[0]}`}
+                          defaultValue={u.roles[0] || "user"}
+                          onValueChange={(v) => changeRole(u.user_id, v)}
+                        >
                           <SelectTrigger className="w-32 h-8">
                             <SelectValue />
                           </SelectTrigger>
