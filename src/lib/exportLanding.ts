@@ -1,4 +1,5 @@
 import type { LandingTheme } from "@/components/landing/themes";
+import JSZip from "jszip";
 
 interface Block {
   type: string;
@@ -82,7 +83,9 @@ export function generateLandingHTML(
   blocks: Block[],
   product: { name: string; price: number } | null,
   landingName: string,
-  theme: LandingTheme = "clean"
+  theme: LandingTheme = "clean",
+  imageUrl?: string | null,
+  imageLocalPath?: string | null
 ): string {
   const t = themeCSS[theme];
   const getBlock = (type: string) => blocks.find((b) => b.type === type);
@@ -117,13 +120,17 @@ export function generateLandingHTML(
   const sections: string[] = [];
 
   // HERO
+  const heroImgSrc = imageLocalPath || imageUrl;
   if (hero) {
     sections.push(`
       <section style="padding:80px 24px;background:${t.heroBg};color:${t.heroText};">
-        <div style="max-width:1152px;margin:0 auto;">
-          <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,5vw,60px);font-weight:800;line-height:1.1;margin-bottom:20px;">${hero.title || ""}</h1>
-          ${hero.content ? `<p style="font-size:18px;line-height:1.7;max-width:600px;margin-bottom:32px;opacity:0.85;">${typeof hero.content === "string" ? hero.content : ""}</p>` : ""}
-          ${ctaWithTrust}
+        <div style="max-width:1152px;margin:0 auto;${heroImgSrc ? "display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;" : ""}">
+          <div>
+            <h1 style="font-family:'Space Grotesk',sans-serif;font-size:clamp(36px,5vw,60px);font-weight:800;line-height:1.1;margin-bottom:20px;">${hero.title || ""}</h1>
+            ${hero.content ? `<p style="font-size:18px;line-height:1.7;max-width:600px;margin-bottom:32px;opacity:0.85;">${typeof hero.content === "string" ? hero.content : ""}</p>` : ""}
+            ${ctaWithTrust}
+          </div>
+          ${heroImgSrc ? `<div style="text-align:center;"><img src="${heroImgSrc}" alt="${productName}" style="max-height:480px;width:100%;max-width:400px;object-fit:cover;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.15);" /></div>` : ""}
         </div>
       </section>`);
   }
@@ -334,4 +341,77 @@ export function generateLandingHTML(
 ${sections.join("\n")}
 </body>
 </html>`;
+}
+
+/**
+ * Fetch an image URL as a Blob
+ */
+async function fetchImageAsBlob(url: string): Promise<{ blob: Blob; extension: string } | null> {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    const blob = await response.blob();
+    const contentType = response.headers.get("content-type") || "image/jpeg";
+    const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
+    return { blob, extension: ext };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Export landing as a ZIP file containing:
+ * - index.html (with local image references)
+ * - images/ folder with product images
+ */
+export async function exportLandingAsZip(
+  blocks: Block[],
+  product: { name: string; price: number } | null,
+  landingName: string,
+  theme: LandingTheme = "clean",
+  imageUrls: string[] = []
+): Promise<Blob> {
+  const zip = new JSZip();
+  const imgFolder = zip.folder("images")!;
+  
+  let heroImagePath: string | null = null;
+
+  // Download and add images to ZIP
+  for (let i = 0; i < imageUrls.length; i++) {
+    const url = imageUrls[i];
+    const result = await fetchImageAsBlob(url);
+    if (result) {
+      const filename = `product-${i + 1}.${result.extension}`;
+      imgFolder.file(filename, result.blob);
+      if (i === 0) heroImagePath = `images/${filename}`;
+    }
+  }
+
+  // Generate HTML with local image paths
+  const html = generateLandingHTML(
+    blocks,
+    product,
+    landingName,
+    theme,
+    null,
+    heroImagePath
+  );
+  
+  zip.file("index.html", html);
+
+  return zip.generateAsync({ type: "blob" });
+}
+
+/**
+ * Export only the HTML file (no images bundled, uses absolute URLs)
+ */
+export function exportLandingAsHTML(
+  blocks: Block[],
+  product: { name: string; price: number } | null,
+  landingName: string,
+  theme: LandingTheme = "clean",
+  imageUrl?: string | null
+): Blob {
+  const html = generateLandingHTML(blocks, product, landingName, theme, imageUrl);
+  return new Blob([html], { type: "text/html" });
 }
