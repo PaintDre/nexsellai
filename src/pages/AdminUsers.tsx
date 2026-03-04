@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { Users, Ban, ArrowLeft } from "lucide-react";
+import { Users, Ban, ArrowLeft, Save, Loader2 } from "lucide-react";
 
 interface UserRow {
   user_id: string;
@@ -19,9 +19,15 @@ interface UserRow {
   created_at: string;
 }
 
+interface PendingChanges {
+  [userId: string]: { plan?: string; role?: string };
+}
+
 const AdminUsers = () => {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<PendingChanges>({});
   const { toast } = useToast();
   const { isSuperAdmin } = useAuth();
 
@@ -50,34 +56,68 @@ const AdminUsers = () => {
 
   useEffect(() => { fetchUsers(); }, []);
 
-  const changePlan = async (userId: string, plan: string) => {
-    const headers = await getHeaders();
-    const res = await fetch(`${baseUrl}/users/${userId}/plan`, {
-      method: "PATCH",
-      headers,
-      body: JSON.stringify({ plan }),
+  const hasPendingChanges = Object.keys(pendingChanges).length > 0;
+
+  const setLocalPlan = (userId: string, plan: string, originalPlan: string) => {
+    setPendingChanges((prev) => {
+      const existing = prev[userId] || {};
+      const updated = { ...existing, plan };
+      // If same as original, remove that key
+      if (updated.plan === originalPlan) delete updated.plan;
+      if (!updated.plan && !updated.role) {
+        const { [userId]: _, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [userId]: updated };
     });
-    if (res.ok) {
-      toast({ title: "Plan actualizado" });
-      fetchUsers();
-    } else {
-      toast({ title: "Error al cambiar plan", variant: "destructive" });
-    }
   };
 
-  const changeRole = async (userId: string, role: string) => {
-    const headers = await getHeaders();
-    const res = await fetch(`${baseUrl}/users/${userId}/role`, {
-      method: "PATCH",
-      headers,
-      body: JSON.stringify({ role }),
+  const setLocalRole = (userId: string, role: string, originalRole: string) => {
+    setPendingChanges((prev) => {
+      const existing = prev[userId] || {};
+      const updated = { ...existing, role };
+      if (updated.role === originalRole) delete updated.role;
+      if (!updated.plan && !updated.role) {
+        const { [userId]: _, ...rest } = prev;
+        return rest;
+      }
+      return { ...prev, [userId]: updated };
     });
-    if (res.ok) {
-      toast({ title: "Rol actualizado" });
-      fetchUsers();
-    } else {
-      toast({ title: "Error al cambiar rol", variant: "destructive" });
+  };
+
+  const saveAllChanges = async () => {
+    setSaving(true);
+    const headers = await getHeaders();
+    let hasError = false;
+
+    for (const [userId, changes] of Object.entries(pendingChanges)) {
+      if (changes.plan) {
+        const res = await fetch(`${baseUrl}/users/${userId}/plan`, {
+          method: "PATCH",
+          headers,
+          body: JSON.stringify({ plan: changes.plan }),
+        });
+        if (!res.ok) hasError = true;
+      }
+      if (changes.role) {
+        const res = await fetch(`${baseUrl}/users/${userId}/role`, {
+          method: "PATCH",
+          headers,
+          body: JSON.stringify({ role: changes.role }),
+        });
+        if (!res.ok) hasError = true;
+      }
     }
+
+    if (hasError) {
+      toast({ title: "Algunos cambios no se pudieron guardar", variant: "destructive" });
+    } else {
+      toast({ title: "Cambios guardados correctamente" });
+    }
+
+    setPendingChanges({});
+    await fetchUsers();
+    setSaving(false);
   };
 
   const deactivateUser = async (userId: string) => {
@@ -94,6 +134,9 @@ const AdminUsers = () => {
     }
   };
 
+  const getDisplayPlan = (u: UserRow) => pendingChanges[u.user_id]?.plan || u.plan;
+  const getDisplayRole = (u: UserRow) => pendingChanges[u.user_id]?.role || u.roles[0] || "user";
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -104,17 +147,34 @@ const AdminUsers = () => {
 
   return (
     <div className="p-6 md:p-10 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button asChild variant="outline" size="sm">
-          <Link to="/admin"><ArrowLeft className="h-4 w-4 mr-1" /> Volver</Link>
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold font-display text-foreground flex items-center gap-2">
-            <Users className="h-7 w-7" /> Gestión de Usuarios
-          </h1>
-          <p className="text-muted-foreground mt-1">{users.length} usuarios registrados</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin"><ArrowLeft className="h-4 w-4 mr-1" /> Volver</Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold font-display text-foreground flex items-center gap-2">
+              <Users className="h-7 w-7" /> Gestión de Usuarios
+            </h1>
+            <p className="text-muted-foreground mt-1">{users.length} usuarios registrados</p>
+          </div>
         </div>
+        <Button
+          onClick={saveAllChanges}
+          disabled={!hasPendingChanges || saving}
+          size="sm"
+          className="gap-2"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          Guardar cambios
+        </Button>
       </div>
+
+      {hasPendingChanges && (
+        <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-2 text-sm text-primary">
+          Tienes cambios sin guardar en {Object.keys(pendingChanges).length} usuario(s).
+        </div>
+      )}
 
       <Card>
         <CardContent className="p-0">
@@ -131,54 +191,55 @@ const AdminUsers = () => {
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => (
-                  <tr key={u.user_id} className="border-b last:border-0 hover:bg-muted/30">
-                    <td className="p-3">{u.full_name || "—"}</td>
-                    <td className="p-3 text-muted-foreground">{u.email}</td>
-                    <td className="p-3">
-                      <Select
-                        key={`plan-${u.user_id}-${u.plan}`}
-                        defaultValue={u.plan}
-                        onValueChange={(v) => changePlan(u.user_id, v)}
-                      >
-                        <SelectTrigger className="w-28 h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="free">Free</SelectItem>
-                          <SelectItem value="starter">Starter</SelectItem>
-                          <SelectItem value="pro">Pro</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </td>
-                    <td className="p-3">
-                      {isSuperAdmin() ? (
+                {users.map((u) => {
+                  const hasChange = !!pendingChanges[u.user_id];
+                  return (
+                    <tr key={u.user_id} className={`border-b last:border-0 hover:bg-muted/30 ${hasChange ? "bg-primary/5" : ""}`}>
+                      <td className="p-3">{u.full_name || "—"}</td>
+                      <td className="p-3 text-muted-foreground">{u.email}</td>
+                      <td className="p-3">
                         <Select
-                          key={`role-${u.user_id}-${u.roles[0]}`}
-                          defaultValue={u.roles[0] || "user"}
-                          onValueChange={(v) => changeRole(u.user_id, v)}
+                          value={getDisplayPlan(u)}
+                          onValueChange={(v) => setLocalPlan(u.user_id, v, u.plan)}
                         >
-                          <SelectTrigger className="w-32 h-8">
+                          <SelectTrigger className="w-28 h-8">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="user">User</SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="super_admin">Super Admin</SelectItem>
+                            <SelectItem value="free">Free</SelectItem>
+                            <SelectItem value="starter">Starter</SelectItem>
+                            <SelectItem value="pro">Pro</SelectItem>
                           </SelectContent>
                         </Select>
-                      ) : (
-                        <Badge variant="secondary" className="capitalize">{u.roles[0] || "user"}</Badge>
-                      )}
-                    </td>
-                    <td className="p-3 text-right font-medium">{u.landings_used}</td>
-                    <td className="p-3 text-right">
-                      <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => deactivateUser(u.user_id)}>
-                        <Ban className="h-4 w-4" />
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="p-3">
+                        {isSuperAdmin() ? (
+                          <Select
+                            value={getDisplayRole(u)}
+                            onValueChange={(v) => setLocalRole(u.user_id, v, u.roles[0] || "user")}
+                          >
+                            <SelectTrigger className="w-32 h-8">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="user">User</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="super_admin">Super Admin</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Badge variant="secondary" className="capitalize">{u.roles[0] || "user"}</Badge>
+                        )}
+                      </td>
+                      <td className="p-3 text-right font-medium">{u.landings_used}</td>
+                      <td className="p-3 text-right">
+                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => deactivateUser(u.user_id)}>
+                          <Ban className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
