@@ -22,14 +22,7 @@ const AdminDashboard = () => {
     const fetchStats = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-      
-      const res = await supabase.functions.invoke("admin-api", {
-        method: "GET",
-        body: null,
-        headers: { "x-action": "stats" },
-      });
 
-      // Use custom fetch since functions.invoke doesn't support path routing easily
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api/stats`;
       const response = await fetch(url, {
         headers: {
