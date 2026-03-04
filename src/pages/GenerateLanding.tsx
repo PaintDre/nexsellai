@@ -107,7 +107,7 @@ const GenerateLanding = () => {
       const { data: insertedLanding, error: insertError } = await supabase.from("landings").insert({
         user_id: user.id,
         product_id: product.id,
-        name: `${product.name} - ${mode.toUpperCase()}`,
+        name: product.name,
         mode: mode as any,
         intensity: intensity as any,
         has_offer: hasOffer,
