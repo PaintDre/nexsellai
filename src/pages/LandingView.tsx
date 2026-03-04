@@ -151,7 +151,11 @@ const LandingView = () => {
             </Select>
             <Badge variant="secondary" className="text-xs hidden sm:inline-flex">{landing.name}</Badge>
             
-            <DropdownMenu>
+            <Button variant="outline" size="sm" asChild>
+              <Link to={`/landings/${landing.id}/preview`}>
+                <Maximize2 className="h-4 w-4 mr-1" /> Vista completa
+              </Link>
+            </Button>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" disabled={exporting}>
                   {exporting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Download className="h-4 w-4 mr-1" />}
