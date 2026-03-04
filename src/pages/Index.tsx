@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Sparkles, Zap, Code2, ShoppingCart, ArrowRight, Loader2,
   CheckCircle2, Upload, Wand2, Download, ChevronDown, ChevronUp,
+  Monitor, Store, FilePlus, Send,
 } from "lucide-react";
 
 const categories = ["home", "fitness", "beauty", "gadget", "pets"];
