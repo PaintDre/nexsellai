@@ -6,67 +6,77 @@ const corsHeaders = {
 };
 
 const templatePrompts: Record<string, string> = {
-  "oferta-directa": `Create a bold promotional ecommerce sales banner. Requirements:
-- Show the product name in LARGE bold text at the top
-- Include a social proof bar at the very top: "⭐⭐⭐⭐⭐ 4.9/5 MÁS DE 5,000 CLIENTES SATISFECHOS"
-- Show a compelling subtitle describing the main benefit
-- Display crossed-out original price and new discounted price in large text ("Antes $X (tachado) AHORA $Y")
-- List 3 key product benefits with small icons/checkmarks on the left side
-- Place the product image prominently in the center-right area
-- Use warm gradient background (pink/coral tones)
-- Add urgency element like "OFERTA LIMITADA" or "ÚLTIMAS UNIDADES"
-- Professional ecommerce aesthetic, clean typography, high contrast`,
+  "oferta-directa": `Create a professional Shopify-style product sales banner for dropshipping. Requirements:
+- Product name in LARGE bold white text
+- Price displayed EXACTLY as provided — large, clear, and prominent. Do NOT modify, discount, or invent prices
+- Badge: "🚚 ENVÍO GRATIS" prominently visible
+- Badge: "💰 PAGO CONTRAENTREGA" 
+- CTA button: "COMPRAR AHORA" in a contrasting color
+- Urgency strip: "⚡ OFERTA POR TIEMPO LIMITADO" or "🔥 ÚLTIMAS UNIDADES"
+- Warm gradient background (coral/red/orange tones)
+- Product image large and centered
+- Trust badges at bottom: "✅ Entrega 24-48h" "✅ Garantía 30 días"
+- Clean, professional ecommerce aesthetic like a real Shopify store`,
 
-  "hero-producto": `Create a premium product showcase banner for ecommerce. Requirements:
-- Product name in bold, modern typography at the top
-- Social proof badge: "⭐⭐⭐⭐⭐ 4.9/5 +5,000 clientes satisfechos"
-- Clean subtitle with the main value proposition
-- Product image large and centered as the hero element
-- List 2-3 key benefits with icons alongside the product
-- Minimalist gradient background (light to white)
-- Price displayed clearly at the bottom
-- Premium, aspirational feel with lots of white space`,
+  "hero-producto": `Create a premium dark product showcase banner for dropshipping. Requirements:
+- Dark/black gradient background for a luxury feel
+- Product name in bold modern white typography, very prominent
+- Price displayed EXACTLY as provided — large and clear. Do NOT modify or discount the price
+- Product image large, centered, with subtle shadow/glow effect
+- Minimal text: name, price, one tagline about the main benefit
+- Badge: "🚚 Envío Gratis a Todo el País"
+- Small trust indicators at bottom
+- Premium, Apple-style minimalist aesthetic
+- High-end Shopify store feel`,
 
-  "social-proof": `Create a testimonial-focused ecommerce banner. Requirements:
-- Large 5-star rating display at the top: "⭐⭐⭐⭐⭐ 4.9/5"
+  "social-proof": `Create a trust-focused ecommerce banner for dropshipping. Requirements:
+- Large 5-star rating: "⭐⭐⭐⭐⭐ 4.9/5" at the top
 - Counter: "MÁS DE 5,000 CLIENTES SATISFECHOS"
 - Product name in bold
-- 1-2 short customer testimonial quotes overlaid
+- 2 short fake testimonial quotes in quotation marks
 - Product image visible and prominent
-- Trust badges: "Envío Gratis", "Garantía 30 días", "Pago Seguro"
-- Warm, trustworthy colors (amber/gold tones)
-- Professional ecommerce layout`,
+- Price displayed EXACTLY as provided. Do NOT modify or discount the price
+- Trust badges row: "🚚 Envío Gratis" "🔒 Pago Seguro" "↩️ Garantía 30 días" "💰 Contraentrega"
+- Warm amber/gold background tones
+- Professional Shopify store aesthetic`,
 
-  "beneficios-grid": `Create a clean product-in-context lifestyle image for an ecommerce benefits section. Requirements:
-- Show the product being USED in a real-life setting that illustrates its benefits
-- The image should feel aspirational and contextual (e.g., a massage gun on someone's shoulder, a skincare product in a bathroom setup)
-- Do NOT include ANY text, labels, icons, or overlays on the image
-- No price, no product name, no stars, no text of any kind
-- Soft, warm lighting with a clean background
-- Professional product photography aesthetic
-- The product should be the clear focal point in a natural environment
-- High quality, editorial-style composition`,
+  "beneficios-grid": `Create a benefits-focused product banner for dropshipping. Requirements:
+- Product image centered and prominent
+- Product name at the top in bold
+- Price displayed EXACTLY as provided. Do NOT modify or discount the price
+- 4 benefit icons arranged around the product in a grid-like layout:
+  • "🚚 Envío Gratis"
+  • "💰 Pago Contraentrega"  
+  • "🔄 Garantía 30 días"
+  • "⚡ Entrega Rápida"
+- Clean emerald/teal gradient background
+- Each benefit has a small icon and short text
+- Professional, organized layout like a Shopify product page
+- No excessive text, let the visual icons communicate`,
 
-  "flash-sale": `Create an urgent flash sale ecommerce banner. Requirements:
-- "VENTA FLASH" or "OFERTA RELÁMPAGO" in bold neon text
-- Dark/black background with electric accent colors (neon green, cyan, or magenta)
-- Product name in large bold text
-- Massive discount display: "ANTES $X → AHORA $Y" with original price crossed out
-- Large percentage badge: "-30%" or "-50%"
-- Countdown timer aesthetic element
-- Product image with glow effect
-- "ÚLTIMAS UNIDADES" urgency text
-- High energy, high contrast design`,
+  "flash-sale": `Create an urgent flash sale banner for dropshipping. Requirements:
+- "⚡ VENTA FLASH ⚡" in bold neon/electric text at the top
+- Dark/black background with neon accent colors (electric cyan, magenta, or lime green)
+- Product name in large bold text with glow effect
+- Price displayed EXACTLY as provided — VERY LARGE. Do NOT modify or discount the price
+- Countdown timer visual element (e.g., "QUEDAN 02:45:30")
+- "🔥 ÚLTIMAS UNIDADES DISPONIBLES" urgency text
+- Product image with neon glow/border effect
+- Badges: "🚚 ENVÍO GRATIS" "💰 CONTRAENTREGA"
+- High energy, high contrast, electric feel
+- Gaming/tech store aesthetic`,
 
-  "lifestyle": `Create a lifestyle ecommerce banner. Requirements:
-- Product shown in natural use context/environment
-- Warm, aspirational color palette (earth tones, soft pastels)
-- Product name and short tagline in elegant typography
+  "lifestyle": `Create a lifestyle/aspirational product banner for dropshipping. Requirements:
+- Product shown in a warm, aspirational context
+- Soft warm color palette (rose, peach, earth tones)
+- Product name in elegant, modern typography
+- Price displayed EXACTLY as provided. Do NOT modify or discount the price
+- Short aspirational tagline about how the product improves life
 - Social proof: "⭐ 4.9/5 — Miles de clientes felices"
-- 2-3 subtle benefit callouts
-- Price displayed naturally
-- Instagram-worthy aesthetic
-- Aspirational, emotional feel`,
+- Subtle badges: "🚚 Envío Gratis" "💰 Contraentrega"
+- Instagram-worthy aesthetic, lifestyle photography feel
+- Aspirational, emotional connection
+- Like a premium Shopify store's hero image`,
 };
 
 serve(async (req) => {
@@ -96,13 +106,13 @@ serve(async (req) => {
     }
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !user) {
+    const { data: { user: authUser }, error: userError } = await supabase.auth.getUser(token);
+    if (userError || !authUser) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userId = user.id;
+    const userId = authUser.id;
 
     // Check plan
     const { data: profile } = await supabase
@@ -136,7 +146,7 @@ serve(async (req) => {
       });
     }
 
-    // Build prompt - adapt for section-specific or standalone banner
+    // Build prompt
     const templateStyle = templatePrompts[templateId] || templatePrompts["oferta-directa"];
     const [width, height] = (outputSize || "1080x1080").split("x").map(Number);
 
@@ -154,10 +164,7 @@ serve(async (req) => {
       if (sectionTitle) sectionContext += `\nSection title: "${sectionTitle}"`;
     }
 
-    // Calculate offer prices for the prompt
-    const originalPrice = product.price;
-    const discountedPrice = Math.round(originalPrice * 0.7);
-    const discountPercent = 30;
+    const productPrice = product.price;
 
     let benefitsText = "";
     if (blockContent && Array.isArray(blockContent)) {
@@ -166,31 +173,29 @@ serve(async (req) => {
       benefitsText = `\nKey benefits to highlight:\n- ${product.description}`;
     }
 
-    const textPrompt = `Generate a professional ecommerce marketing banner image for the following product:
+    const textPrompt = `Generate a professional ecommerce marketing banner image for dropshipping. This is for a Shopify-style store.
 
 Product Name: ${product.name}
-Original Price: $${originalPrice.toLocaleString("es-CL")} CLP
-Discounted Price: $${discountedPrice.toLocaleString("es-CL")} CLP (${discountPercent}% OFF)
+Product Price: $${productPrice.toLocaleString("es-CL")} CLP
 Category: ${product.category}
 Description: ${product.description || "N/A"}
 Target Audience: ${product.target_audience}
 ${benefitsText}
 
-COPYWRITING STYLE INSTRUCTIONS:
+TEMPLATE STYLE:
 ${templateStyle}
 ${sectionContext}
 
-CRITICAL DESIGN RULES:
-- The banner dimensions are ${width}x${height} pixels
-- ALL text on the banner MUST be in Spanish (Chile)
+CRITICAL RULES:
+- Banner dimensions: ${width}x${height} pixels
+- ALL text MUST be in Spanish
+- Display the EXACT price "$${productPrice.toLocaleString("es-CL")} CLP" — do NOT invent discounts, do NOT show a "before/after" price, do NOT cross out any price
 - Include the product name "${product.name}" prominently
-- Show pricing: "Antes $${originalPrice.toLocaleString("es-CL")}" (crossed out) and "AHORA $${discountedPrice.toLocaleString("es-CL")}"
-- Add social proof element at top: "⭐⭐⭐⭐⭐ 4.9/5  MÁS DE 5,000 CLIENTES SATISFECHOS"
-- Include at least 2-3 key product benefits with small icons
-- Use professional ecommerce aesthetic with clean typography
+- The design must look like a real professional Shopify/ecommerce store banner
+- Include "Envío Gratis" and "Pago Contraentrega" badges where applicable
 - NO watermarks, NO AI notices, NO stock photo text
-- The design should look like a real ecommerce promotion banner from a professional Chilean store
-- Make text readable and high contrast against the background`;
+- Make all text readable with high contrast against the background
+- Professional Chilean ecommerce aesthetic`;
 
     // Build messages with product image if available
     const userContent: any[] = [{ type: "text", text: textPrompt }];
