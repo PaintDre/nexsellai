@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,8 @@ const AdminUsers = () => {
   const [pendingChanges, setPendingChanges] = useState<PendingChanges>({});
   const { toast } = useToast();
   const { isSuperAdmin } = useAuth();
+
+  const isMobile = useIsMobile();
 
   const baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
 
@@ -160,7 +163,7 @@ const AdminUsers = () => {
   }
 
   return (
-    <div className="p-6 md:p-10 space-y-6">
+    <div className="p-4 md:p-6 lg:p-10 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button asChild variant="outline" size="sm">
@@ -190,75 +193,121 @@ const AdminUsers = () => {
         </div>
       )}
 
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-muted/50">
-                  <th className="text-left p-3">Nombre</th>
-                  <th className="text-left p-3">Email</th>
-                  <th className="text-left p-3">Plan</th>
-                  <th className="text-left p-3">Rol</th>
-                  <th className="text-right p-3">Landings</th>
-                  <th className="text-right p-3">Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((u) => {
-                  const hasChange = !!pendingChanges[u.user_id];
-                  return (
-                    <tr key={u.user_id} className={`border-b last:border-0 hover:bg-muted/30 ${hasChange ? "bg-primary/5" : ""}`}>
-                      <td className="p-3">{u.full_name || "—"}</td>
-                      <td className="p-3 text-muted-foreground">{u.email}</td>
-                      <td className="p-3">
-                        <Select
-                          value={getDisplayPlan(u)}
-                          onValueChange={(v) => setLocalPlan(u.user_id, v, u.plan)}
-                        >
-                          <SelectTrigger className="w-28 h-8">
-                            <SelectValue />
-                          </SelectTrigger>
+      {isMobile ? (
+        /* Mobile: Card-based layout */
+        <div className="space-y-3">
+          {users.map((u) => {
+            const hasChange = !!pendingChanges[u.user_id];
+            return (
+              <Card key={u.user_id} className={hasChange ? "border-primary/30 bg-primary/5" : ""}>
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0">
+                      <p className="font-semibold truncate">{u.full_name || "—"}</p>
+                      <p className="text-sm text-muted-foreground truncate">{u.email}</p>
+                    </div>
+                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive shrink-0 min-h-[44px]" onClick={() => deactivateUser(u.user_id)}>
+                      <Ban className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground">Plan</p>
+                      <Select value={getDisplayPlan(u)} onValueChange={(v) => setLocalPlan(u.user_id, v, u.plan)}>
+                        <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="free">Free</SelectItem>
+                          <SelectItem value="starter">Starter</SelectItem>
+                          <SelectItem value="pro">Pro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-xs text-muted-foreground">Rol</p>
+                      {isSuperAdmin() ? (
+                        <Select value={getDisplayRole(u)} onValueChange={(v) => setLocalRole(u.user_id, v, u.roles[0] || "user")}>
+                          <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="free">Free</SelectItem>
-                            <SelectItem value="starter">Starter</SelectItem>
-                            <SelectItem value="pro">Pro</SelectItem>
+                            <SelectItem value="user">User</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="super_admin">Super Admin</SelectItem>
                           </SelectContent>
                         </Select>
-                      </td>
-                      <td className="p-3">
-                        {isSuperAdmin() ? (
-                          <Select
-                            value={getDisplayRole(u)}
-                            onValueChange={(v) => setLocalRole(u.user_id, v, u.roles[0] || "user")}
-                          >
-                            <SelectTrigger className="w-32 h-8">
-                              <SelectValue />
-                            </SelectTrigger>
+                      ) : (
+                        <Badge variant="secondary" className="capitalize mt-1">{u.roles[0] || "user"}</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <span>Landings: <strong className="text-foreground">{u.landings_used}</strong></span>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      ) : (
+        /* Desktop: Table layout */
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/50">
+                    <th className="text-left p-3">Nombre</th>
+                    <th className="text-left p-3">Email</th>
+                    <th className="text-left p-3">Plan</th>
+                    <th className="text-left p-3">Rol</th>
+                    <th className="text-right p-3">Landings</th>
+                    <th className="text-right p-3">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((u) => {
+                    const hasChange = !!pendingChanges[u.user_id];
+                    return (
+                      <tr key={u.user_id} className={`border-b last:border-0 hover:bg-muted/30 ${hasChange ? "bg-primary/5" : ""}`}>
+                        <td className="p-3">{u.full_name || "—"}</td>
+                        <td className="p-3 text-muted-foreground">{u.email}</td>
+                        <td className="p-3">
+                          <Select value={getDisplayPlan(u)} onValueChange={(v) => setLocalPlan(u.user_id, v, u.plan)}>
+                            <SelectTrigger className="w-28 h-8"><SelectValue /></SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="user">User</SelectItem>
-                              <SelectItem value="admin">Admin</SelectItem>
-                              <SelectItem value="super_admin">Super Admin</SelectItem>
+                              <SelectItem value="free">Free</SelectItem>
+                              <SelectItem value="starter">Starter</SelectItem>
+                              <SelectItem value="pro">Pro</SelectItem>
                             </SelectContent>
                           </Select>
-                        ) : (
-                          <Badge variant="secondary" className="capitalize">{u.roles[0] || "user"}</Badge>
-                        )}
-                      </td>
-                      <td className="p-3 text-right font-medium">{u.landings_used}</td>
-                      <td className="p-3 text-right">
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => deactivateUser(u.user_id)}>
-                          <Ban className="h-4 w-4" />
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+                        </td>
+                        <td className="p-3">
+                          {isSuperAdmin() ? (
+                            <Select value={getDisplayRole(u)} onValueChange={(v) => setLocalRole(u.user_id, v, u.roles[0] || "user")}>
+                              <SelectTrigger className="w-32 h-8"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="user">User</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="super_admin">Super Admin</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Badge variant="secondary" className="capitalize">{u.roles[0] || "user"}</Badge>
+                          )}
+                        </td>
+                        <td className="p-3 text-right font-medium">{u.landings_used}</td>
+                        <td className="p-3 text-right">
+                          <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => deactivateUser(u.user_id)}>
+                            <Ban className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

@@ -194,7 +194,7 @@ const GenerateLanding = () => {
   };
 
   return (
-    <div className="p-6 lg:p-8 max-w-2xl space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 max-w-2xl space-y-6">
       <Button variant="ghost" onClick={() => navigate(-1)}>
         <ArrowLeft className="h-4 w-4 mr-2" /> Volver
       </Button>
@@ -300,7 +300,7 @@ const GenerateLanding = () => {
             </div>
           )}
 
-          <Button onClick={handleGenerate} disabled={generating || !canGenerate} className="w-full" size="lg">
+          <Button onClick={handleGenerate} disabled={generating || !canGenerate} className="w-full min-h-[44px]" size="lg">
             {generating ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generando...</>
             ) : (

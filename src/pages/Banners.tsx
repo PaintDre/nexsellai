@@ -225,13 +225,13 @@ const Banners = () => {
           {new Date(banner.created_at).toLocaleDateString("es-CL")}
         </p>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1" onClick={() => setPreviewIndex(idx)}>
+          <Button variant="outline" size="sm" className="flex-1 min-h-[44px]" onClick={() => setPreviewIndex(idx)}>
             <Eye className="h-3 w-3 mr-1" /> Ver
           </Button>
-          <Button variant="outline" size="sm" className="flex-1" onClick={() => handleDownload(banner)}>
+          <Button variant="outline" size="sm" className="flex-1 min-h-[44px]" onClick={() => handleDownload(banner)}>
             <Download className="h-3 w-3 mr-1" /> Bajar
           </Button>
-          <Button variant="ghost" size="icon" className="text-destructive shrink-0" onClick={() => setDeleteTarget(banner.id)}>
+          <Button variant="ghost" size="icon" className="text-destructive shrink-0 min-h-[44px]" onClick={() => setDeleteTarget(banner.id)}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -298,7 +298,7 @@ const Banners = () => {
               ) : (
                 <>
                   <Select value={filterTemplate} onValueChange={setFilterTemplate}>
-                    <SelectTrigger className="w-[150px] h-8 text-xs">
+                    <SelectTrigger className="w-full sm:w-[150px] h-10 sm:h-8 text-xs">
                       <Filter className="h-3 w-3 mr-1" />
                       <SelectValue placeholder="Plantilla" />
                     </SelectTrigger>
@@ -310,7 +310,7 @@ const Banners = () => {
                     </SelectContent>
                   </Select>
                   <Select value={filterSize} onValueChange={setFilterSize}>
-                    <SelectTrigger className="w-[130px] h-8 text-xs">
+                    <SelectTrigger className="w-full sm:w-[130px] h-10 sm:h-8 text-xs">
                       <SelectValue placeholder="Tamaño" />
                     </SelectTrigger>
                     <SelectContent>

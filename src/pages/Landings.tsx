@@ -219,25 +219,28 @@ const Landings = () => {
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground">{new Date(landing.created_at).toLocaleDateString("es-CL")}</p>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" asChild className="flex-1 text-xs">
-                        <Link to={`/landings/${landing.id}`}><Eye className="h-3 w-3 mr-1" /> Editor</Link>
-                      </Button>
-                      <Button variant="default" size="sm" asChild className="flex-1 text-xs">
-                        <Link to={`/landings/${landing.id}/preview`}><Maximize2 className="h-3 w-3 mr-1" /> Preview</Link>
-                      </Button>
-                      <Button variant="secondary" size="sm" className="text-xs" onClick={() => handleDuplicate(landing)}>
-                        <Copy className="h-3 w-3" />
-                      </Button>
-                      <Button variant="secondary" size="sm" className="text-xs" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
-                        {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="destructive" size="sm" className="text-xs" disabled={deletingId === landing.id}>
-                            {deletingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
-                          </Button>
-                        </AlertDialogTrigger>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" asChild className="flex-1 text-xs min-h-[44px]">
+                          <Link to={`/landings/${landing.id}`}><Eye className="h-3 w-3 mr-1" /> Editor</Link>
+                        </Button>
+                        <Button variant="default" size="sm" asChild className="flex-1 text-xs min-h-[44px]">
+                          <Link to={`/landings/${landing.id}/preview`}><Maximize2 className="h-3 w-3 mr-1" /> Preview</Link>
+                        </Button>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="secondary" size="sm" className="text-xs flex-1 min-h-[44px]" onClick={() => handleDuplicate(landing)}>
+                          <Copy className="h-3 w-3 mr-1" /> Duplicar
+                        </Button>
+                        <Button variant="secondary" size="sm" className="text-xs flex-1 min-h-[44px]" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
+                          {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Download className="h-3 w-3 mr-1" /> Exportar</>}
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive" size="sm" className="text-xs min-h-[44px]" disabled={deletingId === landing.id}>
+                              {deletingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+                            </Button>
+                          </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>¿Eliminar landing?</AlertDialogTitle>
@@ -251,6 +254,7 @@ const Landings = () => {
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
+                      </div>
                     </div>
                 </CardContent>
               </Card>
