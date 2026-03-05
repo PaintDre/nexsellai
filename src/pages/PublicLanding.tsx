@@ -30,32 +30,68 @@ const PublicLanding = () => {
 
       setLanding(l);
 
-      // Set meta tags
-      document.title = (l as any).name || "Landing Page";
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) metaDesc.setAttribute("content", `${(l as any).name} - Landing Page`);
-
-      // OG tags
-      const setMeta = (property: string, content: string) => {
-        let el = document.querySelector(`meta[property="${property}"]`);
-        if (!el) {
-          el = document.createElement("meta");
-          el.setAttribute("property", property);
-          document.head.appendChild(el);
-        }
-        el.setAttribute("content", content);
-      };
-      setMeta("og:title", (l as any).name);
-      setMeta("og:type", "website");
-      setMeta("og:url", window.location.href);
-
-      // Load product for rendering
+      // Load product for OG image
       const { data: p } = await supabase
         .from("products")
         .select("*")
         .eq("id", (l as any).product_id)
         .single();
       setProduct(p);
+
+      // Build OG image from product
+      let ogImage = "";
+      if (p?.images?.[0]) {
+        ogImage = p.images[0].startsWith("http")
+          ? p.images[0]
+          : supabase.storage.from("product-images").getPublicUrl(p.images[0]).data?.publicUrl || "";
+      }
+
+      // Extract hero content for description
+      const heroBlock = ((l as any).blocks as any[])?.find((b: any) => b.type === "hero");
+      const description = typeof heroBlock?.content === "string"
+        ? heroBlock.content.slice(0, 160)
+        : p?.description?.slice(0, 160) || `${(l as any).name} - Landing Page`;
+
+      // Set document title
+      document.title = `${(l as any).name} | ${p?.name || "Landing Page"}`;
+
+      // Helper to set/create meta tags
+      const setMeta = (attr: string, key: string, content: string) => {
+        let el = document.querySelector(`meta[${attr}="${key}"]`);
+        if (!el) {
+          el = document.createElement("meta");
+          el.setAttribute(attr, key);
+          document.head.appendChild(el);
+        }
+        el.setAttribute("content", content);
+      };
+
+      // Standard meta
+      setMeta("name", "description", description);
+      setMeta("name", "robots", "index, follow");
+
+      // Open Graph
+      setMeta("property", "og:title", (l as any).name);
+      setMeta("property", "og:description", description);
+      setMeta("property", "og:type", "website");
+      setMeta("property", "og:url", window.location.href);
+      if (ogImage) setMeta("property", "og:image", ogImage);
+      setMeta("property", "og:site_name", (l as any).name);
+
+      // Twitter Card
+      setMeta("name", "twitter:card", ogImage ? "summary_large_image" : "summary");
+      setMeta("name", "twitter:title", (l as any).name);
+      setMeta("name", "twitter:description", description);
+      if (ogImage) setMeta("name", "twitter:image", ogImage);
+
+      // Canonical URL
+      let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+      if (!canonical) {
+        canonical = document.createElement("link");
+        canonical.setAttribute("rel", "canonical");
+        document.head.appendChild(canonical);
+      }
+      canonical.setAttribute("href", window.location.href);
 
       // Track view
       await supabase.from("landing_views" as any).insert({
