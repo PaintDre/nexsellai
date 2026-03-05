@@ -710,4 +710,4 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
   );
 };
 
-export default LandingRenderer;
+export default memo(LandingRenderer);

@@ -48,6 +48,41 @@ const Landings = () => {
     }
   };
 
+  const handleDuplicate = useCallback(async (landing: LandingWithProduct) => {
+    if (!user) return;
+    try {
+      const { error: insertError } = await supabase
+        .from("landings")
+        .insert({
+          user_id: user.id,
+          product_id: landing.product_id,
+          name: `${landing.name} (copia)`,
+          blocks: landing.blocks,
+          mode: landing.mode,
+          intensity: landing.intensity,
+          theme: (landing as any).theme || "clean",
+          has_offer: landing.has_offer,
+          guarantee: landing.guarantee,
+        });
+      if (insertError) throw insertError;
+      toast({ title: "Landing duplicada" });
+      // Reload
+      const { data: landingsData } = await supabase
+        .from("landings")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (landingsData) {
+        const productIds = [...new Set(landingsData.map(l => l.product_id))];
+        const { data: products } = await supabase.from("products").select("*").in("id", productIds);
+        const productMap = new Map((products || []).map(p => [p.id, p]));
+        setLandings(landingsData.map(l => ({ ...l, product: productMap.get(l.product_id) || null })));
+      }
+    } catch (err: any) {
+      toast({ title: "Error al duplicar", description: err.message, variant: "destructive" });
+    }
+  }, [user, toast]);
+
   useEffect(() => {
     if (!user) return;
     const load = async () => {
