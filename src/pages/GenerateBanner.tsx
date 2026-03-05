@@ -12,8 +12,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const BANNER_LIMITS: Record<string, number> = { free: 2, starter: 30, pro: 150 };
 
 type Product = Tables<"products">;
 
@@ -57,8 +60,26 @@ const GenerateBanner = () => {
   const [loading, setLoading] = useState(false);
   const [generatedBanners, setGeneratedBanners] = useState<GeneratedBanner[]>([]);
   const [previewBanner, setPreviewBanner] = useState<GeneratedBanner | null>(null);
+  const [bannersUsed, setBannersUsed] = useState(0);
 
-  const isPaidPlan = profile?.plan === "starter" || profile?.plan === "pro";
+  const plan = profile?.plan || "free";
+  const bannerLimit = BANNER_LIMITS[plan] || 2;
+
+  // Calculate effective usage with monthly reset
+  useEffect(() => {
+    if (!profile) return;
+    const resetAt = profile.banners_reset_at ? new Date(profile.banners_reset_at) : null;
+    const now = new Date();
+    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+    if (!resetAt || (now.getTime() - resetAt.getTime()) >= thirtyDaysMs) {
+      setBannersUsed(0);
+    } else {
+      setBannersUsed(profile.banners_used || 0);
+    }
+  }, [profile]);
+
+  const bannersRemaining = Math.max(0, bannerLimit - bannersUsed);
+  const hasReachedLimit = bannersRemaining <= 0;
 
   useEffect(() => {
     if (!user || !id) return;
@@ -81,7 +102,7 @@ const GenerateBanner = () => {
   };
 
   const handleGenerate = async () => {
-    if (!product || !isPaidPlan) return;
+    if (!product || hasReachedLimit) return;
     setLoading(true);
     setGeneratedBanners([]);
 
@@ -129,6 +150,7 @@ const GenerateBanner = () => {
       const results = await Promise.all(calls);
       results.sort((a, b) => a.sequencePosition - b.sequencePosition);
       setGeneratedBanners(results);
+      setBannersUsed(prev => prev + results.length);
       toast({
         title: `¡${results.length} banners generados!`,
         description: "Tu secuencia de venta está lista.",
@@ -180,16 +202,19 @@ const GenerateBanner = () => {
         </div>
       </div>
 
-      {!isPaidPlan ? (
-        <Card className="border-dashed border-2 border-primary/30">
+      {hasReachedLimit ? (
+        <Card className="border-dashed border-2 border-destructive/30">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <Lock className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Función exclusiva para planes Starter y Pro</h3>
+            <h3 className="text-lg font-semibold mb-2">Has alcanzado el límite de banners de tu plan</h3>
+            <p className="text-muted-foreground mb-2 max-w-md">
+              Has usado {bannersUsed} de {bannerLimit} banners este mes.
+            </p>
             <p className="text-muted-foreground mb-6 max-w-md">
-              Genera banners profesionales con IA para tus campañas publicitarias.
+              Actualiza tu plan para seguir generando banners.
             </p>
             <Button asChild>
-              <Link to="/pricing">Ver planes</Link>
+              <Link to="/pricing">Actualizar plan</Link>
             </Button>
           </CardContent>
         </Card>
@@ -374,10 +399,22 @@ const GenerateBanner = () => {
                 </CardContent>
               </Card>
 
+              {/* Usage indicator */}
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Banners usados este mes</span>
+                  <span className="font-semibold">{bannersUsed} / {bannerLimit}</span>
+                </div>
+                <Progress value={(bannersUsed / bannerLimit) * 100} className="h-2" />
+                <p className="text-xs text-muted-foreground">
+                  {bannersRemaining} banners restantes · Plan {plan}
+                </p>
+              </div>
+
               {generatedBanners.length === 0 && (
                 <Button
                   onClick={handleGenerate}
-                  disabled={loading}
+                  disabled={loading || sequence.length > bannersRemaining}
                   className="w-full h-12 text-base font-semibold"
                   size="lg"
                 >
@@ -385,6 +422,11 @@ const GenerateBanner = () => {
                     <>
                       <Loader2 className="h-5 w-5 animate-spin mr-2" />
                       Generando {sequence.length} banners...
+                    </>
+                  ) : sequence.length > bannersRemaining ? (
+                    <>
+                      <Lock className="h-5 w-5 mr-2" />
+                      No tienes suficientes banners ({bannersRemaining} restantes)
                     </>
                   ) : (
                     <>

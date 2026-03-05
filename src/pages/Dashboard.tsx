@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, FileText, Zap, Eye, History, Plus } from "lucide-react";
+import { Package, FileText, Zap, Eye, History, Plus, Image } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
@@ -13,6 +13,7 @@ type Product = Tables<"products">;
 type Landing = Tables<"landings">;
 
 const planLimits: Record<string, number> = { free: 1, starter: 10, pro: 100 };
+const bannerLimits: Record<string, number> = { free: 2, starter: 30, pro: 150 };
 
 interface RecentVersion {
   id: string;
@@ -69,6 +70,14 @@ const Dashboard = () => {
   const used = profile?.landings_used || 0;
   const usagePercent = Math.min((used / limit) * 100, 100);
 
+  // Banner usage with monthly reset
+  const bannerLimit = bannerLimits[profile?.plan || "free"];
+  const bannerResetAt = profile?.banners_reset_at ? new Date(profile.banners_reset_at) : null;
+  const now = new Date();
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+  const bannersUsed = (!bannerResetAt || (now.getTime() - bannerResetAt.getTime()) >= thirtyDaysMs) ? 0 : (profile?.banners_used || 0);
+  const bannerUsagePercent = Math.min((bannersUsed / bannerLimit) * 100, 100);
+
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-8">
       <div className="flex items-center justify-between">
@@ -108,11 +117,14 @@ const Dashboard = () => {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Versiones Guardadas</CardTitle>
-            <History className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Banners Usados</CardTitle>
+            <Image className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold font-display">{versionsCount}</div>
+            <div className="text-3xl font-bold font-display">
+              {bannersUsed} <span className="text-lg text-muted-foreground font-normal">/ {bannerLimit}</span>
+            </div>
+            <Progress value={bannerUsagePercent} className="h-2 mt-2" />
           </CardContent>
         </Card>
         <Card>
