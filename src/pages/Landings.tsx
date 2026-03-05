@@ -158,14 +158,14 @@ const Landings = () => {
 
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 flex items-center justify-center min-h-[50vh]">
+      <div className="p-4 md:p-6 lg:p-8 flex items-center justify-center min-h-[50vh]">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
       <h1 className="text-3xl font-bold font-display tracking-tight">Mis Landings</h1>
 
       {landings.length === 0 ? (
@@ -177,7 +177,7 @@ const Landings = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {landings.map((landing) => {
             const hero = getHeroBlock(landing.blocks);
             const image = getProductImage(landing.product);
