@@ -37,15 +37,15 @@ const templatePrompts: Record<string, string> = {
 - Warm, trustworthy colors (amber/gold tones)
 - Professional ecommerce layout`,
 
-  "beneficios-grid": `Create a benefits-focused ecommerce banner. Requirements:
-- Product name at the top in bold
-- Social proof: "⭐⭐⭐⭐⭐ +5,000 clientes satisfechos"
-- Product image in the center
-- 3-4 benefit callouts arranged around the product with small icons
-- Each benefit has an icon and 1-2 line description
-- Clean layout with modern flat design
-- Gradient background
-- Price displayed at the bottom with CTA text`,
+  "beneficios-grid": `Create a clean product-in-context lifestyle image for an ecommerce benefits section. Requirements:
+- Show the product being USED in a real-life setting that illustrates its benefits
+- The image should feel aspirational and contextual (e.g., a massage gun on someone's shoulder, a skincare product in a bathroom setup)
+- Do NOT include ANY text, labels, icons, or overlays on the image
+- No price, no product name, no stars, no text of any kind
+- Soft, warm lighting with a clean background
+- Professional product photography aesthetic
+- The product should be the clear focal point in a natural environment
+- High quality, editorial-style composition`,
 
   "flash-sale": `Create an urgent flash sale ecommerce banner. Requirements:
 - "VENTA FLASH" or "OFERTA RELÁMPAGO" in bold neon text

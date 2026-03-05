@@ -178,22 +178,40 @@ const Index = () => {
         </div>
       </section>
 
-      {/* How it works */}
+      {/* How it works - 4 steps */}
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold font-display mb-12">Cómo funciona</h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">Cómo funciona</h2>
+          <p className="text-muted-foreground mb-12 max-w-xl mx-auto">De producto a landing page lista para vender en 4 pasos simples</p>
+          <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto relative">
             {[
-              { icon: Upload, step: "1", title: "Describe tu producto", desc: "Agrega nombre, categoría, precio y público objetivo." },
-              { icon: Wand2, step: "2", title: "La IA genera tu landing", desc: "Nuestro motor crea bloques de contenido persuasivo optimizado." },
-              { icon: Download, step: "3", title: "Exporta y publica", desc: "Descarga tu landing lista para usar en tu tienda." },
-            ].map(({ icon: Icon, step, title, desc }) => (
-              <div key={step} className="relative">
-                <div className="h-16 w-16 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4 text-2xl font-display font-bold">
+              { icon: Upload, step: "1", title: "Sube tu producto", desc: "Agrega fotos, nombre, precio y descripción de tu producto." },
+              { icon: Wand2, step: "2", title: "La IA lo analiza", desc: "Nuestro motor entiende tu producto, audiencia y categoría." },
+              { icon: ImagePlus, step: "3", title: "Genera todo", desc: "Landing completa con copy persuasivo, banners e imágenes IA.", badges: ["Landing", "Banners", "Secciones"] },
+              { icon: Download, step: "4", title: "Exporta y publica", desc: "Descarga HTML listo para Shopify u otra plataforma." },
+            ].map(({ icon: Icon, step, title, desc, badges }, idx) => (
+              <div key={step} className="relative flex flex-col items-center">
+                {/* Connector line */}
+                {idx < 3 && (
+                  <div className="hidden md:block absolute top-8 left-[calc(50%+2rem)] w-[calc(100%-4rem)] h-0.5 bg-border z-0">
+                    <ArrowRight className="absolute -right-2 -top-[7px] h-4 w-4 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="h-16 w-16 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center mb-4 text-2xl font-display font-bold relative z-10">
                   {step}
                 </div>
+                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3">
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
                 <h3 className="font-display font-semibold text-lg mb-2">{title}</h3>
-                <p className="text-muted-foreground text-sm">{desc}</p>
+                <p className="text-muted-foreground text-sm mb-3">{desc}</p>
+                {badges && (
+                  <div className="flex flex-wrap gap-1.5 justify-center">
+                    {badges.map((b) => (
+                      <Badge key={b} variant="secondary" className="text-xs">{b}</Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -327,6 +345,32 @@ const Index = () => {
                 </form>
               </CardContent>
             </Card>
+        </div>
+
+        {/* Example gallery */}
+        <div className="mt-16 max-w-4xl mx-auto">
+          <h3 className="text-xl font-display font-bold text-center mb-6">Ejemplos de landings generadas</h3>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {[
+              { name: "Masajeador Cervical Pro", cat: "Fitness", gradient: "from-primary/20 to-primary/5" },
+              { name: "Sérum Vitamina C", cat: "Beauty", gradient: "from-accent/20 to-accent/5" },
+              { name: "Cama Ortopédica Mascota", cat: "Pets", gradient: "from-secondary to-muted" },
+            ].map((ex) => (
+              <Card key={ex.name} className="overflow-hidden group hover:shadow-md transition-shadow">
+                <div className={`h-32 bg-gradient-to-br ${ex.gradient} flex items-center justify-center`}>
+                  <div className="text-center">
+                    <Sparkles className="h-8 w-8 text-primary/40 mx-auto mb-2" />
+                    <Badge variant="outline" className="text-xs">Vista previa</Badge>
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <p className="font-medium text-sm">{ex.name}</p>
+                  <p className="text-xs text-muted-foreground">{ex.cat}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
         </div>
       </section>
 
