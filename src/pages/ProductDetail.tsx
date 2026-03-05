@@ -38,7 +38,7 @@ const ProductDetail = () => {
   if (!product) return null;
 
   return (
-    <div className="p-6 lg:p-8 max-w-4xl space-y-8">
+    <div className="p-4 md:p-6 lg:p-8 max-w-4xl space-y-8">
       <Button variant="ghost" onClick={() => navigate("/products")} className="mb-2">
         <ArrowLeft className="h-4 w-4 mr-2" /> Productos
       </Button>
@@ -125,19 +125,19 @@ const ProductDetail = () => {
           <div className="space-y-3">
             {landings.map((landing) => (
               <Card key={landing.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="flex items-center justify-between p-4">
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <div>
-                      <h3 className="font-semibold text-sm">{landing.name}</h3>
+                <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <FileText className="h-5 w-5 text-primary shrink-0" />
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-sm truncate">{landing.name}</h3>
                       <p className="text-xs text-muted-foreground">
                         {new Date(landing.created_at).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" })}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <Badge variant="secondary" className="capitalize text-xs">{landing.theme}</Badge>
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="sm" asChild className="min-h-[44px] sm:min-h-0">
                       <Link to={`/landings/${landing.id}/preview`}>
                         <Eye className="h-3 w-3 mr-1" /> Ver
                       </Link>

@@ -174,7 +174,7 @@ const GenerateBanner = () => {
   const sequence = getSequence();
 
   return (
-    <div className="p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
@@ -242,7 +242,7 @@ const GenerateBanner = () => {
                 <CardTitle className="text-lg">Describe tu producto</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   {product.images[0] && (
                     <div className="w-24 h-24 rounded-lg bg-muted overflow-hidden flex-shrink-0">
                       <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
@@ -288,7 +288,7 @@ const GenerateBanner = () => {
                   <p className="text-sm text-muted-foreground">
                     Se generará una secuencia de venta automática con 2 variaciones por etapa.
                   </p>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {bannerQuantityOptions.map((opt) => (
                       <button
                         key={opt.value}
@@ -482,6 +482,7 @@ const GenerateBanner = () => {
                 variant="outline"
                 onClick={() => setStep((s) => Math.max(0, s - 1))}
                 disabled={step === 0}
+                className="min-h-[44px]"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" /> Anterior
               </Button>
@@ -489,6 +490,7 @@ const GenerateBanner = () => {
                 <Button
                   onClick={() => setStep((s) => s + 1)}
                   disabled={!canGoNext()}
+                  className="min-h-[44px]"
                 >
                   Siguiente <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>

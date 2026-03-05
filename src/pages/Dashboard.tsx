@@ -146,21 +146,21 @@ const Dashboard = () => {
           <div className="space-y-3">
             {landings.slice(0, 10).map((landing) => (
               <Card key={landing.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="flex items-center justify-between p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4">
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
                       <FileText className="h-5 w-5 text-primary" />
                     </div>
-                    <div>
-                      <h3 className="font-semibold">{landing.name}</h3>
+                    <div className="min-w-0">
+                      <h3 className="font-semibold truncate">{landing.name}</h3>
                       <p className="text-sm text-muted-foreground">
                         {new Date(landing.created_at).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" })}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 shrink-0">
                     <Badge variant="secondary" className="capitalize text-xs">{landing.theme}</Badge>
-                    <Button variant="outline" size="sm" asChild>
+                    <Button variant="outline" size="sm" asChild className="min-h-[44px] sm:min-h-0">
                       <Link to={`/landings/${landing.id}/preview`}>
                         <Eye className="h-3 w-3 mr-1" /> Ver
                       </Link>
