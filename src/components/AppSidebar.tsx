@@ -37,8 +37,8 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
   return (
     <div className="flex h-full flex-col">
       <div className={cn("flex items-center gap-2 py-5", collapsed ? "justify-center px-2" : "px-6")}>
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary shrink-0">
-          <Zap className="h-5 w-5 text-sidebar-primary-foreground" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg shrink-0 overflow-hidden">
+          <img src="/logo-ns.png" alt="Nexsell" className="h-9 w-9 object-contain" />
         </div>
         {!collapsed && (
           <span className="text-xl font-bold font-display tracking-tight text-sidebar-primary-foreground">Nexsell</span>
