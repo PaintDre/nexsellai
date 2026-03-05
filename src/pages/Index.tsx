@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import {
   Sparkles, Zap, Code2, ShoppingCart, ArrowRight, Loader2,
   CheckCircle2, Upload, Wand2, Download, ChevronDown, ChevronUp,
@@ -56,9 +57,9 @@ const steps = [
 ];
 
 const plans = [
-  { name: "Free", price: 0, landings: "1 landing", features: ["1 hook de venta", "2 banners / mes", "Preview de landing", "Exportar HTML básico"], popular: false },
-  { name: "Starter", price: 14990, landings: "10 landings / mes", features: ["3 hooks por producto", "30 banners / mes", "Imágenes IA en landings", "Objeciones y urgencia", "FAQs editables", "Exportar HTML + CSS"], popular: true },
-  { name: "Pro", price: 34990, landings: "100 landings / mes", features: ["Ángulos psicológicos ilimitados", "150 banners / mes", "Hooks optimizados para ads", "Variantes de CTA", "Bundles y comparativas", "Microcopys de checkout", "Exportar ZIP completo"], popular: false },
+  { name: "Free", monthlyPrice: 0, annualPrice: 0, landings: "1 landing", features: ["1 hook de venta", "2 banners / mes", "Preview de landing", "Exportar HTML básico"], popular: false },
+  { name: "Starter", monthlyPrice: 14990, annualPrice: 149900, landings: "10 landings / mes", features: ["3 hooks por producto", "30 banners / mes", "Imágenes IA en landings", "Objeciones y urgencia", "FAQs editables", "Exportar HTML + CSS"], popular: true },
+  { name: "Pro", monthlyPrice: 34990, annualPrice: 349900, landings: "100 landings / mes", features: ["Ángulos psicológicos ilimitados", "150 banners / mes", "Hooks optimizados para ads", "Variantes de CTA", "Bundles y comparativas", "Microcopys de checkout", "Exportar ZIP completo"], popular: false },
 ];
 
 const Index = () => {
@@ -72,6 +73,7 @@ const Index = () => {
   const [demoAudience, setDemoAudience] = useState("");
   const [generating, setGenerating] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
   const [demoImage, setDemoImage] = useState<File | null>(null);
   const [demoImagePreview, setDemoImagePreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
@@ -438,11 +440,30 @@ const Index = () => {
       <section id="pricing" className="py-20 lg:py-28">
         <div className="container mx-auto px-4 max-w-6xl">
           <h2 className="text-3xl md:text-4xl font-bold font-display text-center mb-4">Planes y Precios</h2>
-          <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-14">
+          <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-8">
             Elige el plan que mejor se adapte a tu negocio
           </p>
+          <div className="flex justify-center mb-10">
+            <div className="inline-flex items-center gap-3 bg-muted rounded-lg p-1">
+              <button
+                className={cn("px-4 py-2 rounded-md text-sm font-medium transition-colors", billingPeriod === "monthly" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")}
+                onClick={() => setBillingPeriod("monthly")}
+              >
+                Mensual
+              </button>
+              <button
+                className={cn("px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2", billingPeriod === "annual" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")}
+                onClick={() => setBillingPeriod("annual")}
+              >
+                Anual <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">-2 meses</Badge>
+              </button>
+            </div>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {plans.map((plan) => (
+            {plans.map((plan) => {
+              const price = billingPeriod === "annual" ? plan.annualPrice : plan.monthlyPrice;
+              const monthlyEq = billingPeriod === "annual" && plan.annualPrice > 0 ? Math.round(plan.annualPrice / 12) : null;
+              return (
               <Card key={plan.name} className={plan.popular ? "border-primary shadow-lg relative" : ""}>
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -452,12 +473,15 @@ const Index = () => {
                 <CardContent className="pt-8 pb-6 px-6 text-center space-y-4">
                   <h3 className="font-display font-bold text-xl">{plan.name}</h3>
                   <div>
-                    {plan.price === 0 ? (
+                    {price === 0 ? (
                       <span className="text-4xl font-bold font-display">Gratis</span>
                     ) : (
                       <>
-                        <span className="text-4xl font-bold font-display">${plan.price.toLocaleString("es-CL")}</span>
-                        <span className="text-muted-foreground">/mes</span>
+                        <span className="text-4xl font-bold font-display">${price.toLocaleString("es-CL")}</span>
+                        <span className="text-muted-foreground">/{billingPeriod === "annual" ? "año" : "mes"}</span>
+                        {monthlyEq && (
+                          <p className="text-sm text-muted-foreground mt-1">${monthlyEq.toLocaleString("es-CL")}/mes</p>
+                        )}
                       </>
                     )}
                   </div>
@@ -471,11 +495,12 @@ const Index = () => {
                     ))}
                   </ul>
                   <Button className="w-full" variant={plan.popular ? "default" : "outline"} asChild>
-                    <Link to="/register">{plan.price === 0 ? "Comenzar gratis" : "Suscribirse"}</Link>
+                    <Link to="/register">{price === 0 ? "Comenzar gratis" : "Suscribirse"}</Link>
                   </Button>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
