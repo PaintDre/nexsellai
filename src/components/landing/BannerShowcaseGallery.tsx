@@ -42,10 +42,17 @@ export const BannerShowcaseGallery = () => {
           className="rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:scale-[1.02] transition-all"
         >
           <img
-            src={url}
-            alt=""
+            src={url.includes('supabase.co/storage/v1/object/public/')
+              ? url.replace(
+                  '/storage/v1/object/public/',
+                  '/storage/v1/render/image/public/'
+                ) + '?width=400&quality=75'
+              : url}
+            alt="Banner generado por Nexsell"
             className="w-full h-auto object-cover"
             loading="lazy"
+            width={400}
+            height={400}
           />
         </div>
       ))}
