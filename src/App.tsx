@@ -39,36 +39,38 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/landing/preview" element={<LandingPreview />} />
-            <Route path="/p/:slug" element={<PublicLanding />} />
-            <Route element={<ProtectedLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/products" element={<Products />} />
-              <Route path="/products/new" element={<ProductForm />} />
-              <Route path="/products/:id" element={<ProductDetail />} />
-              <Route path="/products/:id/edit" element={<ProductForm />} />
-              <Route path="/products/:id/generate" element={<GenerateLanding />} />
-              <Route path="/landings" element={<Landings />} />
-              <Route path="/landings/:id" element={<LandingView />} />
-              <Route path="/landings/:id/preview" element={<LandingFullPreview />} />
-              <Route path="/products/:id/banner" element={<GenerateBanner />} />
-              <Route path="/banners" element={<Banners />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/settings" element={<SettingsPage />} />
-            </Route>
-            <Route element={<AdminLayout />}>
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/users" element={<AdminUsers />} />
-            </Route>
-            <Route element={<SuperAdminLayout />}>
-              <Route path="/admin/config" element={<SuperAdminConfig />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <Suspense fallback={null}>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/landing/preview" element={<LandingPreview />} />
+              <Route path="/p/:slug" element={<PublicLanding />} />
+              <Route element={<ProtectedLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/products" element={<Products />} />
+                <Route path="/products/new" element={<ProductForm />} />
+                <Route path="/products/:id" element={<ProductDetail />} />
+                <Route path="/products/:id/edit" element={<ProductForm />} />
+                <Route path="/products/:id/generate" element={<GenerateLanding />} />
+                <Route path="/landings" element={<Landings />} />
+                <Route path="/landings/:id" element={<LandingView />} />
+                <Route path="/landings/:id/preview" element={<LandingFullPreview />} />
+                <Route path="/products/:id/banner" element={<GenerateBanner />} />
+                <Route path="/banners" element={<Banners />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/settings" element={<SettingsPage />} />
+              </Route>
+              <Route element={<AdminLayout />}>
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<AdminUsers />} />
+              </Route>
+              <Route element={<SuperAdminLayout />}>
+                <Route path="/admin/config" element={<SuperAdminConfig />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
