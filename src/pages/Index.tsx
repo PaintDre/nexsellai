@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { BannerShowcaseGallery } from "@/components/landing/BannerShowcaseGallery";
+const BannerShowcaseGallery = lazy(() => import("@/components/landing/BannerShowcaseGallery").then(m => ({ default: m.BannerShowcaseGallery })));
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -152,7 +152,7 @@ const Index = () => {
       <nav className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-2">
-            <img src="/logo-ns.png" alt="Nexsell" className="h-8 w-8 object-contain" />
+            <img src="/logo-ns.png" alt="Nexsell" className="h-8 w-8 object-contain" width={32} height={32} />
             <span className="font-display text-xl font-bold tracking-tight">
               <span className="text-primary">Nex</span>sell
             </span>
@@ -346,7 +346,9 @@ const Index = () => {
           <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-14">
             Landings y banners generados con Nexsell en segundos
           </p>
-          <BannerShowcaseGallery />
+          <Suspense fallback={<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">{[1,2,3].map(i=><div key={i} className="aspect-square rounded-xl bg-muted/40" />)}</div>}>
+            <BannerShowcaseGallery />
+          </Suspense>
         </div>
       </section>
 
