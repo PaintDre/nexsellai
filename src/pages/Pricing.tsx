@@ -13,12 +13,13 @@ const plans = [
     description: "Para probar Nexsell",
     features: [
       "1 landing total",
+      "2 banners / mes",
       "1 ángulo / 1 hook",
       "Preview de landing",
       "Exportar HTML básico",
       "Listo para Shopify",
     ],
-    excluded: ["Sin generador de banners", "Sin imágenes IA", "Sin edición avanzada"],
+    excluded: ["Sin imágenes IA", "Sin edición avanzada"],
   },
   {
     id: "starter",
@@ -27,8 +28,8 @@ const plans = [
     description: "Para testear 2-3 productos/mes",
     features: [
       "10 landings / mes",
+      "30 banners / mes",
       "3 hooks por producto",
-      "Generador de banners",
       "Imágenes IA en landings",
       "Objeciones básicas",
       "Bloque de urgencia editable",
@@ -44,8 +45,8 @@ const plans = [
     description: "Para correr ads diario",
     features: [
       "100 landings / mes",
+      "150 banners / mes",
       "Múltiples ángulos psicológicos",
-      "Generador de banners avanzado",
       "Imágenes IA en landings",
       "Edición completa de secciones",
       "Hooks para ads incluidos",
