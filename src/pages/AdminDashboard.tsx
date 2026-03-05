@@ -3,14 +3,15 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, FileText, TrendingUp, Settings, Crown } from "lucide-react";
+import { Users, FileText, TrendingUp, Settings, Crown, Image } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Stats {
   totalUsers: number;
   totalLandings: number;
+  totalBanners: number;
   byPlan: { free: number; starter: number; pro: number };
-  topUsers: { user_id: string; full_name: string | null; landings_used: number; plan: string }[];
+  topUsers: { user_id: string; full_name: string | null; landings_used: number; banners_used: number; plan: string }[];
 }
 
 const AdminDashboard = () => {
@@ -65,7 +66,7 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Usuarios</CardTitle>
@@ -82,6 +83,15 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">{stats?.totalLandings ?? 0}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Banners Generados</CardTitle>
+            <Image className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{stats?.totalBanners ?? 0}</div>
           </CardContent>
         </Card>
         <Card>
@@ -111,20 +121,22 @@ const AdminDashboard = () => {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-muted-foreground">
-                    <th className="text-left py-2 pr-4">Nombre</th>
-                    <th className="text-left py-2 pr-4">Plan</th>
-                    <th className="text-right py-2">Landings</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.topUsers.map((u) => (
-                    <tr key={u.user_id} className="border-b last:border-0">
-                      <td className="py-2 pr-4">{u.full_name || "Sin nombre"}</td>
-                      <td className="py-2 pr-4 capitalize">{u.plan}</td>
-                      <td className="py-2 text-right font-medium">{u.landings_used}</td>
-                    </tr>
-                  ))}
-                </tbody>
+                     <th className="text-left py-2 pr-4">Nombre</th>
+                     <th className="text-left py-2 pr-4">Plan</th>
+                     <th className="text-right py-2 pr-4">Landings</th>
+                     <th className="text-right py-2">Banners</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   {stats.topUsers.map((u) => (
+                     <tr key={u.user_id} className="border-b last:border-0">
+                       <td className="py-2 pr-4">{u.full_name || "Sin nombre"}</td>
+                       <td className="py-2 pr-4 capitalize">{u.plan}</td>
+                       <td className="py-2 text-right pr-4 font-medium">{u.landings_used}</td>
+                       <td className="py-2 text-right font-medium">{u.banners_used}</td>
+                     </tr>
+                   ))}
+                 </tbody>
               </table>
             </div>
           </CardContent>

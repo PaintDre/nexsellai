@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Save, Lock, Trash2, ExternalLink, HelpCircle, MessageSquare, Zap } from "lucide-react";
+import { Save, Lock, Trash2, ExternalLink, HelpCircle, MessageSquare, Zap, Image } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   AlertDialog,
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const PLAN_LIMITS: Record<string, number> = { free: 1, starter: 10, pro: 100 };
+const BANNER_LIMITS: Record<string, number> = { free: 2, starter: 30, pro: 150 };
 
 const SettingsPage = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -88,6 +89,12 @@ const SettingsPage = () => {
   const landingsUsed = profile?.landings_used || 0;
   const limit = PLAN_LIMITS[plan] || 1;
   const usagePercent = Math.min((landingsUsed / limit) * 100, 100);
+
+  const bannerLimit = BANNER_LIMITS[plan] || 2;
+  const bannerResetAt = profile?.banners_reset_at ? new Date(profile.banners_reset_at) : null;
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+  const bannersUsed = (!bannerResetAt || (Date.now() - bannerResetAt.getTime()) >= thirtyDaysMs) ? 0 : (profile?.banners_used || 0);
+  const bannerUsagePercent = Math.min((bannersUsed / bannerLimit) * 100, 100);
 
   return (
     <div className="p-6 lg:p-8 max-w-2xl space-y-6">
@@ -160,7 +167,7 @@ const SettingsPage = () => {
           <CardTitle className="font-display flex items-center gap-2">
             <Zap className="h-5 w-5 text-primary" /> Plan y uso
           </CardTitle>
-          <CardDescription>Tu plan actual y consumo de landings</CardDescription>
+          <CardDescription>Tu plan actual y consumo de landings y banners</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
@@ -173,6 +180,13 @@ const SettingsPage = () => {
               <span className="font-medium">{landingsUsed} / {limit}</span>
             </div>
             <Progress value={usagePercent} className="h-2" />
+          </div>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span className="flex items-center gap-1"><Image className="h-3.5 w-3.5" /> Banners usados</span>
+              <span className="font-medium">{bannersUsed} / {bannerLimit}</span>
+            </div>
+            <Progress value={bannerUsagePercent} className="h-2" />
           </div>
           {plan !== "pro" && (
             <Button asChild variant="outline" className="w-full">

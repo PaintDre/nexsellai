@@ -116,6 +116,7 @@ serve(async (req) => {
     if (req.method === "GET" && path === "/stats") {
       const { count: totalUsers } = await supabase.from("profiles").select("*", { count: "exact", head: true });
       const { count: totalLandings } = await supabase.from("landings").select("*", { count: "exact", head: true });
+      const { count: totalBanners } = await supabase.from("banners").select("*", { count: "exact", head: true });
 
       const { data: planStats } = await supabase.from("profiles").select("plan");
       const byPlan = { free: 0, starter: 0, pro: 0 };
@@ -123,11 +124,11 @@ serve(async (req) => {
 
       const { data: topUsers } = await supabase
         .from("profiles")
-        .select("user_id, full_name, landings_used, plan")
+        .select("user_id, full_name, landings_used, banners_used, plan")
         .order("landings_used", { ascending: false })
         .limit(10);
 
-      return jsonResponse({ totalUsers, totalLandings, byPlan, topUsers });
+      return jsonResponse({ totalUsers, totalLandings, totalBanners, byPlan, topUsers });
     }
 
     // GET /config
