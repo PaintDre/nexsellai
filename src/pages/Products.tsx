@@ -20,7 +20,7 @@ const Products = () => {
   }, [user]);
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold font-display tracking-tight">Productos</h1>
         <Button asChild>
@@ -37,7 +37,7 @@ const Products = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => (
             <Card key={product.id} className="group hover:shadow-md transition-shadow">
               <div className="aspect-video overflow-hidden rounded-t-lg bg-muted">

@@ -1,13 +1,58 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { AppSidebar } from "./AppSidebar";
+import { AppSidebar, SidebarContent } from "./AppSidebar";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Menu, Zap } from "lucide-react";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export const AppLayout = () => {
+  const isMobile = useIsMobile();
+  const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
-    <div className="flex h-screen overflow-hidden">
-      <AppSidebar />
-      <main className="flex-1 overflow-y-auto bg-background">
-        <Outlet />
-      </main>
+    <div className="flex h-screen w-full overflow-hidden">
+      {/* Desktop sidebar */}
+      {!isMobile && !isTablet && <AppSidebar />}
+
+      {/* Tablet collapsed sidebar */}
+      {isTablet && <AppSidebar collapsed />}
+
+      {/* Mobile sheet */}
+      {isMobile && (
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetContent side="left" className="w-64 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border">
+            <VisuallyHidden>
+              <SheetTitle>Menú de navegación</SheetTitle>
+            </VisuallyHidden>
+            <SidebarContent onNavigate={() => setMobileOpen(false)} />
+          </SheetContent>
+        </Sheet>
+      )}
+
+      <div className="flex flex-1 flex-col overflow-hidden max-w-full">
+        {/* Mobile header */}
+        {isMobile && (
+          <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-sidebar-border bg-sidebar px-4">
+            <Button variant="ghost" size="icon" className="text-sidebar-foreground" onClick={() => setMobileOpen(true)}>
+              <Menu className="h-5 w-5" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sidebar-primary">
+                <Zap className="h-4 w-4 text-sidebar-primary-foreground" />
+              </div>
+              <span className="text-lg font-bold font-display tracking-tight text-sidebar-primary-foreground">Nexsell</span>
+            </div>
+          </header>
+        )}
+
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 };

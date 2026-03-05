@@ -240,7 +240,7 @@ const Banners = () => {
   );
 
   return (
-    <div className="p-6 lg:p-8 space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -342,7 +342,7 @@ const Banners = () => {
             {filteredBanners.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">No hay banners con estos filtros</p>
             ) : (
-              <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredBanners.map((banner, idx) => (
                   <BannerCard key={banner.id} banner={banner} idx={idx} />
                 ))}
@@ -362,7 +362,7 @@ const Banners = () => {
                       <h2 className="text-lg font-semibold">{group.productName}</h2>
                       <Badge variant="outline" className="text-xs">{group.banners.length}</Badge>
                     </div>
-                    <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                       {group.banners.map((banner) => {
                         const globalIdx = filteredBanners.findIndex((b) => b.id === banner.id);
                         return <BannerCard key={banner.id} banner={banner} idx={globalIdx} />;

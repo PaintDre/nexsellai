@@ -70,7 +70,7 @@ const Dashboard = () => {
   const usagePercent = Math.min((used / limit) * 100, 100);
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
+    <div className="p-4 md:p-6 lg:p-8 space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold font-display tracking-tight">Dashboard</h1>
@@ -84,7 +84,7 @@ const Dashboard = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Productos</CardTitle>
