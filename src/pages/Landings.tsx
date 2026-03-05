@@ -6,10 +6,21 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Eye, Download, Loader2, Maximize2, Copy } from "lucide-react";
+import { FileText, Eye, Download, Loader2, Maximize2, Copy, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generateLandingHTML } from "@/lib/exportLanding";
 import { type LandingTheme } from "@/components/landing/themes";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type Landing = Tables<"landings">;
 type Product = Tables<"products">;
@@ -24,6 +35,7 @@ const Landings = () => {
   const [landings, setLandings] = useState<LandingWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [exportingId, setExportingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleExport = async (landing: LandingWithProduct) => {
     setExportingId(landing.id);
@@ -48,6 +60,25 @@ const Landings = () => {
     }
   };
 
+  const handleDelete = useCallback(async (landingId: string) => {
+    if (!user) return;
+    setDeletingId(landingId);
+    try {
+      const { error } = await supabase
+        .from("landings")
+        .delete()
+        .eq("id", landingId)
+        .eq("user_id", user.id);
+      if (error) throw error;
+      setLandings(prev => prev.filter(l => l.id !== landingId));
+      toast({ title: "Landing eliminada" });
+    } catch (err: any) {
+      toast({ title: "Error al eliminar", description: err.message, variant: "destructive" });
+    } finally {
+      setDeletingId(null);
+    }
+  }, [user, toast]);
+
   const handleDuplicate = useCallback(async (landing: LandingWithProduct) => {
     if (!user) return;
     try {
@@ -66,7 +97,6 @@ const Landings = () => {
         });
       if (insertError) throw insertError;
       toast({ title: "Landing duplicada" });
-      // Reload
       const { data: landingsData } = await supabase
         .from("landings")
         .select("*")
@@ -95,7 +125,6 @@ const Landings = () => {
 
       if (!landingsData) { setLandings([]); setLoading(false); return; }
 
-      // Fetch products for all landings
       const productIds = [...new Set(landingsData.map(l => l.product_id))];
       const { data: products } = await supabase
         .from("products")
@@ -156,7 +185,6 @@ const Landings = () => {
 
             return (
               <Card key={landing.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
-                {/* Hero Preview Strip */}
                 <Link to={`/landings/${landing.id}/preview`} className="block">
                   <div className="relative h-40 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-50">
                     {image && (
@@ -204,6 +232,25 @@ const Landings = () => {
                       <Button variant="secondary" size="sm" className="text-xs" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
                         {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
                       </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm" className="text-xs" disabled={deletingId === landing.id}>
+                            {deletingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>¿Eliminar landing?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta acción no se puede deshacer. Se eliminarán también las versiones guardadas de "{landing.name}".
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(landing.id)}>Eliminar</AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                 </CardContent>
               </Card>

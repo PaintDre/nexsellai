@@ -6,7 +6,18 @@ import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2, ImagePlus, Sparkles, Pencil, Save, X, Copy } from "lucide-react";
+import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2, ImagePlus, Sparkles, Pencil, Save, X, Copy, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { exportLandingAsHTML, exportLandingAsZip } from "@/lib/exportLanding";
 import LandingRenderer from "@/components/landing/LandingRenderer";
 import { themes, type LandingTheme } from "@/components/landing/themes";
@@ -377,13 +388,25 @@ const LandingView = () => {
               </>
             ) : (
               <>
-                <Select value={theme} onValueChange={(v) => setTheme(v as LandingTheme)}>
+                <Select value={theme} onValueChange={async (v) => {
+                  const newTheme = v as LandingTheme;
+                  setTheme(newTheme);
+                  if (landing) {
+                    await supabase.from("landings").update({ theme: v }).eq("id", landing.id);
+                    setLanding({ ...landing, theme: v } as any);
+                  }
+                }}>
                   <SelectTrigger className="h-8 w-[140px] text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(themes).map(([key, cfg]) => (
-                      <SelectItem key={key} value={key}>{cfg.name}</SelectItem>
+                      <SelectItem key={key} value={key}>
+                        <span className="flex items-center gap-2">
+                          <span className="h-3 w-3 rounded-full border" style={{ backgroundColor: cfg.ctaBg }} />
+                          {cfg.name}
+                        </span>
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -423,6 +446,36 @@ const LandingView = () => {
                   <Copy className="h-4 w-4 mr-1" />
                   <span className="hidden sm:inline">Duplicar</span>
                 </Button>
+
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      <span className="hidden sm:inline">Eliminar</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Eliminar landing?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Esta acción no se puede deshacer. Se eliminarán también las versiones guardadas de "{landing.name}".
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={async () => {
+                        try {
+                          const { error } = await supabase.from("landings").delete().eq("id", landing.id).eq("user_id", user!.id);
+                          if (error) throw error;
+                          toast({ title: "Landing eliminada" });
+                          navigate("/landings");
+                        } catch (err: any) {
+                          toast({ title: "Error al eliminar", description: err.message, variant: "destructive" });
+                        }
+                      }}>Eliminar</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
 
                 <VersionHistory
                   landingId={landing.id}
