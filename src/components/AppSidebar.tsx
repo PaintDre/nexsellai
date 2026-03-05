@@ -10,7 +10,12 @@ const planColors: Record<string, string> = {
   pro: "bg-primary/20 text-primary",
 };
 
-export const AppSidebar = () => {
+interface SidebarContentProps {
+  collapsed?: boolean;
+  onNavigate?: () => void;
+}
+
+export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContentProps) => {
   const { pathname } = useLocation();
   const { profile, signOut, role, isAdmin, isSuperAdmin } = useAuth();
 
@@ -30,37 +35,42 @@ export const AppSidebar = () => {
   }
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground">
-      <div className="flex items-center gap-2 px-6 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary">
+    <div className="flex h-full flex-col">
+      <div className={cn("flex items-center gap-2 py-5", collapsed ? "justify-center px-2" : "px-6")}>
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary shrink-0">
           <Zap className="h-5 w-5 text-sidebar-primary-foreground" />
         </div>
-        <span className="text-xl font-bold font-display tracking-tight text-sidebar-primary-foreground">Nexsell</span>
+        {!collapsed && (
+          <span className="text-xl font-bold font-display tracking-tight text-sidebar-primary-foreground">Nexsell</span>
+        )}
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className={cn("flex-1 space-y-1 py-4", collapsed ? "px-2" : "px-3")}>
         {navItems.map((item) => {
           const active = pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}
               to={item.href}
+              onClick={onNavigate}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-colors",
+                collapsed ? "justify-center px-2" : "px-3",
                 active
                   ? "bg-sidebar-accent text-sidebar-primary"
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
               )}
+              title={collapsed ? item.label : undefined}
             >
-              <item.icon className="h-4 w-4" />
-              {item.label}
+              <item.icon className="h-4 w-4 shrink-0" />
+              {!collapsed && item.label}
             </Link>
           );
         })}
       </nav>
 
-      <div className="border-t border-sidebar-border p-4 space-y-3">
-        {profile && (
+      <div className={cn("border-t border-sidebar-border p-4 space-y-3", collapsed && "px-2")}>
+        {profile && !collapsed && (
           <div className="flex items-center gap-2">
             <div className={cn("rounded-md px-2 py-0.5 text-xs font-semibold uppercase", planColors[profile.plan] || planColors.free)}>
               {profile.plan}
@@ -68,15 +78,32 @@ export const AppSidebar = () => {
             <span className="text-xs text-sidebar-foreground truncate">{profile.full_name || "Usuario"}</span>
           </div>
         )}
-        <div className="flex gap-2">
-          <Button variant="ghost" size="sm" className="flex-1 justify-start gap-2 text-sidebar-foreground" asChild>
-            <Link to="/settings"><Settings className="h-4 w-4" /> Ajustes</Link>
-          </Button>
+        <div className={cn("flex", collapsed ? "flex-col items-center gap-2" : "gap-2")}>
+          {!collapsed ? (
+            <Button variant="ghost" size="sm" className="flex-1 justify-start gap-2 text-sidebar-foreground" asChild onClick={onNavigate}>
+              <Link to="/settings"><Settings className="h-4 w-4" /> Ajustes</Link>
+            </Button>
+          ) : (
+            <Button variant="ghost" size="icon" className="text-sidebar-foreground" asChild onClick={onNavigate}>
+              <Link to="/settings" title="Ajustes"><Settings className="h-4 w-4" /></Link>
+            </Button>
+          )}
           <Button variant="ghost" size="icon" className="text-sidebar-foreground hover:text-destructive shrink-0" onClick={signOut}>
             <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </div>
+    </div>
+  );
+};
+
+export const AppSidebar = ({ collapsed = false }: { collapsed?: boolean }) => {
+  return (
+    <aside className={cn(
+      "hidden md:flex h-screen flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-200",
+      collapsed ? "w-16" : "w-64"
+    )}>
+      <SidebarContent collapsed={collapsed} />
     </aside>
   );
 };
