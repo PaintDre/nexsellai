@@ -119,13 +119,13 @@ const Landings = () => {
     return (blocks as any[]).find((b: any) => b.type === "hero");
   };
 
-  const getProductImage = (product?: Product | null): string | null => {
+  const getProductImage = useCallback((product?: Product | null): string | null => {
     if (!product || !product.images || product.images.length === 0) return null;
     const img = product.images[0];
     if (img.startsWith("http")) return img;
     const { data } = supabase.storage.from("product-images").getPublicUrl(img);
     return data?.publicUrl || null;
-  };
+  }, []);
 
   if (loading) {
     return (
