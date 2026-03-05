@@ -6,7 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2, ImagePlus, Sparkles, Pencil, Save, X } from "lucide-react";
+import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2, ImagePlus, Sparkles, Pencil, Save, X, Copy } from "lucide-react";
 import { exportLandingAsHTML, exportLandingAsZip } from "@/lib/exportLanding";
 import LandingRenderer from "@/components/landing/LandingRenderer";
 import { themes, type LandingTheme } from "@/components/landing/themes";
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { TemplateGallery } from "@/components/banner/TemplateGallery";
 import { bannerSizes } from "@/components/banner/templates";
+import VersionHistory from "@/components/landing/VersionHistory";
 
 type Landing = Tables<"landings">;
 type Product = Tables<"products">;
