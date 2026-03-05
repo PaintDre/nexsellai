@@ -621,6 +621,42 @@ const LandingView = () => {
         />
       </ResizablePreview>
 
+      {/* Analytics section */}
+      {(landing as any).published && viewsData.total > 0 && (
+        <div className="container mx-auto px-4 py-6">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" /> Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-6 items-end">
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{viewsData.total}</p>
+                  <p className="text-xs text-muted-foreground">Visitas totales</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{viewsData.last7}</p>
+                  <p className="text-xs text-muted-foreground">Últimos 7 días</p>
+                </div>
+                <div className="flex-1 flex items-end gap-1 h-12">
+                  {viewsData.daily.map((d) => (
+                    <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
+                      <div
+                        className="w-full bg-primary/80 rounded-sm min-h-[2px]"
+                        style={{ height: `${Math.max(2, (d.views / Math.max(...viewsData.daily.map(x => x.views), 1)) * 48)}px` }}
+                      />
+                      <span className="text-[9px] text-muted-foreground">{d.date.slice(5)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* Export Preview Dialog */}
       <ExportPreviewDialog
         open={showExportPreview}
