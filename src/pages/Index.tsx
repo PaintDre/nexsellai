@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { LandingExamplesGallery } from "@/components/landing/LandingExamplesGallery";
+import { BannerShowcaseGallery } from "@/components/landing/BannerShowcaseGallery";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -341,7 +341,7 @@ const Index = () => {
           <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-14">
             Landings y banners generados con Nexsell en segundos
           </p>
-          <LandingExamplesGallery />
+          <BannerShowcaseGallery />
         </div>
       </section>
 
