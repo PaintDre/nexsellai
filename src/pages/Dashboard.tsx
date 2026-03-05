@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, FileText, Plus, Zap, Pencil, Sparkles } from "lucide-react";
+import { Package, FileText, Plus, Zap, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 type Product = Tables<"products">;
@@ -79,46 +79,39 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Recent Products */}
+      {/* Recent Landings */}
       <div>
-        <h2 className="text-xl font-semibold font-display mb-4">Productos Recientes</h2>
-        {products.length === 0 ? (
+        <h2 className="text-xl font-semibold font-display mb-4">Landings Recientes</h2>
+        {landings.length === 0 ? (
           <Card className="border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <Package className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground mb-4">No tienes productos aún</p>
-              <Button asChild>
-                <Link to="/products/new">
-                  <Plus className="h-4 w-4 mr-2" /> Crear primer producto
-                </Link>
-              </Button>
+              <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <p className="text-muted-foreground mb-4">No tienes landings aún</p>
+              <p className="text-sm text-muted-foreground">Ve a Productos para crear tu primera landing</p>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {products.slice(0, 6).map((product) => (
-              <Card key={product.id} className="hover:shadow-md transition-shadow group">
-                <div className="aspect-video overflow-hidden rounded-t-lg bg-muted">
-                  {product.images[0] ? (
-                    <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform" />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center">
-                      <Package className="h-8 w-8 text-muted-foreground/40" />
+          <div className="space-y-3">
+            {landings.slice(0, 10).map((landing) => (
+              <Card key={landing.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="flex items-center justify-between p-4">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                      <FileText className="h-5 w-5 text-primary" />
                     </div>
-                  )}
-                </div>
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold truncate">{product.name}</h3>
-                    <Badge variant="secondary" className="capitalize text-xs">{product.category}</Badge>
+                    <div>
+                      <h3 className="font-semibold">{landing.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(landing.created_at).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" })}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">${product.price.toLocaleString("es-CL")}</p>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" asChild className="flex-1">
-                      <Link to={`/products/${product.id}/edit`}><Pencil className="h-3 w-3 mr-1" /> Editar</Link>
-                    </Button>
-                    <Button size="sm" asChild className="flex-1">
-                      <Link to={`/products/${product.id}/generate`}><Sparkles className="h-3 w-3 mr-1" /> Generar</Link>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="secondary" className="capitalize text-xs">{landing.theme}</Badge>
+                    <Button variant="outline" size="sm" asChild>
+                      <Link to={`/landings/${landing.id}/preview`}>
+                        <Eye className="h-3 w-3 mr-1" /> Ver
+                      </Link>
                     </Button>
                   </div>
                 </CardContent>
