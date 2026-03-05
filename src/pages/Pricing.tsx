@@ -14,10 +14,11 @@ const plans = [
     features: [
       "1 landing total",
       "1 ángulo / 1 hook",
+      "Preview de landing",
       "Exportar HTML básico",
       "Listo para Shopify",
     ],
-    excluded: ["Sin objeciones fuertes", "Sin urgencia avanzada", "Sin bundles / upsell"],
+    excluded: ["Sin generador de banners", "Sin imágenes IA", "Sin edición avanzada"],
   },
   {
     id: "starter",
@@ -27,6 +28,8 @@ const plans = [
     features: [
       "10 landings / mes",
       "3 hooks por producto",
+      "Generador de banners",
+      "Imágenes IA en landings",
       "Objeciones básicas",
       "Bloque de urgencia editable",
       "FAQs simples",
@@ -42,12 +45,14 @@ const plans = [
     features: [
       "100 landings / mes",
       "Múltiples ángulos psicológicos",
+      "Generador de banners avanzado",
+      "Imágenes IA en landings",
+      "Edición completa de secciones",
       "Hooks para ads incluidos",
       "Variantes de CTA",
       "Sección de bundles",
       "Comparativa vs otros",
       "Microcopys de checkout",
-      "Versión corta para producto",
       "Exportar ZIP completo",
     ],
   },

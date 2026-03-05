@@ -12,6 +12,7 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -23,7 +24,7 @@ const Register = () => {
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: { full_name: fullName, phone: phone || undefined },
         emailRedirectTo: window.location.origin,
       },
     });
@@ -63,6 +64,10 @@ const Register = () => {
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Teléfono <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+56 9 1234 5678" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Contraseña</Label>
