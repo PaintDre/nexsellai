@@ -56,9 +56,9 @@ const steps = [
 ];
 
 const plans = [
-  { name: "Free", price: 0, landings: "1 landing", features: ["1 hook de venta", "2 banners / mes", "Preview de landing", "Exportar HTML básico"], popular: false },
-  { name: "Starter", price: 14990, landings: "10 landings / mes", features: ["3 hooks por producto", "30 banners / mes", "Imágenes IA en landings", "Objeciones y urgencia", "FAQs editables", "Exportar HTML + CSS"], popular: true },
-  { name: "Pro", price: 34990, landings: "100 landings / mes", features: ["Ángulos psicológicos ilimitados", "150 banners / mes", "Hooks optimizados para ads", "Variantes de CTA", "Bundles y comparativas", "Microcopys de checkout", "Exportar ZIP completo"], popular: false },
+  { name: "Free", monthlyPrice: 0, annualPrice: 0, landings: "1 landing", features: ["1 hook de venta", "2 banners / mes", "Preview de landing", "Exportar HTML básico"], popular: false },
+  { name: "Starter", monthlyPrice: 14990, annualPrice: 149900, landings: "10 landings / mes", features: ["3 hooks por producto", "30 banners / mes", "Imágenes IA en landings", "Objeciones y urgencia", "FAQs editables", "Exportar HTML + CSS"], popular: true },
+  { name: "Pro", monthlyPrice: 34990, annualPrice: 349900, landings: "100 landings / mes", features: ["Ángulos psicológicos ilimitados", "150 banners / mes", "Hooks optimizados para ads", "Variantes de CTA", "Bundles y comparativas", "Microcopys de checkout", "Exportar ZIP completo"], popular: false },
 ];
 
 const Index = () => {
@@ -72,6 +72,7 @@ const Index = () => {
   const [demoAudience, setDemoAudience] = useState("");
   const [generating, setGenerating] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
   const [demoImage, setDemoImage] = useState<File | null>(null);
   const [demoImagePreview, setDemoImagePreview] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
