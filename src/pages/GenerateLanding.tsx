@@ -14,6 +14,7 @@ import { ArrowLeft, Sparkles, Loader2, ImagePlus, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { themes, type LandingTheme } from "@/components/landing/themes";
+import LandingTemplatePicker, { landingTemplates } from "@/components/landing/LandingTemplates";
 
 type Product = Tables<"products">;
 
@@ -33,6 +34,7 @@ const GenerateLanding = () => {
   const [generating, setGenerating] = useState(false);
   const [theme, setTheme] = useState<LandingTheme>("clean");
   const [autoImages, setAutoImages] = useState(true);
+  const [templateId, setTemplateId] = useState("completa");
   const [generationStep, setGenerationStep] = useState<"idle" | "copy" | "images" | "done">("idle");
   const [progress, setProgress] = useState(0);
 
@@ -96,8 +98,9 @@ const GenerateLanding = () => {
     try {
       // Step 1: Generate copy
       setProgress(20);
+      const selectedTemplate = landingTemplates.find(t => t.id === templateId);
       const { data, error } = await supabase.functions.invoke("generate-landing", {
-        body: { product, mode, intensity, hasOffer, guarantee, plan: profile.plan },
+        body: { product, mode, intensity, hasOffer, guarantee, plan: profile.plan, sections: selectedTemplate?.sections },
       });
 
       if (error) throw error;
@@ -206,6 +209,11 @@ const GenerateLanding = () => {
           <CardTitle className="font-display">Configuración</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label>Plantilla de landing</Label>
+            <LandingTemplatePicker selected={templateId} onSelect={setTemplateId} />
+          </div>
+
           <div className="space-y-2">
             <Label>Intensidad comercial</Label>
             <Select value={intensity} onValueChange={setIntensity}>
