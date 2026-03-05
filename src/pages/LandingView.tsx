@@ -69,7 +69,12 @@ const LandingView = () => {
   const [outputSize, setOutputSize] = useState("1200x628");
   const [generatingImage, setGeneratingImage] = useState(false);
   const [showExportPreview, setShowExportPreview] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [viewsData, setViewsData] = useState<{ total: number; last7: number; daily: { date: string; views: number }[] }>({ total: 0, last7: 0, daily: [] });
   const isPaidPlan = profile?.plan === "starter" || profile?.plan === "pro";
+
+  const slugify = (text: string) =>
+    text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 60) + "-" + Date.now().toString(36);
 
   useEffect(() => {
     if (!user || !id) return;
