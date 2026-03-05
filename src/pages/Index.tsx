@@ -149,9 +149,12 @@ const Index = () => {
       {/* Nav */}
       <nav className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
-          <span className="font-display text-xl font-bold tracking-tight">
-            <span className="text-primary">Nex</span>sell
-          </span>
+          <div className="flex items-center gap-2">
+            <img src="/logo-ns.png" alt="Nexsell" className="h-8 w-8 object-contain" />
+            <span className="font-display text-xl font-bold tracking-tight">
+              <span className="text-primary">Nex</span>sell
+            </span>
+          </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" asChild><Link to="/login">Iniciar sesión</Link></Button>
             <Button asChild><Link to="/register">Crear cuenta</Link></Button>
