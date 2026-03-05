@@ -68,7 +68,7 @@ const GenerateLanding = () => {
             target_audience: productData.target_audience,
             images: allImageUrls,
           },
-          templateId: block.type === "hero" ? "hero-producto" : "oferta-directa",
+          templateId: block.templateOverride || (block.type === "hero" ? "hero-producto" : block.type === "benefits" ? "beneficios-grid" : "oferta-directa"),
           outputSize: "1200x628",
           sectionType: block.type,
           sectionTitle: block.title || block.type,
@@ -137,14 +137,18 @@ const GenerateLanding = () => {
           }
         }
 
-        // Generate banners for hero and offer/cta sections
+        // Generate banners for hero, benefits and offer/cta sections
         const blocks = data.blocks as any[];
         const heroBlock = blocks.find((b: any) => b.type === "hero");
+        const benefitsBlock = blocks.find((b: any) => b.type === "benefits");
         const offerBlock = blocks.find((b: any) => b.type === "offer") || blocks.find((b: any) => b.type === "cta");
 
         const bannerPromises: Promise<void>[] = [];
         if (heroBlock) {
           bannerPromises.push(generateBannerForSection(insertedLanding.id, heroBlock, product, allImageUrls));
+        }
+        if (benefitsBlock) {
+          bannerPromises.push(generateBannerForSection(insertedLanding.id, { ...benefitsBlock, templateOverride: "beneficios-grid" }, product, allImageUrls));
         }
         setProgress(75);
 
@@ -182,7 +186,7 @@ const GenerateLanding = () => {
   const stepLabels: Record<string, string> = {
     idle: "",
     copy: "Paso 1/2 — Generando copy con IA...",
-    images: "Paso 2/2 — Generando imágenes con IA...",
+    images: "Paso 2/2 — Generando imágenes con IA (Hero + Beneficios + Oferta)...",
     done: "¡Listo! Redirigiendo...",
   };
 
