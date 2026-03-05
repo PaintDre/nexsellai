@@ -345,10 +345,9 @@ const Index = () => {
                 </form>
               </CardContent>
             </Card>
-        </div>
 
         {/* Example gallery */}
-        <div className="mt-16 max-w-4xl mx-auto">
+        <div className="mt-16">
           <h3 className="text-xl font-display font-bold text-center mb-6">Ejemplos de landings generadas</h3>
           <div className="grid sm:grid-cols-3 gap-4">
             {[
