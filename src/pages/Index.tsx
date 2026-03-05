@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 import {
   Sparkles, Zap, Code2, ShoppingCart, ArrowRight, Loader2,
   CheckCircle2, Upload, Wand2, Download, ChevronDown, ChevronUp,
