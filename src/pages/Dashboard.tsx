@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, FileText, Zap, Eye, History } from "lucide-react";
+import { Package, FileText, Zap, Eye, History, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
@@ -76,6 +76,11 @@ const Dashboard = () => {
           <h1 className="text-3xl font-bold font-display tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground mt-1">Bienvenido de vuelta, {profile?.full_name || "usuario"}</p>
         </div>
+        <Button asChild>
+          <Link to="/products/new">
+            <Plus className="h-4 w-4 mr-1" /> Nuevo Producto
+          </Link>
+        </Button>
       </div>
 
       {/* Stats */}
@@ -134,7 +139,7 @@ const Dashboard = () => {
             <CardContent className="flex flex-col items-center justify-center py-12">
               <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
               <p className="text-muted-foreground mb-4">No tienes landings aún</p>
-              <p className="text-sm text-muted-foreground">Ve a Productos para crear tu primera landing</p>
+              <p className="text-sm text-muted-foreground">Crea tu primer producto para empezar a generar landings y banners</p>
             </CardContent>
           </Card>
         ) : (
