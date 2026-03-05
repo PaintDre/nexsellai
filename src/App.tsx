@@ -25,6 +25,7 @@ import SuperAdminConfig from "./pages/SuperAdminConfig";
 import GenerateBanner from "./pages/GenerateBanner";
 import Banners from "./pages/Banners";
 import NotFound from "./pages/NotFound";
+import PublicLanding from "./pages/PublicLanding";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/landing/preview" element={<LandingPreview />} />
+            <Route path="/p/:slug" element={<PublicLanding />} />
             <Route element={<ProtectedLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/products" element={<Products />} />
