@@ -28,31 +28,31 @@ const faqs = [
 ];
 
 const problems = [
-  { text: "Diseñar landings toma horas o días", detail: "Escribir copy, armar estructura, buscar plantillas..." },
-  { text: "Contratar un diseñador es caro", detail: "Un freelancer cobra $50-200 USD por página" },
-  { text: "Las plantillas genéricas no venden", detail: "Sin copy persuasivo ni estructura de conversión" },
+  { text: "Crear páginas de venta y banners toma horas", detail: "Escribir copy, armar estructura, buscar plantillas..." },
+  { text: "Contratar un diseñador o copywriter es caro", detail: "Un freelancer cobra $50-200 USD por página" },
+  { text: "Las plantillas genéricas no convierten visitas en ventas", detail: "Sin copy persuasivo ni estructura de conversión" },
 ];
 
 const solutions = [
-  { text: "Genera en 30 segundos", detail: "Landing completa con IA en un clic" },
-  { text: "Sin costo de diseño", detail: "Todo incluido en tu plan desde $0" },
-  { text: "Copy optimizado para conversión", detail: "Estructura AIDA y técnicas de persuasión" },
+  { text: "Genera landings y banners en segundos con IA", detail: "Landing completa con IA en un clic" },
+  { text: "Sin costos extras de diseño ni redacción", detail: "Todo incluido en tu plan desde $0" },
+  { text: "Copy y estructura optimizados para conversión", detail: "Estructura AIDA y técnicas de persuasión" },
 ];
 
 const benefits = [
-  { icon: Zap, title: "Ultra rápido", desc: "Landing completa en menos de 30 segundos. Sin esperas." },
-  { icon: ShoppingCart, title: "Optimizado para ventas", desc: "Estructura de 7 secciones que maximiza conversiones." },
-  { icon: Code2, title: "Sin código", desc: "Solo describe tu producto. La IA crea todo el copy persuasivo." },
-  { icon: Image, title: "Banners con IA", desc: "Genera banners promocionales listos para redes sociales." },
-  { icon: FileCode, title: "Exportar HTML", desc: "Descarga el código listo para Shopify u otra plataforma." },
-  { icon: Layers, title: "Multi-producto", desc: "Crea landings para todos tus productos desde un solo lugar." },
+  { icon: Zap, title: "Landings de alta conversión", desc: "Genera páginas de venta con estructura optimizada para que tus visitantes compren." },
+  { icon: ShoppingCart, title: "Banners listos para anuncios", desc: "Crea banners promocionales para Facebook, Instagram y Google Ads." },
+  { icon: Code2, title: "Prueba diferentes ángulos", desc: "Genera múltiples versiones con distintos hooks y enfoques de venta." },
+  { icon: FileCode, title: "Exporta listo para tu tienda", desc: "Descarga HTML listo para Shopify, WooCommerce o cualquier plataforma." },
+  { icon: Image, title: "Sin código ni diseño", desc: "Solo describe tu producto. La IA escribe el copy y arma la página." },
+  { icon: Layers, title: "Multi-producto", desc: "Administra todos tus productos y genera contenido para cada uno." },
 ];
 
 const steps = [
-  { icon: Upload, step: "1", title: "Sube tu producto", desc: "Agrega nombre, precio, imagen y descripción." },
-  { icon: Wand2, step: "2", title: "La IA lo analiza", desc: "Nuestro motor entiende tu producto y audiencia." },
-  { icon: ImagePlus, step: "3", title: "Genera todo", desc: "Landing + banners con copy persuasivo al instante." },
-  { icon: Download, step: "4", title: "Exporta y publica", desc: "HTML listo para Shopify u otra plataforma." },
+  { icon: Upload, step: "1", title: "Sube tu producto", desc: "Agrega imágenes, nombre, precio y descripción de tu producto." },
+  { icon: Wand2, step: "2", title: "La IA analiza todo", desc: "Nuestro motor identifica los mejores ángulos de venta para tu producto." },
+  { icon: ImagePlus, step: "3", title: "Genera landings y banners", desc: "Obtén páginas de venta y banners con copy persuasivo al instante." },
+  { icon: Download, step: "4", title: "Publica y vende", desc: "Exporta el HTML a tu tienda y empieza a recibir ventas." },
 ];
 
 const plans = [
@@ -169,19 +169,18 @@ const Index = () => {
                 Generador de Landing Pages con IA
               </Badge>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-display tracking-tight leading-tight">
-                Crea landing pages que
-                <span className="text-primary"> venden de verdad</span>
+                Crea landings y banners que
+                <span className="text-primary"> venden tu producto en minutos</span>
               </h1>
               <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
-                Genera landing pages de alta conversión para tus productos de ecommerce en segundos.
-                Sin código. Optimizadas para dropshipping en Chile.
+                Nexsell usa inteligencia artificial para generar páginas de venta y banners optimizados para ecommerce y dropshipping.
               </p>
               <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button size="lg" className="text-base px-8 w-full sm:w-auto" asChild>
                   <a href="#demo"><Sparkles className="h-5 w-5 mr-2" /> Probar gratis</a>
                 </Button>
                 <Button size="lg" variant="outline" className="text-base px-8 w-full sm:w-auto" asChild>
-                  <a href="#pricing">Ver planes</a>
+                  <a href="#how">Ver cómo funciona</a>
                 </Button>
               </div>
             </div>
@@ -239,7 +238,7 @@ const Index = () => {
       <section className="py-20 lg:py-28 bg-muted/50">
         <div className="container mx-auto px-4 max-w-6xl">
           <h2 className="text-3xl md:text-4xl font-bold font-display text-center mb-4">
-            El problema que resolvemos
+            Crear páginas de venta no debería ser tan difícil
           </h2>
           <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-14">
             Vender online no debería requerir horas de diseño ni presupuestos altos
@@ -285,10 +284,10 @@ const Index = () => {
       <section className="py-20 lg:py-28">
         <div className="container mx-auto px-4 max-w-6xl">
           <h2 className="text-3xl md:text-4xl font-bold font-display text-center mb-4">
-            ¿Por qué usar Nexsell?
+            Todo lo que necesitas para vender más
           </h2>
           <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-14">
-            Todo lo que necesitas para crear landings que convierten
+            Herramientas diseñadas para convertir visitantes en compradores
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {benefits.map(({ icon: Icon, title, desc }) => (
@@ -307,10 +306,10 @@ const Index = () => {
       </section>
 
       {/* ── 4. CÓMO FUNCIONA ── */}
-      <section className="py-20 lg:py-28 bg-muted/50">
+      <section id="how" className="py-20 lg:py-28 bg-muted/50">
         <div className="container mx-auto px-4 max-w-6xl text-center">
           <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">Cómo funciona</h2>
-          <p className="text-muted-foreground mb-14 max-w-xl mx-auto">De producto a landing page lista para vender en 4 pasos simples</p>
+          <p className="text-muted-foreground mb-14 max-w-xl mx-auto">De producto a página de venta lista en 4 pasos</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto relative">
             {steps.map(({ icon: Icon, step, title, desc }, idx) => (
               <div key={step} className="relative flex flex-col items-center">
@@ -340,7 +339,7 @@ const Index = () => {
             Mira lo que puedes crear
           </h2>
           <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-14">
-            Ejemplos reales generados con Nexsell en segundos
+            Landings y banners generados con Nexsell en segundos
           </p>
           <LandingExamplesGallery />
         </div>
@@ -505,17 +504,17 @@ const Index = () => {
       <section className="py-20 lg:py-28">
         <div className="container mx-auto px-4 text-center max-w-3xl">
           <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">
-            Empieza a generar landings hoy
+            Crea tu primera landing en minutos
           </h2>
           <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-            Crea tu cuenta gratis y genera tu primera landing page en menos de 1 minuto.
+            Regístrate gratis y genera tu primera página de venta con inteligencia artificial.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="text-base px-10 w-full sm:w-auto" asChild>
-              <Link to="/register"><Sparkles className="h-5 w-5 mr-2" /> Crear cuenta gratis</Link>
+              <Link to="/register"><Sparkles className="h-5 w-5 mr-2" /> Comenzar gratis</Link>
             </Button>
             <Button size="lg" variant="outline" className="text-base px-10 w-full sm:w-auto" asChild>
-              <a href="#demo">Probar demo</a>
+              <a href="#how">Ver cómo funciona</a>
             </Button>
           </div>
         </div>
