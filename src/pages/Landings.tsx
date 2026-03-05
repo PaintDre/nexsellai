@@ -254,6 +254,7 @@ const Landings = () => {
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
+                      </div>
                     </div>
                 </CardContent>
               </Card>
