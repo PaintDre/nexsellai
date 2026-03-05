@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Zap } from "lucide-react";
+
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -42,8 +42,8 @@ const Register = () => {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <div className="inline-flex items-center gap-2 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-              <Zap className="h-6 w-6 text-primary-foreground" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden">
+              <img src="/logo-ns.png" alt="Nexsell" className="h-10 w-10 object-contain" />
             </div>
             <h1 className="text-3xl font-bold font-display tracking-tight text-foreground">Nexsell</h1>
           </div>

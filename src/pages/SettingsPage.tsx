@@ -242,14 +242,8 @@ const SettingsPage = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <a href="/#shopify-tutorial" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <ExternalLink className="h-4 w-4" /> Tutorial de Shopify
-          </a>
           <a href="mailto:soporte@nexsell.ai" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <MessageSquare className="h-4 w-4" /> Reportar un problema
-          </a>
-          <a href="/docs" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <HelpCircle className="h-4 w-4" /> Documentación
           </a>
         </CardContent>
       </Card>

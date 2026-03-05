@@ -4,7 +4,7 @@ import { AppSidebar, SidebarContent } from "./AppSidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Zap } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
