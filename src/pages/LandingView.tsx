@@ -37,6 +37,8 @@ import {
 import { TemplateGallery } from "@/components/banner/TemplateGallery";
 import { bannerSizes } from "@/components/banner/templates";
 import VersionHistory from "@/components/landing/VersionHistory";
+import ExportPreviewDialog from "@/components/landing/ExportPreviewDialog";
+import ResizablePreview from "@/components/landing/ResizablePreview";
 
 type Landing = Tables<"landings">;
 type Product = Tables<"products">;
@@ -75,7 +77,7 @@ const LandingView = () => {
   const [templateId, setTemplateId] = useState("hero-producto");
   const [outputSize, setOutputSize] = useState("1200x628");
   const [generatingImage, setGeneratingImage] = useState(false);
-
+  const [showExportPreview, setShowExportPreview] = useState(false);
   const isPaidPlan = profile?.plan === "starter" || profile?.plan === "pro";
 
   useEffect(() => {
@@ -488,39 +490,37 @@ const LandingView = () => {
                     <Maximize2 className="h-4 w-4 mr-1" /> Vista completa
                   </Link>
                 </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" disabled={exporting}>
-                      {exporting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Download className="h-4 w-4 mr-1" />}
-                      Exportar
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={handleExportHTML}>
-                      <FileCode className="h-4 w-4 mr-2" />
-                      Solo HTML
-                      <span className="text-xs text-muted-foreground ml-2">(imágenes URL)</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleExportZip}>
-                      <FileArchive className="h-4 w-4 mr-2" />
-                      ZIP con imágenes
-                      <span className="text-xs text-muted-foreground ml-2">(HTML + archivos)</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button variant="outline" size="sm" onClick={() => setShowExportPreview(true)} disabled={exporting}>
+                  <Download className="h-4 w-4 mr-1" />
+                  Exportar
+                </Button>
               </>
             )}
           </div>
         </div>
       </div>
 
-      <LandingRenderer
+      <ResizablePreview>
+        <LandingRenderer
+          blocks={blocks}
+          product={product ? { name: product.name, price: product.price } : null}
+          imagePreview={productImage}
+          theme={theme}
+          editable={editMode}
+          onBlocksChange={handleBlocksChange}
+        />
+      </ResizablePreview>
+
+      {/* Export Preview Dialog */}
+      <ExportPreviewDialog
+        open={showExportPreview}
+        onOpenChange={setShowExportPreview}
         blocks={blocks}
         product={product ? { name: product.name, price: product.price } : null}
-        imagePreview={productImage}
+        landingName={landing.name}
         theme={theme}
-        editable={editMode}
-        onBlocksChange={handleBlocksChange}
+        productImage={productImage}
+        allImageUrls={allImageUrls}
       />
 
       {/* Image Generation Dialog */}
