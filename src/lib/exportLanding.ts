@@ -383,7 +383,7 @@ export async function exportLandingAsZip(
   
   let heroImagePath: string | null = null;
 
-  // Download and add images to ZIP
+  // Download and add product images to ZIP
   for (let i = 0; i < imageUrls.length; i++) {
     const url = imageUrls[i];
     const result = await fetchImageAsBlob(url);
@@ -394,9 +394,28 @@ export async function exportLandingAsZip(
     }
   }
 
+  // Download and add section banner images to ZIP
+  const blocksWithLocalImages = blocks.map((block, idx) => {
+    if (!block.image_url) return block;
+    return { ...block, _originalImageUrl: block.image_url };
+  });
+
+  for (let i = 0; i < blocksWithLocalImages.length; i++) {
+    const block = blocksWithLocalImages[i] as any;
+    if (block._originalImageUrl) {
+      const result = await fetchImageAsBlob(block._originalImageUrl);
+      if (result) {
+        const filename = `section-${block.type}-${i}.${result.extension}`;
+        imgFolder.file(filename, result.blob);
+        blocksWithLocalImages[i] = { ...block, image_url: `images/${filename}` };
+      }
+      delete (blocksWithLocalImages[i] as any)._originalImageUrl;
+    }
+  }
+
   // Generate HTML with local image paths
   const html = generateLandingHTML(
-    blocks,
+    blocksWithLocalImages,
     product,
     landingName,
     theme,
