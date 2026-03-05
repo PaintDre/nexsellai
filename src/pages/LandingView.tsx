@@ -108,6 +108,84 @@ const LandingView = () => {
     load();
   }, [id, user]);
 
+  // Load analytics
+  useEffect(() => {
+    if (!landing) return;
+    const loadViews = async () => {
+      const { data, count } = await (supabase.from("landing_views" as any).select("*", { count: "exact" }).eq("landing_id", landing.id) as any);
+      const rows = data || [];
+      const now = new Date();
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const recent = rows.filter((r: any) => new Date(r.viewed_at) >= sevenDaysAgo);
+
+      // Build daily chart data
+      const dailyMap: Record<string, number> = {};
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+        dailyMap[d.toISOString().slice(0, 10)] = 0;
+      }
+      recent.forEach((r: any) => {
+        const day = new Date(r.viewed_at).toISOString().slice(0, 10);
+        if (dailyMap[day] !== undefined) dailyMap[day]++;
+      });
+
+      setViewsData({
+        total: count || rows.length,
+        last7: recent.length,
+        daily: Object.entries(dailyMap).map(([date, views]) => ({ date, views })),
+      });
+    };
+    loadViews();
+  }, [landing?.id]);
+
+  const handleTogglePublish = async () => {
+    if (!landing || !user) return;
+    setPublishing(true);
+    try {
+      const isPublished = (landing as any).published;
+      if (isPublished) {
+        // Unpublish
+        await (supabase.from("landings").update({ published: false, published_at: null } as any).eq("id", landing.id).eq("user_id", user.id) as any);
+        setLanding({ ...landing, published: false, published_at: null } as any);
+        toast({ title: "Landing despublicada" });
+      } else {
+        // Publish
+        const slug = (landing as any).slug || slugify(landing.name);
+        await (supabase.from("landings").update({ published: true, slug, published_at: new Date().toISOString() } as any).eq("id", landing.id).eq("user_id", user.id) as any);
+        setLanding({ ...landing, published: true, slug, published_at: new Date().toISOString() } as any);
+        toast({ title: "¡Landing publicada!" });
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const publicUrl = (landing as any)?.slug
+    ? `${window.location.origin}/p/${(landing as any).slug}`
+    : null;
+
+  const handleCopyPublicUrl = () => {
+    if (publicUrl) {
+      navigator.clipboard.writeText(publicUrl);
+      toast({ title: "URL copiada al portapapeles" });
+    }
+  };
+
+  const handleShare = (platform: string) => {
+    if (!publicUrl) return;
+    const text = encodeURIComponent(landing?.name || "Landing Page");
+    const url = encodeURIComponent(publicUrl);
+    const urls: Record<string, string> = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      twitter: `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+      whatsapp: `https://wa.me/?text=${text}%20${url}`,
+    };
+    window.open(urls[platform], "_blank", "noopener,noreferrer");
+  };
+
   const blocks = (editMode ? editedBlocks : (landing?.blocks as unknown as BlockWithImage[])) || [];
 
   const handleEnterEditMode = () => {
