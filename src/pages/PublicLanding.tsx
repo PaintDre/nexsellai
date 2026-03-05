@@ -15,11 +15,11 @@ const PublicLanding = () => {
     if (!slug) return;
     const load = async () => {
       setLoading(true);
-      const { data: l, error } = await supabase
+      const { data: l, error } = await (supabase
         .from("landings")
-        .select("*")
-        .eq("slug" as any, slug)
-        .eq("published" as any, true)
+        .select("*") as any)
+        .eq("slug", slug)
+        .eq("published", true)
         .single();
 
       if (error || !l) {
