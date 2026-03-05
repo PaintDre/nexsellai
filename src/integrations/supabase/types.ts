@@ -285,6 +285,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          banners_reset_at: string | null
+          banners_used: number
           created_at: string
           full_name: string | null
           id: string
@@ -297,6 +299,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          banners_reset_at?: string | null
+          banners_used?: number
           created_at?: string
           full_name?: string | null
           id?: string
@@ -309,6 +313,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          banners_reset_at?: string | null
+          banners_used?: number
           created_at?: string
           full_name?: string | null
           id?: string
