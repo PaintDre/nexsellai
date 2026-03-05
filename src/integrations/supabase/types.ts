@@ -76,6 +76,47 @@ export type Database = {
         }
         Relationships: []
       }
+      landing_versions: {
+        Row: {
+          blocks: Json
+          created_at: string
+          id: string
+          label: string | null
+          landing_id: string
+          theme: string
+          user_id: string
+          version_number: number
+        }
+        Insert: {
+          blocks?: Json
+          created_at?: string
+          id?: string
+          label?: string | null
+          landing_id: string
+          theme?: string
+          user_id: string
+          version_number?: number
+        }
+        Update: {
+          blocks?: Json
+          created_at?: string
+          id?: string
+          label?: string | null
+          landing_id?: string
+          theme?: string
+          user_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landing_versions_landing_id_fkey"
+            columns: ["landing_id"]
+            isOneToOne: false
+            referencedRelation: "landings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       landings: {
         Row: {
           blocks: Json
