@@ -14,12 +14,6 @@ import AudienceSelector from "@/components/AudienceSelector";
 
 const categories = ["home", "fitness", "beauty", "gadget", "pets"];
 
-interface Audience {
-  id: string;
-  name: string;
-  usage_count: number;
-}
-
 const ProductForm = () => {
   const { id } = useParams();
   const isEdit = !!id;
@@ -30,7 +24,7 @@ const ProductForm = () => {
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>("home");
   const [price, setPrice] = useState("");
-  const [selectedAudiences, setSelectedAudiences] = useState<Audience[]>([]);
+  const [selectedAudiences, setSelectedAudiences] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -38,35 +32,15 @@ const ProductForm = () => {
 
   useEffect(() => {
     if (!isEdit || !user) return;
-    supabase.from("products").select("*").eq("id", id).eq("user_id", user.id).single().then(async ({ data, error }) => {
-      if (error || !data) { navigate("/dashboard"); return; }
+    supabase.from("products").select("*").eq("id", id).eq("user_id", user.id).single().then(({ data, error }) => {
+      if (error || !data) { navigate("/products"); return; }
       setName(data.name);
       setCategory(data.category);
       setPrice(data.price.toString());
       setDescription(data.description || "");
       setImages(data.images);
-
-      // Load existing audiences for this product
-      const { data: paData } = await supabase
-        .from("product_audiences" as any)
-        .select("audience_id")
-        .eq("product_id", id);
-
-      if (paData && paData.length > 0) {
-        const ids = paData.map((pa: any) => pa.audience_id);
-        const { data: audiences } = await supabase
-          .from("target_audiences" as any)
-          .select("*")
-          .in("id", ids);
-        if (audiences) setSelectedAudiences(audiences as any);
-      } else if (data.target_audience) {
-        // Backward compat: parse comma-separated string
-        const names = data.target_audience.split(",").map((s: string) => s.trim()).filter(Boolean);
-        const { data: matched } = await supabase
-          .from("target_audiences" as any)
-          .select("*")
-          .in("name", names);
-        if (matched) setSelectedAudiences(matched as any);
+      if (data.target_audience) {
+        setSelectedAudiences(data.target_audience.split(",").map((s: string) => s.trim()).filter(Boolean));
       }
     });
   }, [id, user]);
@@ -107,13 +81,11 @@ const ProductForm = () => {
     }
     setSaving(true);
 
-    const targetAudienceString = selectedAudiences.map((a) => a.name).join(", ");
-
     const productData = {
       name,
       category: category as any,
       price: parseInt(price),
-      target_audience: targetAudienceString,
+      target_audience: selectedAudiences.join(", "),
       description: description || null,
       images,
       user_id: user.id,
@@ -130,26 +102,8 @@ const ProductForm = () => {
       productId = newProduct.id;
     }
 
-    // Sync product_audiences
-    if (productId) {
-      await supabase.from("product_audiences" as any).delete().eq("product_id", productId);
-      if (selectedAudiences.length > 0) {
-        await supabase.from("product_audiences" as any).insert(
-          selectedAudiences.map((a) => ({ product_id: productId, audience_id: a.id }))
-        );
-      }
-
-      // Increment usage_count for selected audiences
-      for (const a of selectedAudiences) {
-        await supabase
-          .from("target_audiences" as any)
-          .update({ usage_count: a.usage_count + 1 })
-          .eq("id", a.id);
-      }
-    }
-
     toast({ title: isEdit ? "Producto actualizado" : "Producto creado" });
-    navigate("/dashboard");
+    navigate(isEdit ? `/products/${productId}` : `/products/${productId}`);
     setSaving(false);
   };
 
@@ -213,7 +167,6 @@ const ProductForm = () => {
               </div>
             </div>
 
-            {/* Target Audience Selector */}
             <AudienceSelector selected={selectedAudiences} onChange={setSelectedAudiences} />
 
             <div className="space-y-2">
