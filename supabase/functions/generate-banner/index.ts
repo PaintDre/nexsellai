@@ -169,34 +169,40 @@ serve(async (req) => {
     }
     const userId = authUser.id;
 
-    // Check plan
+    // Check plan and banner limits
     const { data: profile } = await supabase
       .from("profiles")
-      .select("plan")
+      .select("plan, banners_used, banners_reset_at")
       .eq("user_id", userId)
       .single();
 
-    if (!profile || profile.plan === "free") {
-      return new Response(JSON.stringify({ error: "Banner generation requires Starter or Pro plan" }), {
+    if (!profile) {
+      return new Response(JSON.stringify({ error: "Profile not found" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Check monthly limits
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    const bannerLimits: Record<string, number> = { free: 2, starter: 30, pro: 150 };
+    const limit = bannerLimits[profile.plan] || 2;
 
-    const { count } = await supabase
-      .from("banners")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", userId)
-      .gte("created_at", startOfMonth.toISOString());
+    // Check if monthly reset is needed (30 days)
+    let currentUsed = profile.banners_used || 0;
+    const resetAt = profile.banners_reset_at ? new Date(profile.banners_reset_at) : null;
+    const now = new Date();
+    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
 
-    const limits: Record<string, number> = { starter: 5, pro: 50 };
-    const limit = limits[profile.plan] || 5;
-    if ((count || 0) >= limit) {
-      return new Response(JSON.stringify({ error: `Monthly banner limit reached (${limit})` }), {
+    if (!resetAt || (now.getTime() - resetAt.getTime()) >= thirtyDaysMs) {
+      // Reset counter
+      currentUsed = 0;
+      await supabase
+        .from("profiles")
+        .update({ banners_used: 0, banners_reset_at: now.toISOString() })
+        .eq("user_id", userId);
+    }
+
+    // Check limit
+    if (currentUsed >= limit) {
+      return new Response(JSON.stringify({ error: `Has alcanzado el límite de banners de tu plan (${currentUsed}/${limit}). Actualiza tu plan para seguir generando banners.` }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -350,7 +356,7 @@ CRITICAL RULES:
       .from("banner-images")
       .getPublicUrl(fileName);
 
-    // Save banner record
+    // Save banner record and increment usage
     await supabase.from("banners").insert({
       user_id: userId,
       product_id: product.id || null,
@@ -358,6 +364,12 @@ CRITICAL RULES:
       template_id: templateId,
       output_size: outputSize || "1080x1080",
     });
+
+    // Increment banners_used
+    await supabase
+      .from("profiles")
+      .update({ banners_used: (currentUsed + 1) })
+      .eq("user_id", userId);
 
     // If this is for a landing section, update the landing blocks
     if (landingId && sectionType) {
