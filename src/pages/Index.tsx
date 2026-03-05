@@ -56,9 +56,9 @@ const steps = [
 ];
 
 const plans = [
-  { name: "Free", price: 0, landings: "1 landing", features: ["1 ángulo / 1 hook", "2 banners / mes", "Exportar HTML básico", "Listo para Shopify"] },
-  { name: "Starter", price: 7990, landings: "10 landings / mes", features: ["3 hooks por producto", "30 banners / mes", "Objeciones básicas", "Urgencia editable", "FAQs", "Exportar HTML + CSS"], popular: true },
-  { name: "Pro", price: 14990, landings: "100 landings / mes", features: ["Múltiples ángulos psicológicos", "150 banners / mes", "Hooks para ads", "Variantes de CTA", "Bundles y comparativas", "Microcopys de checkout", "Exportar ZIP completo"] },
+  { name: "Free", price: 0, landings: "1 landing", features: ["1 hook de venta", "2 banners / mes", "Preview de landing", "Exportar HTML básico"], popular: false },
+  { name: "Starter", price: 14990, landings: "10 landings / mes", features: ["3 hooks por producto", "30 banners / mes", "Imágenes IA en landings", "Objeciones y urgencia", "FAQs editables", "Exportar HTML + CSS"], popular: true },
+  { name: "Pro", price: 34990, landings: "100 landings / mes", features: ["Ángulos psicológicos ilimitados", "150 banners / mes", "Hooks optimizados para ads", "Variantes de CTA", "Bundles y comparativas", "Microcopys de checkout", "Exportar ZIP completo"], popular: false },
 ];
 
 const Index = () => {
