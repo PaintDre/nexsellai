@@ -419,6 +419,17 @@ const LandingView = () => {
                   </DropdownMenu>
                 )}
 
+                <Button variant="outline" size="sm" onClick={handleDuplicate}>
+                  <Copy className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">Duplicar</span>
+                </Button>
+
+                <VersionHistory
+                  landingId={landing.id}
+                  userId={user!.id}
+                  onRestore={handleRestoreVersion}
+                />
+
                 <Button variant="outline" size="sm" asChild>
                   <Link to={`/landings/${landing.id}/preview`}>
                     <Maximize2 className="h-4 w-4 mr-1" /> Vista completa

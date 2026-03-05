@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,7 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Eye, Download, Loader2, Maximize2 } from "lucide-react";
+import { FileText, Eye, Download, Loader2, Maximize2, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generateLandingHTML } from "@/lib/exportLanding";
 import { type LandingTheme } from "@/components/landing/themes";
