@@ -568,6 +568,42 @@ const LandingView = () => {
                   <Download className="h-4 w-4 mr-1" />
                   Exportar
                 </Button>
+
+                {/* Publish button */}
+                <Button
+                  variant={(landing as any).published ? "default" : "outline"}
+                  size="sm"
+                  onClick={handleTogglePublish}
+                  disabled={publishing}
+                >
+                  {publishing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> :
+                    (landing as any).published ? <Globe className="h-4 w-4 mr-1" /> : <GlobeLock className="h-4 w-4 mr-1" />}
+                  <span className="hidden sm:inline">{(landing as any).published ? "Publicada" : "Publicar"}</span>
+                </Button>
+
+                {/* Share & public URL */}
+                {(landing as any).published && publicUrl && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Share2 className="h-4 w-4 mr-1" />
+                        <span className="hidden sm:inline">Compartir</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={handleCopyPublicUrl}>
+                        <Copy className="h-4 w-4 mr-2" /> Copiar URL
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => window.open(publicUrl, "_blank")}>
+                        <ExternalLink className="h-4 w-4 mr-2" /> Abrir en nueva pestaña
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleShare("facebook")}>Facebook</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleShare("twitter")}>X (Twitter)</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleShare("linkedin")}>LinkedIn</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleShare("whatsapp")}>WhatsApp</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </>
             )}
           </div>
