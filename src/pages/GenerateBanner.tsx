@@ -20,7 +20,6 @@ type Product = Tables<"products">;
 interface GeneratedBanner {
   templateId: string;
   templateName: string;
-  variation: number;
   imageUrl: string;
   sequencePosition: number;
   totalInSequence: number;
@@ -94,46 +93,41 @@ const GenerateBanner = () => {
         const templateId = sequence[i];
         const templateName = getTemplateName(templateId);
 
-        for (let variation = 1; variation <= 2; variation++) {
-          calls.push(
-            (async () => {
-              const { data, error } = await supabase.functions.invoke("generate-banner", {
-                body: {
-                  product: {
-                    id: product.id,
-                    name: product.name,
-                    price: product.price,
-                    category: product.category,
-                    description: description,
-                    target_audience: product.target_audience,
-                    images: product.images,
-                  },
-                  templateId,
-                  outputSize,
-                  variation,
-                  bannerIndex: i + 1,
-                  sequencePosition: i + 1,
-                  totalInSequence: sequence.length,
+        calls.push(
+          (async () => {
+            const { data, error } = await supabase.functions.invoke("generate-banner", {
+              body: {
+                product: {
+                  id: product.id,
+                  name: product.name,
+                  price: product.price,
+                  category: product.category,
+                  description: description,
+                  target_audience: product.target_audience,
+                  images: product.images,
                 },
-              });
-              if (error) throw error;
-              if (data?.error) throw new Error(data.error);
-              return {
                 templateId,
-                templateName,
-                variation,
-                imageUrl: data.imageUrl,
+                outputSize,
+                bannerIndex: i + 1,
                 sequencePosition: i + 1,
                 totalInSequence: sequence.length,
-              };
-            })()
-          );
-        }
+              },
+            });
+            if (error) throw error;
+            if (data?.error) throw new Error(data.error);
+            return {
+              templateId,
+              templateName,
+              imageUrl: data.imageUrl,
+              sequencePosition: i + 1,
+              totalInSequence: sequence.length,
+            };
+          })()
+        );
       }
 
       const results = await Promise.all(calls);
-      // Sort by sequence position then variation
-      results.sort((a, b) => a.sequencePosition - b.sequencePosition || a.variation - b.variation);
+      results.sort((a, b) => a.sequencePosition - b.sequencePosition);
       setGeneratedBanners(results);
       toast({
         title: `¡${results.length} banners generados!`,
@@ -152,7 +146,7 @@ const GenerateBanner = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `banner-${product?.name || "image"}-${banner.templateId}-v${banner.variation}-${outputSize}.png`;
+    a.download = `banner-${product?.name || "image"}-${banner.templateId}-${outputSize}.png`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -286,7 +280,7 @@ const GenerateBanner = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Se generará una secuencia de venta automática con 2 variaciones por etapa.
+                    Se generará una secuencia de venta automática — 1 banner por etapa del embudo.
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {bannerQuantityOptions.map((opt) => (
@@ -302,9 +296,6 @@ const GenerateBanner = () => {
                       >
                         <span className="text-2xl font-bold">{opt.value}</span>
                         <p className="text-xs text-muted-foreground mt-1">{opt.description}</p>
-                        <p className="text-[10px] text-muted-foreground/70 mt-0.5">
-                          ({opt.value * 2} imágenes total)
-                        </p>
                       </button>
                     ))}
                   </div>
@@ -355,14 +346,10 @@ const GenerateBanner = () => {
               {/* Summary */}
               <Card>
                 <CardContent className="pt-6">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
                     <div>
                       <p className="text-xs text-muted-foreground">Secuencia</p>
                       <p className="font-semibold text-sm">{sequence.length} etapas</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Variaciones</p>
-                      <p className="font-semibold text-sm">2 por etapa</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Tamaño</p>
@@ -370,7 +357,7 @@ const GenerateBanner = () => {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Total</p>
-                      <p className="font-semibold text-sm">{sequence.length * 2} imágenes</p>
+                      <p className="font-semibold text-sm">{sequence.length} banners</p>
                     </div>
                   </div>
                   {/* Sequence chips */}
@@ -397,18 +384,18 @@ const GenerateBanner = () => {
                   {loading ? (
                     <>
                       <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                      Generando {sequence.length * 2} banners...
+                      Generando {sequence.length} banners...
                     </>
                   ) : (
                     <>
                       <Sparkles className="h-5 w-5 mr-2" />
-                      Generar Secuencia de Venta ({sequence.length * 2} banners)
+                      Generar Secuencia de Venta ({sequence.length} banners)
                     </>
                   )}
                 </Button>
               )}
 
-              {/* Results grouped by sequence stage */}
+              {/* Results */}
               {generatedBanners.length > 0 && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
@@ -420,42 +407,31 @@ const GenerateBanner = () => {
                     </Button>
                   </div>
 
-                  {/* Group by sequence position */}
-                  {sequence.map((tid, seqIdx) => {
-                    const stageBanners = generatedBanners.filter(
-                      (b) => b.sequencePosition === seqIdx + 1
-                    );
-                    if (stageBanners.length === 0) return null;
-                    const tpl = bannerTemplates.find((t) => t.id === tid);
+                  {/* Each banner as its own stage */}
+                  {generatedBanners.map((banner, idx) => {
+                    const tpl = bannerTemplates.find((t) => t.id === banner.templateId);
                     return (
-                      <div key={seqIdx} className="space-y-3">
+                      <div key={idx} className="space-y-3">
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold bg-primary/10 text-primary rounded-full px-3 py-1">
-                            {tpl?.icon} {seqIdx + 1}/{sequence.length} — {tpl?.name}
+                            {tpl?.icon} {banner.sequencePosition}/{banner.totalInSequence} — {tpl?.name}
                           </span>
                         </div>
-                        <div className="grid sm:grid-cols-2 gap-4">
-                          {stageBanners.map((banner, idx) => (
-                            <div key={idx} className="space-y-2 group">
-                              <div
-                                className="rounded-lg overflow-hidden border bg-muted cursor-pointer relative"
-                                onClick={() => setPreviewBanner(banner)}
-                              >
-                                <img src={banner.imageUrl} alt={`${banner.templateName} v${banner.variation}`} className="w-full h-auto" />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                  <Eye className="h-8 w-8 text-white" />
-                                </div>
-                              </div>
-                              <div className="flex justify-between items-center">
-                                <span className="text-xs text-muted-foreground">
-                                  Variación {banner.variation}
-                                </span>
-                                <Button variant="outline" size="sm" onClick={() => handleDownload(banner)}>
-                                  <Download className="h-3 w-3 mr-1" /> Descargar
-                                </Button>
-                              </div>
+                        <div className="max-w-lg mx-auto space-y-2 group">
+                          <div
+                            className="rounded-lg overflow-hidden border bg-muted cursor-pointer relative"
+                            onClick={() => setPreviewBanner(banner)}
+                          >
+                            <img src={banner.imageUrl} alt={banner.templateName} className="w-full h-auto" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                              <Eye className="h-8 w-8 text-white" />
                             </div>
-                          ))}
+                          </div>
+                          <div className="flex justify-end">
+                            <Button variant="outline" size="sm" onClick={() => handleDownload(banner)}>
+                              <Download className="h-3 w-3 mr-1" /> Descargar
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     );
@@ -508,17 +484,14 @@ const GenerateBanner = () => {
               <div className="bg-muted flex items-center justify-center max-h-[70vh] overflow-auto">
                 <img
                   src={previewBanner.imageUrl}
-                  alt={`${previewBanner.templateName} v${previewBanner.variation}`}
+                  alt={previewBanner.templateName}
                   className="w-full h-auto"
                 />
               </div>
               <div className="p-4 flex items-center justify-between">
-                <div>
-                  <p className="font-semibold text-sm">
-                    {previewBanner.sequencePosition}/{previewBanner.totalInSequence} — {previewBanner.templateName}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Variación {previewBanner.variation}</p>
-                </div>
+                <p className="font-semibold text-sm">
+                  {previewBanner.sequencePosition}/{previewBanner.totalInSequence} — {previewBanner.templateName}
+                </p>
                 <Button size="sm" onClick={() => handleDownload(previewBanner)}>
                   <Download className="h-4 w-4 mr-2" /> Descargar
                 </Button>

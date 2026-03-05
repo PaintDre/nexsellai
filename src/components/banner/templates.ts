@@ -82,7 +82,7 @@ export const bannerSizes = [
 ];
 
 export const bannerQuantityOptions = [
-  { value: 2, label: "2 banners", description: "Prueba rápida con 2 variaciones" },
-  { value: 3, label: "3 banners", description: "Balance ideal para testear" },
-  { value: 5, label: "5 banners", description: "Máxima variedad para campañas" },
+  { value: 2, label: "2 banners", description: "Secuencia rápida de venta" },
+  { value: 3, label: "3 banners", description: "Balance ideal para campañas" },
+  { value: 5, label: "5 banners", description: "Secuencia completa de venta" },
 ];
