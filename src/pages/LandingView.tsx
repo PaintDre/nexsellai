@@ -6,7 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2, ImagePlus, Sparkles, Pencil, Save, X } from "lucide-react";
+import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2, ImagePlus, Sparkles, Pencil, Save, X, Copy } from "lucide-react";
 import { exportLandingAsHTML, exportLandingAsZip } from "@/lib/exportLanding";
 import LandingRenderer from "@/components/landing/LandingRenderer";
 import { themes, type LandingTheme } from "@/components/landing/themes";
@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { TemplateGallery } from "@/components/banner/TemplateGallery";
 import { bannerSizes } from "@/components/banner/templates";
+import VersionHistory from "@/components/landing/VersionHistory";
 
 type Landing = Tables<"landings">;
 type Product = Tables<"products">;
@@ -121,6 +122,43 @@ const LandingView = () => {
     if (!landing || !user) return;
     setSaving(true);
     try {
+      // Save version snapshot of previous blocks before updating
+      const prevBlocks = landing.blocks;
+      const { data: versionCount } = await supabase
+        .from("landing_versions")
+        .select("id", { count: "exact", head: true })
+        .eq("landing_id", landing.id);
+
+      const nextVersion = (versionCount as any)?.length ? (versionCount as any).length + 1 : 1;
+
+      // Count existing versions to determine version_number
+      const { count } = await supabase
+        .from("landing_versions")
+        .select("*", { count: "exact", head: true })
+        .eq("landing_id", landing.id);
+
+      await supabase.from("landing_versions").insert({
+        landing_id: landing.id,
+        user_id: user.id,
+        blocks: prevBlocks,
+        theme: (landing as any).theme || "clean",
+        version_number: (count || 0) + 1,
+      } as any);
+
+      // Clean up old versions (keep max 20)
+      if ((count || 0) >= 20) {
+        const { data: oldest } = await supabase
+          .from("landing_versions")
+          .select("id")
+          .eq("landing_id", landing.id)
+          .order("created_at", { ascending: true })
+          .limit(1);
+        if (oldest && oldest.length > 0) {
+          await supabase.from("landing_versions").delete().eq("id", oldest[0].id);
+        }
+      }
+
+      // Now update the landing
       const { error: updateError } = await supabase
         .from("landings")
         .update({ blocks: editedBlocks as any, updated_at: new Date().toISOString() })
@@ -128,7 +166,6 @@ const LandingView = () => {
         .eq("user_id", user.id);
       if (updateError) throw updateError;
 
-      // Update local state
       setLanding({ ...landing, blocks: editedBlocks as any });
       setEditMode(false);
       setHasChanges(false);
@@ -137,6 +174,66 @@ const LandingView = () => {
       toast({ title: "Error al guardar", description: err.message, variant: "destructive" });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDuplicate = async () => {
+    if (!landing || !user) return;
+    try {
+      const { data, error: insertError } = await supabase
+        .from("landings")
+        .insert({
+          user_id: user.id,
+          product_id: landing.product_id,
+          name: `${landing.name} (copia)`,
+          blocks: landing.blocks,
+          mode: landing.mode,
+          intensity: landing.intensity,
+          theme: (landing as any).theme || "clean",
+          has_offer: landing.has_offer,
+          guarantee: landing.guarantee,
+        })
+        .select("id")
+        .single();
+      if (insertError) throw insertError;
+      toast({ title: "Landing duplicada" });
+      navigate(`/landings/${data.id}`);
+    } catch (err: any) {
+      toast({ title: "Error al duplicar", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const handleRestoreVersion = async (blocks: any[], versionTheme: string) => {
+    if (!landing || !user) return;
+    try {
+      // Save current state as a version before restoring
+      const { count } = await supabase
+        .from("landing_versions")
+        .select("*", { count: "exact", head: true })
+        .eq("landing_id", landing.id);
+
+      await supabase.from("landing_versions").insert({
+        landing_id: landing.id,
+        user_id: user.id,
+        blocks: landing.blocks,
+        theme: (landing as any).theme || "clean",
+        version_number: (count || 0) + 1,
+        label: "Pre-restauración",
+      } as any);
+
+      // Update landing with restored version
+      const { error: updateError } = await supabase
+        .from("landings")
+        .update({ blocks: blocks as any, theme: versionTheme, updated_at: new Date().toISOString() })
+        .eq("id", landing.id)
+        .eq("user_id", user.id);
+      if (updateError) throw updateError;
+
+      setLanding({ ...landing, blocks: blocks as any, theme: versionTheme as any });
+      setTheme(versionTheme as LandingTheme);
+      toast({ title: "Versión restaurada" });
+    } catch (err: any) {
+      toast({ title: "Error al restaurar", description: err.message, variant: "destructive" });
     }
   };
 
@@ -321,6 +418,17 @@ const LandingView = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
+
+                <Button variant="outline" size="sm" onClick={handleDuplicate}>
+                  <Copy className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">Duplicar</span>
+                </Button>
+
+                <VersionHistory
+                  landingId={landing.id}
+                  userId={user!.id}
+                  onRestore={handleRestoreVersion}
+                />
 
                 <Button variant="outline" size="sm" asChild>
                   <Link to={`/landings/${landing.id}/preview`}>

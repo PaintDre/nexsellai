@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, memo } from "react";
 import {
   CheckCircle2, ShieldCheck, Star, Quote, Clock,
   ChevronDown, ChevronUp, Zap, Gift, Award,
@@ -710,4 +710,4 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
   );
 };
 
-export default LandingRenderer;
+export default memo(LandingRenderer);

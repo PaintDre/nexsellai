@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,7 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Eye, Download, Loader2, Maximize2 } from "lucide-react";
+import { FileText, Eye, Download, Loader2, Maximize2, Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generateLandingHTML } from "@/lib/exportLanding";
 import { type LandingTheme } from "@/components/landing/themes";
@@ -48,6 +48,41 @@ const Landings = () => {
     }
   };
 
+  const handleDuplicate = useCallback(async (landing: LandingWithProduct) => {
+    if (!user) return;
+    try {
+      const { error: insertError } = await supabase
+        .from("landings")
+        .insert({
+          user_id: user.id,
+          product_id: landing.product_id,
+          name: `${landing.name} (copia)`,
+          blocks: landing.blocks,
+          mode: landing.mode,
+          intensity: landing.intensity,
+          theme: (landing as any).theme || "clean",
+          has_offer: landing.has_offer,
+          guarantee: landing.guarantee,
+        });
+      if (insertError) throw insertError;
+      toast({ title: "Landing duplicada" });
+      // Reload
+      const { data: landingsData } = await supabase
+        .from("landings")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      if (landingsData) {
+        const productIds = [...new Set(landingsData.map(l => l.product_id))];
+        const { data: products } = await supabase.from("products").select("*").in("id", productIds);
+        const productMap = new Map((products || []).map(p => [p.id, p]));
+        setLandings(landingsData.map(l => ({ ...l, product: productMap.get(l.product_id) || null })));
+      }
+    } catch (err: any) {
+      toast({ title: "Error al duplicar", description: err.message, variant: "destructive" });
+    }
+  }, [user, toast]);
+
   useEffect(() => {
     if (!user) return;
     const load = async () => {
@@ -84,13 +119,13 @@ const Landings = () => {
     return (blocks as any[]).find((b: any) => b.type === "hero");
   };
 
-  const getProductImage = (product?: Product | null): string | null => {
+  const getProductImage = useCallback((product?: Product | null): string | null => {
     if (!product || !product.images || product.images.length === 0) return null;
     const img = product.images[0];
     if (img.startsWith("http")) return img;
     const { data } = supabase.storage.from("product-images").getPublicUrl(img);
     return data?.publicUrl || null;
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -156,17 +191,20 @@ const Landings = () => {
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground">{new Date(landing.created_at).toLocaleDateString("es-CL")}</p>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" asChild className="flex-1 text-xs">
-                      <Link to={`/landings/${landing.id}`}><Eye className="h-3 w-3 mr-1" /> Editor</Link>
-                    </Button>
-                    <Button variant="default" size="sm" asChild className="flex-1 text-xs">
-                      <Link to={`/landings/${landing.id}/preview`}><Maximize2 className="h-3 w-3 mr-1" /> Preview</Link>
-                    </Button>
-                    <Button variant="secondary" size="sm" className="text-xs" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
-                      {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
-                    </Button>
-                  </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" asChild className="flex-1 text-xs">
+                        <Link to={`/landings/${landing.id}`}><Eye className="h-3 w-3 mr-1" /> Editor</Link>
+                      </Button>
+                      <Button variant="default" size="sm" asChild className="flex-1 text-xs">
+                        <Link to={`/landings/${landing.id}/preview`}><Maximize2 className="h-3 w-3 mr-1" /> Preview</Link>
+                      </Button>
+                      <Button variant="secondary" size="sm" className="text-xs" onClick={() => handleDuplicate(landing)}>
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                      <Button variant="secondary" size="sm" className="text-xs" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
+                        {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+                      </Button>
+                    </div>
                 </CardContent>
               </Card>
             );
