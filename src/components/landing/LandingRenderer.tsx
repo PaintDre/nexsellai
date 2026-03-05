@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   CheckCircle2, ShieldCheck, Star, Quote, Clock,
   ChevronDown, ChevronUp, Zap, Gift, Award,
@@ -8,6 +8,8 @@ import TrustBadges from "./TrustBadges";
 import { themes, type LandingTheme, type ThemeConfig } from "./themes";
 import SectionDivider from "./SectionDivider";
 import SocialProof from "./SocialProof";
+import EditableText from "./EditableText";
+import BlockToolbar from "./BlockToolbar";
 
 interface Block {
   type: string;
@@ -27,9 +29,11 @@ interface LandingRendererProps {
   } | null;
   imagePreview?: string | null;
   theme?: LandingTheme;
+  editable?: boolean;
+  onBlocksChange?: (blocks: Block[]) => void;
 }
 
-const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: LandingRendererProps) => {
+const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", editable = false, onBlocksChange }: LandingRendererProps) => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const t = themes[theme];
 
@@ -37,6 +41,40 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
   const price = product?.price ?? 0;
   const formattedPrice = `$${price.toLocaleString("es-CL")}`;
   const productName = product?.name ?? "Producto";
+
+  // Editing helpers
+  const updateBlock = useCallback((type: string, updates: Partial<Block>) => {
+    if (!onBlocksChange) return;
+    const newBlocks = blocks.map(b => b.type === type ? { ...b, ...updates } : b);
+    onBlocksChange(newBlocks);
+  }, [blocks, onBlocksChange]);
+
+  const updateBlockContentItem = useCallback((type: string, index: number, value: string) => {
+    if (!onBlocksChange) return;
+    const newBlocks = blocks.map(b => {
+      if (b.type === type && Array.isArray(b.content)) {
+        const newContent = [...b.content] as any[];
+        newContent[index] = value;
+        return { ...b, content: newContent } as Block;
+      }
+      return b;
+    });
+    onBlocksChange(newBlocks);
+  }, [blocks, onBlocksChange]);
+
+  const moveBlock = useCallback((index: number, direction: "up" | "down") => {
+    if (!onBlocksChange) return;
+    const newBlocks = [...blocks];
+    const target = direction === "up" ? index - 1 : index + 1;
+    if (target < 0 || target >= newBlocks.length) return;
+    [newBlocks[index], newBlocks[target]] = [newBlocks[target], newBlocks[index]];
+    onBlocksChange(newBlocks);
+  }, [blocks, onBlocksChange]);
+
+  const deleteBlock = useCallback((index: number) => {
+    if (!onBlocksChange) return;
+    onBlocksChange(blocks.filter((_, i) => i !== index));
+  }, [blocks, onBlocksChange]);
 
   const hero = getBlock("hero");
   const benefits = getBlock("benefits");
@@ -79,13 +117,27 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
     </div>
   );
 
-  const SectionTitle = ({ children, className = "", alt = false }: { children: React.ReactNode; className?: string; alt?: boolean }) => (
-    <h2 className={`text-3xl md:text-4xl font-bold tracking-tight text-center mb-10 ${getHeading(alt)} ${className}`}
-      style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-    >
-      {children}
-    </h2>
-  );
+  const SectionTitle = ({ children, className = "", alt = false, blockType }: { children: React.ReactNode; className?: string; alt?: boolean; blockType?: string }) => {
+    if (editable && blockType) {
+      return (
+        <EditableText
+          value={String(children)}
+          onChange={(v) => updateBlock(blockType, { title: v })}
+          editable
+          tag="h2"
+          className={`text-3xl md:text-4xl font-bold tracking-tight text-center mb-10 ${getHeading(alt)} ${className}`}
+          style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+        />
+      );
+    }
+    return (
+      <h2 className={`text-3xl md:text-4xl font-bold tracking-tight text-center mb-10 ${getHeading(alt)} ${className}`}
+        style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+      >
+        {children}
+      </h2>
+    );
+  };
 
   const Section = ({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) => (
     <section
@@ -95,6 +147,34 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
       {children}
     </section>
   );
+
+  // Wrap section with edit toolbar
+  const EditableSection = ({ children, blockType, blockTitle, className = "", delay = 0 }: {
+    children: React.ReactNode;
+    blockType: string;
+    blockTitle?: string;
+    className?: string;
+    delay?: number;
+  }) => {
+    const blockIndex = blocks.findIndex(b => b.type === blockType);
+    if (!editable) {
+      return <Section className={className} delay={delay}>{children}</Section>;
+    }
+    return (
+      <Section className={`${className} relative group`} delay={delay}>
+        <BlockToolbar
+          blockType={blockType}
+          blockTitle={blockTitle}
+          index={blockIndex}
+          total={blocks.length}
+          onMoveUp={() => moveBlock(blockIndex, "up")}
+          onMoveDown={() => moveBlock(blockIndex, "down")}
+          onDelete={() => deleteBlock(blockIndex)}
+        />
+        {children}
+      </Section>
+    );
+  };
 
   const featureIcons = [Zap, Gift, Award, CheckCircle2, Star, ShieldCheck];
 
@@ -109,7 +189,6 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
 
   const avatarColors = ["bg-blue-500", "bg-emerald-500", "bg-purple-500", "bg-amber-500", "bg-rose-500", "bg-cyan-500"];
 
-  // Determine hero image: use block's generated image_url first, then product image
   const heroImage = hero?.image_url || imagePreview;
 
   return (
@@ -117,27 +196,29 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
 
       {/* ═══ HERO ═══ */}
       {hero && (
-        <Section className={`relative overflow-hidden ${hero.image_url ? 'py-0' : `py-20 md:py-28 ${t.heroBg}`}`}>
-          {/* Hero with banner background */}
+        <EditableSection blockType="hero" blockTitle={hero.title} className={`relative overflow-hidden ${hero.image_url ? 'py-0' : `py-20 md:py-28 ${t.heroBg}`}`}>
           {hero.image_url ? (
             <div className="relative min-h-[500px] md:min-h-[600px] flex items-center">
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${hero.image_url})` }}
-              />
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${hero.image_url})` }} />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
               <div className="relative z-10 mx-auto max-w-6xl px-6 py-20 md:py-28">
                 <div className="max-w-2xl space-y-8">
-                  <h1
+                  <EditableText
+                    value={hero.title || ""}
+                    onChange={(v) => updateBlock("hero", { title: v })}
+                    editable={editable}
+                    tag="h1"
                     className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] text-white drop-shadow-lg"
                     style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  >
-                    {hero.title}
-                  </h1>
+                  />
                   {hero.content && (
-                    <p className="text-lg md:text-xl leading-relaxed max-w-xl text-gray-200">
-                      {typeof hero.content === "string" ? hero.content : ""}
-                    </p>
+                    <EditableText
+                      value={typeof hero.content === "string" ? hero.content : ""}
+                      onChange={(v) => updateBlock("hero", { content: v })}
+                      editable={editable}
+                      tag="p"
+                      className="text-lg md:text-xl leading-relaxed max-w-xl text-gray-200"
+                    />
                   )}
                   <SocialProof theme={theme} />
                   <CTAWithTrust className="items-start" trustColor="text-gray-400" />
@@ -145,20 +226,25 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               </div>
             </div>
           ) : (
-            /* Hero without banner - standard layout */
             <div className="mx-auto max-w-6xl px-6">
               <div className={`grid ${imagePreview ? "lg:grid-cols-2" : ""} gap-12 items-center`}>
                 <div className="space-y-8">
-                  <h1
+                  <EditableText
+                    value={hero.title || ""}
+                    onChange={(v) => updateBlock("hero", { title: v })}
+                    editable={editable}
+                    tag="h1"
                     className={`text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] ${t.heroText}`}
                     style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  >
-                    {hero.title}
-                  </h1>
+                  />
                   {hero.content && (
-                    <p className={`text-lg md:text-xl leading-relaxed max-w-xl ${theme === "bold" ? "text-gray-300" : t.bodyColor}`}>
-                      {typeof hero.content === "string" ? hero.content : ""}
-                    </p>
+                    <EditableText
+                      value={typeof hero.content === "string" ? hero.content : ""}
+                      onChange={(v) => updateBlock("hero", { content: v })}
+                      editable={editable}
+                      tag="p"
+                      className={`text-lg md:text-xl leading-relaxed max-w-xl ${theme === "bold" ? "text-gray-300" : t.bodyColor}`}
+                    />
                   )}
                   <SocialProof theme={theme} />
                   <CTAWithTrust className="items-start" trustColor={theme === "bold" ? "text-gray-500" : undefined} />
@@ -166,11 +252,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
                 {imagePreview && (
                   <div className="flex justify-center lg:justify-end">
                     <div className="relative">
-                      <img
-                        src={imagePreview}
-                        alt={productName}
-                        className="rounded-2xl shadow-2xl max-h-[480px] object-cover w-full max-w-md ring-1 ring-black/5"
-                      />
+                      <img src={imagePreview} alt={productName} className="rounded-2xl shadow-2xl max-h-[480px] object-cover w-full max-w-md ring-1 ring-black/5" />
                       <div className="absolute -inset-1 rounded-2xl bg-gradient-to-tr from-black/5 to-transparent pointer-events-none" />
                     </div>
                   </div>
@@ -178,26 +260,20 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               </div>
             </div>
           )}
-        </Section>
+        </EditableSection>
       )}
 
       <SectionDivider theme={theme} from="hero" to="alt" />
 
       {/* ═══ BENEFITS ═══ */}
       {benefits && (
-        <Section className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={100}>
+        <EditableSection blockType="benefits" blockTitle={benefits.title} className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={100}>
           <div className="mx-auto max-w-5xl px-6">
-            <SectionTitle alt>{benefits.title || "Beneficios"}</SectionTitle>
-            {/* Benefits with banner - 50/50 split layout */}
+            <SectionTitle alt blockType="benefits">{benefits.title || "Beneficios"}</SectionTitle>
             {benefits.image_url ? (
               <div className="grid lg:grid-cols-2 gap-10 items-center">
                 <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <img
-                    src={benefits.image_url}
-                    alt={benefits.title || "Beneficios"}
-                    className="w-full h-auto object-cover"
-                    loading="lazy"
-                  />
+                  <img src={benefits.image_url} alt={benefits.title || "Beneficios"} className="w-full h-auto object-cover" loading="lazy" />
                 </div>
                 <div className="space-y-4">
                   {Array.isArray(benefits.content) ? (
@@ -208,17 +284,22 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
                           <div className={`h-10 w-10 rounded-lg ${t.accentBg} flex items-center justify-center shrink-0`}>
                             <Icon className={`h-5 w-5 ${getHeading(true)}`} />
                           </div>
-                          <p className={`text-base leading-relaxed ${getBody(true)}`}>{item}</p>
+                          <EditableText
+                            value={item}
+                            onChange={(v) => updateBlockContentItem("benefits", i, v)}
+                            editable={editable}
+                            tag="p"
+                            className={`text-base leading-relaxed ${getBody(true)}`}
+                          />
                         </div>
                       );
                     })
                   ) : (
-                    <p className={`text-lg ${getBody(true)}`}>{benefits.content as string}</p>
+                    <EditableText value={benefits.content as string} onChange={(v) => updateBlock("benefits", { content: v })} editable={editable} tag="p" className={`text-lg ${getBody(true)}`} />
                   )}
                 </div>
               </div>
             ) : (
-              /* Benefits without banner - grid layout */
               Array.isArray(benefits.content) ? (
                 <div className="grid sm:grid-cols-2 gap-5">
                   {(benefits.content as string[]).map((item, i) => {
@@ -228,24 +309,30 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
                         <div className={`h-10 w-10 rounded-lg ${t.accentBg} flex items-center justify-center shrink-0`}>
                           <Icon className={`h-5 w-5 ${getHeading(true)}`} />
                         </div>
-                        <p className={`text-base leading-relaxed ${getBody(true)}`}>{item}</p>
+                        <EditableText
+                          value={item}
+                          onChange={(v) => updateBlockContentItem("benefits", i, v)}
+                          editable={editable}
+                          tag="p"
+                          className={`text-base leading-relaxed ${getBody(true)}`}
+                        />
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <p className={`text-center text-lg ${getBody(true)}`}>{benefits.content as string}</p>
+                <EditableText value={String(benefits.content)} onChange={(v) => updateBlock("benefits", { content: v })} editable={editable} tag="p" className={`text-center text-lg ${getBody(true)}`} />
               )
             )}
           </div>
-        </Section>
+        </EditableSection>
       )}
 
       {/* ═══ FEATURES ═══ */}
       {features && (
-        <Section className={`py-16 md:py-24 ${t.sectionBg}`} delay={200}>
+        <EditableSection blockType="features" blockTitle={features.title} className={`py-16 md:py-24 ${t.sectionBg}`} delay={200}>
           <div className="mx-auto max-w-4xl px-6">
-            <SectionTitle>{features.title || "Características"}</SectionTitle>
+            <SectionTitle blockType="features">{features.title || "Características"}</SectionTitle>
             {features.image_url ? (
               <div className="grid lg:grid-cols-2 gap-10 items-center">
                 <div className="space-y-4">
@@ -254,21 +341,16 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
                       {(features.content as string[]).map((item, i) => (
                         <li key={i} className={`flex items-start gap-4 text-base ${t.bodyColor}`}>
                           <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
-                          <span>{item}</span>
+                          <EditableText value={item} onChange={(v) => updateBlockContentItem("features", i, v)} editable={editable} tag="span" className="" />
                         </li>
                       ))}
                     </ul>
                   ) : (
-                    <p className={`text-lg leading-relaxed ${t.bodyColor}`}>{features.content as string}</p>
+                    <EditableText value={features.content as string} onChange={(v) => updateBlock("features", { content: v })} editable={editable} tag="p" className={`text-lg leading-relaxed ${t.bodyColor}`} />
                   )}
                 </div>
                 <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <img
-                    src={features.image_url}
-                    alt={features.title || "Características"}
-                    className="w-full h-auto object-cover"
-                    loading="lazy"
-                  />
+                  <img src={features.image_url} alt={features.title || "Características"} className="w-full h-auto object-cover" loading="lazy" />
                 </div>
               </div>
             ) : (
@@ -277,23 +359,23 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
                   {(features.content as string[]).map((item, i) => (
                     <li key={i} className={`flex items-start gap-4 text-base ${t.bodyColor}`}>
                       <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
-                      <span>{item}</span>
+                      <EditableText value={item} onChange={(v) => updateBlockContentItem("features", i, v)} editable={editable} tag="span" className="" />
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className={`text-lg leading-relaxed ${t.bodyColor}`}>{features.content as string}</p>
+                <EditableText value={String(features.content)} onChange={(v) => updateBlock("features", { content: v })} editable={editable} tag="p" className={`text-lg leading-relaxed ${t.bodyColor}`} />
               )
             )}
           </div>
-        </Section>
+        </EditableSection>
       )}
 
       {/* ═══ TESTIMONIALS ═══ */}
       {testimonials && (
-        <Section className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={300}>
+        <EditableSection blockType="testimonials" blockTitle={testimonials.title} className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={300}>
           <div className="mx-auto max-w-5xl px-6">
-            <SectionTitle alt>{testimonials.title || "Lo que dicen nuestros clientes"}</SectionTitle>
+            <SectionTitle alt blockType="testimonials">{testimonials.title || "Lo que dicen nuestros clientes"}</SectionTitle>
             {Array.isArray(testimonials.content) ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {(testimonials.content as string[]).map((item, i) => (
@@ -304,7 +386,13 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
                         <Star key={j} className={`h-4 w-4 ${t.starColor}`} />
                       ))}
                     </div>
-                    <p className={`text-sm leading-relaxed italic ${getMuted(true)}`}>"{item}"</p>
+                    <EditableText
+                      value={item}
+                      onChange={(v) => updateBlockContentItem("testimonials", i, v)}
+                      editable={editable}
+                      tag="p"
+                      className={`text-sm leading-relaxed italic ${getMuted(true)}`}
+                    />
                     <div className="mt-4 flex items-center gap-3">
                       <div className={`h-8 w-8 rounded-full ${avatarColors[i % avatarColors.length]} flex items-center justify-center text-xs font-bold text-white`}>
                         {String.fromCharCode(65 + (i % 26))}
@@ -315,38 +403,38 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
                 ))}
               </div>
             ) : (
-              <p className={`text-center italic ${getMuted(true)}`}>{testimonials.content as string}</p>
+              <EditableText value={String(testimonials.content)} onChange={(v) => updateBlock("testimonials", { content: v })} editable={editable} tag="p" className={`text-center italic ${getMuted(true)}`} />
             )}
           </div>
-        </Section>
+        </EditableSection>
       )}
 
       {/* ═══ OBJECTIONS ═══ */}
       {objections && (
-        <Section className={`py-16 md:py-24 ${t.sectionBg}`} delay={400}>
+        <EditableSection blockType="objections" blockTitle={objections.title} className={`py-16 md:py-24 ${t.sectionBg}`} delay={400}>
           <div className="mx-auto max-w-3xl px-6">
-            <SectionTitle>{objections.title || "¿Aún tienes dudas?"}</SectionTitle>
+            <SectionTitle blockType="objections">{objections.title || "¿Aún tienes dudas?"}</SectionTitle>
             {Array.isArray(objections.content) ? (
               <div className="space-y-3">
                 {(objections.content as string[]).map((item, i) => (
                   <div key={i} className={`flex items-start gap-4 p-5 rounded-xl ${t.cardBg} border ${t.cardBorder} hover:shadow-sm transition-shadow`}>
                     <ShieldCheck className="h-5 w-5 text-emerald-500 mt-0.5 shrink-0" />
-                    <p className={`text-base ${t.bodyColor}`}>{item}</p>
+                    <EditableText value={item} onChange={(v) => updateBlockContentItem("objections", i, v)} editable={editable} tag="p" className={`text-base ${t.bodyColor}`} />
                   </div>
                 ))}
               </div>
             ) : (
-              <p className={`text-center ${t.bodyColor}`}>{objections.content as string}</p>
+              <EditableText value={String(objections.content)} onChange={(v) => updateBlock("objections", { content: v })} editable={editable} tag="p" className={`text-center ${t.bodyColor}`} />
             )}
           </div>
-        </Section>
+        </EditableSection>
       )}
 
       {/* ═══ FAQ ═══ */}
       {faq && Array.isArray(faq.content) && (
-        <Section className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={500}>
+        <EditableSection blockType="faq" blockTitle={faq.title} className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={500}>
           <div className="mx-auto max-w-2xl px-6">
-            <SectionTitle alt>{faq.title || "Preguntas frecuentes"}</SectionTitle>
+            <SectionTitle alt blockType="faq">{faq.title || "Preguntas frecuentes"}</SectionTitle>
             <div className="space-y-2">
               {parseFaqItems(faq.content).map((item, i) => (
                 <div key={i} className={`rounded-xl ${getCard(true)} border ${getCardBorder(true)} transition-all overflow-hidden`}>
@@ -368,14 +456,14 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               ))}
             </div>
           </div>
-        </Section>
+        </EditableSection>
       )}
 
       {/* ═══ COMPARISON ═══ */}
       {comparison && Array.isArray(comparison.content) && (
-        <Section className={`py-16 md:py-24 ${t.sectionBg}`}>
+        <EditableSection blockType="comparison" blockTitle={comparison.title} className={`py-16 md:py-24 ${t.sectionBg}`}>
           <div className="mx-auto max-w-4xl px-6">
-            <SectionTitle>{comparison.title || "¿Por qué elegirnos?"}</SectionTitle>
+            <SectionTitle blockType="comparison">{comparison.title || "¿Por qué elegirnos?"}</SectionTitle>
             <div className="grid sm:grid-cols-2 gap-6">
               <div className={`p-6 rounded-xl border-2 border-emerald-500 ${t.cardBg} shadow-md`}>
                 <div className="flex items-center gap-2 mb-4">
@@ -407,38 +495,34 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               </div>
             </div>
           </div>
-        </Section>
+        </EditableSection>
       )}
 
       {/* ═══ BUNDLES ═══ */}
       {bundles && Array.isArray(bundles.content) && (
-        <Section className={`py-16 md:py-24 ${t.sectionAltBg}`}>
+        <EditableSection blockType="bundles" blockTitle={bundles.title} className={`py-16 md:py-24 ${t.sectionAltBg}`}>
           <div className="mx-auto max-w-4xl px-6">
-            <SectionTitle alt>{bundles.title || "Packs disponibles"}</SectionTitle>
+            <SectionTitle alt blockType="bundles">{bundles.title || "Packs disponibles"}</SectionTitle>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {(bundles.content as string[]).map((item, i) => (
                 <div key={i} className={`p-6 rounded-xl ${getCard(true)} border ${getCardBorder(true)} shadow-sm text-center hover:shadow-md transition-shadow`}>
                   <Layers className={`h-8 w-8 mx-auto mb-3 ${getHeading(true)}`} />
-                  <p className={`text-sm leading-relaxed ${getBody(true)}`}>{item}</p>
+                  <EditableText value={item} onChange={(v) => updateBlockContentItem("bundles", i, v)} editable={editable} tag="p" className={`text-sm leading-relaxed ${getBody(true)}`} />
                 </div>
               ))}
             </div>
           </div>
-        </Section>
+        </EditableSection>
       )}
 
       <SectionDivider theme={theme} from="main" to="accent" />
 
       {/* ═══ OFFER / URGENCY ═══ */}
       {(offer || urgency) && (
-        <Section className={`relative overflow-hidden ${offer?.image_url ? 'py-0' : `py-16 md:py-24 ${t.accentBg}`}`}>
-          {/* Offer with banner background */}
+        <EditableSection blockType="offer" blockTitle={offer?.title || "Oferta"} className={`relative overflow-hidden ${offer?.image_url ? 'py-0' : `py-16 md:py-24 ${t.accentBg}`}`}>
           {offer?.image_url ? (
             <div className="relative min-h-[400px] flex items-center">
-              <div
-                className="absolute inset-0 bg-cover bg-center"
-                style={{ backgroundImage: `url(${offer.image_url})` }}
-              />
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${offer.image_url})` }} />
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40" />
               <div className="relative z-10 mx-auto max-w-3xl px-6 py-16 md:py-24 text-center space-y-6">
                 {urgency && (
@@ -447,16 +531,22 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
                     {typeof urgency.content === "string" ? urgency.content : urgency.title}
                   </span>
                 )}
-                <h2
+                <EditableText
+                  value={offer?.title || ""}
+                  onChange={(v) => updateBlock("offer", { title: v })}
+                  editable={editable}
+                  tag="h2"
                   className="text-3xl md:text-4xl font-bold tracking-tight text-white"
                   style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                >
-                  {offer.title}
-                </h2>
-                {offer.content && (
-                  <p className="text-lg text-gray-200">
-                    {typeof offer.content === "string" ? offer.content : ""}
-                  </p>
+                />
+                {offer?.content && (
+                  <EditableText
+                    value={typeof offer.content === "string" ? offer.content : ""}
+                    onChange={(v) => updateBlock("offer", { content: v })}
+                    editable={editable}
+                    tag="p"
+                    className="text-lg text-gray-200"
+                  />
                 )}
                 <div className="flex items-center justify-center gap-4">
                   <span className="text-2xl line-through text-gray-400">{formattedPrice}</span>
@@ -469,7 +559,6 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               </div>
             </div>
           ) : (
-            /* Offer without banner - standard layout */
             <div className="mx-auto max-w-3xl px-6 text-center space-y-6">
               {urgency && (
                 <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${t.urgencyBg} ${t.urgencyText}`}>
@@ -479,16 +568,22 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               )}
               {offer && (
                 <>
-                  <h2
+                  <EditableText
+                    value={offer.title || ""}
+                    onChange={(v) => updateBlock("offer", { title: v })}
+                    editable={editable}
+                    tag="h2"
                     className={`text-3xl md:text-4xl font-bold tracking-tight ${t.headingColor}`}
                     style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  >
-                    {offer.title}
-                  </h2>
+                  />
                   {offer.content && (
-                    <p className={`text-lg ${t.bodyColor}`}>
-                      {typeof offer.content === "string" ? offer.content : ""}
-                    </p>
+                    <EditableText
+                      value={typeof offer.content === "string" ? offer.content : ""}
+                      onChange={(v) => updateBlock("offer", { content: v })}
+                      editable={editable}
+                      tag="p"
+                      className={`text-lg ${t.bodyColor}`}
+                    />
                   )}
                   <div className="flex items-center justify-center gap-4">
                     <span className={`text-2xl line-through ${t.mutedColor}`}>{formattedPrice}</span>
@@ -502,71 +597,89 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean" }: Lan
               <CTAWithTrust />
             </div>
           )}
-        </Section>
+        </EditableSection>
       )}
 
       {/* ═══ GUARANTEE ═══ */}
       {guarantee && (
-        <Section className={`py-12 md:py-16 ${t.sectionBg}`}>
+        <EditableSection blockType="guarantee" blockTitle="Garantía" className={`py-12 md:py-16 ${t.sectionBg}`}>
           <div className="mx-auto max-w-2xl px-6">
             <div className={`flex items-start gap-5 p-6 rounded-2xl ${t.guaranteeBg} border ${t.guaranteeBorder}`}>
               <ShieldCheck className="h-8 w-8 text-emerald-600 shrink-0 mt-1" />
               <div>
-                <h3 className={`font-bold text-lg mb-1 ${t.headingColor}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                  {guarantee.title || "Garantía"}
-                </h3>
-                <p className={t.bodyColor}>
-                  {typeof guarantee.content === "string" ? guarantee.content : ""}
-                </p>
+                <EditableText
+                  value={guarantee.title || "Garantía"}
+                  onChange={(v) => updateBlock("guarantee", { title: v })}
+                  editable={editable}
+                  tag="h3"
+                  className={`font-bold text-lg mb-1 ${t.headingColor}`}
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                />
+                <EditableText
+                  value={typeof guarantee.content === "string" ? guarantee.content : ""}
+                  onChange={(v) => updateBlock("guarantee", { content: v })}
+                  editable={editable}
+                  tag="p"
+                  className={t.bodyColor}
+                />
               </div>
             </div>
           </div>
-        </Section>
+        </EditableSection>
       )}
 
       <SectionDivider theme={theme} from="alt" to="cta" />
 
       {/* ═══ FINAL CTA ═══ */}
-      <Section className={`relative overflow-hidden ${cta?.image_url ? 'py-0' : `py-20 md:py-28 ${t.sectionAltBg}`}`}>
+      <EditableSection blockType="cta" blockTitle="CTA Final" className={`relative overflow-hidden ${cta?.image_url ? 'py-0' : `py-20 md:py-28 ${t.sectionAltBg}`}`}>
         {cta?.image_url ? (
           <div className="relative min-h-[350px] flex items-center">
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${cta.image_url})` }}
-            />
+            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${cta.image_url})` }} />
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
             <div className="relative z-10 mx-auto max-w-2xl px-6 py-20 md:py-28 text-center space-y-8">
-              <h2
+              <EditableText
+                value={cta?.title || "¿Listo para probarlo?"}
+                onChange={(v) => updateBlock("cta", { title: v })}
+                editable={editable}
+                tag="h2"
                 className="text-3xl md:text-4xl font-bold tracking-tight text-white"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-              >
-                {cta?.title || "¿Listo para probarlo?"}
-              </h2>
+              />
               {cta?.content && (
-                <p className="text-lg text-gray-200">
-                  {typeof cta.content === "string" ? cta.content : ""}
-                </p>
+                <EditableText
+                  value={typeof cta.content === "string" ? cta.content : ""}
+                  onChange={(v) => updateBlock("cta", { content: v })}
+                  editable={editable}
+                  tag="p"
+                  className="text-lg text-gray-200"
+                />
               )}
               <CTAWithTrust trustColor="text-gray-400" />
             </div>
           </div>
         ) : (
           <div className="mx-auto max-w-2xl px-6 text-center space-y-8">
-            <h2
+            <EditableText
+              value={cta?.title || "¿Listo para probarlo?"}
+              onChange={(v) => updateBlock("cta", { title: v })}
+              editable={editable}
+              tag="h2"
               className={`text-3xl md:text-4xl font-bold tracking-tight ${getHeading(true)}`}
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-            >
-              {cta?.title || "¿Listo para probarlo?"}
-            </h2>
+            />
             {cta?.content && (
-              <p className={`text-lg ${getBody(true)}`}>
-                {typeof cta.content === "string" ? cta.content : ""}
-              </p>
+              <EditableText
+                value={typeof cta.content === "string" ? cta.content : ""}
+                onChange={(v) => updateBlock("cta", { content: v })}
+                editable={editable}
+                tag="p"
+                className={`text-lg ${getBody(true)}`}
+              />
             )}
             <CTAWithTrust trustColor={theme === "bold" ? "text-gray-500" : undefined} />
           </div>
         )}
-      </Section>
+      </EditableSection>
 
       {/* ═══ STICKY MOBILE CTA ═══ */}
       <div className="fixed bottom-0 left-0 right-0 md:hidden z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200 p-3 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">

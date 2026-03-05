@@ -6,7 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2, ImagePlus, Sparkles } from "lucide-react";
+import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2, ImagePlus, Sparkles, Pencil, Save, X } from "lucide-react";
 import { exportLandingAsHTML, exportLandingAsZip } from "@/lib/exportLanding";
 import LandingRenderer from "@/components/landing/LandingRenderer";
 import { themes, type LandingTheme } from "@/components/landing/themes";
@@ -50,6 +50,12 @@ const LandingView = () => {
   const [productImage, setProductImage] = useState<string | null>(null);
   const [allImageUrls, setAllImageUrls] = useState<string[]>([]);
 
+  // Edit mode
+  const [editMode, setEditMode] = useState(false);
+  const [editedBlocks, setEditedBlocks] = useState<BlockWithImage[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+
   // Section image generation state
   const [showImageDialog, setShowImageDialog] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
@@ -91,6 +97,48 @@ const LandingView = () => {
     };
     load();
   }, [id, user]);
+
+  const blocks = (editMode ? editedBlocks : (landing?.blocks as unknown as BlockWithImage[])) || [];
+
+  const handleEnterEditMode = () => {
+    setEditedBlocks(JSON.parse(JSON.stringify(landing?.blocks || [])));
+    setEditMode(true);
+    setHasChanges(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    setEditedBlocks([]);
+    setHasChanges(false);
+  };
+
+  const handleBlocksChange = (newBlocks: any[]) => {
+    setEditedBlocks(newBlocks);
+    setHasChanges(true);
+  };
+
+  const handleSave = async () => {
+    if (!landing || !user) return;
+    setSaving(true);
+    try {
+      const { error: updateError } = await supabase
+        .from("landings")
+        .update({ blocks: editedBlocks as any, updated_at: new Date().toISOString() })
+        .eq("id", landing.id)
+        .eq("user_id", user.id);
+      if (updateError) throw updateError;
+
+      // Update local state
+      setLanding({ ...landing, blocks: editedBlocks as any });
+      setEditMode(false);
+      setHasChanges(false);
+      toast({ title: "¡Cambios guardados!" });
+    } catch (err: any) {
+      toast({ title: "Error al guardar", description: err.message, variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const downloadBlob = (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);
@@ -145,7 +193,6 @@ const LandingView = () => {
     if (!landing || !product || !selectedSection) return;
     setGeneratingImage(true);
     try {
-      // Find the block content to pass context to the AI
       const targetBlock = blocks.find(b => b.type === selectedSection);
       const blockContent = targetBlock?.content;
 
@@ -172,7 +219,6 @@ const LandingView = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
 
-      // Refresh landing data to get updated blocks
       const { data: updatedLanding } = await supabase
         .from("landings").select("*").eq("id", landing.id).single();
       if (updatedLanding) setLanding(updatedLanding);
@@ -205,7 +251,6 @@ const LandingView = () => {
     );
   }
 
-  const blocks = landing.blocks as unknown as BlockWithImage[];
   const imageableSections = blocks.filter(b => 
     ["hero", "benefits", "offer", "features", "testimonials", "cta"].includes(b.type)
   );
@@ -219,68 +264,91 @@ const LandingView = () => {
             <Link to="/landings"><ArrowLeft className="h-4 w-4 mr-2" /> Mis landings</Link>
           </Button>
           <div className="flex items-center gap-2">
-            <Select value={theme} onValueChange={(v) => setTheme(v as LandingTheme)}>
-              <SelectTrigger className="h-8 w-[140px] text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(themes).map(([key, cfg]) => (
-                  <SelectItem key={key} value={key}>{cfg.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Badge variant="secondary" className="text-xs hidden sm:inline-flex">{landing.name}</Badge>
-            
-            {isPaidPlan && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <ImagePlus className="h-4 w-4 mr-1" />
-                    <span className="hidden sm:inline">Imágenes IA</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  {imageableSections.map((block) => (
-                    <DropdownMenuItem
-                      key={block.type}
-                      onClick={() => openImageGenerator(block.type, block.title || block.type)}
-                    >
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      {block.title || block.type}
-                      {block.image_url && (
-                        <Badge variant="secondary" className="ml-2 text-[10px]">✓</Badge>
-                      )}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-
-            <Button variant="outline" size="sm" asChild>
-              <Link to={`/landings/${landing.id}/preview`}>
-                <Maximize2 className="h-4 w-4 mr-1" /> Vista completa
-              </Link>
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" disabled={exporting}>
-                  {exporting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Download className="h-4 w-4 mr-1" />}
-                  Exportar
+            {/* Edit mode controls */}
+            {editMode ? (
+              <>
+                <Badge variant="default" className="text-xs bg-primary/90">
+                  <Pencil className="h-3 w-3 mr-1" /> Modo edición
+                </Badge>
+                <Button variant="outline" size="sm" onClick={handleCancelEdit}>
+                  <X className="h-4 w-4 mr-1" /> Cancelar
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={handleExportHTML}>
-                  <FileCode className="h-4 w-4 mr-2" />
-                  Solo HTML
-                  <span className="text-xs text-muted-foreground ml-2">(imágenes URL)</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleExportZip}>
-                  <FileArchive className="h-4 w-4 mr-2" />
-                  ZIP con imágenes
-                  <span className="text-xs text-muted-foreground ml-2">(HTML + archivos)</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <Button size="sm" onClick={handleSave} disabled={saving || !hasChanges}>
+                  {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
+                  Guardar
+                </Button>
+              </>
+            ) : (
+              <>
+                <Select value={theme} onValueChange={(v) => setTheme(v as LandingTheme)}>
+                  <SelectTrigger className="h-8 w-[140px] text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(themes).map(([key, cfg]) => (
+                      <SelectItem key={key} value={key}>{cfg.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Badge variant="secondary" className="text-xs hidden sm:inline-flex">{landing.name}</Badge>
+
+                <Button variant="outline" size="sm" onClick={handleEnterEditMode}>
+                  <Pencil className="h-4 w-4 mr-1" />
+                  <span className="hidden sm:inline">Editar</span>
+                </Button>
+                
+                {isPaidPlan && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <ImagePlus className="h-4 w-4 mr-1" />
+                        <span className="hidden sm:inline">Imágenes IA</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      {imageableSections.map((block) => (
+                        <DropdownMenuItem
+                          key={block.type}
+                          onClick={() => openImageGenerator(block.type, block.title || block.type)}
+                        >
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          {block.title || block.type}
+                          {block.image_url && (
+                            <Badge variant="secondary" className="ml-2 text-[10px]">✓</Badge>
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+
+                <Button variant="outline" size="sm" asChild>
+                  <Link to={`/landings/${landing.id}/preview`}>
+                    <Maximize2 className="h-4 w-4 mr-1" /> Vista completa
+                  </Link>
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" disabled={exporting}>
+                      {exporting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Download className="h-4 w-4 mr-1" />}
+                      Exportar
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleExportHTML}>
+                      <FileCode className="h-4 w-4 mr-2" />
+                      Solo HTML
+                      <span className="text-xs text-muted-foreground ml-2">(imágenes URL)</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportZip}>
+                      <FileArchive className="h-4 w-4 mr-2" />
+                      ZIP con imágenes
+                      <span className="text-xs text-muted-foreground ml-2">(HTML + archivos)</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -290,6 +358,8 @@ const LandingView = () => {
         product={product ? { name: product.name, price: product.price } : null}
         imagePreview={productImage}
         theme={theme}
+        editable={editMode}
+        onBlocksChange={handleBlocksChange}
       />
 
       {/* Image Generation Dialog */}
