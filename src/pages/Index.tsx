@@ -13,7 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Sparkles, Zap, Code2, ShoppingCart, ArrowRight, Loader2,
   CheckCircle2, Upload, Wand2, Download, ChevronDown, ChevronUp,
-  Monitor, Store, FilePlus, Send, ImagePlus, X,
+  ImagePlus, X, XCircle, Image, FileCode, Layers,
 } from "lucide-react";
 
 const categories = ["home", "fitness", "beauty", "gadget", "pets"];
@@ -24,20 +24,53 @@ const faqs = [
   { q: "¿Puedo probar sin crear una cuenta?", a: "Sí. Puedes generar 1 landing demo sin registrarte. Para exportar o descargar necesitas crear una cuenta." },
   { q: "¿Cuántas landings puedo generar?", a: "Depende de tu plan: Free (1), Starter (10), Pro (100). Cada plan tiene características adicionales de persuasión." },
   { q: "¿Puedo editar la landing después?", a: "Sí. Una vez generada puedes editar los bloques de texto y ajustar el contenido a tu gusto." },
+  { q: "¿Cómo subo mi landing a Shopify?", a: "Exporta el HTML generado, ve a tu panel de Shopify → Online Store → Pages → Add page, pega el código y publica. ¡Listo en 2 minutos!" },
+];
+
+const problems = [
+  { text: "Diseñar landings toma horas o días", detail: "Escribir copy, armar estructura, buscar plantillas..." },
+  { text: "Contratar un diseñador es caro", detail: "Un freelancer cobra $50-200 USD por página" },
+  { text: "Las plantillas genéricas no venden", detail: "Sin copy persuasivo ni estructura de conversión" },
+];
+
+const solutions = [
+  { text: "Genera en 30 segundos", detail: "Landing completa con IA en un clic" },
+  { text: "Sin costo de diseño", detail: "Todo incluido en tu plan desde $0" },
+  { text: "Copy optimizado para conversión", detail: "Estructura AIDA y técnicas de persuasión" },
+];
+
+const benefits = [
+  { icon: Zap, title: "Ultra rápido", desc: "Landing completa en menos de 30 segundos. Sin esperas." },
+  { icon: ShoppingCart, title: "Optimizado para ventas", desc: "Estructura de 7 secciones que maximiza conversiones." },
+  { icon: Code2, title: "Sin código", desc: "Solo describe tu producto. La IA crea todo el copy persuasivo." },
+  { icon: Image, title: "Banners con IA", desc: "Genera banners promocionales listos para redes sociales." },
+  { icon: FileCode, title: "Exportar HTML", desc: "Descarga el código listo para Shopify u otra plataforma." },
+  { icon: Layers, title: "Multi-producto", desc: "Crea landings para todos tus productos desde un solo lugar." },
+];
+
+const steps = [
+  { icon: Upload, step: "1", title: "Sube tu producto", desc: "Agrega nombre, precio, imagen y descripción." },
+  { icon: Wand2, step: "2", title: "La IA lo analiza", desc: "Nuestro motor entiende tu producto y audiencia." },
+  { icon: ImagePlus, step: "3", title: "Genera todo", desc: "Landing + banners con copy persuasivo al instante." },
+  { icon: Download, step: "4", title: "Exporta y publica", desc: "HTML listo para Shopify u otra plataforma." },
+];
+
+const plans = [
+  { name: "Free", price: 0, landings: "1 landing", features: ["1 ángulo / 1 hook", "2 banners / mes", "Exportar HTML básico", "Listo para Shopify"] },
+  { name: "Starter", price: 7990, landings: "10 landings / mes", features: ["3 hooks por producto", "30 banners / mes", "Objeciones básicas", "Urgencia editable", "FAQs", "Exportar HTML + CSS"], popular: true },
+  { name: "Pro", price: 14990, landings: "100 landings / mes", features: ["Múltiples ángulos psicológicos", "150 banners / mes", "Hooks para ads", "Variantes de CTA", "Bundles y comparativas", "Microcopys de checkout", "Exportar ZIP completo"] },
 ];
 
 const Index = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Demo form state
   const [demoName, setDemoName] = useState("");
   const [demoCategory, setDemoCategory] = useState("home");
   const [demoPrice, setDemoPrice] = useState("");
   const [demoDescription, setDemoDescription] = useState("");
   const [demoAudience, setDemoAudience] = useState("");
   const [generating, setGenerating] = useState(false);
-  
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [demoImage, setDemoImage] = useState<File | null>(null);
   const [demoImagePreview, setDemoImagePreview] = useState<string | null>(null);
@@ -98,7 +131,6 @@ const Index = () => {
         imagePreview: demoImagePreview,
       }));
 
-      // Store in demo_landings
       const sessionId = localStorage.getItem("nexsell_session") || crypto.randomUUID();
       localStorage.setItem("nexsell_session", sessionId);
       await supabase.from("demo_landings" as any).insert({ session_id: sessionId, blocks: data.blocks, product_data: product });
@@ -111,7 +143,6 @@ const Index = () => {
       setGenerating(false);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-background">
@@ -128,46 +159,142 @@ const Index = () => {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="py-20 lg:py-32">
-        <div className="container mx-auto px-4 text-center max-w-4xl">
-          <Badge variant="secondary" className="mb-6 text-sm px-4 py-1">
-            Generador de Landing Pages con IA
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold font-display tracking-tight leading-tight">
-            Crea landing pages que
-            <span className="text-primary"> venden de verdad</span>
-          </h1>
-          <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Genera landing pages de alta conversión para tus productos de ecommerce en segundos. 
-            Sin código. Optimizadas para dropshipping en Chile.
-          </p>
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-base px-8" asChild>
-              <a href="#demo"><Sparkles className="h-5 w-5 mr-2" /> Probar gratis</a>
-            </Button>
-            <Button size="lg" variant="outline" className="text-base px-8" asChild>
-              <a href="#pricing">Ver planes</a>
-            </Button>
+      {/* ── 1. HERO ── */}
+      <section className="py-24 lg:py-40 bg-gradient-to-b from-primary/5 to-background">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Text */}
+            <div className="text-center lg:text-left">
+              <Badge variant="secondary" className="mb-6 text-sm px-4 py-1">
+                Generador de Landing Pages con IA
+              </Badge>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold font-display tracking-tight leading-tight">
+                Crea landing pages que
+                <span className="text-primary"> venden de verdad</span>
+              </h1>
+              <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
+                Genera landing pages de alta conversión para tus productos de ecommerce en segundos.
+                Sin código. Optimizadas para dropshipping en Chile.
+              </p>
+              <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Button size="lg" className="text-base px-8 w-full sm:w-auto" asChild>
+                  <a href="#demo"><Sparkles className="h-5 w-5 mr-2" /> Probar gratis</a>
+                </Button>
+                <Button size="lg" variant="outline" className="text-base px-8 w-full sm:w-auto" asChild>
+                  <a href="#pricing">Ver planes</a>
+                </Button>
+              </div>
+            </div>
+
+            {/* Mockup */}
+            <div className="relative mx-auto lg:mx-0 w-full max-w-md lg:max-w-none">
+              <div className="rounded-2xl border bg-card shadow-2xl overflow-hidden">
+                {/* Browser bar */}
+                <div className="flex items-center gap-2 px-4 py-3 border-b bg-muted/50">
+                  <div className="flex gap-1.5">
+                    <div className="h-3 w-3 rounded-full bg-destructive/60" />
+                    <div className="h-3 w-3 rounded-full bg-accent/60" />
+                    <div className="h-3 w-3 rounded-full bg-primary/60" />
+                  </div>
+                  <div className="flex-1 mx-4">
+                    <div className="h-6 rounded-md bg-muted flex items-center px-3">
+                      <span className="text-xs text-muted-foreground truncate">nexsell.app/landing/mi-producto</span>
+                    </div>
+                  </div>
+                </div>
+                {/* Fake landing content */}
+                <div className="p-6 space-y-4">
+                  <div className="h-8 w-3/4 rounded bg-gradient-to-r from-primary/20 to-primary/5" />
+                  <div className="h-4 w-full rounded bg-muted" />
+                  <div className="h-4 w-5/6 rounded bg-muted" />
+                  <div className="h-32 rounded-lg bg-gradient-to-br from-primary/10 via-accent/10 to-secondary/10 flex items-center justify-center">
+                    <ImagePlus className="h-10 w-10 text-muted-foreground/40" />
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="h-10 flex-1 rounded-lg bg-primary/20" />
+                    <div className="h-10 w-28 rounded-lg bg-primary flex items-center justify-center">
+                      <span className="text-xs font-semibold text-primary-foreground">Comprar</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 pt-2">
+                    <div className="h-16 rounded bg-muted/80" />
+                    <div className="h-16 rounded bg-muted/80" />
+                    <div className="h-16 rounded bg-muted/80" />
+                  </div>
+                </div>
+              </div>
+              {/* Floating badges */}
+              <div className="absolute -top-3 -right-3 bg-primary text-primary-foreground text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                IA ✨
+              </div>
+              <div className="absolute -bottom-3 -left-3 bg-card border text-xs font-medium px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                <CheckCircle2 className="h-3.5 w-3.5 text-primary" /> 30 seg
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Benefits */}
-      <section className="py-20 bg-muted/50">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold font-display text-center mb-12">
+      {/* ── 2. PROBLEMA / SOLUCIÓN ── */}
+      <section className="py-20 lg:py-28 bg-muted/50">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h2 className="text-3xl md:text-4xl font-bold font-display text-center mb-4">
+            El problema que resolvemos
+          </h2>
+          <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-14">
+            Vender online no debería requerir horas de diseño ni presupuestos altos
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+            {/* Problems */}
+            <div className="space-y-5">
+              <h3 className="font-display font-semibold text-lg text-destructive flex items-center gap-2 mb-2">
+                <XCircle className="h-5 w-5" /> Sin Nexsell
+              </h3>
+              {problems.map((p) => (
+                <div key={p.text} className="flex items-start gap-3 p-4 rounded-xl bg-destructive/5 border border-destructive/10">
+                  <XCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-sm">{p.text}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{p.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Solutions */}
+            <div className="space-y-5">
+              <h3 className="font-display font-semibold text-lg text-primary flex items-center gap-2 mb-2">
+                <CheckCircle2 className="h-5 w-5" /> Con Nexsell
+              </h3>
+              {solutions.map((s) => (
+                <div key={s.text} className="flex items-start gap-3 p-4 rounded-xl bg-primary/5 border border-primary/10">
+                  <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-sm">{s.text}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{s.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 3. BENEFICIOS ── */}
+      <section className="py-20 lg:py-28">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h2 className="text-3xl md:text-4xl font-bold font-display text-center mb-4">
             ¿Por qué usar Nexsell?
           </h2>
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {[
-              { icon: Zap, title: "Rápido", desc: "Genera una landing completa en menos de 30 segundos. Sin diseñar, sin programar." },
-              { icon: ShoppingCart, title: "Optimizado para ventas", desc: "Estructura probada de 7 secciones que maximiza conversiones en ecommerce." },
-              { icon: Code2, title: "Sin código", desc: "Solo describe tu producto y la IA crea todo el contenido persuasivo listo para usar." },
-            ].map(({ icon: Icon, title, desc }) => (
-              <Card key={title} className="text-center border-none bg-card shadow-sm">
+          <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-14">
+            Todo lo que necesitas para crear landings que convierten
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {benefits.map(({ icon: Icon, title, desc }) => (
+              <Card key={title} className="border bg-card hover:shadow-md transition-shadow">
                 <CardContent className="pt-8 pb-6 px-6">
-                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
                     <Icon className="h-6 w-6 text-primary" />
                   </div>
                   <h3 className="font-display font-semibold text-lg mb-2">{title}</h3>
@@ -179,22 +306,16 @@ const Index = () => {
         </div>
       </section>
 
-      {/* How it works - 4 steps */}
-      <section className="py-20">
-        <div className="container mx-auto px-4 text-center">
+      {/* ── 4. CÓMO FUNCIONA ── */}
+      <section className="py-20 lg:py-28 bg-muted/50">
+        <div className="container mx-auto px-4 max-w-6xl text-center">
           <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">Cómo funciona</h2>
-          <p className="text-muted-foreground mb-12 max-w-xl mx-auto">De producto a landing page lista para vender en 4 pasos simples</p>
-          <div className="grid md:grid-cols-4 gap-6 max-w-5xl mx-auto relative">
-            {[
-              { icon: Upload, step: "1", title: "Sube tu producto", desc: "Agrega fotos, nombre, precio y descripción de tu producto." },
-              { icon: Wand2, step: "2", title: "La IA lo analiza", desc: "Nuestro motor entiende tu producto, audiencia y categoría." },
-              { icon: ImagePlus, step: "3", title: "Genera todo", desc: "Landing completa con copy persuasivo, banners e imágenes IA.", badges: ["Landing", "Banners", "Secciones"] },
-              { icon: Download, step: "4", title: "Exporta y publica", desc: "Descarga HTML listo para Shopify u otra plataforma." },
-            ].map(({ icon: Icon, step, title, desc, badges }, idx) => (
+          <p className="text-muted-foreground mb-14 max-w-xl mx-auto">De producto a landing page lista para vender en 4 pasos simples</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-5xl mx-auto relative">
+            {steps.map(({ icon: Icon, step, title, desc }, idx) => (
               <div key={step} className="relative flex flex-col items-center">
-                {/* Connector line */}
                 {idx < 3 && (
-                  <div className="hidden md:block absolute top-8 left-[calc(50%+2rem)] w-[calc(100%-4rem)] h-0.5 bg-border z-0">
+                  <div className="hidden lg:block absolute top-8 left-[calc(50%+2rem)] w-[calc(100%-4rem)] h-0.5 bg-border z-0">
                     <ArrowRight className="absolute -right-2 -top-[7px] h-4 w-4 text-muted-foreground" />
                   </div>
                 )}
@@ -205,163 +326,121 @@ const Index = () => {
                   <Icon className="h-5 w-5 text-primary" />
                 </div>
                 <h3 className="font-display font-semibold text-lg mb-2">{title}</h3>
-                <p className="text-muted-foreground text-sm mb-3">{desc}</p>
-                {badges && (
-                  <div className="flex flex-wrap gap-1.5 justify-center">
-                    {badges.map((b) => (
-                      <Badge key={b} variant="secondary" className="text-xs">{b}</Badge>
-                    ))}
-                  </div>
-                )}
+                <p className="text-muted-foreground text-sm">{desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Shopify Tutorial */}
-      <section className="py-20">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="text-center mb-4">
-            <Badge variant="secondary" className="mb-4 text-sm px-4 py-1">Integración Shopify</Badge>
-            <h2 className="text-3xl md:text-4xl font-bold font-display">
-              Cómo subir tu landing a Shopify en menos de 2 minutos
-            </h2>
-            <p className="mt-4 text-muted-foreground max-w-2xl mx-auto">
-              No necesitas saber programar. Solo descarga tu landing generada y súbela a tu tienda Shopify en pocos pasos.
-            </p>
-          </div>
-
-          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 mt-12">
-            {[
-              { icon: Monitor, step: "1", title: "Abre tu panel de Shopify", desc: "Inicia sesión en tu cuenta de Shopify y accede al panel de administración." },
-              { icon: Store, step: "2", title: "Online Store → Pages", desc: "En el menú lateral, ve a Online Store y luego haz clic en Pages." },
-              { icon: FilePlus, step: "3", title: "Crea una nueva página", desc: "Haz clic en 'Add page' para crear una página nueva en tu tienda." },
-              { icon: Send, step: "4", title: "Pega el HTML y publica", desc: "Pega el código HTML de tu landing generada en el editor y haz clic en Publicar." },
-            ].map(({ icon: Icon, step, title, desc }) => (
-              <Card key={step} className="text-center border-none bg-card shadow-sm">
-                <CardContent className="pt-8 pb-6 px-5">
-                  <div className="h-14 w-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center mx-auto mb-4 text-2xl font-display font-bold">
-                    {step}
-                  </div>
-                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                    <Icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="font-display font-semibold text-base mb-2">{title}</h3>
-                  <p className="text-muted-foreground text-sm">{desc}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-
-          <div className="mt-16 text-center">
-            <h3 className="text-2xl md:text-3xl font-bold font-display mb-4">
-              Crea tu primera landing y publícala en Shopify hoy
-            </h3>
-            <Button size="lg" className="text-base px-8" asChild>
-              <a href="#demo"><Sparkles className="h-5 w-5 mr-2" /> Probar generador gratis</a>
-            </Button>
-          </div>
+      {/* ── 5. EJEMPLOS ── */}
+      <section className="py-20 lg:py-28">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h2 className="text-3xl md:text-4xl font-bold font-display text-center mb-4">
+            Mira lo que puedes crear
+          </h2>
+          <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-14">
+            Ejemplos reales generados con Nexsell en segundos
+          </p>
+          <LandingExamplesGallery />
         </div>
       </section>
-      <section id="demo" className="py-20 bg-muted/50">
-        <div className="container mx-auto px-4 max-w-4xl">
+
+      {/* ── 6. DEMO GENERATOR ── */}
+      <section id="demo" className="py-20 lg:py-28 bg-muted/50">
+        <div className="container mx-auto px-4 max-w-3xl">
           <div className="text-center mb-10">
+            <Badge variant="secondary" className="mb-4 text-sm px-4 py-1">Prueba gratis</Badge>
             <h2 className="text-3xl md:text-4xl font-bold font-display">Prueba el generador</h2>
             <p className="text-muted-foreground mt-2">Genera 1 landing gratis sin crear cuenta</p>
           </div>
 
           <Card>
-              <CardContent className="p-6">
-                <form onSubmit={handleDemo} className="space-y-5">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="demo-name">Nombre del producto *</Label>
-                      <Input id="demo-name" value={demoName} onChange={(e) => setDemoName(e.target.value)} placeholder="Ej: Masajeador Cervical Pro" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Categoría</Label>
-                      <Select value={demoCategory} onValueChange={setDemoCategory}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {categories.map((cat) => (
-                            <SelectItem key={cat} value={cat} className="capitalize">{cat}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+            <CardContent className="p-6">
+              <form onSubmit={handleDemo} className="space-y-5">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="demo-name">Nombre del producto *</Label>
+                    <Input id="demo-name" value={demoName} onChange={(e) => setDemoName(e.target.value)} placeholder="Ej: Masajeador Cervical Pro" required />
                   </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="demo-price">Precio CLP</Label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
-                        <Input id="demo-price" type="number" value={demoPrice} onChange={(e) => setDemoPrice(e.target.value)} className="pl-7" placeholder="19990" />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="demo-audience">Público objetivo</Label>
-                      <Input id="demo-audience" value={demoAudience} onChange={(e) => setDemoAudience(e.target.value)} placeholder="Ej: Mujeres 25-45, oficina" />
+                  <div className="space-y-2">
+                    <Label>Categoría</Label>
+                    <Select value={demoCategory} onValueChange={setDemoCategory}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat} value={cat} className="capitalize">{cat}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="demo-price">Precio CLP</Label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
+                      <Input id="demo-price" type="number" value={demoPrice} onChange={(e) => setDemoPrice(e.target.value)} className="pl-7" placeholder="19990" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="demo-desc">Descripción (opcional)</Label>
-                    <Textarea id="demo-desc" value={demoDescription} onChange={(e) => setDemoDescription(e.target.value)} placeholder="Detalles del producto..." rows={2} />
+                    <Label htmlFor="demo-audience">Público objetivo</Label>
+                    <Input id="demo-audience" value={demoAudience} onChange={(e) => setDemoAudience(e.target.value)} placeholder="Ej: Mujeres 25-45, oficina" />
                   </div>
-                  <div className="space-y-2">
-                    <Label>Imagen del producto *</Label>
-                    {demoImagePreview ? (
-                      <div className="relative inline-block">
-                        <img src={demoImagePreview} alt="Preview" className="h-28 w-28 object-cover rounded-lg border" />
-                        <button type="button" onClick={removeImage} className="absolute -top-2 -right-2 h-6 w-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                    ) : (
-                      <label htmlFor="demo-image" className="flex flex-col items-center justify-center h-28 w-full border-2 border-dashed border-input rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
-                        <ImagePlus className="h-8 w-8 text-muted-foreground mb-1" />
-                        <span className="text-sm text-muted-foreground">Sube una imagen (JPG, PNG, WEBP · máx 5MB)</span>
-                        <input id="demo-image" type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageChange} />
-                      </label>
-                    )}
-                    {imageError && <p className="text-sm text-destructive">{imageError}</p>}
-                    {!demoImage && !imageError && <p className="text-xs text-muted-foreground">Debes subir una imagen para generar la landing.</p>}
-                  </div>
-                  <Button type="submit" className="w-full" size="lg" disabled={generating || demoUsed || !demoImage}>
-                    {generating ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generando con IA...</>
-                    ) : demoUsed ? (
-                      "Demo ya utilizado — Crea una cuenta"
-                    ) : (
-                      <><Sparkles className="h-4 w-4 mr-2" /> Generar Landing Demo</>
-                    )}
-                  </Button>
-                  {demoUsed && (
-                    <p className="text-center text-sm text-muted-foreground">
-                      Ya usaste tu demo gratis.{" "}
-                      <Link to="/register" className="text-primary underline">Crea una cuenta</Link> para generar más.
-                    </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="demo-desc">Descripción (opcional)</Label>
+                  <Textarea id="demo-desc" value={demoDescription} onChange={(e) => setDemoDescription(e.target.value)} placeholder="Detalles del producto..." rows={2} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Imagen del producto *</Label>
+                  {demoImagePreview ? (
+                    <div className="relative inline-block">
+                      <img src={demoImagePreview} alt="Preview" className="h-28 w-28 object-cover rounded-lg border" />
+                      <button type="button" onClick={removeImage} className="absolute -top-2 -right-2 h-6 w-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center">
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label htmlFor="demo-image" className="flex flex-col items-center justify-center h-28 w-full border-2 border-dashed border-input rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+                      <ImagePlus className="h-8 w-8 text-muted-foreground mb-1" />
+                      <span className="text-sm text-muted-foreground">Sube una imagen (JPG, PNG, WEBP · máx 5MB)</span>
+                      <input id="demo-image" type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleImageChange} />
+                    </label>
                   )}
-                </form>
-              </CardContent>
-            </Card>
-
-        {/* Example gallery */}
-        <LandingExamplesGallery />
+                  {imageError && <p className="text-sm text-destructive">{imageError}</p>}
+                  {!demoImage && !imageError && <p className="text-xs text-muted-foreground">Debes subir una imagen para generar la landing.</p>}
+                </div>
+                <Button type="submit" className="w-full" size="lg" disabled={generating || demoUsed || !demoImage}>
+                  {generating ? (
+                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generando con IA...</>
+                  ) : demoUsed ? (
+                    "Demo ya utilizado — Crea una cuenta"
+                  ) : (
+                    <><Sparkles className="h-4 w-4 mr-2" /> Generar Landing Demo</>
+                  )}
+                </Button>
+                {demoUsed && (
+                  <p className="text-center text-sm text-muted-foreground">
+                    Ya usaste tu demo gratis.{" "}
+                    <Link to="/register" className="text-primary underline">Crea una cuenta</Link> para generar más.
+                  </p>
+                )}
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold font-display text-center mb-12">Planes y Precios</h2>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {[
-              { name: "Free", price: 0, landings: "1 landing", features: ["1 ángulo / 1 hook", "Exportar HTML básico", "Listo para Shopify"] },
-              { name: "Starter", price: 7990, landings: "10 landings / mes", features: ["3 hooks por producto", "Objeciones básicas", "Urgencia editable", "FAQs", "Exportar HTML + CSS"], popular: true },
-              { name: "Pro", price: 14990, landings: "100 landings / mes", features: ["Múltiples ángulos psicológicos", "Hooks para ads", "Variantes de CTA", "Bundles y comparativas", "Microcopys de checkout", "Exportar ZIP completo"] },
-            ].map((plan) => (
+      {/* ── 7. PLANES ── */}
+      <section id="pricing" className="py-20 lg:py-28">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <h2 className="text-3xl md:text-4xl font-bold font-display text-center mb-4">Planes y Precios</h2>
+          <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-14">
+            Elige el plan que mejor se adapte a tu negocio
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {plans.map((plan) => (
               <Card key={plan.name} className={plan.popular ? "border-primary shadow-lg relative" : ""}>
                 {plan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -384,7 +463,7 @@ const Index = () => {
                   <ul className="text-left space-y-2">
                     {plan.features.map((f) => (
                       <li key={f} className="flex items-start gap-2 text-sm">
-                        <CheckCircle2 className="h-4 w-4 text-accent mt-0.5 shrink-0" />
+                        <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                         {f}
                       </li>
                     ))}
@@ -399,10 +478,10 @@ const Index = () => {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="py-20 bg-muted/50">
+      {/* ── 8. FAQ ── */}
+      <section className="py-20 lg:py-28 bg-muted/50">
         <div className="container mx-auto px-4 max-w-2xl">
-          <h2 className="text-3xl md:text-4xl font-bold font-display text-center mb-12">Preguntas Frecuentes</h2>
+          <h2 className="text-3xl md:text-4xl font-bold font-display text-center mb-14">Preguntas Frecuentes</h2>
           <div className="space-y-3">
             {faqs.map((faq, i) => (
               <Card key={i} className="overflow-hidden">
@@ -422,25 +501,42 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="py-20">
-        <div className="container mx-auto px-4 text-center max-w-2xl">
+      {/* ── 9. CTA FINAL ── */}
+      <section className="py-20 lg:py-28">
+        <div className="container mx-auto px-4 text-center max-w-3xl">
           <h2 className="text-3xl md:text-4xl font-bold font-display mb-4">
             Empieza a generar landings hoy
           </h2>
-          <p className="text-muted-foreground mb-8">
+          <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
             Crea tu cuenta gratis y genera tu primera landing page en menos de 1 minuto.
           </p>
-          <Button size="lg" className="text-base px-10" asChild>
-            <Link to="/register"><Sparkles className="h-5 w-5 mr-2" /> Crear cuenta gratis</Link>
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" className="text-base px-10 w-full sm:w-auto" asChild>
+              <Link to="/register"><Sparkles className="h-5 w-5 mr-2" /> Crear cuenta gratis</Link>
+            </Button>
+            <Button size="lg" variant="outline" className="text-base px-10 w-full sm:w-auto" asChild>
+              <a href="#demo">Probar demo</a>
+            </Button>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Nexsell. Todos los derechos reservados.
+      <footer className="border-t py-10 bg-card">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span className="font-display text-lg font-bold tracking-tight">
+              <span className="text-primary">Nex</span>sell
+            </span>
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <a href="#pricing" className="hover:text-foreground transition-colors">Precios</a>
+              <Link to="/login" className="hover:text-foreground transition-colors">Iniciar sesión</Link>
+              <Link to="/register" className="hover:text-foreground transition-colors">Crear cuenta</Link>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              © {new Date().getFullYear()} Nexsell
+            </p>
+          </div>
         </div>
       </footer>
     </div>
