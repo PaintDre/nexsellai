@@ -86,7 +86,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { product, templateId, outputSize, sectionType, sectionTitle, landingId, blockContent, customText, variation, bannerIndex } = await req.json();
+    const { product, templateId, outputSize, sectionType, sectionTitle, landingId, blockContent, customText, variation, bannerIndex, sequencePosition, totalInSequence } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -150,9 +150,26 @@ serve(async (req) => {
     }
 
     // Build prompt
-    const templateStyle = templatePrompts[templateId] || templatePrompts["hook-visual"];
+    const actualTemplateId = templateId || "hook-visual";
+    const templateStyle = templatePrompts[actualTemplateId] || templatePrompts["hook-visual"];
     const [width, height] = (outputSize || "1080x1080").split("x").map(Number);
 
+    // Sequence context for unique angles
+    let sequenceInstruction = "";
+    if (sequencePosition && totalInSequence) {
+      const stageNames: Record<string, string> = {
+        "hook-visual": "HOOK — captar atención",
+        "problema": "PROBLEMA — identificar dolor",
+        "solucion": "SOLUCIÓN — presentar respuesta",
+        "beneficio": "BENEFICIO — ventaja clave",
+        "prueba-social": "PRUEBA SOCIAL — generar confianza",
+        "oferta": "OFERTA — motivar compra",
+        "cta": "CTA — cerrar venta",
+      };
+      sequenceInstruction = `\n\nSALES SEQUENCE CONTEXT: This is banner ${sequencePosition} of ${totalInSequence} in a complete sales funnel sequence.
+Current stage: ${stageNames[actualTemplateId] || actualTemplateId}
+CRITICAL: Each banner in this sequence MUST use completely different text, headlines, and angles. Do NOT repeat any phrase, slogan, or headline from other banners in the sequence. This banner's role is specifically "${stageNames[actualTemplateId]}" — focus ONLY on this stage's unique messaging angle.`;
+    }
     let sectionContext = "";
     if (sectionType) {
       const sectionDescriptions: Record<string, string> = {
@@ -215,8 +232,7 @@ CRITICAL RULES:
 - Include "Envío Gratis" and "Pago Contraentrega" badges where applicable
 - NO watermarks, NO AI notices, NO stock photo text
 - All text must be readable with high contrast
-- Professional Chilean ecommerce aesthetic${customText ? `\n\nIMPORTANT — Custom text/slogan to include PROMINENTLY:\n"${customText}"` : ""}`;
-
+- Professional Chilean ecommerce aesthetic${customText ? `\n\nIMPORTANT — Custom text/slogan to include PROMINENTLY:\n"${customText}"` : ""}${sequenceInstruction}`;
     // Build messages with product image if available
     const userContent: any[] = [{ type: "text", text: textPrompt }];
     
