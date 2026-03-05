@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import Products from "./pages/Products";
 import ProductForm from "./pages/ProductForm";
 import GenerateLanding from "./pages/GenerateLanding";
+import ProductDetail from "./pages/ProductDetail";
 import Landings from "./pages/Landings";
 import LandingView from "./pages/LandingView";
 import Pricing from "./pages/Pricing";
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/products" element={<Products />} />
               <Route path="/products/new" element={<ProductForm />} />
+              <Route path="/products/:id" element={<ProductDetail />} />
               <Route path="/products/:id/edit" element={<ProductForm />} />
               <Route path="/products/:id/generate" element={<GenerateLanding />} />
               <Route path="/landings" element={<Landings />} />
