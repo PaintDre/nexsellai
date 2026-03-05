@@ -53,9 +53,9 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
     if (!onBlocksChange) return;
     const newBlocks = blocks.map(b => {
       if (b.type === type && Array.isArray(b.content)) {
-        const newContent = [...b.content];
+        const newContent = [...b.content] as any[];
         newContent[index] = value;
-        return { ...b, content: newContent };
+        return { ...b, content: newContent } as Block;
       }
       return b;
     });
