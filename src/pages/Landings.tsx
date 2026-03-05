@@ -191,17 +191,20 @@ const Landings = () => {
                     </div>
                   </div>
                   <p className="text-xs text-muted-foreground">{new Date(landing.created_at).toLocaleDateString("es-CL")}</p>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" asChild className="flex-1 text-xs">
-                      <Link to={`/landings/${landing.id}`}><Eye className="h-3 w-3 mr-1" /> Editor</Link>
-                    </Button>
-                    <Button variant="default" size="sm" asChild className="flex-1 text-xs">
-                      <Link to={`/landings/${landing.id}/preview`}><Maximize2 className="h-3 w-3 mr-1" /> Preview</Link>
-                    </Button>
-                    <Button variant="secondary" size="sm" className="text-xs" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
-                      {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
-                    </Button>
-                  </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" asChild className="flex-1 text-xs">
+                        <Link to={`/landings/${landing.id}`}><Eye className="h-3 w-3 mr-1" /> Editor</Link>
+                      </Button>
+                      <Button variant="default" size="sm" asChild className="flex-1 text-xs">
+                        <Link to={`/landings/${landing.id}/preview`}><Maximize2 className="h-3 w-3 mr-1" /> Preview</Link>
+                      </Button>
+                      <Button variant="secondary" size="sm" className="text-xs" onClick={() => handleDuplicate(landing)}>
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                      <Button variant="secondary" size="sm" className="text-xs" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
+                        {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+                      </Button>
+                    </div>
                 </CardContent>
               </Card>
             );
