@@ -1,9 +1,10 @@
 import { cn } from "@/lib/utils";
 import { bannerTemplates, type BannerTemplate } from "./templates";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface TemplateGalleryProps {
-  selected: string;
-  onSelect: (id: string) => void;
+  selectedIds: string[];
+  onToggle: (id: string) => void;
 }
 
 const OfferPreview = () => (
@@ -88,22 +89,33 @@ const previewComponents: Record<string, React.FC> = {
   lifestyle: LifestylePreview,
 };
 
-export const TemplateGallery = ({ selected, onSelect }: TemplateGalleryProps) => {
+export const TemplateGallery = ({ selectedIds, onToggle }: TemplateGalleryProps) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {bannerTemplates.map((tpl) => {
         const PreviewComponent = previewComponents[tpl.previewLayout];
+        const isSelected = selectedIds.includes(tpl.id);
         return (
           <button
             key={tpl.id}
-            onClick={() => onSelect(tpl.id)}
+            onClick={() => onToggle(tpl.id)}
             className={cn(
               "group relative rounded-xl border-2 p-3 text-left transition-all hover:scale-[1.02]",
-              selected === tpl.id
+              isSelected
                 ? "border-primary bg-primary/5 shadow-lg ring-2 ring-primary/20"
                 : "border-border hover:border-primary/40"
             )}
           >
+            {/* Checkbox */}
+            <div className="absolute top-2 right-2 z-10">
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={() => onToggle(tpl.id)}
+                onClick={(e) => e.stopPropagation()}
+                className="h-5 w-5"
+              />
+            </div>
+
             {/* Mini preview */}
             <div className={cn("h-28 rounded-lg overflow-hidden mb-3", tpl.previewBg)}>
               {PreviewComponent && <PreviewComponent />}
@@ -112,13 +124,6 @@ export const TemplateGallery = ({ selected, onSelect }: TemplateGalleryProps) =>
             {/* Template info */}
             <h4 className="font-semibold text-base leading-tight">{tpl.name}</h4>
             <p className="text-sm text-muted-foreground mt-1.5 leading-snug">{tpl.description}</p>
-
-            {/* Selected indicator */}
-            {selected === tpl.id && (
-              <div className="absolute top-2 right-2 h-6 w-6 rounded-full bg-primary flex items-center justify-center shadow-md">
-                <span className="text-primary-foreground text-xs font-bold">✓</span>
-              </div>
-            )}
           </button>
         );
       })}

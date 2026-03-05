@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { LandingExamplesGallery } from "@/components/landing/LandingExamplesGallery";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -347,29 +348,7 @@ const Index = () => {
             </Card>
 
         {/* Example gallery */}
-        <div className="mt-16">
-          <h3 className="text-xl font-display font-bold text-center mb-6">Ejemplos de landings generadas</h3>
-          <div className="grid sm:grid-cols-3 gap-4">
-            {[
-              { name: "Masajeador Cervical Pro", cat: "Fitness", gradient: "from-primary/20 to-primary/5" },
-              { name: "Sérum Vitamina C", cat: "Beauty", gradient: "from-accent/20 to-accent/5" },
-              { name: "Cama Ortopédica Mascota", cat: "Pets", gradient: "from-secondary to-muted" },
-            ].map((ex) => (
-              <Card key={ex.name} className="overflow-hidden group hover:shadow-md transition-shadow">
-                <div className={`h-32 bg-gradient-to-br ${ex.gradient} flex items-center justify-center`}>
-                  <div className="text-center">
-                    <Sparkles className="h-8 w-8 text-primary/40 mx-auto mb-2" />
-                    <Badge variant="outline" className="text-xs">Vista previa</Badge>
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <p className="font-medium text-sm">{ex.name}</p>
-                  <p className="text-xs text-muted-foreground">{ex.cat}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
+        <LandingExamplesGallery />
         </div>
       </section>
 

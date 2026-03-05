@@ -8,11 +8,18 @@ import { bannerSizes } from "@/components/banner/templates";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Sparkles, Download, Loader2, Lock, Image as ImageIcon } from "lucide-react";
 
 type Product = Tables<"products">;
+
+interface GeneratedBanner {
+  templateId: string;
+  imageUrl: string;
+}
 
 const GenerateBanner = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,10 +28,11 @@ const GenerateBanner = () => {
   const { toast } = useToast();
 
   const [product, setProduct] = useState<Product | null>(null);
-  const [templateId, setTemplateId] = useState("oferta-directa");
+  const [selectedTemplates, setSelectedTemplates] = useState<string[]>(["oferta-directa"]);
   const [outputSize, setOutputSize] = useState("1080x1080");
+  const [customText, setCustomText] = useState("");
   const [loading, setLoading] = useState(false);
-  const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
+  const [generatedBanners, setGeneratedBanners] = useState<GeneratedBanner[]>([]);
   const [showPreview, setShowPreview] = useState(false);
 
   const isPaidPlan = profile?.plan === "starter" || profile?.plan === "pro";
@@ -35,34 +43,50 @@ const GenerateBanner = () => {
       .then(({ data }) => setProduct(data));
   }, [user, id]);
 
+  const handleToggleTemplate = (templateId: string) => {
+    setSelectedTemplates((prev) =>
+      prev.includes(templateId)
+        ? prev.length > 1 ? prev.filter((t) => t !== templateId) : prev
+        : [...prev, templateId]
+    );
+  };
+
   const handleGenerate = async () => {
-    if (!product || !isPaidPlan) return;
+    if (!product || !isPaidPlan || selectedTemplates.length === 0) return;
     setLoading(true);
-    setGeneratedUrl(null);
+    setGeneratedBanners([]);
 
     try {
-      const { data, error } = await supabase.functions.invoke("generate-banner", {
-        body: {
-          product: {
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            category: product.category,
-            description: product.description,
-            target_audience: product.target_audience,
-            images: product.images,
-          },
-          templateId,
-          outputSize,
-        },
-      });
+      const results = await Promise.all(
+        selectedTemplates.map(async (templateId) => {
+          const { data, error } = await supabase.functions.invoke("generate-banner", {
+            body: {
+              product: {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                category: product.category,
+                description: product.description,
+                target_audience: product.target_audience,
+                images: product.images,
+              },
+              templateId,
+              outputSize,
+              customText: customText.trim() || undefined,
+            },
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+          return { templateId, imageUrl: data.imageUrl } as GeneratedBanner;
+        })
+      );
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
-      setGeneratedUrl(data.imageUrl);
+      setGeneratedBanners(results);
       setShowPreview(true);
-      toast({ title: "¡Banner generado!", description: "Tu banner está listo para descargar." });
+      toast({
+        title: results.length > 1 ? `¡${results.length} banners generados!` : "¡Banner generado!",
+        description: "Tus banners están listos para descargar.",
+      });
     } catch (err: any) {
       toast({ title: "Error", description: err.message || "No se pudo generar el banner", variant: "destructive" });
     } finally {
@@ -70,16 +94,21 @@ const GenerateBanner = () => {
     }
   };
 
-  const handleDownload = async () => {
-    if (!generatedUrl) return;
-    const response = await fetch(generatedUrl);
+  const handleDownload = async (banner: GeneratedBanner) => {
+    const response = await fetch(banner.imageUrl);
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `banner-${product?.name || "image"}-${outputSize}.png`;
+    a.download = `banner-${product?.name || "image"}-${banner.templateId}-${outputSize}.png`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadAll = async () => {
+    for (const banner of generatedBanners) {
+      await handleDownload(banner);
+    }
   };
 
   if (!product) {
@@ -143,10 +172,32 @@ const GenerateBanner = () => {
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Elige una plantilla</CardTitle>
+                <CardTitle className="text-base">
+                  Elige plantillas ({selectedTemplates.length} seleccionada{selectedTemplates.length !== 1 ? "s" : ""})
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <TemplateGallery selected={templateId} onSelect={setTemplateId} />
+                <TemplateGallery selectedIds={selectedTemplates} onToggle={handleToggleTemplate} />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Texto personalizado (opcional)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Label htmlFor="customText" className="text-sm text-muted-foreground mb-2 block">
+                  Agrega un slogan o texto que aparecerá en el banner
+                </Label>
+                <Textarea
+                  id="customText"
+                  value={customText}
+                  onChange={(e) => setCustomText(e.target.value)}
+                  placeholder="Ej: La mejor calidad al mejor precio • ¡Solo por hoy!"
+                  rows={2}
+                  maxLength={120}
+                />
+                <p className="text-xs text-muted-foreground mt-1 text-right">{customText.length}/120</p>
               </CardContent>
             </Card>
 
@@ -172,19 +223,19 @@ const GenerateBanner = () => {
 
             <Button
               onClick={handleGenerate}
-              disabled={loading}
+              disabled={loading || selectedTemplates.length === 0}
               className="w-full h-12 text-base font-semibold"
               size="lg"
             >
               {loading ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                  Generando banner...
+                  Generando {selectedTemplates.length} banner{selectedTemplates.length !== 1 ? "s" : ""}...
                 </>
               ) : (
                 <>
                   <Sparkles className="h-5 w-5 mr-2" />
-                  Generar Banner con IA
+                  Generar {selectedTemplates.length} Banner{selectedTemplates.length !== 1 ? "s" : ""} con IA
                 </>
               )}
             </Button>
@@ -194,23 +245,41 @@ const GenerateBanner = () => {
 
       {/* Preview dialog */}
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Banner Generado</DialogTitle>
+            <DialogTitle>
+              {generatedBanners.length > 1
+                ? `${generatedBanners.length} Banners Generados`
+                : "Banner Generado"}
+            </DialogTitle>
           </DialogHeader>
-          {generatedUrl && (
-            <div className="space-y-4">
-              <div className="rounded-lg overflow-hidden border bg-muted">
-                <img src={generatedUrl} alt="Banner generado" className="w-full h-auto" />
-              </div>
-              <div className="flex gap-3 justify-end">
-                <Button variant="outline" onClick={() => setShowPreview(false)}>Cerrar</Button>
-                <Button onClick={handleDownload}>
-                  <Download className="h-4 w-4 mr-2" /> Descargar PNG
-                </Button>
-              </div>
+          <div className="space-y-6">
+            <div className={generatedBanners.length > 1 ? "grid sm:grid-cols-2 gap-4" : ""}>
+              {generatedBanners.map((banner) => (
+                <div key={banner.templateId} className="space-y-2">
+                  <div className="rounded-lg overflow-hidden border bg-muted">
+                    <img src={banner.imageUrl} alt={`Banner ${banner.templateId}`} className="w-full h-auto" />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground capitalize">
+                      {banner.templateId.replace(/-/g, " ")}
+                    </span>
+                    <Button variant="outline" size="sm" onClick={() => handleDownload(banner)}>
+                      <Download className="h-3 w-3 mr-1" /> Descargar
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
+            <div className="flex gap-3 justify-end border-t pt-4">
+              <Button variant="outline" onClick={() => setShowPreview(false)}>Cerrar</Button>
+              {generatedBanners.length > 1 && (
+                <Button onClick={handleDownloadAll}>
+                  <Download className="h-4 w-4 mr-2" /> Descargar Todos
+                </Button>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

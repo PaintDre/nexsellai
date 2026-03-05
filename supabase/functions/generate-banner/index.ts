@@ -83,7 +83,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { product, templateId, outputSize, sectionType, sectionTitle, landingId, blockContent } = await req.json();
+    const { product, templateId, outputSize, sectionType, sectionTitle, landingId, blockContent, customText } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -195,7 +195,7 @@ CRITICAL RULES:
 - Include "Envío Gratis" and "Pago Contraentrega" badges where applicable
 - NO watermarks, NO AI notices, NO stock photo text
 - Make all text readable with high contrast against the background
-- Professional Chilean ecommerce aesthetic`;
+- Professional Chilean ecommerce aesthetic${customText ? `\n\nIMPORTANT — Custom text/slogan to include PROMINENTLY and VISIBLY on the banner:\n"${customText}"` : ""}`;
 
     // Build messages with product image if available
     const userContent: any[] = [{ type: "text", text: textPrompt }];

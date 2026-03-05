@@ -681,7 +681,7 @@ const LandingView = () => {
           <div className="space-y-6">
             <div>
               <p className="text-sm font-medium mb-3">Elige una plantilla visual</p>
-              <TemplateGallery selected={templateId} onSelect={setTemplateId} />
+              <TemplateGallery selectedIds={[templateId]} onToggle={(id) => setTemplateId(id)} />
             </div>
 
             <div>
