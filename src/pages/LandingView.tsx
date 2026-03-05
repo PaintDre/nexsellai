@@ -5,19 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2, ImagePlus, Sparkles, Pencil, Save, X, Copy, Trash2 } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2, ImagePlus, Sparkles, Pencil, Save, X, Copy, Trash2, Globe, GlobeLock, Share2, ExternalLink, Eye, TrendingUp } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { exportLandingAsHTML, exportLandingAsZip } from "@/lib/exportLanding";
 import LandingRenderer from "@/components/landing/LandingRenderer";
 import { themes, type LandingTheme } from "@/components/landing/themes";
@@ -78,7 +69,12 @@ const LandingView = () => {
   const [outputSize, setOutputSize] = useState("1200x628");
   const [generatingImage, setGeneratingImage] = useState(false);
   const [showExportPreview, setShowExportPreview] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [viewsData, setViewsData] = useState<{ total: number; last7: number; daily: { date: string; views: number }[] }>({ total: 0, last7: 0, daily: [] });
   const isPaidPlan = profile?.plan === "starter" || profile?.plan === "pro";
+
+  const slugify = (text: string) =>
+    text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 60) + "-" + Date.now().toString(36);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -111,6 +107,84 @@ const LandingView = () => {
     };
     load();
   }, [id, user]);
+
+  // Load analytics
+  useEffect(() => {
+    if (!landing) return;
+    const loadViews = async () => {
+      const { data, count } = await (supabase.from("landing_views" as any).select("*", { count: "exact" }).eq("landing_id", landing.id) as any);
+      const rows = data || [];
+      const now = new Date();
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const recent = rows.filter((r: any) => new Date(r.viewed_at) >= sevenDaysAgo);
+
+      // Build daily chart data
+      const dailyMap: Record<string, number> = {};
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+        dailyMap[d.toISOString().slice(0, 10)] = 0;
+      }
+      recent.forEach((r: any) => {
+        const day = new Date(r.viewed_at).toISOString().slice(0, 10);
+        if (dailyMap[day] !== undefined) dailyMap[day]++;
+      });
+
+      setViewsData({
+        total: count || rows.length,
+        last7: recent.length,
+        daily: Object.entries(dailyMap).map(([date, views]) => ({ date, views })),
+      });
+    };
+    loadViews();
+  }, [landing?.id]);
+
+  const handleTogglePublish = async () => {
+    if (!landing || !user) return;
+    setPublishing(true);
+    try {
+      const isPublished = (landing as any).published;
+      if (isPublished) {
+        // Unpublish
+        await (supabase.from("landings").update({ published: false, published_at: null } as any).eq("id", landing.id).eq("user_id", user.id) as any);
+        setLanding({ ...landing, published: false, published_at: null } as any);
+        toast({ title: "Landing despublicada" });
+      } else {
+        // Publish
+        const slug = (landing as any).slug || slugify(landing.name);
+        await (supabase.from("landings").update({ published: true, slug, published_at: new Date().toISOString() } as any).eq("id", landing.id).eq("user_id", user.id) as any);
+        setLanding({ ...landing, published: true, slug, published_at: new Date().toISOString() } as any);
+        toast({ title: "¡Landing publicada!" });
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const publicUrl = (landing as any)?.slug
+    ? `${window.location.origin}/p/${(landing as any).slug}`
+    : null;
+
+  const handleCopyPublicUrl = () => {
+    if (publicUrl) {
+      navigator.clipboard.writeText(publicUrl);
+      toast({ title: "URL copiada al portapapeles" });
+    }
+  };
+
+  const handleShare = (platform: string) => {
+    if (!publicUrl) return;
+    const text = encodeURIComponent(landing?.name || "Landing Page");
+    const url = encodeURIComponent(publicUrl);
+    const urls: Record<string, string> = {
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      twitter: `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+      whatsapp: `https://wa.me/?text=${text}%20${url}`,
+    };
+    window.open(urls[platform], "_blank", "noopener,noreferrer");
+  };
 
   const blocks = (editMode ? editedBlocks : (landing?.blocks as unknown as BlockWithImage[])) || [];
 
@@ -494,6 +568,42 @@ const LandingView = () => {
                   <Download className="h-4 w-4 mr-1" />
                   Exportar
                 </Button>
+
+                {/* Publish button */}
+                <Button
+                  variant={(landing as any).published ? "default" : "outline"}
+                  size="sm"
+                  onClick={handleTogglePublish}
+                  disabled={publishing}
+                >
+                  {publishing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> :
+                    (landing as any).published ? <Globe className="h-4 w-4 mr-1" /> : <GlobeLock className="h-4 w-4 mr-1" />}
+                  <span className="hidden sm:inline">{(landing as any).published ? "Publicada" : "Publicar"}</span>
+                </Button>
+
+                {/* Share & public URL */}
+                {(landing as any).published && publicUrl && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Share2 className="h-4 w-4 mr-1" />
+                        <span className="hidden sm:inline">Compartir</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={handleCopyPublicUrl}>
+                        <Copy className="h-4 w-4 mr-2" /> Copiar URL
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => window.open(publicUrl, "_blank")}>
+                        <ExternalLink className="h-4 w-4 mr-2" /> Abrir en nueva pestaña
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleShare("facebook")}>Facebook</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleShare("twitter")}>X (Twitter)</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleShare("linkedin")}>LinkedIn</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleShare("whatsapp")}>WhatsApp</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </>
             )}
           </div>
@@ -510,6 +620,42 @@ const LandingView = () => {
           onBlocksChange={handleBlocksChange}
         />
       </ResizablePreview>
+
+      {/* Analytics section */}
+      {(landing as any).published && viewsData.total > 0 && (
+        <div className="container mx-auto px-4 py-6">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" /> Analytics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-6 items-end">
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{viewsData.total}</p>
+                  <p className="text-xs text-muted-foreground">Visitas totales</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold text-foreground">{viewsData.last7}</p>
+                  <p className="text-xs text-muted-foreground">Últimos 7 días</p>
+                </div>
+                <div className="flex-1 flex items-end gap-1 h-12">
+                  {viewsData.daily.map((d) => (
+                    <div key={d.date} className="flex-1 flex flex-col items-center gap-1">
+                      <div
+                        className="w-full bg-primary/80 rounded-sm min-h-[2px]"
+                        style={{ height: `${Math.max(2, (d.views / Math.max(...viewsData.daily.map(x => x.views), 1)) * 48)}px` }}
+                      />
+                      <span className="text-[9px] text-muted-foreground">{d.date.slice(5)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Export Preview Dialog */}
       <ExportPreviewDialog

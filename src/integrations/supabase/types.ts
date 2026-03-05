@@ -117,6 +117,38 @@ export type Database = {
           },
         ]
       }
+      landing_views: {
+        Row: {
+          id: string
+          landing_id: string
+          referrer: string | null
+          user_agent: string | null
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          landing_id: string
+          referrer?: string | null
+          user_agent?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          landing_id?: string
+          referrer?: string | null
+          user_agent?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landing_views_landing_id_fkey"
+            columns: ["landing_id"]
+            isOneToOne: false
+            referencedRelation: "landings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       landings: {
         Row: {
           blocks: Json
@@ -128,6 +160,9 @@ export type Database = {
           mode: Database["public"]["Enums"]["landing_mode"]
           name: string
           product_id: string
+          published: boolean
+          published_at: string | null
+          slug: string | null
           theme: string
           updated_at: string
           user_id: string
@@ -142,6 +177,9 @@ export type Database = {
           mode?: Database["public"]["Enums"]["landing_mode"]
           name: string
           product_id: string
+          published?: boolean
+          published_at?: string | null
+          slug?: string | null
           theme?: string
           updated_at?: string
           user_id: string
@@ -156,6 +194,9 @@ export type Database = {
           mode?: Database["public"]["Enums"]["landing_mode"]
           name?: string
           product_id?: string
+          published?: boolean
+          published_at?: string | null
+          slug?: string | null
           theme?: string
           updated_at?: string
           user_id?: string
