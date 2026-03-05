@@ -10,30 +10,28 @@ const plans = [
     id: "free",
     name: "Free",
     price: 0,
-    description: "Para probar Nexsell",
+    description: "Explora Nexsell sin costo",
     features: [
       "1 landing total",
       "2 banners / mes",
-      "1 ángulo / 1 hook",
+      "1 hook de venta",
       "Preview de landing",
       "Exportar HTML básico",
-      "Listo para Shopify",
     ],
     excluded: ["Sin imágenes IA", "Sin edición avanzada"],
   },
   {
     id: "starter",
     name: "Starter",
-    price: 7990,
-    description: "Para testear 2-3 productos/mes",
+    price: 14990,
+    description: "Ideal para lanzar y testear productos cada mes",
     features: [
       "10 landings / mes",
       "30 banners / mes",
       "3 hooks por producto",
       "Imágenes IA en landings",
-      "Objeciones básicas",
-      "Bloque de urgencia editable",
-      "FAQs simples",
+      "Objeciones y urgencia",
+      "FAQs editables",
       "Exportar HTML + CSS",
     ],
     popular: true,
@@ -41,18 +39,16 @@ const plans = [
   {
     id: "pro",
     name: "Pro",
-    price: 14990,
-    description: "Para correr ads diario",
+    price: 34990,
+    description: "Para vendedores que escalan con ads todos los días",
     features: [
       "100 landings / mes",
       "150 banners / mes",
-      "Múltiples ángulos psicológicos",
+      "Ángulos psicológicos ilimitados",
       "Imágenes IA en landings",
-      "Edición completa de secciones",
-      "Hooks para ads incluidos",
+      "Hooks optimizados para ads",
       "Variantes de CTA",
-      "Sección de bundles",
-      "Comparativa vs otros",
+      "Bundles y comparativas",
       "Microcopys de checkout",
       "Exportar ZIP completo",
     ],
@@ -66,7 +62,7 @@ const Pricing = () => {
     <div className="p-6 lg:p-8 space-y-8">
       <div className="text-center max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold font-display tracking-tight">Planes y Precios</h1>
-        <p className="text-muted-foreground mt-2">Elige el plan que se ajuste a tu volumen de ventas</p>
+        <p className="text-muted-foreground mt-2">Elige el plan que mejor se adapte a tu volumen de ventas</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
