@@ -714,7 +714,8 @@ const GenerateBanner = () => {
 
       {/* Preview Modal */}
       <Dialog open={!!previewBanner} onOpenChange={(open) => !open && setPreviewBanner(null)}>
-        <DialogContent className="max-w-3xl p-0 overflow-hidden">
+        <DialogContent className="max-w-3xl p-0 overflow-hidden" aria-describedby={undefined}>
+          <DialogTitle className="sr-only">Vista previa del banner</DialogTitle>
           {previewBanner && (
             <div className="flex flex-col">
               <div className="bg-muted flex items-center justify-center max-h-[70vh] overflow-auto">
