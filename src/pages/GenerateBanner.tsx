@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { toast } from "sonner";
@@ -714,7 +714,8 @@ const GenerateBanner = () => {
 
       {/* Preview Modal */}
       <Dialog open={!!previewBanner} onOpenChange={(open) => !open && setPreviewBanner(null)}>
-        <DialogContent className="max-w-3xl p-0 overflow-hidden">
+        <DialogContent className="max-w-3xl p-0 overflow-hidden" aria-describedby={undefined}>
+          <DialogTitle className="sr-only">Vista previa del banner</DialogTitle>
           {previewBanner && (
             <div className="flex flex-col">
               <div className="bg-muted flex items-center justify-center max-h-[70vh] overflow-auto">
