@@ -78,7 +78,7 @@ const Login = () => {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full min-h-[44px]" disabled={loading}>
                 {loading ? "Entrando..." : "Entrar"}
               </Button>
               <p className="text-sm text-muted-foreground">

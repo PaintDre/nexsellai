@@ -120,7 +120,7 @@ const Pricing = () => {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-8">
+    <div className="p-4 md:p-6 lg:p-8 space-y-8">
       <div className="text-center max-w-2xl mx-auto space-y-4">
         <h1 className="text-3xl font-bold font-display tracking-tight">Planes y Precios</h1>
         <p className="text-muted-foreground">Elige el plan que mejor se adapte a tu volumen de ventas</p>
@@ -189,7 +189,7 @@ const Pricing = () => {
                   ))}
                 </ul>
                 <Button
-                  className="w-full"
+                  className="w-full min-h-[44px]"
                   variant={isCurrent ? "secondary" : plan.popular ? "default" : "outline"}
                   disabled={isCurrent || isLoading || plan.id === "free"}
                   onClick={() => handleSubscribe(plan.id)}

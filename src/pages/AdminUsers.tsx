@@ -164,14 +164,14 @@ const AdminUsers = () => {
 
   return (
     <div className="p-4 md:p-6 lg:p-10 space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3">
           <Button asChild variant="outline" size="sm">
             <Link to="/admin"><ArrowLeft className="h-4 w-4 mr-1" /> Volver</Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold font-display text-foreground flex items-center gap-2">
-              <Users className="h-7 w-7" /> Gestión de Usuarios
+            <h1 className="text-2xl sm:text-3xl font-bold font-display text-foreground flex items-center gap-2">
+              <Users className="h-6 w-6 sm:h-7 sm:w-7" /> Gestión de Usuarios
             </h1>
             <p className="text-muted-foreground mt-1">{users.length} usuarios registrados</p>
           </div>
@@ -179,8 +179,7 @@ const AdminUsers = () => {
         <Button
           onClick={saveAllChanges}
           disabled={!hasPendingChanges || saving}
-          size="sm"
-          className="gap-2"
+          className="gap-2 w-full sm:w-auto"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Guardar cambios
@@ -204,7 +203,7 @@ const AdminUsers = () => {
                   <div className="flex items-start justify-between">
                     <div className="min-w-0">
                       <p className="font-semibold truncate">{u.full_name || "—"}</p>
-                      <p className="text-sm text-muted-foreground truncate">{u.email}</p>
+                      <p className="text-sm text-muted-foreground break-all">{u.email}</p>
                     </div>
                     <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive shrink-0 min-h-[44px]" onClick={() => deactivateUser(u.user_id)}>
                       <Ban className="h-4 w-4" />
@@ -214,7 +213,7 @@ const AdminUsers = () => {
                     <div className="space-y-1">
                       <p className="text-xs text-muted-foreground">Plan</p>
                       <Select value={getDisplayPlan(u)} onValueChange={(v) => setLocalPlan(u.user_id, v, u.plan)}>
-                        <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                        <SelectTrigger className="min-h-[44px]"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="free">Free</SelectItem>
                           <SelectItem value="starter">Starter</SelectItem>
@@ -225,8 +224,8 @@ const AdminUsers = () => {
                     <div className="space-y-1">
                       <p className="text-xs text-muted-foreground">Rol</p>
                       {isSuperAdmin() ? (
-                        <Select value={getDisplayRole(u)} onValueChange={(v) => setLocalRole(u.user_id, v, u.roles[0] || "user")}>
-                          <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
+                         <Select value={getDisplayRole(u)} onValueChange={(v) => setLocalRole(u.user_id, v, u.roles[0] || "user")}>
+                          <SelectTrigger className="min-h-[44px]"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="user">User</SelectItem>
                             <SelectItem value="admin">Admin</SelectItem>

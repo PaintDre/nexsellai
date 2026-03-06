@@ -221,7 +221,7 @@ const GenerateBanner = () => {
       ) : (
         <>
           {/* Step indicator */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2">
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1">
             {STEPS.map((s, i) => (
               <button
                 key={i}
