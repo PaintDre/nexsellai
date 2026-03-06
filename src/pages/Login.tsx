@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const REMEMBER_KEY = "nexsell_remembered_email";
 
@@ -18,7 +18,6 @@ const Login = () => {
   const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
     const saved = localStorage.getItem(REMEMBER_KEY);
@@ -34,7 +33,7 @@ const Login = () => {
     const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast({ title: "Error al iniciar sesión", description: error.message, variant: "destructive" });
+      toast.error("Error al iniciar sesión", { description: error.message });
     } else {
       if (remember) {
         localStorage.setItem(REMEMBER_KEY, email);
@@ -115,7 +114,7 @@ const Login = () => {
                     redirect_uri: window.location.origin,
                   });
                   if (error) {
-                    toast({ title: "Error con Google", description: String(error), variant: "destructive" });
+                    toast.error("Error con Google", { description: String(error) });
                   }
                 }}
               >

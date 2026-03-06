@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { MailCheck } from "lucide-react";
 
 const Register = () => {
@@ -20,13 +20,12 @@ const Register = () => {
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast({ title: "Las contraseñas no coinciden", description: "Verifica que ambas contraseñas sean iguales.", variant: "destructive" });
+      toast.error("Las contraseñas no coinciden", { description: "Verifica que ambas contraseñas sean iguales." });
       return;
     }
 
@@ -41,7 +40,7 @@ const Register = () => {
     });
     setLoading(false);
     if (error) {
-      toast({ title: "Error al registrarse", description: error.message, variant: "destructive" });
+      toast.error("Error al registrarse", { description: error.message });
     } else {
       setRegisteredEmail(email);
       setShowVerificationDialog(true);
@@ -99,7 +98,7 @@ const Register = () => {
                     redirect_uri: window.location.origin,
                   });
                   if (error) {
-                    toast({ title: "Error con Google", description: String(error), variant: "destructive" });
+                    toast.error("Error con Google", { description: String(error) });
                   }
                 }}
               >
