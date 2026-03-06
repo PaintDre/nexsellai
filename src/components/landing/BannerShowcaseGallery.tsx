@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/carousel";
 
 const ImageCard = ({ url }: { url: string }) => (
-  <div className="rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:scale-[1.02] transition-all">
+  <div className="rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:scale-[1.02] transition-all bg-muted flex items-center justify-center max-h-[70vh]">
     <img
       src={
         url.includes("supabase.co/storage/v1/object/public/")
@@ -21,7 +21,7 @@ const ImageCard = ({ url }: { url: string }) => (
           : url
       }
       alt="Banner generado por Nexsell"
-      className="w-full h-auto object-contain"
+      className="w-full h-auto object-contain max-h-[70vh]"
       loading="lazy"
       width={400}
       height={400}
@@ -64,7 +64,7 @@ export const BannerShowcaseGallery = () => {
           <CarouselContent>
             {hasImages
               ? images.map((url, i) => (
-                  <CarouselItem key={i}>
+                  <CarouselItem key={i} className="basis-[85%]">
                     <ImageCard url={url} />
                   </CarouselItem>
                 ))
