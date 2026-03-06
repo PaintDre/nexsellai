@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Save, Lock, Trash2, ExternalLink, HelpCircle, MessageSquare, Zap, Image } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
@@ -27,7 +27,7 @@ const BANNER_LIMITS: Record<string, number> = { free: 2, starter: 30, pro: 150 }
 
 const SettingsPage = () => {
   const { user, profile, refreshProfile } = useAuth();
-  const { toast } = useToast();
+  
 
   // Account
   const [fullName, setFullName] = useState("");
@@ -52,37 +52,37 @@ const SettingsPage = () => {
       .eq("user_id", user.id);
     setSaving(false);
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast.error("Error", { description: error.message });
     } else {
-      toast({ title: "Perfil actualizado" });
+      toast.success("Perfil actualizado");
       await refreshProfile();
     }
   };
 
   const handleChangePassword = async () => {
     if (!newPassword || newPassword.length < 6) {
-      toast({ title: "La contraseña debe tener al menos 6 caracteres", variant: "destructive" });
+      toast.error("La contraseña debe tener al menos 6 caracteres");
       return;
     }
     setChangingPassword(true);
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     setChangingPassword(false);
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast.error("Error", { description: error.message });
     } else {
-      toast({ title: "Contraseña actualizada" });
+      toast.success("Contraseña actualizada");
       setNewPassword("");
     }
   };
 
   const handleDeleteAccount = async () => {
-    toast({ title: "Contacta soporte para eliminar tu cuenta", description: "Por seguridad, la eliminación de cuenta requiere verificación manual." });
+    toast("Contacta soporte para eliminar tu cuenta", { description: "Por seguridad, la eliminación de cuenta requiere verificación manual." });
   };
 
   const handleSavePreferences = () => {
     localStorage.setItem("pref_intensity", defaultIntensity);
     localStorage.setItem("pref_mode", defaultMode);
-    toast({ title: "Preferencias guardadas" });
+    toast.success("Preferencias guardadas");
   };
 
   const plan = profile?.plan || "free";

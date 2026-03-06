@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Upload, X, Loader2, Sparkles, Rocket, ArrowRight } from "lucide-react";
 
 const categories = [
@@ -32,7 +32,7 @@ const Onboarding = () => {
   const [step, setStep] = useState(1);
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
 
   // Product form state
   const [name, setName] = useState("");
@@ -77,7 +77,7 @@ const Onboarding = () => {
       const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
       setImages([urlData.publicUrl]);
     } else {
-      toast({ title: "Error al subir imagen", description: error.message, variant: "destructive" });
+      toast.error("Error al subir imagen", { description: error.message });
     }
     setUploading(false);
   };
@@ -86,11 +86,11 @@ const Onboarding = () => {
     if (!user || !profile) return;
 
     if (!name.trim() || !price) {
-      toast({ title: "Completa los campos obligatorios", variant: "destructive" });
+      toast.error("Completa los campos obligatorios");
       return;
     }
     if (images.length === 0) {
-      toast({ title: "Sube al menos 1 imagen de tu producto", variant: "destructive" });
+      toast.error("Sube al menos 1 imagen de tu producto");
       return;
     }
 
@@ -155,10 +155,10 @@ const Onboarding = () => {
 
       setProgress(100);
 
-      toast({ title: "¡Tu primera landing está lista!" });
+      toast.success("¡Tu primera landing está lista!");
       setTimeout(() => navigate("/dashboard"), 1200);
     } catch (err: any) {
-      toast({ title: "Error al generar", description: err.message, variant: "destructive" });
+      toast.error("Error al generar", { description: err.message });
       setStep(2);
       setGenerating(false);
       setProgress(0);

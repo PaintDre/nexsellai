@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Users, Ban, ArrowLeft, Save, Loader2 } from "lucide-react";
 
@@ -29,7 +29,7 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<PendingChanges>({});
-  const { toast } = useToast();
+  
   const { isSuperAdmin } = useAuth();
 
   const isMobile = useIsMobile();
@@ -52,7 +52,7 @@ const AdminUsers = () => {
       const data = await res.json();
       setUsers(data.users || []);
     } else {
-      toast({ title: "Error al cargar usuarios", variant: "destructive" });
+      toast.error("Error al cargar usuarios");
     }
     setLoading(false);
   };
@@ -127,9 +127,9 @@ const AdminUsers = () => {
     }
 
     if (errors.length > 0) {
-      toast({ title: "Error al guardar", description: errors.join("; "), variant: "destructive" });
+      toast.error("Error al guardar", { description: errors.join("; ") });
     } else {
-      toast({ title: "Cambios guardados correctamente" });
+      toast.success("Cambios guardados correctamente");
     }
 
     setPendingChanges({});
@@ -144,10 +144,10 @@ const AdminUsers = () => {
       headers,
     });
     if (res.ok) {
-      toast({ title: "Usuario desactivado" });
+      toast.success("Usuario desactivado");
       fetchUsers();
     } else {
-      toast({ title: "Error al desactivar", variant: "destructive" });
+      toast.error("Error al desactivar");
     }
   };
 
