@@ -237,9 +237,6 @@ const AdminUsers = () => {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <span>Landings: <strong className="text-foreground">{u.landings_used}</strong></span>
-                  </div>
                 </CardContent>
               </Card>
             );
@@ -257,7 +254,7 @@ const AdminUsers = () => {
                     <th className="text-left p-3">Email</th>
                     <th className="text-left p-3">Plan</th>
                     <th className="text-left p-3">Rol</th>
-                    <th className="text-right p-3">Landings</th>
+                    
                     <th className="text-right p-3">Acciones</th>
                   </tr>
                 </thead>
@@ -292,7 +289,7 @@ const AdminUsers = () => {
                             <Badge variant="secondary" className="capitalize">{u.roles[0] || "user"}</Badge>
                           )}
                         </td>
-                        <td className="p-3 text-right font-medium">{u.landings_used}</td>
+                        
                         <td className="p-3 text-right">
                           <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => deactivateUser(u.user_id)}>
                             <Ban className="h-4 w-4" />
