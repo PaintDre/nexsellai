@@ -171,6 +171,14 @@ const GenerateBanner = () => {
                 bannerIndex: i + 1,
                 sequencePosition: i + 1,
                 totalInSequence: sequence.length,
+                businessConfig: {
+                  currency: businessConfig.currency,
+                  badges: businessConfig.badges,
+                  customBadge: businessConfig.customBadge,
+                  guaranteeDays: businessConfig.guaranteeDays,
+                  deliveryTime: businessConfig.deliveryTime,
+                  tone: businessConfig.tone,
+                },
               },
             });
             if (error) throw error;
