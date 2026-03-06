@@ -30,6 +30,8 @@ const Banners = lazy(() => import("./pages/Banners"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PublicLanding = lazy(() => import("./pages/PublicLanding"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 
 const queryClient = new QueryClient();
 
