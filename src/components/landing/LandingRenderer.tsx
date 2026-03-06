@@ -536,7 +536,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                   onChange={(v) => updateBlock("offer", { title: v })}
                   editable={editable}
                   tag="h2"
-                  className="text-3xl md:text-4xl font-bold tracking-tight text-white"
+                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white"
                   style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 />
                 {offer?.content && (
@@ -545,15 +545,15 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                     onChange={(v) => updateBlock("offer", { content: v })}
                     editable={editable}
                     tag="p"
-                    className="text-lg text-gray-200"
+                    className="text-base sm:text-lg text-gray-200"
                   />
                 )}
-                <div className="flex items-center justify-center gap-4">
-                  <span className="text-2xl line-through text-gray-400">{formattedPrice}</span>
-                  <span className="text-4xl font-extrabold text-emerald-400" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+                  <span className="text-lg sm:text-2xl line-through text-gray-400">{formattedPrice}</span>
+                  <span className="text-2xl sm:text-4xl font-extrabold text-emerald-400" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                     {`$${Math.round(price * 0.7).toLocaleString("es-CL")}`}
                   </span>
-                  <span className="inline-block bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">-30%</span>
+                  <span className="inline-block bg-red-500 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-1 rounded-full">-30%</span>
                 </div>
                 <CTAWithTrust trustColor="text-gray-400" />
               </div>
@@ -573,7 +573,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                     onChange={(v) => updateBlock("offer", { title: v })}
                     editable={editable}
                     tag="h2"
-                    className={`text-3xl md:text-4xl font-bold tracking-tight ${t.headingColor}`}
+                    className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight ${t.headingColor}`}
                     style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                   />
                   {offer.content && (
@@ -585,12 +585,12 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                       className={`text-lg ${t.bodyColor}`}
                     />
                   )}
-                  <div className="flex items-center justify-center gap-4">
-                    <span className={`text-2xl line-through ${t.mutedColor}`}>{formattedPrice}</span>
-                    <span className="text-4xl font-extrabold text-emerald-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+                    <span className={`text-lg sm:text-2xl line-through ${t.mutedColor}`}>{formattedPrice}</span>
+                    <span className="text-2xl sm:text-4xl font-extrabold text-emerald-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                       {`$${Math.round(price * 0.7).toLocaleString("es-CL")}`}
                     </span>
-                    <span className="inline-block bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">-30%</span>
+                    <span className="inline-block bg-red-500 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-1 rounded-full">-30%</span>
                   </div>
                 </>
               )}
