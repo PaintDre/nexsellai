@@ -228,7 +228,7 @@ const Landings = () => {
                           <Link to={`/landings/${landing.id}/preview`}><Maximize2 className="h-3 w-3 mr-1" /> Preview</Link>
                         </Button>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         <Button variant="secondary" size="sm" className="text-xs flex-1 min-h-[44px]" onClick={() => handleDuplicate(landing)}>
                           <Copy className="h-3 w-3 mr-1" /> Duplicar
                         </Button>

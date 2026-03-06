@@ -48,18 +48,18 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="p-6 md:p-10 space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="p-4 md:p-6 lg:p-10 space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-display text-foreground">Panel de Administración</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold font-display text-foreground">Panel de Administración</h1>
           <p className="text-muted-foreground mt-1">Estadísticas y gestión de la plataforma</p>
         </div>
-        <div className="flex gap-3">
-          <Button asChild variant="outline">
+        <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+          <Button asChild variant="outline" className="flex-1 sm:flex-none min-h-[44px]">
             <Link to="/admin/users"><Users className="h-4 w-4 mr-2" /> Usuarios</Link>
           </Button>
           {isSuperAdmin() && (
-            <Button asChild>
+            <Button asChild className="flex-1 sm:flex-none min-h-[44px]">
               <Link to="/admin/config"><Settings className="h-4 w-4 mr-2" /> Configuración</Link>
             </Button>
           )}
@@ -100,7 +100,7 @@ const AdminDashboard = () => {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4 text-sm">
+            <div className="flex flex-col sm:flex-row gap-1 sm:gap-4 text-sm">
               <span>Free: <strong>{stats?.byPlan.free ?? 0}</strong></span>
               <span>Starter: <strong>{stats?.byPlan.starter ?? 0}</strong></span>
               <span>Pro: <strong>{stats?.byPlan.pro ?? 0}</strong></span>
@@ -112,12 +112,13 @@ const AdminDashboard = () => {
       {stats?.topUsers && stats.topUsers.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-2xl">
               <Crown className="h-5 w-5 text-primary" /> Usuarios más activos
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
+            {/* Desktop table */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-muted-foreground">
@@ -138,6 +139,21 @@ const AdminDashboard = () => {
                    ))}
                  </tbody>
               </table>
+            </div>
+            {/* Mobile cards */}
+            <div className="sm:hidden space-y-3">
+              {stats.topUsers.map((u) => (
+                <div key={u.user_id} className="rounded-lg border p-3 space-y-1">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium text-sm truncate">{u.full_name || "Sin nombre"}</p>
+                    <Badge variant="secondary" className="capitalize text-xs">{u.plan}</Badge>
+                  </div>
+                  <div className="flex gap-4 text-xs text-muted-foreground">
+                    <span>Landings: <strong className="text-foreground">{u.landings_used}</strong></span>
+                    <span>Banners: <strong className="text-foreground">{u.banners_used}</strong></span>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>

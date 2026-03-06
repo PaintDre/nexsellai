@@ -80,12 +80,12 @@ const Dashboard = () => {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold font-display tracking-tight">Dashboard</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground mt-1">Bienvenido de vuelta, {profile?.full_name || "usuario"}</p>
         </div>
-        <Button asChild>
+        <Button asChild className="w-full sm:w-auto min-h-[44px]">
           <Link to="/products/new">
             <Plus className="h-4 w-4 mr-1" /> Nuevo Producto
           </Link>

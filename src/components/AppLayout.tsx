@@ -14,7 +14,7 @@ export const AppLayout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden">
+    <div className="flex h-screen w-full overflow-hidden overflow-x-hidden">
       {/* Desktop sidebar */}
       {!isMobile && !isTablet && <AppSidebar />}
 
