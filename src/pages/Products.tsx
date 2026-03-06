@@ -21,9 +21,9 @@ const Products = () => {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold font-display tracking-tight">Productos</h1>
-        <Button asChild>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight">Productos</h1>
+        <Button asChild className="w-full sm:w-auto min-h-[44px]">
           <Link to="/products/new"><Plus className="h-4 w-4 mr-2" /> Nuevo</Link>
         </Button>
       </div>

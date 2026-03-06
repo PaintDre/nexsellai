@@ -378,7 +378,7 @@ const Banners = () => {
 
       {/* Preview Modal */}
       <Dialog open={previewIndex !== null} onOpenChange={(open) => !open && setPreviewIndex(null)}>
-        <DialogContent className="max-w-3xl p-0 overflow-hidden">
+        <DialogContent className="max-w-[95vw] sm:max-w-3xl p-0 overflow-hidden">
           {previewBanner && (
             <div className="flex flex-col">
               <div className="bg-muted flex items-center justify-center max-h-[70vh] overflow-auto relative">
