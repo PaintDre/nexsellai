@@ -642,7 +642,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                 onChange={(v) => updateBlock("cta", { title: v })}
                 editable={editable}
                 tag="h2"
-                className="text-3xl md:text-4xl font-bold tracking-tight text-white"
+                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               />
               {cta?.content && (
@@ -651,7 +651,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                   onChange={(v) => updateBlock("cta", { content: v })}
                   editable={editable}
                   tag="p"
-                  className="text-lg text-gray-200"
+                  className="text-base sm:text-lg text-gray-200"
                 />
               )}
               <CTAWithTrust trustColor="text-gray-400" />
@@ -664,7 +664,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
               onChange={(v) => updateBlock("cta", { title: v })}
               editable={editable}
               tag="h2"
-              className={`text-3xl md:text-4xl font-bold tracking-tight ${getHeading(true)}`}
+              className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight ${getHeading(true)}`}
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             />
             {cta?.content && (
