@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Eye, Download, Loader2, Maximize2, Copy, Trash2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { generateLandingHTML } from "@/lib/exportLanding";
 import { type LandingTheme } from "@/components/landing/themes";
 import {
@@ -31,7 +31,6 @@ interface LandingWithProduct extends Landing {
 
 const Landings = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [landings, setLandings] = useState<LandingWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [exportingId, setExportingId] = useState<string | null>(null);
@@ -52,9 +51,9 @@ const Landings = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast({ title: "Landing exportada correctamente" });
+      toast.success("Landing exportada correctamente");
     } catch {
-      toast({ title: "Error al exportar", variant: "destructive" });
+      toast.error("Error al exportar");
     } finally {
       setExportingId(null);
     }
@@ -71,13 +70,13 @@ const Landings = () => {
         .eq("user_id", user.id);
       if (error) throw error;
       setLandings(prev => prev.filter(l => l.id !== landingId));
-      toast({ title: "Landing eliminada" });
+      toast.success("Landing eliminada");
     } catch (err: any) {
-      toast({ title: "Error al eliminar", description: err.message, variant: "destructive" });
+      toast.error("Error al eliminar", { description: err.message });
     } finally {
       setDeletingId(null);
     }
-  }, [user, toast]);
+  }, [user]);
 
   const handleDuplicate = useCallback(async (landing: LandingWithProduct) => {
     if (!user) return;
@@ -96,7 +95,7 @@ const Landings = () => {
           guarantee: landing.guarantee,
         });
       if (insertError) throw insertError;
-      toast({ title: "Landing duplicada" });
+      toast.success("Landing duplicada");
       const { data: landingsData } = await supabase
         .from("landings")
         .select("*")
@@ -109,9 +108,9 @@ const Landings = () => {
         setLandings(landingsData.map(l => ({ ...l, product: productMap.get(l.product_id) || null })));
       }
     } catch (err: any) {
-      toast({ title: "Error al duplicar", description: err.message, variant: "destructive" });
+      toast.error("Error al duplicar", { description: err.message });
     }
-  }, [user, toast]);
+  }, [user]);
 
   useEffect(() => {
     if (!user) return;

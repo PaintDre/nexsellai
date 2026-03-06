@@ -37,6 +37,7 @@ const GenerateLanding = () => {
   const [templateId, setTemplateId] = useState("completa");
   const [generationStep, setGenerationStep] = useState<"idle" | "copy" | "images" | "done">("idle");
   const [progress, setProgress] = useState(0);
+  const [quickMode, setQuickMode] = useState(true);
 
   const isPaidPlan = profile?.plan === "starter" || profile?.plan === "pro";
 
@@ -204,6 +205,51 @@ const GenerateLanding = () => {
         <p className="text-muted-foreground mt-1">Producto: <strong>{product.name}</strong></p>
       </div>
 
+      {/* Quick vs Custom Mode Tabs */}
+      <div className="flex gap-2 p-1 bg-muted rounded-lg w-fit">
+        <button
+          onClick={() => setQuickMode(true)}
+          className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${quickMode ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          ⚡ Rápido
+        </button>
+        <button
+          onClick={() => setQuickMode(false)}
+          className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${!quickMode ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          🎛️ Personalizado
+        </button>
+      </div>
+
+      {quickMode ? (
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <div className="text-center space-y-2">
+              <Sparkles className="h-8 w-8 text-primary mx-auto" />
+              <h3 className="font-semibold font-display text-lg">Generación rápida</h3>
+              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                Usaremos la configuración recomendada: plantilla completa, intensidad media, tema clean.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 justify-center text-sm text-muted-foreground">
+              <span>Landings usadas:</span>
+              <Badge variant={canGenerate ? "secondary" : "destructive"}>{used} / {limit}</Badge>
+            </div>
+            {generationStep !== "idle" && (
+              <div className="space-y-3 p-4 rounded-lg border bg-muted/50">
+                <div className="flex items-center gap-2">
+                  {generationStep === "done" ? <Check className="h-4 w-4 text-emerald-500" /> : <Loader2 className="h-4 w-4 animate-spin text-primary" />}
+                  <span className="text-sm font-medium">{stepLabels[generationStep]}</span>
+                </div>
+                <Progress value={progress} className="h-2" />
+              </div>
+            )}
+            <Button onClick={handleGenerate} disabled={generating || !canGenerate} className="w-full min-h-[44px]" size="lg">
+              {generating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generando...</> : <><Sparkles className="h-4 w-4 mr-2" /> Generar Landing</>}
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
       <Card>
         <CardHeader>
           <CardTitle className="font-display">Configuración</CardTitle>
@@ -310,6 +356,7 @@ const GenerateLanding = () => {
           </Button>
         </CardContent>
       </Card>
+      )}
     </div>
   );
 };

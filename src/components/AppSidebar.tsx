@@ -27,11 +27,12 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
     { label: "Planes", icon: CreditCard, href: "/pricing" },
   ];
 
+  const adminItems: typeof navItems = [];
   if (isAdmin()) {
-    navItems.push({ label: "Admin", icon: Shield, href: "/admin" });
+    adminItems.push({ label: "Admin", icon: Shield, href: "/admin" });
   }
   if (isSuperAdmin()) {
-    navItems.push({ label: "Sistema", icon: ShieldCheck, href: "/admin/config" });
+    adminItems.push({ label: "Sistema", icon: ShieldCheck, href: "/admin/config" });
   }
 
   return (
@@ -67,6 +68,34 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
             </Link>
           );
         })}
+
+        {adminItems.length > 0 && (
+          <>
+            <div className={cn("my-3 border-t border-sidebar-border", collapsed ? "mx-1" : "mx-2")} />
+            {!collapsed && <p className="px-3 text-[10px] uppercase tracking-wider text-sidebar-foreground/50 mb-1">Admin</p>}
+            {adminItems.map((item) => {
+              const active = pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  onClick={onNavigate}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-colors",
+                    collapsed ? "justify-center px-2" : "px-3",
+                    active
+                      ? "bg-sidebar-accent text-sidebar-primary"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  )}
+                  title={collapsed ? item.label : undefined}
+                >
+                  <item.icon className="h-4 w-4 shrink-0" />
+                  {!collapsed && item.label}
+                </Link>
+              );
+            })}
+          </>
+        )}
       </nav>
 
       <div className={cn("border-t border-sidebar-border p-4 space-y-3", collapsed && "px-2")}>

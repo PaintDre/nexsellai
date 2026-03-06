@@ -6,7 +6,8 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Pencil, Sparkles, ImageIcon, FileText, Eye, Package } from "lucide-react";
+import { Pencil, Sparkles, ImageIcon, FileText, Eye, Package, ChevronRight, Home, ArrowRight } from "lucide-react";
+import { Link as BreadcrumbLink } from "react-router-dom";
 
 type Product = Tables<"products">;
 type Landing = Tables<"landings">;
@@ -38,10 +39,13 @@ const ProductDetail = () => {
   if (!product) return null;
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-4xl space-y-8">
-      <Button variant="ghost" onClick={() => navigate("/products")} className="mb-2">
-        <ArrowLeft className="h-4 w-4 mr-2" /> Productos
-      </Button>
+    <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto space-y-8">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <BreadcrumbLink to="/products" className="hover:text-foreground transition-colors">Productos</BreadcrumbLink>
+        <ChevronRight className="h-3 w-3" />
+        <span className="text-foreground font-medium truncate">{product.name}</span>
+      </nav>
 
       {/* Product Header */}
       <div className="flex flex-col md:flex-row gap-6">
@@ -117,6 +121,22 @@ const ProductDetail = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* CTA when no landings */}
+      {landings.length === 0 && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="flex flex-col sm:flex-row items-center gap-4 p-6">
+            <Sparkles className="h-8 w-8 text-primary shrink-0" />
+            <div className="flex-1 text-center sm:text-left">
+              <h3 className="font-semibold">¡Genera tu primera landing!</h3>
+              <p className="text-sm text-muted-foreground">La IA creará una página de venta profesional para este producto.</p>
+            </div>
+            <Button asChild>
+              <Link to={`/products/${id}/generate`}>Generar ahora <ArrowRight className="h-4 w-4 ml-1" /></Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Landings List */}
       {landings.length > 0 && (
