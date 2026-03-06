@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { ArrowLeft, Download, Loader2, Palette } from "lucide-react";
 import { exportLandingAsHTML } from "@/lib/exportLanding";
 import LandingRenderer from "@/components/landing/LandingRenderer";
@@ -18,7 +18,7 @@ const LandingFullPreview = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast } = useToast();
+  
   const [landing, setLanding] = useState<Landing | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -71,9 +71,9 @@ const LandingFullPreview = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast({ title: "HTML exportado correctamente" });
+      toast.success("HTML exportado correctamente");
     } catch {
-      toast({ title: "Error al exportar", variant: "destructive" });
+      toast.error("Error al exportar");
     } finally {
       setExporting(false);
     }

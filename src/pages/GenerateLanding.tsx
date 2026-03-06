@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { ArrowLeft, Sparkles, Loader2, ImagePlus, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -24,7 +24,7 @@ const GenerateLanding = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const { toast } = useToast();
+  
 
   const [product, setProduct] = useState<Product | null>(null);
   const [mode, setMode] = useState<string>("aida");
@@ -87,7 +87,7 @@ const GenerateLanding = () => {
     if (!user || !product || !profile) return;
 
     if (!canGenerate) {
-      toast({ title: "Límite alcanzado", description: "Actualiza tu plan para generar más landings.", variant: "destructive" });
+      toast.error("Límite alcanzado", { description: "Actualiza tu plan para generar más landings." });
       return;
     }
 
@@ -169,14 +169,14 @@ const GenerateLanding = () => {
       setProgress(100);
       setGenerationStep("done");
 
-      toast({ title: "¡Landing generada!" });
+      toast.success("¡Landing generada!");
 
       // Navigate after a brief moment to show completion
       setTimeout(() => {
         navigate(`/landings/${insertedLanding?.id || ""}`);
       }, 800);
     } catch (err: any) {
-      toast({ title: "Error al generar", description: err.message, variant: "destructive" });
+      toast.error("Error al generar", { description: err.message });
       setGenerationStep("idle");
       setProgress(0);
     } finally {
@@ -194,7 +194,7 @@ const GenerateLanding = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-2xl space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 max-w-2xl mx-auto space-y-6">
       <Button variant="ghost" onClick={() => navigate(-1)}>
         <ArrowLeft className="h-4 w-4 mr-2" /> Volver
       </Button>

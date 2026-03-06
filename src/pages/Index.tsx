@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
   Sparkles, Zap, Code2, ShoppingCart, ArrowRight, Loader2,
@@ -17,7 +17,13 @@ import {
   ImagePlus, X, XCircle, Image, FileCode, Layers,
 } from "lucide-react";
 
-const categories = ["home", "fitness", "beauty", "gadget", "pets"];
+const categories = [
+  { value: "home", label: "Hogar" },
+  { value: "fitness", label: "Fitness" },
+  { value: "beauty", label: "Belleza" },
+  { value: "gadget", label: "Gadgets" },
+  { value: "pets", label: "Mascotas" },
+];
 
 const faqs = [
   { q: "¿Necesito saber programar?", a: "No. Nexsell genera todo el contenido listo para usar. Solo describe tu producto y la IA hace el resto." },
@@ -63,7 +69,7 @@ const plans = [
 ];
 
 const Index = () => {
-  const { toast } = useToast();
+  
   const navigate = useNavigate();
 
   const [demoName, setDemoName] = useState("");
@@ -105,7 +111,7 @@ const Index = () => {
   const handleDemo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (demoUsed) {
-      toast({ title: "Demo ya utilizado", description: "Crea una cuenta para seguir generando.", variant: "destructive" });
+      toast.error("Demo ya utilizado", { description: "Crea una cuenta para seguir generando." });
       return;
     }
     if (!demoName.trim()) return;
@@ -137,10 +143,10 @@ const Index = () => {
       localStorage.setItem("nexsell_session", sessionId);
       await supabase.from("demo_landings" as any).insert({ session_id: sessionId, blocks: data.blocks, product_data: product });
 
-      toast({ title: "¡Landing demo generada!" });
+      toast.success("¡Landing demo generada!");
       navigate("/landing/preview");
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast.error("Error", { description: err.message });
     } finally {
       setGenerating(false);
     }
@@ -375,7 +381,7 @@ const Index = () => {
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {categories.map((cat) => (
-                          <SelectItem key={cat} value={cat} className="capitalize">{cat}</SelectItem>
+                          <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

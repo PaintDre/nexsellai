@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -49,7 +49,7 @@ const GenerateBanner = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const { toast } = useToast();
+  
 
   const [product, setProduct] = useState<Product | null>(null);
   const [step, setStep] = useState(0);
@@ -151,12 +151,9 @@ const GenerateBanner = () => {
       results.sort((a, b) => a.sequencePosition - b.sequencePosition);
       setGeneratedBanners(results);
       setBannersUsed(prev => prev + results.length);
-      toast({
-        title: `¡${results.length} banners generados!`,
-        description: "Tu secuencia de venta está lista.",
-      });
+      toast.success(`¡${results.length} banners generados!`, { description: "Tu secuencia de venta está lista." });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message || "No se pudo generar los banners", variant: "destructive" });
+      toast.error("Error", { description: err.message || "No se pudo generar los banners" });
     } finally {
       setLoading(false);
     }

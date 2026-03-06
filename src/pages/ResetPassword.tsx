@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -13,10 +13,8 @@ const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   useEffect(() => {
-    // Check for recovery event from the URL hash
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     if (hashParams.get("type") === "recovery") {
       setReady(true);
@@ -28,7 +26,6 @@ const ResetPassword = () => {
         setReady(true);
       }
     });
-    // Also check if already in a session (user clicked link)
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setReady(true);
     });
@@ -39,20 +36,20 @@ const ResetPassword = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      toast({ title: "Error", description: "Las contraseñas no coinciden", variant: "destructive" });
+      toast.error("Las contraseñas no coinciden");
       return;
     }
     if (password.length < 6) {
-      toast({ title: "Error", description: "La contraseña debe tener al menos 6 caracteres", variant: "destructive" });
+      toast.error("La contraseña debe tener al menos 6 caracteres");
       return;
     }
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password });
     setLoading(false);
     if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      toast.error("Error", { description: error.message });
     } else {
-      toast({ title: "¡Contraseña actualizada!", description: "Ya puedes iniciar sesión con tu nueva contraseña" });
+      toast.success("¡Contraseña actualizada!", { description: "Ya puedes iniciar sesión con tu nueva contraseña" });
       navigate("/login");
     }
   };

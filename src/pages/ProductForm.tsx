@@ -8,18 +8,24 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { ArrowLeft, Upload, X, Loader2 } from "lucide-react";
 import AudienceSelector from "@/components/AudienceSelector";
 
-const categories = ["home", "fitness", "beauty", "gadget", "pets"];
+const categories = [
+  { value: "home", label: "Hogar" },
+  { value: "fitness", label: "Fitness" },
+  { value: "beauty", label: "Belleza" },
+  { value: "gadget", label: "Gadgets" },
+  { value: "pets", label: "Mascotas" },
+];
 
 const ProductForm = () => {
   const { id } = useParams();
   const isEdit = !!id;
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast } = useToast();
+  
 
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>("home");
@@ -72,11 +78,11 @@ const ProductForm = () => {
     e.preventDefault();
     if (!user) return;
     if (images.length === 0) {
-      toast({ title: "Se requiere al menos 1 imagen", variant: "destructive" });
+      toast.error("Se requiere al menos 1 imagen");
       return;
     }
     if (selectedAudiences.length === 0) {
-      toast({ title: "Selecciona al menos 1 público objetivo", variant: "destructive" });
+      toast.error("Selecciona al menos 1 público objetivo");
       return;
     }
     setSaving(true);
@@ -95,20 +101,20 @@ const ProductForm = () => {
 
     if (isEdit) {
       const { error } = await supabase.from("products").update(productData).eq("id", id);
-      if (error) { toast({ title: "Error al actualizar", description: error.message, variant: "destructive" }); setSaving(false); return; }
+      if (error) { toast.error("Error al actualizar", { description: error.message }); setSaving(false); return; }
     } else {
       const { data: newProduct, error } = await supabase.from("products").insert(productData).select("id").single();
-      if (error) { toast({ title: "Error al crear", description: error.message, variant: "destructive" }); setSaving(false); return; }
+      if (error) { toast.error("Error al crear", { description: error.message }); setSaving(false); return; }
       productId = newProduct.id;
     }
 
-    toast({ title: isEdit ? "Producto actualizado" : "Producto creado" });
+    toast.success(isEdit ? "Producto actualizado" : "Producto creado");
     navigate(isEdit ? `/products/${productId}` : `/products/${productId}`);
     setSaving(false);
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 w-full max-w-2xl">
+    <div className="p-4 md:p-6 lg:p-8 w-full max-w-2xl mx-auto">
       <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
         <ArrowLeft className="h-4 w-4 mr-2" /> Volver
       </Button>
@@ -153,7 +159,7 @@ const ProductForm = () => {
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat} className="capitalize">{cat}</SelectItem>
+                    <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

@@ -17,7 +17,7 @@ import {
   Download, Trash2, ImageIcon, Eye, ChevronLeft, ChevronRight,
   Plus, Filter, ArrowUpDown, CheckSquare, X,
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface BannerWithProduct {
   id: string;
@@ -47,7 +47,7 @@ const TEMPLATE_LABELS: Record<string, string> = {
 
 const Banners = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
+  
   const navigate = useNavigate();
 
   const [banners, setBanners] = useState<BannerWithProduct[]>([]);
@@ -141,7 +141,7 @@ const Banners = () => {
       if (newBanners.length === 0) setPreviewIndex(null);
       else if (previewIndex >= newBanners.length) setPreviewIndex(newBanners.length - 1);
     }
-    toast({ title: "Banner eliminado" });
+    toast.success("Banner eliminado");
   };
 
   const handleBulkDelete = async () => {
@@ -150,7 +150,7 @@ const Banners = () => {
     setBanners((prev) => prev.filter((b) => !selectedIds.has(b.id)));
     setSelectedIds(new Set());
     setSelectionMode(false);
-    toast({ title: `${ids.length} banners eliminados` });
+    toast.success(`${ids.length} banners eliminados`);
   };
 
   const handleBulkDownload = async () => {
@@ -158,7 +158,7 @@ const Banners = () => {
     for (const banner of selected) {
       await handleDownload(banner);
     }
-    toast({ title: `${selected.length} banners descargados` });
+    toast.success(`${selected.length} banners descargados`);
   };
 
   const toggleSelect = (id: string) => {

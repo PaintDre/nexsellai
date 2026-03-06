@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Settings, Save, Cpu, Sliders } from "lucide-react";
 
 interface ConfigItem {
@@ -17,9 +17,7 @@ const SuperAdminConfig = () => {
   const [config, setConfig] = useState<ConfigItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const { toast } = useToast();
 
-  // Local state for editable fields
   const [aiPrompt, setAiPrompt] = useState("");
   const [limitFree, setLimitFree] = useState("1");
   const [limitStarter, setLimitStarter] = useState("10");
@@ -70,9 +68,9 @@ const SuperAdminConfig = () => {
     });
     setSaving(false);
     if (res.ok) {
-      toast({ title: "Configuración guardada" });
+      toast.success("Configuración guardada");
     } else {
-      toast({ title: "Error al guardar", variant: "destructive" });
+      toast.error("Error al guardar");
     }
   };
 
