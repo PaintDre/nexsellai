@@ -25,7 +25,7 @@ const ProductForm = () => {
   const isEdit = !!id;
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast } = useToast();
+  
 
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>("home");
@@ -78,11 +78,11 @@ const ProductForm = () => {
     e.preventDefault();
     if (!user) return;
     if (images.length === 0) {
-      toast({ title: "Se requiere al menos 1 imagen", variant: "destructive" });
+      toast.error("Se requiere al menos 1 imagen");
       return;
     }
     if (selectedAudiences.length === 0) {
-      toast({ title: "Selecciona al menos 1 público objetivo", variant: "destructive" });
+      toast.error("Selecciona al menos 1 público objetivo");
       return;
     }
     setSaving(true);
@@ -101,14 +101,14 @@ const ProductForm = () => {
 
     if (isEdit) {
       const { error } = await supabase.from("products").update(productData).eq("id", id);
-      if (error) { toast({ title: "Error al actualizar", description: error.message, variant: "destructive" }); setSaving(false); return; }
+      if (error) { toast.error("Error al actualizar", { description: error.message }); setSaving(false); return; }
     } else {
       const { data: newProduct, error } = await supabase.from("products").insert(productData).select("id").single();
-      if (error) { toast({ title: "Error al crear", description: error.message, variant: "destructive" }); setSaving(false); return; }
+      if (error) { toast.error("Error al crear", { description: error.message }); setSaving(false); return; }
       productId = newProduct.id;
     }
 
-    toast({ title: isEdit ? "Producto actualizado" : "Producto creado" });
+    toast.success(isEdit ? "Producto actualizado" : "Producto creado");
     navigate(isEdit ? `/products/${productId}` : `/products/${productId}`);
     setSaving(false);
   };
