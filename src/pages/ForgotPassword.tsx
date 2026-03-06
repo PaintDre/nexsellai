@@ -55,7 +55,7 @@ const ForgotPassword = () => {
                 Si existe una cuenta con <span className="font-medium text-foreground">{email}</span>, recibirás un enlace para restablecer tu contraseña.
               </p>
               <Button variant="outline" className="w-full" asChild>
-                <Link to="/login"><ArrowLeft className="mr-2 h-4 w-4" />Volver al login</Link>
+                <Link to="/login"><ArrowLeft className="mr-2 h-4 w-4" />Volver a iniciar sesión</Link>
               </Button>
             </CardContent>
           ) : (
@@ -71,7 +71,7 @@ const ForgotPassword = () => {
                   {loading ? "Enviando..." : "Enviar enlace de recuperación"}
                 </Button>
                 <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-                  <ArrowLeft className="h-3 w-3" />Volver al login
+                  <ArrowLeft className="h-3 w-3" />Volver a iniciar sesión
                 </Link>
               </CardFooter>
             </form>
