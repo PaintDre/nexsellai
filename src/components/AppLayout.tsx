@@ -7,11 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { PageBreadcrumb } from "./PageBreadcrumb";
+import { useAuth } from "@/hooks/useAuth";
+import { Badge } from "@/components/ui/badge";
+
+const planLabels: Record<string, string> = { free: "Free", starter: "Starter", pro: "Pro" };
 
 export const AppLayout = () => {
   const isMobile = useIsMobile();
   const isTablet = useMediaQuery("(min-width: 768px) and (max-width: 1023px)");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { profile } = useAuth();
 
   return (
     <div className="flex h-screen w-full overflow-hidden overflow-x-hidden">
@@ -46,6 +52,23 @@ export const AppLayout = () => {
               </div>
               <span className="text-lg font-bold font-display tracking-tight text-sidebar-primary-foreground">Nexsell</span>
             </div>
+          </header>
+        )}
+
+        {/* Desktop/Tablet header with breadcrumbs */}
+        {!isMobile && (
+          <header className="sticky top-0 z-40 flex h-12 items-center justify-between border-b border-border bg-background/95 backdrop-blur-sm px-6">
+            <PageBreadcrumb />
+            {profile && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground truncate max-w-[150px]">
+                  {profile.full_name || "Usuario"}
+                </span>
+                <Badge variant="secondary" className="text-[10px] uppercase font-semibold">
+                  {planLabels[profile.plan] || "Free"}
+                </Badge>
+              </div>
+            )}
           </header>
         )}
 
