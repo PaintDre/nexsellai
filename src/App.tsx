@@ -27,6 +27,7 @@ const AdminUsers = lazy(() => import("./pages/AdminUsers"));
 const SuperAdminConfig = lazy(() => import("./pages/SuperAdminConfig"));
 const GenerateBanner = lazy(() => import("./pages/GenerateBanner"));
 const Banners = lazy(() => import("./pages/Banners"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PublicLanding = lazy(() => import("./pages/PublicLanding"));
 
@@ -60,6 +61,7 @@ const App = () => (
                 <Route path="/banners" element={<Banners />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/onboarding" element={<Onboarding />} />
               </Route>
               <Route element={<AdminLayout />}>
                 <Route path="/admin" element={<AdminDashboard />} />

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 
@@ -31,7 +31,7 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       toast({ title: "Error al iniciar sesión", description: error.message, variant: "destructive" });
@@ -41,30 +41,46 @@ const Login = () => {
       } else {
         localStorage.removeItem(REMEMBER_KEY);
       }
-      navigate("/dashboard");
+
+      // Check if user has products to decide redirect
+      if (authData.user) {
+        const { count } = await supabase
+          .from("products")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", authData.user.id);
+
+        if (count === 0) {
+          navigate("/onboarding");
+        } else {
+          navigate("/dashboard");
+        }
+      } else {
+        navigate("/dashboard");
+      }
     }
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
+        <div className="text-center space-y-3">
           <div className="inline-flex items-center gap-2 mb-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden">
               <img src="/logo-ns.png" alt="Nexsell" className="h-10 w-10 object-contain" />
             </div>
             <h1 className="text-3xl font-bold font-display tracking-tight text-foreground">Nexsell</h1>
           </div>
-          <p className="text-muted-foreground">Landings que convierten para dropshipping</p>
+          <h2 className="text-xl font-semibold text-foreground">
+            Crea landings para dropshipping en minutos
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            Genera páginas de venta profesionales con IA para tus productos de dropshipping
+          </p>
         </div>
 
         <Card>
           <form onSubmit={handleLogin}>
-            <CardHeader>
-              <CardTitle className="font-display">Iniciar Sesión</CardTitle>
-              <CardDescription>Ingresa a tu cuenta para crear landings</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required />
