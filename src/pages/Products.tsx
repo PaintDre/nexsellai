@@ -6,6 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Package, Plus, Pencil, Sparkles, ImageIcon } from "lucide-react";
 
 type Product = Tables<"products">;
@@ -13,10 +14,13 @@ type Product = Tables<"products">;
 const Products = () => {
   const { user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
-    supabase.from("products").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).then(({ data }) => setProducts(data || []));
+    setLoading(true);
+    supabase.from("products").select("*").eq("user_id", user.id).order("created_at", { ascending: false })
+      .then(({ data }) => { setProducts(data || []); setLoading(false); });
   }, [user]);
 
   return (
@@ -28,7 +32,23 @@ const Products = () => {
         </Button>
       </div>
 
-      {products.length === 0 ? (
+      {loading ? (
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map(i => (
+            <Card key={i}>
+              <Skeleton className="aspect-video rounded-t-lg" />
+              <CardContent className="p-4 space-y-3">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/3" />
+                <div className="flex gap-2">
+                  <Skeleton className="h-10 flex-1" />
+                  <Skeleton className="h-10 flex-1" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : products.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Package className="h-12 w-12 text-muted-foreground/50 mb-4" />
