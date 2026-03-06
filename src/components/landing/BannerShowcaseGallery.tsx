@@ -62,7 +62,7 @@ export const BannerShowcaseGallery = () => {
           <CarouselContent>
             {hasImages
               ? images.map((url, i) => (
-                  <CarouselItem key={i} className="basis-[85%]">
+                  <CarouselItem key={i} className="basis-full">
                     <ImageCard url={url} />
                   </CarouselItem>
                 ))
