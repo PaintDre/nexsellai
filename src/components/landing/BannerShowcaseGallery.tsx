@@ -10,21 +10,19 @@ import {
 } from "@/components/ui/carousel";
 
 const ImageCard = ({ url }: { url: string }) => (
-  <div className="rounded-xl overflow-hidden shadow-sm hover:shadow-md hover:scale-[1.02] transition-all bg-muted flex items-center justify-center max-h-[70vh]">
+  <div className="rounded-xl shadow-sm hover:shadow-md hover:scale-[1.02] transition-all bg-muted flex items-center justify-center">
     <img
       src={
         url.includes("supabase.co/storage/v1/object/public/")
           ? url.replace(
               "/storage/v1/object/public/",
               "/storage/v1/render/image/public/"
-            ) + "?width=400&quality=75"
+            ) + "?width=800&quality=80"
           : url
       }
       alt="Banner generado por Nexsell"
-      className="w-full h-auto object-contain max-h-[70vh]"
+      className="w-full h-auto object-contain rounded-xl"
       loading="lazy"
-      width={400}
-      height={400}
     />
   </div>
 );
