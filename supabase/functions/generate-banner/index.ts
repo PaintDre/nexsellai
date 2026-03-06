@@ -5,16 +5,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// --- Badge builder ---
-interface BusinessConfig {
-  currency?: string;
-  badges?: string[];
-  customBadge?: string;
-  guaranteeDays?: string;
-  deliveryTime?: string;
-  tone?: string;
-}
-
 const CURRENCY_MAP: Record<string, { symbol: string; locale: string }> = {
   CLP: { symbol: "$", locale: "es-CL" },
   USD: { symbol: "$", locale: "en-US" },
@@ -32,166 +22,128 @@ function formatPrice(price: number, currencyCode: string): string {
   return `${info.symbol}${formatted} ${currencyCode}`;
 }
 
-function buildBadgeList(config: BusinessConfig): string {
-  const badges: string[] = [];
-  const selected = config.badges || [];
+// --- Professional agency-level prompt system ---
 
-  if (selected.includes("free_shipping")) badges.push("🚚 Envío Gratis");
-  if (selected.includes("cod")) badges.push("💰 Pago Contraentrega");
-  if (selected.includes("secure")) badges.push("🔒 Compra Segura");
-  if (selected.includes("guarantee")) {
-    const days = config.guaranteeDays || "30";
-    badges.push(`↩️ Garantía ${days} días`);
-  }
-  if (selected.includes("fast_delivery")) {
-    const time = config.deliveryTime || "24-48h";
-    badges.push(`⚡ Entrega en ${time}`);
-  }
-  if (selected.includes("custom") && config.customBadge) {
-    badges.push(`✅ ${config.customBadge}`);
-  }
+const SYSTEM_PROMPT = `You are an elite graphic designer at a top creative agency. You create scroll-stopping ecommerce banners that convert.
 
-  return badges.length > 0
-    ? `Trust badges to include in the banner: ${badges.join(" | ")}`
-    : "Do NOT include any trust badges or shipping/payment icons in this banner.";
-}
+YOUR DESIGN PROCESS (follow strictly):
 
-function getToneInstruction(tone: string): string {
-  switch (tone) {
-    case "urgent": return "Use URGENT, high-energy, FOMO-driven language. Scarcity and time pressure. Bold exclamations.";
-    case "professional": return "Use PROFESSIONAL, clean, corporate language. Sophisticated and trustworthy. No hype.";
-    case "casual": return "Use CASUAL, friendly, conversational language. Approachable and relatable. Emoji welcome.";
-    case "luxury": return "Use PREMIUM, elegant, aspirational language. Minimalist and sophisticated. Less is more.";
-    default: return "Use a confident, persuasive marketing tone.";
-  }
-}
+STEP 1 — PRODUCT IMAGE ANALYSIS:
+Before designing anything, deeply analyze the provided product image:
+- Extract the DOMINANT color palette (primary, secondary, accent colors)
+- Identify the product's visual style: minimalist, premium, casual, tech, organic, playful, industrial
+- Note the product's shape, texture, and lighting direction
+- Determine if the product looks better on light or dark backgrounds based on its own tones
 
-// --- Template prompts (now generic, no hardcoded badges/currency) ---
+STEP 2 — DESIGN DECISIONS (based on analysis):
+- BACKGROUND: Choose what makes this specific product POP. Use complementary or analogous colors from the product itself. Never force a dark background if the product is dark. Never force white if the product is white.
+- TYPOGRAPHY: Use bold, modern sans-serif fonts. Maximum 2 lines of text. Maximum 8 words per line. Minimum font size must be readable at thumbnail size.
+- COLOR HARMONY: All colors must relate to the product's palette. The banner should feel like a cohesive design, not a product pasted on a random background.
+- COMPOSITION: Use rule of thirds. Product on a focal intersection point. Calculated negative space — not random.
+
+STEP 3 — STRICT RULES (never break these):
+- ALL text must be in Spanish
+- Product must be the LARGEST element (40-70% of canvas depending on template)
+- Text must have WCAG AA contrast ratio against its background (use text shadows, overlays, or solid backing if needed)
+- NO watermarks, NO AI notices, NO stock photo text, NO placeholder text
+- Display prices EXACTLY as provided — never invent discounts or crossed-out prices
+- Clean, professional aesthetic — no cluttered layouts
+- No more than 3 visual elements besides the product (text, price, one accent element)
+- The product must look like the REAL product from the reference image`;
+
 const templatePrompts: Record<string, string> = {
-  "hook-visual": `Create a scroll-stopping HOOK banner for social media advertising. The PRODUCT must be the absolute hero of the image.
+  "hook-visual": `BANNER TYPE: HOOK — Stop the scroll.
+
+GOAL: Create instant curiosity. The viewer sees this and MUST stop scrolling.
 
 COMPOSITION:
-- Product occupies 50-60% of the banner, centered and prominent
-- Background adapts to complement the product — analyze the product image and choose colors/gradients that make it POP
-- One bold provocative question or shocking statement that creates instant curiosity
-- Ultra-bold modern typography
-- The product should look premium, desirable, and larger than life
+- Product: 55-65% of canvas, centered hero shot, larger than life
+- One bold provocative question OR shocking statement (max 6 words) in ultra-bold typography
+- Background: derived from product colors, gradient or solid — whatever creates maximum contrast
+- Optional: subtle motion lines or glow effect around product to draw the eye
 
-VISUAL STYLE:
-- Background: gradient, solid, textured, or ambient — whatever best highlights THIS specific product
-- Dramatic lighting on the product — make it glow, shine, or stand out
-- High contrast between text and background
-- Professional ecommerce aesthetic
+MOOD: High energy, bold, attention-grabbing. The product should feel like it's jumping off the screen.`,
 
-GOAL: Stop the scroll. The viewer sees the product and NEEDS to know more.`,
+  "problema": `BANNER TYPE: PROBLEM — Create emotional connection.
 
-  "problema": `Create a PROBLEM AWARENESS banner where the product is still visible but the emotional context dominates.
+GOAL: Make the viewer feel understood. Show the frustration they experience without this product.
 
 COMPOSITION:
-- Product shown smaller (30-40% of banner), positioned to the side
-- Visual context showing the PROBLEM the customer faces without the product
-- Empathetic text in bold typography addressing the customer's pain point
-- Split composition: problem context on one side, product as the distant solution on the other
-- Background colors that convey frustration but still complement the product
+- Product: 30-40% of canvas, positioned to one side as a "distant solution"
+- Empathetic headline addressing the customer's specific pain point (max 8 words)
+- Visual split: muted/desaturated tones on the problem side, hint of brightness near the product
+- Background: subdued, serious tones that complement the product but convey frustration
 
-VISUAL STYLE:
-- Muted/desaturated tones for the problem area, product area slightly brighter
-- Bold modern typography
-- The product is visible as a hint of the solution to come
-- Professional layout with clear visual hierarchy
+MOOD: Empathetic, relatable. The text should feel like it's reading the customer's mind.`,
 
-GOAL: Make the viewer feel understood — and notice the product waiting.`,
+  "solucion": `BANNER TYPE: SOLUTION — The product IS the answer.
 
-  "solucion": `Create a SOLUTION REVEAL banner where the product is presented as THE answer.
+GOAL: Present the product as the definitive solution. Transition from problem to hope.
 
 COMPOSITION:
-- Product is the LARGEST element (60-70% of banner), front and center, hero shot
-- Bright, optimistic background that complements the product colors
-- Text presenting the product as the solution in bold typography
-- Visual transition feel: from problem to bright solution
-- Product shown in action or in its best angle, looking premium
+- Product: 60-70% of canvas, front and center, hero shot with dramatic lighting
+- Solution statement (max 7 words) in bright, confident typography
+- Background: optimistic, bright colors derived from the product's own palette
+- Visual feel: clean, bright, hopeful — a breath of fresh air
 
-VISUAL STYLE:
-- Bright, clean, hopeful color palette derived from the product itself
-- Product with dramatic lighting — make it look like the answer to everything
-- Bold typography with high readability
-- Professional transformation aesthetic
+MOOD: Confidence, relief, optimism. The product should look like the answer to everything.`,
 
-GOAL: The product IS the answer. Make it undeniable.`,
+  "beneficio": `BANNER TYPE: KEY BENEFIT — One irresistible advantage.
 
-  "beneficio": `Create a KEY BENEFIT showcase banner with the product as the centerpiece.
+GOAL: Highlight the single most compelling benefit that differentiates this product.
 
 COMPOSITION:
-- Product occupies 50% of the banner, prominently displayed
-- ONE main benefit highlighted with large bold text
-- Visual icons or elements reinforcing the specific benefit around the product
-- Clean layout: product + benefit statement + supporting visual elements
-- Background complements and elevates the product
+- Product: 50% of canvas, prominently displayed
+- ONE benefit statement in large bold text (max 6 words)
+- Clean layout: product + benefit text + minimal supporting element
+- Background: harmonious colors from the product's palette
 
-VISUAL STYLE:
-- Colors derived from the product to create visual harmony
-- Premium, confident design
-- Bold statement typography answering "What do I REALLY gain?"
-- The benefit should be specific and tangible, not generic
+MOOD: Confident, specific, tangible. The benefit should answer "What do I REALLY gain?"`,
 
-GOAL: Show the ONE thing that makes this product special. Product + benefit = irresistible.`,
+  "prueba-social": `BANNER TYPE: SOCIAL PROOF — Build trust and credibility.
 
-  "prueba-social": `Create a SOCIAL PROOF banner with the product surrounded by trust signals.
+GOAL: Show that thousands trust this product. Create confidence through social proof.
 
 COMPOSITION:
-- Product centered (40-50% of banner)
-- Large 5-star rating: "⭐⭐⭐⭐⭐ 4.9/5" prominently displayed near the product
+- Product: 40-50% of canvas, centered
+- Large 5-star rating: "⭐⭐⭐⭐⭐ 4.9/5" prominently displayed
 - Customer counter: "+5,000 clientes satisfechos"
-- 2-3 short testimonial quotes with names arranged around the product
+- One short testimonial quote (max 10 words) with a name
+- Gold/amber accents for ratings elements
 
-VISUAL STYLE:
-- Warm, trustworthy color palette that complements the product
-- Professional review-style layout
-- Gold/amber accents for ratings
-- Product looks established and trusted
-- Clean, credible typography
+MOOD: Warm, trustworthy, established. The product should feel proven and loved.`,
 
-GOAL: Build confidence. The product is proven, trusted, and loved by thousands.`,
+  "oferta": `BANNER TYPE: OFFER — Make the deal irresistible.
 
-  "oferta": `Create an OFFER & INCENTIVE banner with the product and price as dual focal points.
+GOAL: Present the product with its price in a way that feels like incredible value.
 
 COMPOSITION:
-- Product large and prominent (50% of banner)
-- Price displayed EXACTLY as provided — large, clear, unmissable. Do NOT modify, discount, or invent prices
-- Urgency elements if appropriate for the communication tone
+- Product: 50% of canvas, large and prominent
+- Price displayed EXACTLY as provided — large, bold, unmissable
+- Optional urgency element: "Disponible ahora" or "Stock limitado" (max 3 words)
+- Background: energetic colors that complement the product
 
-VISUAL STYLE:
-- Energetic colors that complement the product
-- Product looks premium and worth every penny
-- Price typography large and bold
-- Professional design
-- Background enhances the product, not competes with it
+MOOD: Exciting, valuable, urgent. The viewer should feel this is a deal they can't miss.`,
 
-GOAL: Make the deal irresistible. Product + price = must buy NOW.`,
+  "cta": `BANNER TYPE: CTA — Close the sale NOW.
 
-  "cta": `Create a powerful CALL TO ACTION banner with the product and CTA button as the focal point.
+GOAL: This is the final push. Create an irresistible call to action.
 
 COMPOSITION:
-- Product prominent (45-55% of banner)
-- Large, unmissable CTA button with action text
-- Final push messaging creating urgency or desire
-- Arrows or visual elements directing attention to the CTA
+- Product: 45-55% of canvas, looking ready to be yours
+- Large CTA button with action text: "Comprar Ahora", "Lo Quiero", "Pedir Hoy" (max 3 words)
+- Final push message creating desire (max 6 words)
+- Visual arrows or elements directing attention toward the CTA button
+- CTA button must use a high-contrast color against the background
 
-VISUAL STYLE:
-- High energy colors complementing the product
-- CTA button with contrasting color that stands out
-- Action-oriented, decisive design
-- Product looks ready to be yours
-- Professional, bold typography
-
-GOAL: This is the FINAL push. Product + CTA = click and buy NOW.`,
+MOOD: Decisive, action-oriented, now-or-never. This banner should make them click.`,
 };
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { product, templateId, outputSize, sectionType, sectionTitle, landingId, blockContent, customText, bannerIndex, sequencePosition, totalInSequence, businessConfig } = await req.json();
+    const { product, templateId, outputSize, sectionType, sectionTitle, landingId, blockContent, customText, bannerIndex, sequencePosition, totalInSequence } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -257,24 +209,13 @@ serve(async (req) => {
       });
     }
 
-    // --- Build dynamic prompt ---
+    // --- Build prompt ---
     const actualTemplateId = templateId || "hook-visual";
     const templateStyle = templatePrompts[actualTemplateId] || templatePrompts["hook-visual"];
     const [width, height] = (outputSize || "1080x1080").split("x").map(Number);
 
-    // Resolve business config (defaults for backward compatibility)
-    const config: BusinessConfig = businessConfig || {
-      currency: "CLP",
-      badges: ["free_shipping", "cod"],
-      tone: "urgent",
-      guaranteeDays: "30",
-      deliveryTime: "24-48h",
-    };
-
-    const currencyCode = config.currency || "CLP";
+    const currencyCode = "CLP"; // Default currency
     const priceFormatted = formatPrice(product.price, currencyCode);
-    const badgeInstruction = buildBadgeList(config);
-    const toneInstruction = getToneInstruction(config.tone || "urgent");
 
     // Sequence context
     let sequenceInstruction = "";
@@ -288,9 +229,9 @@ serve(async (req) => {
         "oferta": "OFERTA — motivar compra",
         "cta": "CTA — cerrar venta",
       };
-      sequenceInstruction = `\n\nSALES SEQUENCE CONTEXT: This is banner ${sequencePosition} of ${totalInSequence} in a complete sales funnel sequence.
-Current stage: ${stageNames[actualTemplateId] || actualTemplateId}
-CRITICAL: Each banner in this sequence uses a completely different angle and messaging. This banner's role is specifically "${stageNames[actualTemplateId]}" — focus ONLY on this stage's unique messaging.`;
+      sequenceInstruction = `\n\nSALES SEQUENCE: Banner ${sequencePosition} of ${totalInSequence}.
+Stage: ${stageNames[actualTemplateId] || actualTemplateId}
+CRITICAL: This banner's messaging must be COMPLETELY DIFFERENT from other banners in the sequence. Focus ONLY on this stage's unique angle.`;
     }
 
     let sectionContext = "";
@@ -303,7 +244,7 @@ CRITICAL: Each banner in this sequence uses a completely different angle and mes
         features: "This is for the FEATURES section.",
         cta: "This is for the CALL TO ACTION section.",
       };
-      sectionContext = `\n\nSection context: ${sectionDescriptions[sectionType] || `This is for the "${sectionType}" section.`}`;
+      sectionContext = `\n\nSection context: ${sectionDescriptions[sectionType] || `Section: "${sectionType}".`}`;
       if (sectionTitle) sectionContext += `\nSection title: "${sectionTitle}"`;
     }
 
@@ -316,44 +257,27 @@ CRITICAL: Each banner in this sequence uses a completely different angle and mes
 
     let bannerIndexInstruction = "";
     if (bannerIndex && bannerIndex > 1) {
-      bannerIndexInstruction = `\n\nBANNER INDEX: This is banner #${bannerIndex} in a sequence. Make it visually distinct from previous banners while maintaining the same template style. Use different angles, compositions, or visual emphasis.`;
+      bannerIndexInstruction = `\n\nBANNER #${bannerIndex}: Make this visually DISTINCT from previous banners. Different angle, composition, and visual emphasis while maintaining professional coherence.`;
     }
 
     const textPrompt = `Generate a professional ecommerce marketing banner image.
 
-Product Name: ${product.name}
-Product Price: ${priceFormatted}
-Category: ${product.category}
-Description: ${product.description || "N/A"}
-Target Audience: ${product.target_audience}
+PRODUCT DATA:
+- Name: ${product.name}
+- Price: ${priceFormatted}
+- Category: ${product.category}
+- Target Audience: ${product.target_audience}
 ${benefitsText}
 
-TEMPLATE STYLE (Sales Funnel Stage):
+BANNER DIMENSIONS: ${width}x${height} pixels
+
 ${templateStyle}
 ${sectionContext}
 ${bannerIndexInstruction}
+${sequenceInstruction}
+${customText ? `\nCUSTOM SLOGAN (include prominently): "${customText}"` : ""}`;
 
-COMMUNICATION TONE:
-${toneInstruction}
-
-TRUST BADGES:
-${badgeInstruction}
-
-CRITICAL RULES:
-- Banner dimensions: ${width}x${height} pixels
-- ALL text MUST be in Spanish
-- Display the EXACT price "${priceFormatted}" — do NOT invent discounts or crossed-out prices
-- The PRODUCT must be the LARGEST and most prominent visual element in the banner
-- Use the provided product image as direct reference — the product must look like the real product
-- Background and colors must COMPLEMENT the product — analyze the product and choose what makes it stand out most
-- DO NOT force dark/black backgrounds — choose whatever background best highlights this specific product
-- Professional ecommerce aesthetic
-- Bold, modern typography — large and readable
-- NO watermarks, NO AI notices, NO stock photo text
-- All text must be readable with high contrast
-- Each banner in a sequence must have a unique visual identity while maintaining professional coherence${customText ? `\n\nIMPORTANT — Custom text/slogan to include PROMINENTLY:\n"${customText}"` : ""}${sequenceInstruction}`;
-
-    // Build messages with product image if available
+    // Build messages with system prompt + product image
     const userContent: any[] = [{ type: "text", text: textPrompt }];
     
     if (product.images && product.images.length > 0) {
@@ -371,7 +295,10 @@ CRITICAL RULES:
       },
       body: JSON.stringify({
         model: "google/gemini-3-pro-image-preview",
-        messages: [{ role: "user", content: userContent }],
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userContent },
+        ],
         modalities: ["image", "text"],
       }),
     });
