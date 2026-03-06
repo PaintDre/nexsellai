@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, X } from "lucide-react";
 import { cn } from "@/lib/utils";

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { ArrowLeft, Download, Loader2, Palette } from "lucide-react";
 import { exportLandingAsHTML } from "@/lib/exportLanding";
 import LandingRenderer from "@/components/landing/LandingRenderer";
