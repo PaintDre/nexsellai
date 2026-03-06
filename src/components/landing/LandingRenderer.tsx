@@ -252,7 +252,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                 {imagePreview && (
                   <div className="flex justify-center lg:justify-end">
                     <div className="relative">
-                      <img src={imagePreview} alt={productName} className="rounded-2xl shadow-2xl max-h-[480px] object-cover w-full max-w-md ring-1 ring-black/5" />
+                      <img src={imagePreview} alt={productName} className="rounded-2xl shadow-2xl max-h-[480px] object-contain w-full max-w-md ring-1 ring-black/5" />
                       <div className="absolute -inset-1 rounded-2xl bg-gradient-to-tr from-black/5 to-transparent pointer-events-none" />
                     </div>
                   </div>
@@ -273,7 +273,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
             {benefits.image_url ? (
               <div className="grid lg:grid-cols-2 gap-10 items-center">
                 <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <img src={benefits.image_url} alt={benefits.title || "Beneficios"} className="w-full h-auto object-cover" loading="lazy" />
+                  <img src={benefits.image_url} alt={benefits.title || "Beneficios"} className="w-full h-auto object-contain" loading="lazy" />
                 </div>
                 <div className="space-y-4">
                   {Array.isArray(benefits.content) ? (
@@ -350,7 +350,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                   )}
                 </div>
                 <div className="rounded-2xl overflow-hidden shadow-xl">
-                  <img src={features.image_url} alt={features.title || "Características"} className="w-full h-auto object-cover" loading="lazy" />
+                  <img src={features.image_url} alt={features.title || "Características"} className="w-full h-auto object-contain" loading="lazy" />
                 </div>
               </div>
             ) : (

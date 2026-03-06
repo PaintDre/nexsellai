@@ -21,7 +21,7 @@ const ImageCard = ({ url }: { url: string }) => (
           : url
       }
       alt="Banner generado por Nexsell"
-      className="w-full h-auto object-cover"
+      className="w-full h-auto object-contain"
       loading="lazy"
       width={400}
       height={400}

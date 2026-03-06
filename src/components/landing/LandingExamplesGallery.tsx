@@ -66,7 +66,7 @@ export const LandingExamplesGallery = () => {
                   <Card className="overflow-hidden group hover:shadow-md transition-shadow">
                     <div className="h-32 bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center overflow-hidden">
                       {heroImg ? (
-                        <img src={heroImg} alt={landing.name} className="w-full h-full object-cover" />
+                        <img src={heroImg} alt={landing.name} className="w-full h-full object-contain" />
                       ) : (
                         <div className="text-center">
                           <Sparkles className="h-8 w-8 text-primary/40 mx-auto mb-2" />
