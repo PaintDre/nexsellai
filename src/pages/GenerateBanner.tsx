@@ -151,12 +151,9 @@ const GenerateBanner = () => {
       results.sort((a, b) => a.sequencePosition - b.sequencePosition);
       setGeneratedBanners(results);
       setBannersUsed(prev => prev + results.length);
-      toast({
-        title: `¡${results.length} banners generados!`,
-        description: "Tu secuencia de venta está lista.",
-      });
+      toast.success(`¡${results.length} banners generados!`, { description: "Tu secuencia de venta está lista." });
     } catch (err: any) {
-      toast({ title: "Error", description: err.message || "No se pudo generar los banners", variant: "destructive" });
+      toast.error("Error", { description: err.message || "No se pudo generar los banners" });
     } finally {
       setLoading(false);
     }

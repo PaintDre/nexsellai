@@ -111,7 +111,7 @@ const Index = () => {
   const handleDemo = async (e: React.FormEvent) => {
     e.preventDefault();
     if (demoUsed) {
-      toast({ title: "Demo ya utilizado", description: "Crea una cuenta para seguir generando.", variant: "destructive" });
+      toast.error("Demo ya utilizado", { description: "Crea una cuenta para seguir generando." });
       return;
     }
     if (!demoName.trim()) return;
@@ -143,10 +143,10 @@ const Index = () => {
       localStorage.setItem("nexsell_session", sessionId);
       await supabase.from("demo_landings" as any).insert({ session_id: sessionId, blocks: data.blocks, product_data: product });
 
-      toast({ title: "¡Landing demo generada!" });
+      toast.success("¡Landing demo generada!");
       navigate("/landing/preview");
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast.error("Error", { description: err.message });
     } finally {
       setGenerating(false);
     }

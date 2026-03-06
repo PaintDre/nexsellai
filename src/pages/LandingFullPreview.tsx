@@ -71,9 +71,9 @@ const LandingFullPreview = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast({ title: "HTML exportado correctamente" });
+      toast.success("HTML exportado correctamente");
     } catch {
-      toast({ title: "Error al exportar", variant: "destructive" });
+      toast.error("Error al exportar");
     } finally {
       setExporting(false);
     }

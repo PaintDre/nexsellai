@@ -147,16 +147,16 @@ const LandingView = () => {
         // Unpublish
         await (supabase.from("landings").update({ published: false, published_at: null } as any).eq("id", landing.id).eq("user_id", user.id) as any);
         setLanding({ ...landing, published: false, published_at: null } as any);
-        toast({ title: "Landing despublicada" });
+        toast.success("Landing despublicada");
       } else {
         // Publish
         const slug = (landing as any).slug || slugify(landing.name);
         await (supabase.from("landings").update({ published: true, slug, published_at: new Date().toISOString() } as any).eq("id", landing.id).eq("user_id", user.id) as any);
         setLanding({ ...landing, published: true, slug, published_at: new Date().toISOString() } as any);
-        toast({ title: "¡Landing publicada!" });
+        toast.success("¡Landing publicada!");
       }
     } catch (err: any) {
-      toast({ title: "Error", description: err.message, variant: "destructive" });
+      toast.error("Error", { description: err.message });
     } finally {
       setPublishing(false);
     }
@@ -169,7 +169,7 @@ const LandingView = () => {
   const handleCopyPublicUrl = () => {
     if (publicUrl) {
       navigator.clipboard.writeText(publicUrl);
-      toast({ title: "URL copiada al portapapeles" });
+      toast.success("URL copiada al portapapeles");
     }
   };
 
@@ -256,9 +256,9 @@ const LandingView = () => {
       setLanding({ ...landing, blocks: editedBlocks as any });
       setEditMode(false);
       setHasChanges(false);
-      toast({ title: "¡Cambios guardados!" });
+      toast.success("¡Cambios guardados!");
     } catch (err: any) {
-      toast({ title: "Error al guardar", description: err.message, variant: "destructive" });
+      toast.error("Error al guardar", { description: err.message });
     } finally {
       setSaving(false);
     }
@@ -283,10 +283,10 @@ const LandingView = () => {
         .select("id")
         .single();
       if (insertError) throw insertError;
-      toast({ title: "Landing duplicada" });
+      toast.success("Landing duplicada");
       navigate(`/landings/${data.id}`);
     } catch (err: any) {
-      toast({ title: "Error al duplicar", description: err.message, variant: "destructive" });
+      toast.error("Error al duplicar", { description: err.message });
     }
   };
 
@@ -318,9 +318,9 @@ const LandingView = () => {
 
       setLanding({ ...landing, blocks: blocks as any, theme: versionTheme as any });
       setTheme(versionTheme as LandingTheme);
-      toast({ title: "Versión restaurada" });
+      toast.success("Versión restaurada");
     } catch (err: any) {
-      toast({ title: "Error al restaurar", description: err.message, variant: "destructive" });
+      toast.error("Error al restaurar", { description: err.message });
     }
   };
 
@@ -343,9 +343,9 @@ const LandingView = () => {
         landing.blocks as any[], product, landing.name, theme, productImage
       );
       downloadBlob(blob, `${landing.name.replace(/\s+/g, "-").toLowerCase()}.html`);
-      toast({ title: "HTML exportado correctamente" });
+      toast.success("HTML exportado correctamente");
     } catch {
-      toast({ title: "Error al exportar", variant: "destructive" });
+      toast.error("Error al exportar");
     } finally {
       setExporting(false);
     }
@@ -359,9 +359,9 @@ const LandingView = () => {
         landing.blocks as any[], product, landing.name, theme, allImageUrls
       );
       downloadBlob(blob, `${landing.name.replace(/\s+/g, "-").toLowerCase()}.zip`);
-      toast({ title: "ZIP exportado con imágenes" });
+      toast.success("ZIP exportado con imágenes");
     } catch {
-      toast({ title: "Error al exportar ZIP", variant: "destructive" });
+      toast.error("Error al exportar ZIP");
     } finally {
       setExporting(false);
     }
@@ -407,10 +407,10 @@ const LandingView = () => {
         .from("landings").select("*").eq("id", landing.id).single();
       if (updatedLanding) setLanding(updatedLanding);
 
-      toast({ title: "¡Imagen generada!", description: `Imagen agregada a la sección "${selectedSectionTitle}"` });
+      toast.success("¡Imagen generada!", { description: `Imagen agregada a la sección "${selectedSectionTitle}"` });
       setShowImageDialog(false);
     } catch (err: any) {
-      toast({ title: "Error al generar imagen", description: err.message, variant: "destructive" });
+      toast.error("Error al generar imagen", { description: err.message });
     } finally {
       setGeneratingImage(false);
     }
@@ -543,10 +543,10 @@ const LandingView = () => {
                         try {
                           const { error } = await supabase.from("landings").delete().eq("id", landing.id).eq("user_id", user!.id);
                           if (error) throw error;
-                          toast({ title: "Landing eliminada" });
+                          toast.success("Landing eliminada");
                           navigate("/landings");
                         } catch (err: any) {
-                          toast({ title: "Error al eliminar", description: err.message, variant: "destructive" });
+                          toast.error("Error al eliminar", { description: err.message });
                         }
                       }}>Eliminar</AlertDialogAction>
                     </AlertDialogFooter>
