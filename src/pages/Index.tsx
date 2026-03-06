@@ -17,7 +17,13 @@ import {
   ImagePlus, X, XCircle, Image, FileCode, Layers,
 } from "lucide-react";
 
-const categories = ["home", "fitness", "beauty", "gadget", "pets"];
+const categories = [
+  { value: "home", label: "Hogar" },
+  { value: "fitness", label: "Fitness" },
+  { value: "beauty", label: "Belleza" },
+  { value: "gadget", label: "Gadgets" },
+  { value: "pets", label: "Mascotas" },
+];
 
 const faqs = [
   { q: "¿Necesito saber programar?", a: "No. Nexsell genera todo el contenido listo para usar. Solo describe tu producto y la IA hace el resto." },
@@ -375,7 +381,7 @@ const Index = () => {
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {categories.map((cat) => (
-                          <SelectItem key={cat} value={cat} className="capitalize">{cat}</SelectItem>
+                          <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
