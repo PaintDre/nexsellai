@@ -27,6 +27,7 @@ const AdminUsers = lazy(() => import("./pages/AdminUsers"));
 const SuperAdminConfig = lazy(() => import("./pages/SuperAdminConfig"));
 const GenerateBanner = lazy(() => import("./pages/GenerateBanner"));
 const Banners = lazy(() => import("./pages/Banners"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PublicLanding = lazy(() => import("./pages/PublicLanding"));
 

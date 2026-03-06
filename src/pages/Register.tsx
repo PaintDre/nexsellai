@@ -5,7 +5,7 @@ import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -14,8 +14,8 @@ import { MailCheck } from "lucide-react";
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
@@ -24,13 +24,19 @@ const Register = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast({ title: "Las contraseñas no coinciden", description: "Verifica que ambas contraseñas sean iguales.", variant: "destructive" });
+      return;
+    }
+
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName, phone: phone || undefined },
-        emailRedirectTo: window.location.origin,
+        data: { full_name: fullName },
+        emailRedirectTo: `${window.location.origin}/onboarding`,
       },
     });
     setLoading(false);
@@ -57,11 +63,7 @@ const Register = () => {
 
         <Card>
           <form onSubmit={handleRegister}>
-            <CardHeader>
-              <CardTitle className="font-display">Crear Cuenta</CardTitle>
-              <CardDescription>Empieza con el plan Free — 1 landing gratis</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 pt-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Nombre completo</Label>
                 <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Tu nombre" required />
@@ -71,12 +73,12 @@ const Register = () => {
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="phone">Teléfono <span className="text-muted-foreground font-normal">(opcional)</span></Label>
-                <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+56 9 1234 5678" />
-              </div>
-              <div className="space-y-2">
                 <Label htmlFor="password">Contraseña</Label>
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" minLength={6} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+                <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repite tu contraseña" minLength={6} required />
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
@@ -118,7 +120,6 @@ const Register = () => {
         </Card>
       </div>
 
-      {/* Modal de verificación de email */}
       <Dialog open={showVerificationDialog} onOpenChange={() => {}}>
         <DialogContent
           className="sm:max-w-lg"
