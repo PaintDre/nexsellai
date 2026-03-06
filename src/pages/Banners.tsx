@@ -197,11 +197,11 @@ const Banners = () => {
           />
         </div>
       )}
-      <div className="aspect-square overflow-hidden bg-muted relative">
+      <div className="overflow-hidden bg-muted relative">
         <img
           src={banner.image_url}
           alt="Banner"
-          className="h-full w-full object-cover group-hover:scale-105 transition-transform"
+          className="w-full h-auto object-contain group-hover:scale-105 transition-transform"
           loading="lazy"
         />
         <button

@@ -191,7 +191,7 @@ const Landings = () => {
                       <img
                         src={image}
                         alt={landing.name}
-                        className="absolute right-0 top-0 h-full w-1/2 object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
+                        className="absolute right-0 top-0 h-full w-1/2 object-contain opacity-80 group-hover:scale-105 transition-transform duration-500"
                       />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/70 to-transparent p-5 flex flex-col justify-end">
