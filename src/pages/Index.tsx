@@ -69,7 +69,7 @@ const plans = [
 ];
 
 const Index = () => {
-  const { toast } = useToast();
+  
   const navigate = useNavigate();
 
   const [demoName, setDemoName] = useState("");

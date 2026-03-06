@@ -49,7 +49,7 @@ const GenerateBanner = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const { toast } = useToast();
+  
 
   const [product, setProduct] = useState<Product | null>(null);
   const [step, setStep] = useState(0);

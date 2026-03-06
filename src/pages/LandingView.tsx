@@ -45,7 +45,7 @@ const LandingView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
-  const { toast } = useToast();
+  
   const [landing, setLanding] = useState<Landing | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
