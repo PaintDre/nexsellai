@@ -12,7 +12,13 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Upload, X, Loader2 } from "lucide-react";
 import AudienceSelector from "@/components/AudienceSelector";
 
-const categories = ["home", "fitness", "beauty", "gadget", "pets"];
+const categories = [
+  { value: "home", label: "Hogar" },
+  { value: "fitness", label: "Fitness" },
+  { value: "beauty", label: "Belleza" },
+  { value: "gadget", label: "Gadgets" },
+  { value: "pets", label: "Mascotas" },
+];
 
 const ProductForm = () => {
   const { id } = useParams();
@@ -108,7 +114,7 @@ const ProductForm = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 w-full max-w-2xl">
+    <div className="p-4 md:p-6 lg:p-8 w-full max-w-2xl mx-auto">
       <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
         <ArrowLeft className="h-4 w-4 mr-2" /> Volver
       </Button>
