@@ -328,6 +328,156 @@ const GenerateBanner = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Business Config */}
+                <Collapsible open={configOpen} onOpenChange={setConfigOpen}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between" type="button">
+                      <span className="flex items-center gap-2">
+                        <Settings2 className="h-4 w-4" />
+                        Configuración del banner
+                        {businessConfig.badges.length > 0 && (
+                          <span className="text-xs bg-primary/10 text-primary rounded-full px-2 py-0.5">
+                            {businessConfig.badges.length} badge{businessConfig.badges.length > 1 ? "s" : ""}
+                          </span>
+                        )}
+                      </span>
+                      <ChevronDown className={cn("h-4 w-4 transition-transform", configOpen && "rotate-180")} />
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="pt-4 space-y-5">
+                    {/* Currency */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Moneda</Label>
+                      <Select value={businessConfig.currency} onValueChange={(v) => setBusinessConfig(prev => ({ ...prev, currency: v }))}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CURRENCIES.map((c) => (
+                            <SelectItem key={c.code} value={c.code}>{c.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Badges */}
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium">Badges de confianza a mostrar</Label>
+                      <p className="text-xs text-muted-foreground">Selecciona los que apliquen a tu negocio</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {[
+                          { id: "free_shipping", label: "🚚 Envío gratis" },
+                          { id: "cod", label: "💰 Pago contraentrega" },
+                          { id: "secure", label: "🔒 Compra segura" },
+                        ].map((badge) => (
+                          <label key={badge.id} className="flex items-center gap-2 cursor-pointer">
+                            <Checkbox
+                              checked={businessConfig.badges.includes(badge.id)}
+                              onCheckedChange={(checked) => {
+                                setBusinessConfig(prev => ({
+                                  ...prev,
+                                  badges: checked
+                                    ? [...prev.badges, badge.id]
+                                    : prev.badges.filter(b => b !== badge.id),
+                                }));
+                              }}
+                            />
+                            <span className="text-sm">{badge.label}</span>
+                          </label>
+                        ))}
+
+                        {/* Guarantee with days input */}
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            checked={businessConfig.badges.includes("guarantee")}
+                            onCheckedChange={(checked) => {
+                              setBusinessConfig(prev => ({
+                                ...prev,
+                                badges: checked
+                                  ? [...prev.badges, "guarantee"]
+                                  : prev.badges.filter(b => b !== "guarantee"),
+                              }));
+                            }}
+                          />
+                          <span className="text-sm">↩️ Garantía</span>
+                          {businessConfig.badges.includes("guarantee") && (
+                            <Input
+                              value={businessConfig.guaranteeDays}
+                              onChange={(e) => setBusinessConfig(prev => ({ ...prev, guaranteeDays: e.target.value }))}
+                              placeholder="30"
+                              className="w-20 h-7 text-xs"
+                            />
+                          )}
+                          {businessConfig.badges.includes("guarantee") && <span className="text-xs text-muted-foreground">días</span>}
+                        </div>
+
+                        {/* Fast delivery with time input */}
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            checked={businessConfig.badges.includes("fast_delivery")}
+                            onCheckedChange={(checked) => {
+                              setBusinessConfig(prev => ({
+                                ...prev,
+                                badges: checked
+                                  ? [...prev.badges, "fast_delivery"]
+                                  : prev.badges.filter(b => b !== "fast_delivery"),
+                              }));
+                            }}
+                          />
+                          <span className="text-sm">⚡ Entrega rápida</span>
+                          {businessConfig.badges.includes("fast_delivery") && (
+                            <Input
+                              value={businessConfig.deliveryTime}
+                              onChange={(e) => setBusinessConfig(prev => ({ ...prev, deliveryTime: e.target.value }))}
+                              placeholder="24-48h"
+                              className="w-24 h-7 text-xs"
+                            />
+                          )}
+                        </div>
+
+                        {/* Custom badge */}
+                        <div className="flex items-center gap-2 sm:col-span-2">
+                          <Checkbox
+                            checked={businessConfig.badges.includes("custom")}
+                            onCheckedChange={(checked) => {
+                              setBusinessConfig(prev => ({
+                                ...prev,
+                                badges: checked
+                                  ? [...prev.badges, "custom"]
+                                  : prev.badges.filter(b => b !== "custom"),
+                              }));
+                            }}
+                          />
+                          <span className="text-sm">✏️ Personalizado</span>
+                          {businessConfig.badges.includes("custom") && (
+                            <Input
+                              value={businessConfig.customBadge}
+                              onChange={(e) => setBusinessConfig(prev => ({ ...prev, customBadge: e.target.value }))}
+                              placeholder="Ej: Hecho a mano, 100% orgánico..."
+                              className="flex-1 h-7 text-xs"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Tone */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium">Tono de comunicación</Label>
+                      <Select value={businessConfig.tone} onValueChange={(v) => setBusinessConfig(prev => ({ ...prev, tone: v }))}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {TONE_OPTIONS.map((t) => (
+                            <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
               </CardContent>
             </Card>
           )}
