@@ -26,7 +26,7 @@ const PLAN_LIMITS: Record<string, number> = { free: 1, starter: 10, pro: 100 };
 const BANNER_LIMITS: Record<string, number> = { free: 2, starter: 30, pro: 150 };
 
 const SettingsPage = () => {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile, isAdmin } = useAuth();
   
 
   // Account
