@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { toast } from "sonner";
+import { Loader2, Check, X } from "lucide-react";
+import AuthLayout from "@/components/auth/AuthLayout";
+import PasswordInput from "@/components/auth/PasswordInput";
+import PasswordStrengthBar from "@/components/auth/PasswordStrengthBar";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -13,6 +15,9 @@ const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
   const navigate = useNavigate();
+
+  const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
+  const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
 
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -57,46 +62,43 @@ const ResetPassword = () => {
   if (!ready) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <p className="text-muted-foreground">Verificando enlace de recuperación...</p>
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Verificando enlace de recuperación...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-2 mb-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl overflow-hidden">
-              <img src="/logo-ns.png" alt="Nexsell" className="h-10 w-10 object-contain" />
-            </div>
-            <h1 className="text-3xl font-bold font-display tracking-tight text-foreground">Nexsell</h1>
-          </div>
-          <h2 className="text-xl font-semibold text-foreground">Nueva contraseña</h2>
-          <p className="text-muted-foreground text-sm">Ingresa tu nueva contraseña</p>
+    <AuthLayout title="Nueva contraseña" subtitle="Ingresa tu nueva contraseña para tu cuenta">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="password">Nueva contraseña</Label>
+          <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" required minLength={6} />
+          <PasswordStrengthBar password={password} />
         </div>
 
-        <Card>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4 pt-6">
-              <div className="space-y-2">
-                <Label htmlFor="password">Nueva contraseña</Label>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
-                <Input id="confirmPassword" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button type="submit" className="w-full min-h-[44px]" disabled={loading}>
-                {loading ? "Guardando..." : "Guardar nueva contraseña"}
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
-      </div>
-    </div>
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+          <div className="relative">
+            <PasswordInput id="confirmPassword" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Repite tu contraseña" required minLength={6} />
+            {(passwordsMatch || passwordsMismatch) && (
+              <span className="absolute right-10 top-1/2 -translate-y-1/2">
+                {passwordsMatch ? <Check className="h-4 w-4 text-[hsl(var(--success))]" /> : <X className="h-4 w-4 text-destructive" />}
+              </span>
+            )}
+          </div>
+          {passwordsMismatch && (
+            <p className="text-xs text-destructive">Las contraseñas no coinciden</p>
+          )}
+        </div>
+
+        <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={loading}>
+          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Guardar nueva contraseña"}
+        </Button>
+      </form>
+    </AuthLayout>
   );
 };
 
