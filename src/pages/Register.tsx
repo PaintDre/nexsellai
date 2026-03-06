@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-
+import { MailCheck } from "lucide-react";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -14,6 +15,8 @@ const Register = () => {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showVerificationDialog, setShowVerificationDialog] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -32,8 +35,8 @@ const Register = () => {
     if (error) {
       toast({ title: "Error al registrarse", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "¡Cuenta creada!", description: "Revisa tu email para confirmar tu cuenta." });
-      navigate("/login");
+      setRegisteredEmail(email);
+      setShowVerificationDialog(true);
     }
   };
 
@@ -86,6 +89,45 @@ const Register = () => {
           </form>
         </Card>
       </div>
+
+      {/* Modal de verificación de email */}
+      <Dialog open={showVerificationDialog} onOpenChange={() => {}}>
+        <DialogContent
+          className="sm:max-w-lg"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
+          <DialogHeader className="items-center text-center space-y-4 pt-4">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+              <MailCheck className="h-10 w-10 text-primary" />
+            </div>
+            <DialogTitle className="text-2xl font-bold font-display">
+              ¡Revisa tu correo electrónico!
+            </DialogTitle>
+            <DialogDescription className="text-base space-y-3">
+              <p>
+                Hemos enviado un enlace de verificación a{" "}
+                <span className="font-semibold text-foreground">{registeredEmail}</span>
+              </p>
+              <p>
+                Haz clic en el enlace del correo para activar tu cuenta. Si no lo encuentras, revisa tu carpeta de <span className="font-medium">spam</span> o <span className="font-medium">correo no deseado</span>.
+              </p>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 pt-4 pb-2">
+            <Button
+              size="lg"
+              className="w-full text-base"
+              onClick={() => navigate("/login")}
+            >
+              Entendido, ir a iniciar sesión
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              El enlace expira en 24 horas. Si no recibiste el correo, podrás solicitar uno nuevo desde la página de inicio de sesión.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
