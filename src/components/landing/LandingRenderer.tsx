@@ -104,7 +104,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
 
   const CTAButton = ({ className = "" }: { className?: string }) => (
     <button
-      className={`inline-flex items-center justify-center px-10 py-4 text-lg font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 animate-[pulse-glow_2s_ease-in-out_infinite] ${t.ctaBg} ${t.ctaText} ${t.ctaHover} ${className}`}
+      className={`inline-flex items-center justify-center px-6 sm:px-10 py-3 sm:py-4 text-sm sm:text-base md:text-lg font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 animate-[pulse-glow_2s_ease-in-out_infinite] ${t.ctaBg} ${t.ctaText} ${t.ctaHover} ${className}`}
     >
       Comprar ahora — {formattedPrice}
     </button>
@@ -125,13 +125,13 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
           onChange={(v) => updateBlock(blockType, { title: v })}
           editable
           tag="h2"
-          className={`text-3xl md:text-4xl font-bold tracking-tight text-center mb-10 ${getHeading(alt)} ${className}`}
+          className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-center mb-6 sm:mb-10 ${getHeading(alt)} ${className}`}
           style={{ fontFamily: "'Space Grotesk', sans-serif" }}
         />
       );
     }
     return (
-      <h2 className={`text-3xl md:text-4xl font-bold tracking-tight text-center mb-10 ${getHeading(alt)} ${className}`}
+      <h2 className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-center mb-6 sm:mb-10 ${getHeading(alt)} ${className}`}
         style={{ fontFamily: "'Space Grotesk', sans-serif" }}
       >
         {children}
@@ -192,23 +192,23 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
   const heroImage = hero?.image_url || imagePreview;
 
   return (
-    <div className="min-h-screen landing-container" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen landing-container" style={{ fontFamily: "'Inter', sans-serif", overflowWrap: "anywhere", wordBreak: "break-word" }}>
 
       {/* ═══ HERO ═══ */}
       {hero && (
         <EditableSection blockType="hero" blockTitle={hero.title} className={`relative overflow-hidden ${hero.image_url ? 'py-0' : `py-20 md:py-28 ${t.heroBg}`}`}>
           {hero.image_url ? (
-            <div className="relative min-h-[500px] md:min-h-[600px] flex items-center">
+            <div className="relative min-h-[400px] md:min-h-[600px] flex items-center">
               <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${hero.image_url})` }} />
               <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30" />
-              <div className="relative z-10 mx-auto max-w-6xl px-6 py-20 md:py-28">
-                <div className="max-w-2xl space-y-8">
+              <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-16 md:py-28">
+                <div className="max-w-2xl space-y-6 sm:space-y-8">
                   <EditableText
                     value={hero.title || ""}
                     onChange={(v) => updateBlock("hero", { title: v })}
                     editable={editable}
                     tag="h1"
-                    className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] text-white drop-shadow-lg"
+                    className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-white drop-shadow-lg"
                     style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                   />
                   {hero.content && (
@@ -217,7 +217,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                       onChange={(v) => updateBlock("hero", { content: v })}
                       editable={editable}
                       tag="p"
-                      className="text-lg md:text-xl leading-relaxed max-w-xl text-gray-200"
+                      className="text-base sm:text-lg md:text-xl leading-relaxed max-w-xl text-gray-200"
                     />
                   )}
                   <SocialProof theme={theme} />
@@ -226,15 +226,15 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
               </div>
             </div>
           ) : (
-            <div className="mx-auto max-w-6xl px-6">
-              <div className={`grid ${imagePreview ? "lg:grid-cols-2" : ""} gap-12 items-center`}>
-                <div className="space-y-8">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6">
+              <div className={`grid ${imagePreview ? "lg:grid-cols-2" : ""} gap-8 lg:gap-12 items-center`}>
+                <div className="space-y-6 sm:space-y-8">
                   <EditableText
                     value={hero.title || ""}
                     onChange={(v) => updateBlock("hero", { title: v })}
                     editable={editable}
                     tag="h1"
-                    className={`text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] ${t.heroText}`}
+                    className={`text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] ${t.heroText}`}
                     style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                   />
                   {hero.content && (
@@ -243,7 +243,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                       onChange={(v) => updateBlock("hero", { content: v })}
                       editable={editable}
                       tag="p"
-                      className={`text-lg md:text-xl leading-relaxed max-w-xl ${theme === "bold" ? "text-gray-300" : t.bodyColor}`}
+                      className={`text-base sm:text-lg md:text-xl leading-relaxed max-w-xl ${theme === "bold" ? "text-gray-300" : t.bodyColor}`}
                     />
                   )}
                   <SocialProof theme={theme} />
@@ -536,7 +536,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                   onChange={(v) => updateBlock("offer", { title: v })}
                   editable={editable}
                   tag="h2"
-                  className="text-3xl md:text-4xl font-bold tracking-tight text-white"
+                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white"
                   style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 />
                 {offer?.content && (
@@ -545,15 +545,15 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                     onChange={(v) => updateBlock("offer", { content: v })}
                     editable={editable}
                     tag="p"
-                    className="text-lg text-gray-200"
+                    className="text-base sm:text-lg text-gray-200"
                   />
                 )}
-                <div className="flex items-center justify-center gap-4">
-                  <span className="text-2xl line-through text-gray-400">{formattedPrice}</span>
-                  <span className="text-4xl font-extrabold text-emerald-400" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+                  <span className="text-lg sm:text-2xl line-through text-gray-400">{formattedPrice}</span>
+                  <span className="text-2xl sm:text-4xl font-extrabold text-emerald-400" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                     {`$${Math.round(price * 0.7).toLocaleString("es-CL")}`}
                   </span>
-                  <span className="inline-block bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">-30%</span>
+                  <span className="inline-block bg-red-500 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-1 rounded-full">-30%</span>
                 </div>
                 <CTAWithTrust trustColor="text-gray-400" />
               </div>
@@ -573,7 +573,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                     onChange={(v) => updateBlock("offer", { title: v })}
                     editable={editable}
                     tag="h2"
-                    className={`text-3xl md:text-4xl font-bold tracking-tight ${t.headingColor}`}
+                    className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight ${t.headingColor}`}
                     style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                   />
                   {offer.content && (
@@ -585,12 +585,12 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                       className={`text-lg ${t.bodyColor}`}
                     />
                   )}
-                  <div className="flex items-center justify-center gap-4">
-                    <span className={`text-2xl line-through ${t.mutedColor}`}>{formattedPrice}</span>
-                    <span className="text-4xl font-extrabold text-emerald-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                  <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
+                    <span className={`text-lg sm:text-2xl line-through ${t.mutedColor}`}>{formattedPrice}</span>
+                    <span className="text-2xl sm:text-4xl font-extrabold text-emerald-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
                       {`$${Math.round(price * 0.7).toLocaleString("es-CL")}`}
                     </span>
-                    <span className="inline-block bg-red-500 text-white text-sm font-bold px-3 py-1 rounded-full">-30%</span>
+                    <span className="inline-block bg-red-500 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-1 rounded-full">-30%</span>
                   </div>
                 </>
               )}
@@ -642,7 +642,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                 onChange={(v) => updateBlock("cta", { title: v })}
                 editable={editable}
                 tag="h2"
-                className="text-3xl md:text-4xl font-bold tracking-tight text-white"
+                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white"
                 style={{ fontFamily: "'Space Grotesk', sans-serif" }}
               />
               {cta?.content && (
@@ -651,7 +651,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
                   onChange={(v) => updateBlock("cta", { content: v })}
                   editable={editable}
                   tag="p"
-                  className="text-lg text-gray-200"
+                  className="text-base sm:text-lg text-gray-200"
                 />
               )}
               <CTAWithTrust trustColor="text-gray-400" />
@@ -664,7 +664,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
               onChange={(v) => updateBlock("cta", { title: v })}
               editable={editable}
               tag="h2"
-              className={`text-3xl md:text-4xl font-bold tracking-tight ${getHeading(true)}`}
+              className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight ${getHeading(true)}`}
               style={{ fontFamily: "'Space Grotesk', sans-serif" }}
             />
             {cta?.content && (
@@ -683,7 +683,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
 
       {/* ═══ STICKY MOBILE CTA ═══ */}
       <div className="fixed bottom-0 left-0 right-0 md:hidden z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200 p-3 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
-        <button className={`w-full py-3.5 text-base font-bold rounded-xl ${t.ctaBg} ${t.ctaText} shadow-md`}>
+        <button className={`w-full py-3 text-sm sm:text-base font-bold rounded-xl ${t.ctaBg} ${t.ctaText} shadow-md`}>
           Comprar ahora — {formattedPrice}
         </button>
       </div>

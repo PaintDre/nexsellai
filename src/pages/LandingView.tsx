@@ -610,7 +610,7 @@ const LandingView = () => {
         </div>
       </div>
 
-      <ResizablePreview>
+      <ResizablePreview editable={editMode}>
         <LandingRenderer
           blocks={blocks}
           product={product ? { name: product.name, price: product.price } : null}
