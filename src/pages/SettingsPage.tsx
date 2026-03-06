@@ -196,7 +196,7 @@ const SettingsPage = () => {
         </CardContent>
       </Card>
 
-      {/* C) Generator Preferences */}
+      {isAdmin() && (
       <Card>
         <CardHeader>
           <CardTitle className="font-display">Preferencias del generador</CardTitle>
@@ -233,6 +233,7 @@ const SettingsPage = () => {
           </Button>
         </CardContent>
       </Card>
+      )}
 
       {/* D) Help & Support */}
       <Card>
