@@ -108,7 +108,7 @@ const ProductForm = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-2xl">
+    <div className="p-4 md:p-6 lg:p-8 w-full max-w-2xl">
       <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
         <ArrowLeft className="h-4 w-4 mr-2" /> Volver
       </Button>
@@ -119,7 +119,7 @@ const ProductForm = () => {
 
       <Card>
         <form onSubmit={handleSubmit}>
-          <CardContent className="p-6 space-y-6">
+          <CardContent className="p-4 sm:p-6 space-y-6">
             {/* Images */}
             <div className="space-y-2">
               <Label>Imágenes (1-4) *</Label>

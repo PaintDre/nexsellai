@@ -226,12 +226,12 @@ const GenerateLanding = () => {
             </Select>
           </div>
 
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div>
+          <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
+            <div className="min-w-0">
               <Label>Activar oferta</Label>
               <p className="text-sm text-muted-foreground">Agrega precio tachado y descuento</p>
             </div>
-            <Switch checked={hasOffer} onCheckedChange={setHasOffer} />
+            <Switch checked={hasOffer} onCheckedChange={setHasOffer} className="shrink-0" />
           </div>
 
           <div className="space-y-2">
@@ -248,10 +248,10 @@ const GenerateLanding = () => {
           </div>
 
           {/* Auto-generate images toggle */}
-          <div className={`flex items-center justify-between rounded-lg border p-4 ${!isPaidPlan ? 'opacity-60' : ''}`}>
-            <div className="flex items-start gap-3">
-              <ImagePlus className="h-5 w-5 text-primary mt-0.5" />
-              <div>
+          <div className={`flex items-center justify-between gap-4 rounded-lg border p-4 ${!isPaidPlan ? 'opacity-60' : ''}`}>
+            <div className="flex items-start gap-3 min-w-0">
+              <ImagePlus className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+              <div className="min-w-0">
                 <Label>Incluir imágenes IA</Label>
                 <p className="text-sm text-muted-foreground">
                   {isPaidPlan
@@ -265,6 +265,7 @@ const GenerateLanding = () => {
               checked={autoImages && isPaidPlan}
               onCheckedChange={setAutoImages}
               disabled={!isPaidPlan}
+              className="shrink-0"
             />
           </div>
 

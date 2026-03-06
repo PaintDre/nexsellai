@@ -97,7 +97,7 @@ const SettingsPage = () => {
   const bannerUsagePercent = Math.min((bannersUsed / bannerLimit) * 100, 100);
 
   return (
-    <div className="p-6 lg:p-8 max-w-2xl space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 max-w-2xl space-y-6">
       <h1 className="text-3xl font-bold font-display tracking-tight">Ajustes</h1>
 
       {/* A) Account */}
@@ -115,13 +115,13 @@ const SettingsPage = () => {
             <Label htmlFor="name">Nombre</Label>
             <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
           </div>
-          <Button onClick={handleSaveProfile} disabled={saving || fullName === (profile?.full_name || "")}>
+          <Button onClick={handleSaveProfile} disabled={saving || fullName === (profile?.full_name || "")} className="w-full sm:w-auto">
             <Save className="h-4 w-4 mr-2" /> {saving ? "Guardando..." : "Guardar nombre"}
           </Button>
 
           <div className="border-t pt-4 space-y-2">
             <Label htmlFor="newPassword">Cambiar contraseña</Label>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 id="newPassword"
                 type="password"
@@ -129,7 +129,7 @@ const SettingsPage = () => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
-              <Button onClick={handleChangePassword} disabled={changingPassword || !newPassword} variant="outline">
+              <Button onClick={handleChangePassword} disabled={changingPassword || !newPassword} variant="outline" className="w-full sm:w-auto shrink-0">
                 <Lock className="h-4 w-4 mr-2" /> {changingPassword ? "Cambiando..." : "Cambiar"}
               </Button>
             </div>
@@ -228,7 +228,7 @@ const SettingsPage = () => {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleSavePreferences} variant="outline">
+          <Button onClick={handleSavePreferences} variant="outline" className="w-full sm:w-auto">
             <Save className="h-4 w-4 mr-2" /> Guardar preferencias
           </Button>
         </CardContent>
