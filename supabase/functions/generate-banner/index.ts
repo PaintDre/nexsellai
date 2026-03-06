@@ -5,6 +5,68 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// --- Badge builder ---
+interface BusinessConfig {
+  currency?: string;
+  badges?: string[];
+  customBadge?: string;
+  guaranteeDays?: string;
+  deliveryTime?: string;
+  tone?: string;
+}
+
+const CURRENCY_MAP: Record<string, { symbol: string; locale: string }> = {
+  CLP: { symbol: "$", locale: "es-CL" },
+  USD: { symbol: "$", locale: "en-US" },
+  EUR: { symbol: "€", locale: "de-DE" },
+  MXN: { symbol: "$", locale: "es-MX" },
+  COP: { symbol: "$", locale: "es-CO" },
+  ARS: { symbol: "$", locale: "es-AR" },
+  BRL: { symbol: "R$", locale: "pt-BR" },
+  PEN: { symbol: "S/", locale: "es-PE" },
+};
+
+function formatPrice(price: number, currencyCode: string): string {
+  const info = CURRENCY_MAP[currencyCode] || { symbol: "$", locale: "en-US" };
+  const formatted = price.toLocaleString(info.locale);
+  return `${info.symbol}${formatted} ${currencyCode}`;
+}
+
+function buildBadgeList(config: BusinessConfig): string {
+  const badges: string[] = [];
+  const selected = config.badges || [];
+
+  if (selected.includes("free_shipping")) badges.push("🚚 Envío Gratis");
+  if (selected.includes("cod")) badges.push("💰 Pago Contraentrega");
+  if (selected.includes("secure")) badges.push("🔒 Compra Segura");
+  if (selected.includes("guarantee")) {
+    const days = config.guaranteeDays || "30";
+    badges.push(`↩️ Garantía ${days} días`);
+  }
+  if (selected.includes("fast_delivery")) {
+    const time = config.deliveryTime || "24-48h";
+    badges.push(`⚡ Entrega en ${time}`);
+  }
+  if (selected.includes("custom") && config.customBadge) {
+    badges.push(`✅ ${config.customBadge}`);
+  }
+
+  return badges.length > 0
+    ? `Trust badges to include in the banner: ${badges.join(" | ")}`
+    : "Do NOT include any trust badges or shipping/payment icons in this banner.";
+}
+
+function getToneInstruction(tone: string): string {
+  switch (tone) {
+    case "urgent": return "Use URGENT, high-energy, FOMO-driven language. Scarcity and time pressure. Bold exclamations.";
+    case "professional": return "Use PROFESSIONAL, clean, corporate language. Sophisticated and trustworthy. No hype.";
+    case "casual": return "Use CASUAL, friendly, conversational language. Approachable and relatable. Emoji welcome.";
+    case "luxury": return "Use PREMIUM, elegant, aspirational language. Minimalist and sophisticated. Less is more.";
+    default: return "Use a confident, persuasive marketing tone.";
+  }
+}
+
+// --- Template prompts (now generic, no hardcoded badges/currency) ---
 const templatePrompts: Record<string, string> = {
   "hook-visual": `Create a scroll-stopping HOOK banner for social media advertising. The PRODUCT must be the absolute hero of the image.
 
@@ -12,7 +74,7 @@ COMPOSITION:
 - Product occupies 50-60% of the banner, centered and prominent
 - Background adapts to complement the product — analyze the product image and choose colors/gradients that make it POP
 - One bold provocative question or shocking statement that creates instant curiosity
-- Ultra-bold modern typography (influencer/dropshipping style)
+- Ultra-bold modern typography
 - The product should look premium, desirable, and larger than life
 
 VISUAL STYLE:
@@ -20,7 +82,6 @@ VISUAL STYLE:
 - Dramatic lighting on the product — make it glow, shine, or stand out
 - High contrast between text and background
 - Professional ecommerce aesthetic
-- Trust badges subtly integrated: "🚚 Envío Gratis" "💰 Pago Contraentrega"
 
 GOAL: Stop the scroll. The viewer sees the product and NEEDS to know more.`,
 
@@ -29,7 +90,7 @@ GOAL: Stop the scroll. The viewer sees the product and NEEDS to know more.`,
 COMPOSITION:
 - Product shown smaller (30-40% of banner), positioned to the side
 - Visual context showing the PROBLEM the customer faces without the product
-- Empathetic text: "¿Te pasa esto?" or "¿Cansado de...?" in bold typography
+- Empathetic text in bold typography addressing the customer's pain point
 - Split composition: problem context on one side, product as the distant solution on the other
 - Background colors that convey frustration but still complement the product
 
@@ -39,14 +100,14 @@ VISUAL STYLE:
 - The product is visible as a hint of the solution to come
 - Professional layout with clear visual hierarchy
 
-GOAL: Make the viewer feel understood. "YES, that's my problem!" — and notice the product waiting.`,
+GOAL: Make the viewer feel understood — and notice the product waiting.`,
 
   "solucion": `Create a SOLUTION REVEAL banner where the product is presented as THE answer.
 
 COMPOSITION:
 - Product is the LARGEST element (60-70% of banner), front and center, hero shot
 - Bright, optimistic background that complements the product colors
-- Text like "La solución existe" or "Descubre cómo..." in bold typography
+- Text presenting the product as the solution in bold typography
 - Visual transition feel: from problem to bright solution
 - Product shown in action or in its best angle, looking premium
 
@@ -54,7 +115,6 @@ VISUAL STYLE:
 - Bright, clean, hopeful color palette derived from the product itself
 - Product with dramatic lighting — make it look like the answer to everything
 - Bold typography with high readability
-- "🚚 Envío Gratis" badge integrated
 - Professional transformation aesthetic
 
 GOAL: The product IS the answer. Make it undeniable.`,
@@ -73,7 +133,6 @@ VISUAL STYLE:
 - Premium, confident design
 - Bold statement typography answering "What do I REALLY gain?"
 - The benefit should be specific and tangible, not generic
-- Trust and quality visual cues
 
 GOAL: Show the ONE thing that makes this product special. Product + benefit = irresistible.`,
 
@@ -84,7 +143,6 @@ COMPOSITION:
 - Large 5-star rating: "⭐⭐⭐⭐⭐ 4.9/5" prominently displayed near the product
 - Customer counter: "+5,000 clientes satisfechos"
 - 2-3 short testimonial quotes with names arranged around the product
-- Trust badges: "🔒 Compra Segura" "🚚 Envío Gratis" "↩️ Garantía 30 días"
 
 VISUAL STYLE:
 - Warm, trustworthy color palette that complements the product
@@ -100,35 +158,30 @@ GOAL: Build confidence. The product is proven, trusted, and loved by thousands.`
 COMPOSITION:
 - Product large and prominent (50% of banner)
 - Price displayed EXACTLY as provided — large, clear, unmissable. Do NOT modify, discount, or invent prices
-- Badge: "🚚 ENVÍO GRATIS" prominently visible
-- Badge: "💰 PAGO CONTRAENTREGA"
-- Urgency elements: "⏱ OFERTA POR TIEMPO LIMITADO" or "🔥 ÚLTIMAS UNIDADES"
-- Trust badges: "✅ Entrega 24-48h" "✅ Garantía 30 días"
+- Urgency elements if appropriate for the communication tone
 
 VISUAL STYLE:
-- Energetic colors that complement the product — warm tones, urgency feel
+- Energetic colors that complement the product
 - Product looks premium and worth every penny
 - Price typography large and bold
-- Professional urgency without looking cheap
+- Professional design
 - Background enhances the product, not competes with it
 
-GOAL: Make the deal irresistible. Product + price + free shipping = must buy NOW.`,
+GOAL: Make the deal irresistible. Product + price = must buy NOW.`,
 
   "cta": `Create a powerful CALL TO ACTION banner with the product and CTA button as the focal point.
 
 COMPOSITION:
 - Product prominent (45-55% of banner)
-- Large, unmissable CTA button: "COMPRAR AHORA" or "¡LO QUIERO!"
-- Final push messaging: "¡No te quedes sin el tuyo!" or "Últimas unidades disponibles"
+- Large, unmissable CTA button with action text
+- Final push messaging creating urgency or desire
 - Arrows or visual elements directing attention to the CTA
-- "🚚 Envío Gratis" and "💰 Pago Contraentrega" as final reassurance
 
 VISUAL STYLE:
 - High energy colors complementing the product
 - CTA button with contrasting color that stands out
 - Action-oriented, decisive design
 - Product looks ready to be yours
-- Countdown or scarcity visual element
 - Professional, bold typography
 
 GOAL: This is the FINAL push. Product + CTA = click and buy NOW.`,
@@ -138,7 +191,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { product, templateId, outputSize, sectionType, sectionTitle, landingId, blockContent, customText, bannerIndex, sequencePosition, totalInSequence } = await req.json();
+    const { product, templateId, outputSize, sectionType, sectionTitle, landingId, blockContent, customText, bannerIndex, sequencePosition, totalInSequence, businessConfig } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -185,14 +238,12 @@ serve(async (req) => {
     const bannerLimits: Record<string, number> = { free: 2, starter: 30, pro: 150 };
     const limit = bannerLimits[profile.plan] || 2;
 
-    // Check if monthly reset is needed (30 days)
     let currentUsed = profile.banners_used || 0;
     const resetAt = profile.banners_reset_at ? new Date(profile.banners_reset_at) : null;
     const now = new Date();
     const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
 
     if (!resetAt || (now.getTime() - resetAt.getTime()) >= thirtyDaysMs) {
-      // Reset counter
       currentUsed = 0;
       await supabase
         .from("profiles")
@@ -200,17 +251,30 @@ serve(async (req) => {
         .eq("user_id", userId);
     }
 
-    // Check limit
     if (currentUsed >= limit) {
       return new Response(JSON.stringify({ error: `Has alcanzado el límite de banners de tu plan (${currentUsed}/${limit}). Actualiza tu plan para seguir generando banners.` }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Build prompt
+    // --- Build dynamic prompt ---
     const actualTemplateId = templateId || "hook-visual";
     const templateStyle = templatePrompts[actualTemplateId] || templatePrompts["hook-visual"];
     const [width, height] = (outputSize || "1080x1080").split("x").map(Number);
+
+    // Resolve business config (defaults for backward compatibility)
+    const config: BusinessConfig = businessConfig || {
+      currency: "CLP",
+      badges: ["free_shipping", "cod"],
+      tone: "urgent",
+      guaranteeDays: "30",
+      deliveryTime: "24-48h",
+    };
+
+    const currencyCode = config.currency || "CLP";
+    const priceFormatted = formatPrice(product.price, currencyCode);
+    const badgeInstruction = buildBadgeList(config);
+    const toneInstruction = getToneInstruction(config.tone || "urgent");
 
     // Sequence context
     let sequenceInstruction = "";
@@ -243,8 +307,6 @@ CRITICAL: Each banner in this sequence uses a completely different angle and mes
       if (sectionTitle) sectionContext += `\nSection title: "${sectionTitle}"`;
     }
 
-    const productPrice = product.price;
-
     let benefitsText = "";
     if (blockContent && Array.isArray(blockContent)) {
       benefitsText = `\nContent to include:\n${blockContent.map((item: any) => typeof item === "string" ? `- ${item}` : `- ${JSON.stringify(item)}`).join("\n")}`;
@@ -257,10 +319,10 @@ CRITICAL: Each banner in this sequence uses a completely different angle and mes
       bannerIndexInstruction = `\n\nBANNER INDEX: This is banner #${bannerIndex} in a sequence. Make it visually distinct from previous banners while maintaining the same template style. Use different angles, compositions, or visual emphasis.`;
     }
 
-    const textPrompt = `Generate a professional ecommerce marketing banner image for dropshipping.
+    const textPrompt = `Generate a professional ecommerce marketing banner image.
 
 Product Name: ${product.name}
-Product Price: $${productPrice.toLocaleString("es-CL")} CLP
+Product Price: ${priceFormatted}
 Category: ${product.category}
 Description: ${product.description || "N/A"}
 Target Audience: ${product.target_audience}
@@ -271,16 +333,21 @@ ${templateStyle}
 ${sectionContext}
 ${bannerIndexInstruction}
 
+COMMUNICATION TONE:
+${toneInstruction}
+
+TRUST BADGES:
+${badgeInstruction}
+
 CRITICAL RULES:
 - Banner dimensions: ${width}x${height} pixels
 - ALL text MUST be in Spanish
-- Display the EXACT price "$${productPrice.toLocaleString("es-CL")} CLP" — do NOT invent discounts or crossed-out prices
+- Display the EXACT price "${priceFormatted}" — do NOT invent discounts or crossed-out prices
 - The PRODUCT must be the LARGEST and most prominent visual element in the banner
 - Use the provided product image as direct reference — the product must look like the real product
 - Background and colors must COMPLEMENT the product — analyze the product and choose what makes it stand out most
 - DO NOT force dark/black backgrounds — choose whatever background best highlights this specific product
-- Professional influencer/dropshipping ecommerce aesthetic
-- Include "Envío Gratis" and "Pago Contraentrega" badges where applicable
+- Professional ecommerce aesthetic
 - Bold, modern typography — large and readable
 - NO watermarks, NO AI notices, NO stock photo text
 - All text must be readable with high contrast
@@ -365,7 +432,6 @@ CRITICAL RULES:
       output_size: outputSize || "1080x1080",
     });
 
-    // Increment banners_used
     await supabase
       .from("profiles")
       .update({ banners_used: (currentUsed + 1) })
