@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,10 +13,26 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+// ─── Constants ───────────────────────────────────────────────────────────────
+
 const BANNER_LIMITS: Record<string, number> = { free: 2, starter: 30, pro: 150 };
+
+const STEPS = [
+  { label: "Descripción", icon: "✍️" },
+  { label: "Cantidad", icon: "📊" },
+  { label: "Generar", icon: "🚀" },
+];
+
+const SEQUENCES: Record<number, string[]> = {
+  2: ["hook-visual", "oferta"],
+  3: ["hook-visual", "beneficio", "oferta"],
+  5: ["hook-visual", "problema", "solucion", "beneficio", "oferta"],
+};
+
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 type Product = Tables<"products">;
 
@@ -28,21 +44,75 @@ interface GeneratedBanner {
   totalInSequence: number;
 }
 
-const STEPS = [
-  { label: "Descripción", icon: "✍️" },
-  { label: "Cantidad", icon: "📊" },
-  { label: "Generar", icon: "🚀" },
-];
+interface FormState {
+  description: string;
+  customText: string;
+  bannerCount: number;
+  outputSize: string;
+}
 
-// Sales funnel sequences by quantity
-const SEQUENCES: Record<number, string[]> = {
-  2: ["hook-visual", "oferta"],
-  3: ["hook-visual", "beneficio", "oferta"],
-  5: ["hook-visual", "problema", "solucion", "beneficio", "oferta"],
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+const getTemplateName = (id: string): string =>
+  bannerTemplates.find((t) => t.id === id)?.name || id;
+
+const getSequence = (count: number): string[] =>
+  SEQUENCES[count] || SEQUENCES[3];
+
+const computeBannersUsed = (profile: Tables<"profiles"> | null): number => {
+  if (!profile) return 0;
+  const resetAt = profile.banners_reset_at ? new Date(profile.banners_reset_at) : null;
+  const now = new Date();
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+  if (!resetAt || now.getTime() - resetAt.getTime() >= thirtyDaysMs) {
+    return 0;
+  }
+  return profile.banners_used || 0;
 };
 
-const getTemplateName = (id: string) =>
-  bannerTemplates.find((t) => t.id === id)?.name || id;
+const buildBannerPayload = (
+  product: Product,
+  description: string,
+  customText: string,
+  templateId: string,
+  outputSize: string,
+  index: number,
+  total: number,
+) => ({
+  product: {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    category: product.category,
+    description,
+    target_audience: product.target_audience,
+    images: product.images ?? [],
+  },
+  templateId,
+  outputSize,
+  customText: customText || undefined,
+  bannerIndex: index + 1,
+  sequencePosition: index + 1,
+  totalInSequence: total,
+});
+
+const downloadBanner = async (banner: GeneratedBanner, productName: string, outputSize: string) => {
+  try {
+    const response = await fetch(banner.imageUrl);
+    if (!response.ok) throw new Error("Fetch failed");
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `banner-${productName || "image"}-${banner.templateId}-${outputSize}.png`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch {
+    toast.error("Error al descargar", { description: "No se pudo descargar el banner. Intenta de nuevo." });
+  }
+};
+
+// ─── Component ───────────────────────────────────────────────────────────────
 
 const GenerateBanner = () => {
   const { id } = useParams<{ id: string }>();
@@ -50,129 +120,145 @@ const GenerateBanner = () => {
   const { user, profile } = useAuth();
 
   const [product, setProduct] = useState<Product | null>(null);
+  const [productError, setProductError] = useState(false);
   const [step, setStep] = useState(0);
-  const [description, setDescription] = useState("");
-  const [customText, setCustomText] = useState("");
-  const [bannerCount, setBannerCount] = useState(3);
-  const [outputSize, setOutputSize] = useState("1080x1080");
+  const [formState, setFormState] = useState<FormState>({
+    description: "",
+    customText: "",
+    bannerCount: 3,
+    outputSize: "1080x1080",
+  });
   const [loading, setLoading] = useState(false);
   const [generatedBanners, setGeneratedBanners] = useState<GeneratedBanner[]>([]);
   const [previewBanner, setPreviewBanner] = useState<GeneratedBanner | null>(null);
-  const [bannersUsed, setBannersUsed] = useState(0);
+
+  const updateForm = useCallback(<K extends keyof FormState>(key: K, value: FormState[K]) => {
+    setFormState((prev) => ({ ...prev, [key]: value }));
+  }, []);
 
   const plan = profile?.plan || "free";
   const bannerLimit = BANNER_LIMITS[plan] || 2;
-
-  // Calculate effective usage with monthly reset
-  useEffect(() => {
-    if (!profile) return;
-    const resetAt = profile.banners_reset_at ? new Date(profile.banners_reset_at) : null;
-    const now = new Date();
-    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-    if (!resetAt || (now.getTime() - resetAt.getTime()) >= thirtyDaysMs) {
-      setBannersUsed(0);
-    } else {
-      setBannersUsed(profile.banners_used || 0);
-    }
-  }, [profile]);
-
-  const bannersRemaining = Math.max(0, bannerLimit - bannersUsed);
+  const bannersUsed = useMemo(() => computeBannersUsed(profile), [profile]);
+  const bannersRemaining = useMemo(() => Math.max(0, bannerLimit - bannersUsed), [bannerLimit, bannersUsed]);
   const hasReachedLimit = bannersRemaining <= 0;
+  const sequence = useMemo(() => getSequence(formState.bannerCount), [formState.bannerCount]);
+
+  const canGoNext = useMemo(() => {
+    if (step === 0) return formState.description.length >= 120;
+    if (step === 1) return formState.bannerCount > 0;
+    return true;
+  }, [step, formState.description.length, formState.bannerCount]);
+
+  // ─── Product loading ────────────────────────────────────────────────────
 
   useEffect(() => {
     if (!user || !id) return;
-    supabase.from("products").select("*").eq("id", id).eq("user_id", user.id).single()
-      .then(({ data }) => {
+    setProductError(false);
+    supabase
+      .from("products")
+      .select("*")
+      .eq("id", id)
+      .eq("user_id", user.id)
+      .single()
+      .then(({ data, error }) => {
+        if (error || !data) {
+          setProductError(true);
+          return;
+        }
         setProduct(data);
-        if (data?.description) setDescription(data.description);
+        if (data.description) {
+          updateForm("description", data.description);
+        }
       });
-  }, [user, id]);
+  }, [user, id, updateForm]);
 
-  const canGoNext = () => {
-    if (step === 0) return description.length >= 120;
-    if (step === 1) return bannerCount > 0;
-    return true;
-  };
+  // ─── Generation ─────────────────────────────────────────────────────────
 
-  const getSequence = (): string[] => {
-    return SEQUENCES[bannerCount] || SEQUENCES[3];
-  };
-
-  const handleGenerate = async () => {
+  const handleGenerate = useCallback(async () => {
     if (!product || hasReachedLimit) return;
     setLoading(true);
     setGeneratedBanners([]);
 
     try {
-      const sequence = getSequence();
-      const calls: Promise<GeneratedBanner>[] = [];
-
-      for (let i = 0; i < sequence.length; i++) {
-        const templateId = sequence[i];
-        const templateName = getTemplateName(templateId);
-
-        calls.push(
-          (async () => {
+      const results = await Promise.allSettled(
+        sequence.map((templateId, i) =>
+          (async (): Promise<GeneratedBanner> => {
             const { data, error } = await supabase.functions.invoke("generate-banner", {
-              body: {
-                product: {
-                  id: product.id,
-                  name: product.name,
-                  price: product.price,
-                  category: product.category,
-                  description: description,
-                  target_audience: product.target_audience,
-                  images: product.images,
-                },
+              body: buildBannerPayload(
+                product,
+                formState.description,
+                formState.customText,
                 templateId,
-                outputSize,
-                customText: customText || undefined,
-                bannerIndex: i + 1,
-                sequencePosition: i + 1,
-                totalInSequence: sequence.length,
-              },
+                formState.outputSize,
+                i,
+                sequence.length,
+              ),
             });
             if (error) throw error;
             if (data?.error) throw new Error(data.error);
             return {
               templateId,
-              templateName,
+              templateName: getTemplateName(templateId),
               imageUrl: data.imageUrl,
               sequencePosition: i + 1,
               totalInSequence: sequence.length,
             };
           })()
-        );
-      }
+        )
+      );
 
-      const results = await Promise.all(calls);
-      results.sort((a, b) => a.sequencePosition - b.sequencePosition);
-      setGeneratedBanners(results);
-      setBannersUsed(prev => prev + results.length);
-      toast.success(`¡${results.length} banners generados!`, { description: "Tu secuencia de venta está lista." });
+      const fulfilled = results
+        .filter((r): r is PromiseFulfilledResult<GeneratedBanner> => r.status === "fulfilled")
+        .map((r) => r.value)
+        .sort((a, b) => a.sequencePosition - b.sequencePosition);
+
+      const failedCount = results.filter((r) => r.status === "rejected").length;
+
+      if (fulfilled.length > 0) {
+        setGeneratedBanners(fulfilled);
+        if (failedCount > 0) {
+          toast.warning(`${fulfilled.length} banners generados`, {
+            description: `${failedCount} banner(s) fallaron. Puedes regenerar la secuencia.`,
+          });
+        } else {
+          toast.success(`¡${fulfilled.length} banners generados!`, {
+            description: "Tu secuencia de venta está lista.",
+          });
+        }
+      } else {
+        toast.error("Error", { description: "No se pudo generar ningún banner. Intenta de nuevo." });
+      }
     } catch (err: any) {
       toast.error("Error", { description: err.message || "No se pudo generar los banners" });
     } finally {
       setLoading(false);
     }
-  };
+  }, [product, hasReachedLimit, sequence, formState]);
 
-  const handleDownload = async (banner: GeneratedBanner) => {
-    const response = await fetch(banner.imageUrl);
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `banner-${product?.name || "image"}-${banner.templateId}-${outputSize}.png`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const handleDownload = useCallback(
+    (banner: GeneratedBanner) => downloadBanner(banner, product?.name || "", formState.outputSize),
+    [product?.name, formState.outputSize]
+  );
 
-  const handleDownloadAll = async () => {
+  const handleDownloadAll = useCallback(async () => {
     for (const banner of generatedBanners) {
-      await handleDownload(banner);
+      await downloadBanner(banner, product?.name || "", formState.outputSize);
     }
-  };
+  }, [generatedBanners, product?.name, formState.outputSize]);
+
+  // ─── Error / Loading states ─────────────────────────────────────────────
+
+  if (productError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <AlertTriangle className="h-10 w-10 text-destructive" />
+        <p className="text-muted-foreground font-medium">Producto no encontrado o sin acceso.</p>
+        <Button variant="outline" onClick={() => navigate(-1)}>
+          <ArrowLeft className="h-4 w-4 mr-2" /> Volver
+        </Button>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -182,7 +268,10 @@ const GenerateBanner = () => {
     );
   }
 
-  const sequence = getSequence();
+  // ─── Render ─────────────────────────────────────────────────────────────
+
+  const productImage = product.images?.[0];
+  const formattedPrice = product.price != null ? `$${product.price.toLocaleString("es-CL")} CLP` : "";
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
@@ -193,7 +282,10 @@ const GenerateBanner = () => {
         </Button>
         <div>
           <h1 className="text-2xl font-bold font-display tracking-tight">Generar Banners</h1>
-          <p className="text-sm text-muted-foreground">{product.name} — ${product.price.toLocaleString("es-CL")} CLP</p>
+          <p className="text-sm text-muted-foreground">
+            {product.name}
+            {formattedPrice && ` — ${formattedPrice}`}
+          </p>
         </div>
       </div>
 
@@ -244,9 +336,9 @@ const GenerateBanner = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col sm:flex-row gap-4">
-                  {product.images[0] && (
+                  {productImage && (
                     <div className="w-24 h-24 rounded-lg bg-muted overflow-hidden flex-shrink-0">
-                      <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
+                      <img src={productImage} alt={product.name} className="h-full w-full object-cover" />
                     </div>
                   )}
                   <div className="flex-1 space-y-3">
@@ -255,8 +347,8 @@ const GenerateBanner = () => {
                     </Label>
                     <Textarea
                       id="description"
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
+                      value={formState.description}
+                      onChange={(e) => updateForm("description", e.target.value)}
                       placeholder="Describe los beneficios, características principales y por qué tu producto es especial. La IA analizará tu imagen y creará el diseño perfecto..."
                       rows={5}
                       maxLength={400}
@@ -264,26 +356,25 @@ const GenerateBanner = () => {
                     <div className="flex justify-between text-xs">
                       <span className={cn(
                         "transition-colors",
-                        description.length < 120 ? "text-destructive" : "text-green-600"
+                        formState.description.length < 120 ? "text-destructive" : "text-green-600"
                       )}>
-                        {description.length < 120
-                          ? `Faltan ${120 - description.length} caracteres (mínimo 120)`
+                        {formState.description.length < 120
+                          ? `Faltan ${120 - formState.description.length} caracteres (mínimo 120)`
                           : "✓ Descripción suficiente"}
                       </span>
-                      <span className="text-muted-foreground">{description.length}/400</span>
+                      <span className="text-muted-foreground">{formState.description.length}/400</span>
                     </div>
                   </div>
                 </div>
 
-                {/* Optional slogan */}
                 <div className="space-y-2">
                   <Label htmlFor="customText" className="text-sm text-muted-foreground">
                     Slogan o texto personalizado (opcional)
                   </Label>
                   <Input
                     id="customText"
-                    value={customText}
-                    onChange={(e) => setCustomText(e.target.value)}
+                    value={formState.customText}
+                    onChange={(e) => updateForm("customText", e.target.value)}
                     placeholder="Ej: ¡Transforma tu hogar!, La mejor calidad al mejor precio..."
                     maxLength={80}
                   />
@@ -292,13 +383,12 @@ const GenerateBanner = () => {
                   </p>
                 </div>
 
-                {/* AI confidence message */}
                 <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-1">
                   <p className="text-sm font-medium text-primary flex items-center gap-2">
                     <Sparkles className="h-4 w-4" /> Diseño profesional automático
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Nuestra IA analiza la imagen de tu producto para extraer colores, estilo y composición. 
+                    Nuestra IA analiza la imagen de tu producto para extraer colores, estilo y composición.
                     Genera banners de nivel agencia con tipografía profesional, colores armónicos y composición perfecta.
                   </p>
                 </div>
@@ -321,10 +411,10 @@ const GenerateBanner = () => {
                     {bannerQuantityOptions.map((opt) => (
                       <button
                         key={opt.value}
-                        onClick={() => setBannerCount(opt.value)}
+                        onClick={() => updateForm("bannerCount", opt.value)}
                         className={cn(
                           "rounded-xl border-2 p-4 text-center transition-all hover:scale-[1.02]",
-                          bannerCount === opt.value
+                          formState.bannerCount === opt.value
                             ? "border-primary bg-primary/5 shadow-lg ring-2 ring-primary/20"
                             : "border-border hover:border-primary/40"
                         )}
@@ -335,11 +425,10 @@ const GenerateBanner = () => {
                     ))}
                   </div>
 
-                  {/* Sequence preview */}
                   <div className="bg-muted/50 rounded-lg p-3 space-y-2">
                     <p className="text-xs font-medium text-muted-foreground">Secuencia de venta que se generará:</p>
                     <div className="flex flex-wrap gap-2">
-                      {SEQUENCES[bannerCount]?.map((tid, i) => {
+                      {sequence.map((tid, i) => {
                         const tpl = bannerTemplates.find((t) => t.id === tid);
                         return (
                           <span key={i} className="inline-flex items-center gap-1 text-xs bg-background border rounded-full px-3 py-1">
@@ -358,7 +447,7 @@ const GenerateBanner = () => {
                   <CardTitle className="text-base">Tamaño de salida</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Select value={outputSize} onValueChange={setOutputSize}>
+                  <Select value={formState.outputSize} onValueChange={(v) => updateForm("outputSize", v)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -378,7 +467,6 @@ const GenerateBanner = () => {
           {/* Step 3: Generate & Preview */}
           {step === 2 && (
             <div className="space-y-6">
-              {/* Summary */}
               <Card>
                 <CardContent className="pt-6">
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
@@ -388,14 +476,13 @@ const GenerateBanner = () => {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Tamaño</p>
-                      <p className="font-semibold text-sm">{outputSize}</p>
+                      <p className="font-semibold text-sm">{formState.outputSize}</p>
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Total</p>
                       <p className="font-semibold text-sm">{sequence.length} banners</p>
                     </div>
                   </div>
-                  {/* Sequence chips */}
                   <div className="flex flex-wrap gap-1.5 mt-4 justify-center">
                     {sequence.map((tid, i) => {
                       const tpl = bannerTemplates.find((t) => t.id === tid);
@@ -409,7 +496,6 @@ const GenerateBanner = () => {
                 </CardContent>
               </Card>
 
-              {/* Usage indicator */}
               <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Banners usados este mes</span>
@@ -447,7 +533,6 @@ const GenerateBanner = () => {
                 </Button>
               )}
 
-              {/* Results */}
               {generatedBanners.length > 0 && (
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
@@ -516,7 +601,7 @@ const GenerateBanner = () => {
               {step < 2 && (
                 <Button
                   onClick={() => setStep((s) => s + 1)}
-                  disabled={!canGoNext()}
+                  disabled={!canGoNext}
                   className="min-h-[44px]"
                 >
                   Siguiente <ArrowRight className="h-4 w-4 ml-2" />
