@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, AlertTriangle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, AlertTriangle, Zap, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
