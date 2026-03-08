@@ -302,7 +302,7 @@ const Dashboard = () => {
 
 /* Quick Action Card */
 const QuickActionCard = ({ to, icon: Icon, title, description, variant }: {
-  to: string; icon: any; title: string; description: string; variant?: "primary";
+  to: string; icon: React.ComponentType<{ className?: string }>; title: string; description: string; variant?: "primary";
 }) => (
   <Card className={`hover:shadow-md transition-all group cursor-pointer ${variant === "primary" ? "border-primary/30 bg-primary/5" : ""}`}>
     <Link to={to}>
