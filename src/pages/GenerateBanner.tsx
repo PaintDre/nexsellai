@@ -85,29 +85,34 @@ const computeBannersUsed = (profile: Tables<"profiles"> | null): number => {
 
 const buildBannerPayload = (
   product: Product,
-  description: string,
-  customText: string,
+  form: FormState,
   templateId: string,
-  outputSize: string,
   index: number,
   total: number,
-) => ({
-  product: {
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    category: product.category,
-    description,
-    target_audience: product.target_audience,
-    images: product.images ?? [],
-  },
-  templateId,
-  outputSize,
-  customText: customText || undefined,
-  bannerIndex: index + 1,
-  sequencePosition: index + 1,
-  totalInSequence: total,
-});
+) => {
+  const base = {
+    product: {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      category: product.category,
+      description: form.description,
+      target_audience: product.target_audience,
+      images: product.images ?? [],
+    },
+    templateId,
+    outputSize: form.outputSize,
+    customText: form.customText || undefined,
+    bannerIndex: index + 1,
+    sequencePosition: index + 1,
+    totalInSequence: total,
+    generationMode: form.generationMode,
+  };
+  if (form.generationMode === "custom") {
+    return { ...base, bannerGoal: form.bannerGoal, tone: form.tone, visualStyle: form.visualStyle };
+  }
+  return base;
+};
 
 const downloadBanner = async (banner: GeneratedBanner, productName: string, outputSize: string) => {
   try {
