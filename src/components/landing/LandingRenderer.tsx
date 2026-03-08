@@ -588,54 +588,32 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
       <SectionDivider theme={theme} from="alt" to="cta" />
 
       {/* ═══ FINAL CTA ═══ */}
-      <EditableSection blockType="cta" blockTitle="CTA Final" className={`relative overflow-hidden ${cta?.image_url ? 'py-0' : `py-20 md:py-28 ${t.sectionAltBg}`}`}>
-        {cta?.image_url ? (
-          <div className="relative min-h-[350px] flex items-center">
-            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${cta.image_url})` }} />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
-            <div className="relative z-10 mx-auto max-w-2xl px-6 py-20 md:py-28 text-center space-y-8">
-              <EditableText
-                value={cta?.title || "¿Listo para probarlo?"}
-                onChange={(v) => updateBlock("cta", { title: v })}
-                editable={editable}
-                tag="h2"
-                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-              />
-              {cta?.content && (
-                <EditableText
-                  value={typeof cta.content === "string" ? cta.content : ""}
-                  onChange={(v) => updateBlock("cta", { content: v })}
-                  editable={editable}
-                  tag="p"
-                  className="text-base sm:text-lg text-gray-200"
-                />
-              )}
-              <CTAWithTrust trustColor="text-gray-400" />
-            </div>
-          </div>
-        ) : (
-          <div className="mx-auto max-w-2xl px-6 text-center space-y-8">
+      <EditableSection blockType="cta" blockTitle="CTA Final" className={`relative overflow-hidden py-20 md:py-28 ${t.sectionAltBg}`}>
+        <div className="mx-auto max-w-2xl px-6 text-center space-y-8">
+          <EditableText
+            value={cta?.title || "¿Listo para probarlo?"}
+            onChange={(v) => updateBlock("cta", { title: v })}
+            editable={editable}
+            tag="h2"
+            className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight ${getHeading(true)}`}
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          />
+          {cta?.content && (
             <EditableText
-              value={cta?.title || "¿Listo para probarlo?"}
-              onChange={(v) => updateBlock("cta", { title: v })}
+              value={typeof cta.content === "string" ? cta.content : ""}
+              onChange={(v) => updateBlock("cta", { content: v })}
               editable={editable}
-              tag="h2"
-              className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight ${getHeading(true)}`}
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              tag="p"
+              className={`text-lg ${getBody(true)}`}
             />
-            {cta?.content && (
-              <EditableText
-                value={typeof cta.content === "string" ? cta.content : ""}
-                onChange={(v) => updateBlock("cta", { content: v })}
-                editable={editable}
-                tag="p"
-                className={`text-lg ${getBody(true)}`}
-              />
-            )}
-            <CTAWithTrust trustColor={theme === "bold" ? "text-gray-500" : undefined} />
-          </div>
-        )}
+          )}
+          {cta?.image_url && (
+            <div className="mx-auto max-w-sm">
+              <img src={cta.image_url} alt="Producto" className="rounded-2xl shadow-xl w-full h-auto object-contain" loading="lazy" />
+            </div>
+          )}
+          <CTAWithTrust trustColor={theme === "bold" ? "text-gray-500" : undefined} />
+        </div>
       </EditableSection>
 
       {/* ═══ STICKY MOBILE CTA ═══ */}
