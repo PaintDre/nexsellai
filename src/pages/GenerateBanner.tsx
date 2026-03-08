@@ -16,9 +16,8 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, AlertTriangle, Zap, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-const BANNER_LIMITS: Record<string, number> = { free: 2, starter: 30, pro: 150 };
+import { BANNER_LIMITS } from "@/lib/constants";
+import { computeBannersUsed } from "@/lib/planUsage";
 
 const STEPS = [
   { label: "Descripción", icon: "✍️" },
