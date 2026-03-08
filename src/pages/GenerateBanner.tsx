@@ -641,7 +641,7 @@ const GenerateBanner = () => {
                   {loading ? (
                     <>
                       <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                      Generando {sequence.length} banners...
+                      Analizando tu producto y creando tu secuencia de banners...
                     </>
                   ) : sequence.length > bannersRemaining ? (
                     <>
