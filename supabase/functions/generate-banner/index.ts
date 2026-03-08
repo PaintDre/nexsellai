@@ -143,7 +143,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { product, templateId, outputSize, sectionType, sectionTitle, landingId, blockContent, customText, bannerIndex, sequencePosition, totalInSequence } = await req.json();
+    const { product, templateId, outputSize, sectionType, sectionTitle, landingId, blockContent, customText, bannerIndex, sequencePosition, totalInSequence, generationMode, bannerGoal, tone, visualStyle } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -260,6 +260,39 @@ CRITICAL: This banner's messaging must be COMPLETELY DIFFERENT from other banner
       bannerIndexInstruction = `\n\nBANNER #${bannerIndex}: Make this visually DISTINCT from previous banners. Different angle, composition, and visual emphasis while maintaining professional coherence.`;
     }
 
+    // Custom mode instructions
+    let customModeInstruction = "";
+    if (generationMode === "custom") {
+      const goalMap: Record<string, string> = {
+        sale: "Drive immediate sales — focus on urgency, price, and desire to purchase NOW.",
+        offer: "Highlight a special offer or promotion — make the deal feel irresistible and time-sensitive.",
+        awareness: "Build brand awareness — focus on product recognition, lifestyle association, and memorability.",
+        benefit: "Communicate the key benefit — make the viewer instantly understand what they gain.",
+      };
+      const toneMap: Record<string, string> = {
+        premium: "Use a PREMIUM tone: elegant, sophisticated, luxurious. Think high-end brand advertising with refined typography and muted, rich colors.",
+        direct: "Use a DIRECT tone: clear, straightforward, no-nonsense. Bold statements, clean layout, zero fluff.",
+        minimal: "Use a MINIMAL tone: ultra-clean, lots of whitespace, restrained color palette. Less is more — let the product breathe.",
+        bold: "Use a BOLD tone: high energy, vibrant colors, large impactful typography. The banner should SHOUT for attention.",
+      };
+      const styleMap: Record<string, string> = {
+        auto: "", // AI decides
+        clean: "VISUAL STYLE: Clean and modern — crisp edges, flat or subtle gradients, organized grid-like composition.",
+        premium: "VISUAL STYLE: Premium luxury — dark or rich backgrounds, gold/silver accents, dramatic lighting on the product.",
+        ecommerce: "VISUAL STYLE: Classic ecommerce — product-centric, price badge, trust elements, optimized for marketplace feel.",
+        bold: "VISUAL STYLE: Bold and graphic — strong geometric shapes, contrasting colors, poster-like composition.",
+      };
+
+      const goalInstruction = goalMap[bannerGoal] || "";
+      const toneInstruction = toneMap[tone] || "";
+      const styleInstruction = styleMap[visualStyle] || "";
+
+      customModeInstruction = `\n\nCUSTOM MODE DIRECTIVES (follow these strictly):
+${goalInstruction ? `\nMARKETING GOAL: ${goalInstruction}` : ""}
+${toneInstruction ? `\nTONE: ${toneInstruction}` : ""}
+${styleInstruction ? `\n${styleInstruction}` : ""}`;
+    }
+
     const textPrompt = `Generate a professional ecommerce marketing banner image.
 
 PRODUCT DATA:
@@ -275,6 +308,7 @@ ${templateStyle}
 ${sectionContext}
 ${bannerIndexInstruction}
 ${sequenceInstruction}
+${customModeInstruction}
 ${customText ? `\nCUSTOM SLOGAN (include prominently): "${customText}"` : ""}`;
 
     // Build messages with system prompt + product image
