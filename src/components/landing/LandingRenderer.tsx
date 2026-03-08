@@ -32,6 +32,7 @@ interface LandingRendererProps {
   theme?: LandingTheme;
   editable?: boolean;
   onBlocksChange?: (blocks: Block[]) => void;
+  hasOffer?: boolean;
 }
 
 const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", editable = false, onBlocksChange }: LandingRendererProps) => {
