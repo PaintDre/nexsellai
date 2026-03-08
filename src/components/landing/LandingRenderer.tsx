@@ -10,6 +10,7 @@ import SectionDivider from "./SectionDivider";
 import SocialProof from "./SocialProof";
 import EditableText from "./EditableText";
 import BlockToolbar from "./BlockToolbar";
+import { getHeroStyle } from "./heroStyles";
 
 interface Block {
   type: string;
