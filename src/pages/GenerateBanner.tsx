@@ -576,7 +576,7 @@ const GenerateBanner = () => {
                 <CardContent className="pt-6">
                   <div className={cn(
                     "grid gap-4 text-center",
-                    formState.generationMode === "custom" ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" : "grid-cols-2 sm:grid-cols-4"
+                    formState.generationMode === "custom" ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-3"
                   )}>
                     <div>
                       <p className="text-xs text-muted-foreground">Modo</p>
@@ -590,10 +590,6 @@ const GenerateBanner = () => {
                       <p className="text-xs text-muted-foreground">Tamaño</p>
                       <p className="font-semibold text-sm">{formState.outputSize}</p>
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Total</p>
-                      <p className="font-semibold text-sm">{sequence.length} banners</p>
-                    </div>
                     {formState.generationMode === "custom" && (
                       <>
                         <div>
@@ -601,8 +597,12 @@ const GenerateBanner = () => {
                           <p className="font-semibold text-sm">{GOAL_LABELS[formState.bannerGoal]}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Tono / Estilo</p>
-                          <p className="font-semibold text-sm">{TONE_LABELS[formState.tone]} · {VISUAL_LABELS[formState.visualStyle]}</p>
+                          <p className="text-xs text-muted-foreground">Tono</p>
+                          <p className="font-semibold text-sm">{TONE_LABELS[formState.tone]}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Estilo visual</p>
+                          <p className="font-semibold text-sm">{VISUAL_LABELS[formState.visualStyle]}</p>
                         </div>
                       </>
                     )}
