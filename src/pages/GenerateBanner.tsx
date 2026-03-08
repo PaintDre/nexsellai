@@ -366,7 +366,7 @@ const GenerateBanner = () => {
                     <Zap className="h-4 w-4 text-primary" />
                     <span className="font-semibold text-sm">Automático</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Rápido y simple — la IA decide la mejor dirección creativa</p>
+                  <p className="text-xs text-muted-foreground">Rápido y simple — la IA decide el mejor enfoque para tu producto.</p>
                 </button>
                 <button
                   onClick={() => updateForm("generationMode", "custom")}
@@ -381,9 +381,12 @@ const GenerateBanner = () => {
                     <SlidersHorizontal className="h-4 w-4 text-primary" />
                     <span className="font-semibold text-sm">Personalizado</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Más control — define el enfoque y estilo del banner</p>
+                  <p className="text-xs text-muted-foreground">Más control — define el objetivo, tono y estilo visual del banner.</p>
                 </button>
               </div>
+              <p className="text-xs text-muted-foreground text-center">
+                Incluso en modo automático, la IA analiza tu producto y crea una secuencia de banners optimizada para ventas.
+              </p>
 
               <Card>
                 <CardHeader>
@@ -573,7 +576,7 @@ const GenerateBanner = () => {
                 <CardContent className="pt-6">
                   <div className={cn(
                     "grid gap-4 text-center",
-                    formState.generationMode === "custom" ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" : "grid-cols-2 sm:grid-cols-4"
+                    formState.generationMode === "custom" ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-3"
                   )}>
                     <div>
                       <p className="text-xs text-muted-foreground">Modo</p>
@@ -587,10 +590,6 @@ const GenerateBanner = () => {
                       <p className="text-xs text-muted-foreground">Tamaño</p>
                       <p className="font-semibold text-sm">{formState.outputSize}</p>
                     </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Total</p>
-                      <p className="font-semibold text-sm">{sequence.length} banners</p>
-                    </div>
                     {formState.generationMode === "custom" && (
                       <>
                         <div>
@@ -598,8 +597,12 @@ const GenerateBanner = () => {
                           <p className="font-semibold text-sm">{GOAL_LABELS[formState.bannerGoal]}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Tono / Estilo</p>
-                          <p className="font-semibold text-sm">{TONE_LABELS[formState.tone]} · {VISUAL_LABELS[formState.visualStyle]}</p>
+                          <p className="text-xs text-muted-foreground">Tono</p>
+                          <p className="font-semibold text-sm">{TONE_LABELS[formState.tone]}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Estilo visual</p>
+                          <p className="font-semibold text-sm">{VISUAL_LABELS[formState.visualStyle]}</p>
                         </div>
                       </>
                     )}
@@ -638,7 +641,7 @@ const GenerateBanner = () => {
                   {loading ? (
                     <>
                       <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                      Generando {sequence.length} banners...
+                      Analizando tu producto y creando tu secuencia de banners...
                     </>
                   ) : sequence.length > bannersRemaining ? (
                     <>
