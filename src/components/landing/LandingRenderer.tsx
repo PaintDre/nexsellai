@@ -523,84 +523,37 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
 
       {/* ═══ OFFER / URGENCY ═══ */}
       {(offer || urgency) && (
-        <EditableSection blockType="offer" blockTitle={offer?.title || "Oferta"} className={`relative overflow-hidden ${offer?.image_url ? 'py-0' : `py-16 md:py-24 ${t.accentBg}`}`}>
-          {offer?.image_url ? (
-            <div className="relative min-h-[400px] flex items-center">
-              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${offer.image_url})` }} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40" />
-              <div className="relative z-10 mx-auto max-w-3xl px-6 py-16 md:py-24 text-center space-y-6">
-                {urgency && (
-                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-red-500/90 text-white">
-                    <Clock className="h-4 w-4" />
-                    {typeof urgency.content === "string" ? urgency.content : urgency.title}
-                  </span>
-                )}
+        <EditableSection blockType="offer" blockTitle={offer?.title || "Oferta"} className={`relative overflow-hidden ${`py-16 md:py-24 ${t.accentBg}`}`}>
+          <div className="mx-auto max-w-3xl px-6 text-center space-y-6">
+            {urgency && (
+              <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${t.urgencyBg} ${t.urgencyText}`}>
+                <Clock className="h-4 w-4" />
+                {typeof urgency.content === "string" ? urgency.content : urgency.title}
+              </span>
+            )}
+            {offer && (
+              <>
                 <EditableText
-                  value={offer?.title || ""}
+                  value={offer.title || ""}
                   onChange={(v) => updateBlock("offer", { title: v })}
                   editable={editable}
                   tag="h2"
-                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white"
+                  className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight ${t.headingColor}`}
                   style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 />
-                {offer?.content && (
+                {offer.content && (
                   <EditableText
                     value={typeof offer.content === "string" ? offer.content : ""}
                     onChange={(v) => updateBlock("offer", { content: v })}
                     editable={editable}
                     tag="p"
-                    className="text-base sm:text-lg text-gray-200"
+                    className={`text-lg ${t.bodyColor}`}
                   />
                 )}
-                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
-                  <span className="text-lg sm:text-2xl line-through text-gray-400">{formattedPrice}</span>
-                  <span className="text-2xl sm:text-4xl font-extrabold text-emerald-400" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    {`$${Math.round(price * 0.7).toLocaleString("es-CL")}`}
-                  </span>
-                  <span className="inline-block bg-red-500 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-1 rounded-full">-30%</span>
-                </div>
-                <CTAWithTrust trustColor="text-gray-400" />
-              </div>
-            </div>
-          ) : (
-            <div className="mx-auto max-w-3xl px-6 text-center space-y-6">
-              {urgency && (
-                <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${t.urgencyBg} ${t.urgencyText}`}>
-                  <Clock className="h-4 w-4" />
-                  {typeof urgency.content === "string" ? urgency.content : urgency.title}
-                </span>
-              )}
-              {offer && (
-                <>
-                  <EditableText
-                    value={offer.title || ""}
-                    onChange={(v) => updateBlock("offer", { title: v })}
-                    editable={editable}
-                    tag="h2"
-                    className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight ${t.headingColor}`}
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  />
-                  {offer.content && (
-                    <EditableText
-                      value={typeof offer.content === "string" ? offer.content : ""}
-                      onChange={(v) => updateBlock("offer", { content: v })}
-                      editable={editable}
-                      tag="p"
-                      className={`text-lg ${t.bodyColor}`}
-                    />
-                  )}
-                  <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
-                    <span className={`text-lg sm:text-2xl line-through ${t.mutedColor}`}>{formattedPrice}</span>
-                    <span className="text-2xl sm:text-4xl font-extrabold text-emerald-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                      {`$${Math.round(price * 0.7).toLocaleString("es-CL")}`}
-                    </span>
-                    <span className="inline-block bg-red-500 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-1 rounded-full">-30%</span>
-                  </div>
-                </>
-              )}
-              <CTAWithTrust />
-            </div>
-          )}
+              </>
+            )}
+            <CTAWithTrust />
+          </div>
         </EditableSection>
       )}
 
