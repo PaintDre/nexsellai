@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, AlertTriangle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, AlertTriangle, Zap, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -44,12 +44,25 @@ interface GeneratedBanner {
   totalInSequence: number;
 }
 
+type GenerationMode = "auto" | "custom";
+type BannerGoal = "sale" | "offer" | "awareness" | "benefit";
+type Tone = "premium" | "direct" | "minimal" | "bold";
+type VisualStyle = "auto" | "clean" | "premium" | "ecommerce" | "bold";
+
 interface FormState {
   description: string;
   customText: string;
   bannerCount: number;
   outputSize: string;
+  generationMode: GenerationMode;
+  bannerGoal: BannerGoal;
+  tone: Tone;
+  visualStyle: VisualStyle;
 }
+
+const GOAL_LABELS: Record<BannerGoal, string> = { sale: "Venta", offer: "Oferta", awareness: "Awareness", benefit: "Beneficio" };
+const TONE_LABELS: Record<Tone, string> = { premium: "Premium", direct: "Directo", minimal: "Minimalista", bold: "Llamativo" };
+const VISUAL_LABELS: Record<VisualStyle, string> = { auto: "Automático", clean: "Limpio", premium: "Premium", ecommerce: "Ecommerce", bold: "Llamativo" };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -72,29 +85,34 @@ const computeBannersUsed = (profile: Tables<"profiles"> | null): number => {
 
 const buildBannerPayload = (
   product: Product,
-  description: string,
-  customText: string,
+  form: FormState,
   templateId: string,
-  outputSize: string,
   index: number,
   total: number,
-) => ({
-  product: {
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    category: product.category,
-    description,
-    target_audience: product.target_audience,
-    images: product.images ?? [],
-  },
-  templateId,
-  outputSize,
-  customText: customText || undefined,
-  bannerIndex: index + 1,
-  sequencePosition: index + 1,
-  totalInSequence: total,
-});
+) => {
+  const base = {
+    product: {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      category: product.category,
+      description: form.description,
+      target_audience: product.target_audience,
+      images: product.images ?? [],
+    },
+    templateId,
+    outputSize: form.outputSize,
+    customText: form.customText || undefined,
+    bannerIndex: index + 1,
+    sequencePosition: index + 1,
+    totalInSequence: total,
+    generationMode: form.generationMode,
+  };
+  if (form.generationMode === "custom") {
+    return { ...base, bannerGoal: form.bannerGoal, tone: form.tone, visualStyle: form.visualStyle };
+  }
+  return base;
+};
 
 const downloadBanner = async (banner: GeneratedBanner, productName: string, outputSize: string) => {
   try {
@@ -127,6 +145,10 @@ const GenerateBanner = () => {
     customText: "",
     bannerCount: 3,
     outputSize: "1080x1080",
+    generationMode: "auto",
+    bannerGoal: "sale",
+    tone: "direct",
+    visualStyle: "auto",
   });
   const [loading, setLoading] = useState(false);
   const [generatedBanners, setGeneratedBanners] = useState<GeneratedBanner[]>([]);
@@ -186,10 +208,8 @@ const GenerateBanner = () => {
             const { data, error } = await supabase.functions.invoke("generate-banner", {
               body: buildBannerPayload(
                 product,
-                formState.description,
-                formState.customText,
+                formState,
                 templateId,
-                formState.outputSize,
                 i,
                 sequence.length,
               ),
@@ -330,70 +350,152 @@ const GenerateBanner = () => {
 
           {/* Step 1: Description */}
           {step === 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Describe tu producto</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  {productImage && (
-                    <div className="w-24 h-24 rounded-lg bg-muted overflow-hidden flex-shrink-0">
-                      <img src={productImage} alt={product.name} className="h-full w-full object-cover" />
-                    </div>
+            <div className="space-y-6">
+              {/* Mode Selector */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  onClick={() => updateForm("generationMode", "auto")}
+                  className={cn(
+                    "rounded-xl border-2 p-4 text-left transition-all hover:scale-[1.01]",
+                    formState.generationMode === "auto"
+                      ? "border-primary bg-primary/5 shadow-lg ring-2 ring-primary/20"
+                      : "border-border hover:border-primary/40"
                   )}
-                  <div className="flex-1 space-y-3">
-                    <Label htmlFor="description" className="text-sm text-muted-foreground">
-                      Describe los beneficios y características de tu producto (mín. 120 caracteres)
-                    </Label>
-                    <Textarea
-                      id="description"
-                      value={formState.description}
-                      onChange={(e) => updateForm("description", e.target.value)}
-                      placeholder="Describe los beneficios, características principales y por qué tu producto es especial. La IA analizará tu imagen y creará el diseño perfecto..."
-                      rows={5}
-                      maxLength={400}
-                    />
-                    <div className="flex justify-between text-xs">
-                      <span className={cn(
-                        "transition-colors",
-                        formState.description.length < 120 ? "text-destructive" : "text-green-600"
-                      )}>
-                        {formState.description.length < 120
-                          ? `Faltan ${120 - formState.description.length} caracteres (mínimo 120)`
-                          : "✓ Descripción suficiente"}
-                      </span>
-                      <span className="text-muted-foreground">{formState.description.length}/400</span>
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Zap className="h-4 w-4 text-primary" />
+                    <span className="font-semibold text-sm">Automático</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Rápido y simple — la IA decide la mejor dirección creativa</p>
+                </button>
+                <button
+                  onClick={() => updateForm("generationMode", "custom")}
+                  className={cn(
+                    "rounded-xl border-2 p-4 text-left transition-all hover:scale-[1.01]",
+                    formState.generationMode === "custom"
+                      ? "border-primary bg-primary/5 shadow-lg ring-2 ring-primary/20"
+                      : "border-border hover:border-primary/40"
+                  )}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <SlidersHorizontal className="h-4 w-4 text-primary" />
+                    <span className="font-semibold text-sm">Personalizado</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Más control — define el enfoque y estilo del banner</p>
+                </button>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Describe tu producto</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    {productImage && (
+                      <div className="w-24 h-24 rounded-lg bg-muted overflow-hidden flex-shrink-0">
+                        <img src={productImage} alt={product.name} className="h-full w-full object-cover" />
+                      </div>
+                    )}
+                    <div className="flex-1 space-y-3">
+                      <Label htmlFor="description" className="text-sm text-muted-foreground">
+                        Describe los beneficios y características de tu producto (mín. 120 caracteres)
+                      </Label>
+                      <Textarea
+                        id="description"
+                        value={formState.description}
+                        onChange={(e) => updateForm("description", e.target.value)}
+                        placeholder="Describe los beneficios, características principales y por qué tu producto es especial. La IA analizará tu imagen y creará el diseño perfecto..."
+                        rows={5}
+                        maxLength={400}
+                      />
+                      <div className="flex justify-between text-xs">
+                        <span className={cn(
+                          "transition-colors",
+                          formState.description.length < 120 ? "text-destructive" : "text-green-600"
+                        )}>
+                          {formState.description.length < 120
+                            ? `Faltan ${120 - formState.description.length} caracteres (mínimo 120)`
+                            : "✓ Descripción suficiente"}
+                        </span>
+                        <span className="text-muted-foreground">{formState.description.length}/400</span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="customText" className="text-sm text-muted-foreground">
-                    Slogan o texto personalizado (opcional)
-                  </Label>
-                  <Input
-                    id="customText"
-                    value={formState.customText}
-                    onChange={(e) => updateForm("customText", e.target.value)}
-                    placeholder="Ej: ¡Transforma tu hogar!, La mejor calidad al mejor precio..."
-                    maxLength={80}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Si lo incluyes, aparecerá de forma prominente en tus banners.
-                  </p>
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="customText" className="text-sm text-muted-foreground">
+                      Slogan o texto personalizado (opcional)
+                    </Label>
+                    <Input
+                      id="customText"
+                      value={formState.customText}
+                      onChange={(e) => updateForm("customText", e.target.value)}
+                      placeholder="Ej: ¡Transforma tu hogar!, La mejor calidad al mejor precio..."
+                      maxLength={80}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Si lo incluyes, aparecerá de forma prominente en tus banners.
+                    </p>
+                  </div>
 
-                <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-1">
-                  <p className="text-sm font-medium text-primary flex items-center gap-2">
-                    <Sparkles className="h-4 w-4" /> Diseño profesional automático
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Nuestra IA analiza la imagen de tu producto para extraer colores, estilo y composición.
-                    Genera banners de nivel agencia con tipografía profesional, colores armónicos y composición perfecta.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+                  {/* Custom mode fields */}
+                  {formState.generationMode === "custom" && (
+                    <div className="border border-border rounded-lg p-4 space-y-4 bg-muted/30">
+                      <p className="text-sm font-medium flex items-center gap-2">
+                        <SlidersHorizontal className="h-4 w-4 text-primary" /> Configuración avanzada
+                      </p>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-muted-foreground">Objetivo</Label>
+                          <Select value={formState.bannerGoal} onValueChange={(v) => updateForm("bannerGoal", v as BannerGoal)}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {(Object.entries(GOAL_LABELS) as [BannerGoal, string][]).map(([k, v]) => (
+                                <SelectItem key={k} value={k}>{v}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-muted-foreground">Tono</Label>
+                          <Select value={formState.tone} onValueChange={(v) => updateForm("tone", v as Tone)}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {(Object.entries(TONE_LABELS) as [Tone, string][]).map(([k, v]) => (
+                                <SelectItem key={k} value={k}>{v}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-muted-foreground">Estilo visual</Label>
+                          <Select value={formState.visualStyle} onValueChange={(v) => updateForm("visualStyle", v as VisualStyle)}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {(Object.entries(VISUAL_LABELS) as [VisualStyle, string][]).map(([k, v]) => (
+                                <SelectItem key={k} value={k}>{v}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {formState.generationMode === "auto" && (
+                    <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-1">
+                      <p className="text-sm font-medium text-primary flex items-center gap-2">
+                        <Sparkles className="h-4 w-4" /> Diseño profesional automático
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Nuestra IA analiza la imagen de tu producto para extraer colores, estilo y composición.
+                        Genera banners de nivel agencia con tipografía profesional, colores armónicos y composición perfecta.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           )}
 
           {/* Step 2: Quantity & Size */}
@@ -469,7 +571,14 @@ const GenerateBanner = () => {
             <div className="space-y-6">
               <Card>
                 <CardContent className="pt-6">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
+                  <div className={cn(
+                    "grid gap-4 text-center",
+                    formState.generationMode === "custom" ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" : "grid-cols-2 sm:grid-cols-4"
+                  )}>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Modo</p>
+                      <p className="font-semibold text-sm">{formState.generationMode === "auto" ? "Automático" : "Personalizado"}</p>
+                    </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Secuencia</p>
                       <p className="font-semibold text-sm">{sequence.length} etapas</p>
@@ -482,6 +591,18 @@ const GenerateBanner = () => {
                       <p className="text-xs text-muted-foreground">Total</p>
                       <p className="font-semibold text-sm">{sequence.length} banners</p>
                     </div>
+                    {formState.generationMode === "custom" && (
+                      <>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Objetivo</p>
+                          <p className="font-semibold text-sm">{GOAL_LABELS[formState.bannerGoal]}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Tono / Estilo</p>
+                          <p className="font-semibold text-sm">{TONE_LABELS[formState.tone]} · {VISUAL_LABELS[formState.visualStyle]}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-1.5 mt-4 justify-center">
                     {sequence.map((tid, i) => {
