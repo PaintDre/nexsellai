@@ -21,9 +21,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-const PLAN_LIMITS: Record<string, number> = { free: 1, starter: 10, pro: 100 };
-const BANNER_LIMITS: Record<string, number> = { free: 2, starter: 30, pro: 150 };
+import { LANDING_LIMITS, BANNER_LIMITS } from "@/lib/constants";
+import { computeBannersUsed } from "@/lib/planUsage";
 
 const SettingsPage = () => {
   const { user, profile, refreshProfile, isAdmin } = useAuth();
