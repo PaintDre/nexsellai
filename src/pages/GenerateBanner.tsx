@@ -145,6 +145,10 @@ const GenerateBanner = () => {
     customText: "",
     bannerCount: 3,
     outputSize: "1080x1080",
+    generationMode: "auto",
+    bannerGoal: "sale",
+    tone: "direct",
+    visualStyle: "auto",
   });
   const [loading, setLoading] = useState(false);
   const [generatedBanners, setGeneratedBanners] = useState<GeneratedBanner[]>([]);
