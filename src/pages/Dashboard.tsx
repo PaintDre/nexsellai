@@ -12,12 +12,11 @@ import {
   Package, FileText, Zap, Eye, History, Plus, Image,
   ArrowRight, Sparkles, Download, ImageIcon,
 } from "lucide-react";
+import { LANDING_LIMITS, BANNER_LIMITS } from "@/lib/constants";
+import { computeBannersUsed } from "@/lib/planUsage";
 
 type Product = Tables<"products">;
 type Landing = Tables<"landings">;
-
-const planLimits: Record<string, number> = { free: 1, starter: 10, pro: 100 };
-const bannerLimits: Record<string, number> = { free: 2, starter: 30, pro: 150 };
 
 interface RecentVersion {
   id: string;
