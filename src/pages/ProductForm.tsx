@@ -11,14 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ArrowLeft, Upload, X, Loader2 } from "lucide-react";
 import AudienceSelector from "@/components/AudienceSelector";
-
-const categories = [
-  { value: "home", label: "Hogar" },
-  { value: "fitness", label: "Fitness" },
-  { value: "beauty", label: "Belleza" },
-  { value: "gadget", label: "Gadgets" },
-  { value: "pets", label: "Mascotas" },
-];
+import { PRODUCT_CATEGORIES } from "@/lib/constants";
 
 const ProductForm = () => {
   const { id } = useParams();
