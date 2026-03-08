@@ -208,10 +208,8 @@ const GenerateBanner = () => {
             const { data, error } = await supabase.functions.invoke("generate-banner", {
               body: buildBannerPayload(
                 product,
-                formState.description,
-                formState.customText,
+                formState,
                 templateId,
-                formState.outputSize,
                 i,
                 sequence.length,
               ),
