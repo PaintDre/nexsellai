@@ -71,16 +71,6 @@ const getTemplateName = (id: string): string =>
 const getSequence = (count: number): string[] =>
   SEQUENCES[count] || SEQUENCES[3];
 
-const computeBannersUsed = (profile: Tables<"profiles"> | null): number => {
-  if (!profile) return 0;
-  const resetAt = profile.banners_reset_at ? new Date(profile.banners_reset_at) : null;
-  const now = new Date();
-  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-  if (!resetAt || now.getTime() - resetAt.getTime() >= thirtyDaysMs) {
-    return 0;
-  }
-  return profile.banners_used || 0;
-};
 
 const buildBannerPayload = (
   product: Product,

@@ -41,7 +41,7 @@ const ProductDetail = () => {
     <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto space-y-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
-        <BreadcrumbLink to="/products" className="hover:text-foreground transition-colors">Productos</BreadcrumbLink>
+        <Link to="/products" className="hover:text-foreground transition-colors">Productos</Link>
         <ChevronRight className="h-3 w-3" />
         <span className="text-foreground font-medium truncate">{product.name}</span>
       </nav>

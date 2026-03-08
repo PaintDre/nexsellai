@@ -49,7 +49,7 @@ const GenerateLanding = () => {
     });
   }, [id, user]);
 
-  const limit = planLimits[profile?.plan || "free"];
+  const limit = LANDING_LIMITS[profile?.plan || "free"];
   const used = profile?.landings_used || 0;
   const canGenerate = used < limit;
 
