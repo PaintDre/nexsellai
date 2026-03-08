@@ -29,6 +29,17 @@ interface PromptParams {
   plan: string;
 }
 
+interface Strategy {
+  primary_angle: string;
+  tone: string;
+  persuasion_level: string;
+  awareness_level: string;
+  key_objections: string[];
+  section_emphasis: Record<string, string>;
+  category_context: string;
+  risky_blocks: string[];
+}
+
 // ─── Plan Configuration ─────────────────────────────────────────────────────
 
 function getPlanConfig(plan: string): PlanConfig {
@@ -91,16 +102,88 @@ Do NOT generate any other blocks. Keep copy simple and informative.`,
   return sections[plan] || sections.free;
 }
 
-// ─── System Prompt Builder ──────────────────────────────────────────────────
+// ─── Default Strategy Fallback ──────────────────────────────────────────────
 
-function buildSystemPrompt(params: PromptParams): string {
+function getDefaultStrategy(params: PromptParams): Strategy {
+  const intensityMap: Record<string, string> = { soft: "informative", medium: "persuasive", hard: "direct-response" };
+  const isSaas = params.product.category === "saas";
+
+  return {
+    primary_angle: isSaas ? "productivity and time savings" : "quality and value for money",
+    tone: intensityMap[params.intensity] || "persuasive",
+    persuasion_level: params.intensity || "medium",
+    awareness_level: "problem-aware",
+    key_objections: isSaas
+      ? ["Is it easy to use?", "Will it integrate with my tools?", "Is it worth the price?"]
+      : ["Is the quality good?", "How long does shipping take?", "Can I return it?"],
+    section_emphasis: {
+      hero: "strong",
+      benefits: "strong",
+      cta: "strong",
+      features: "medium",
+      testimonials: "medium",
+    },
+    category_context: isSaas
+      ? "SaaS product: emphasize ease of use, ROI, onboarding simplicity"
+      : `Ecommerce product in ${params.product.category} category`,
+    risky_blocks: ["testimonials", "comparison"],
+  };
+}
+
+// ─── Planner Prompt ─────────────────────────────────────────────────────────
+
+function buildPlannerPrompt(params: PromptParams): string {
   const { product, mode, intensity, hasOffer, guarantee, plan } = params;
 
-  const intensityMap: Record<string, string> = { soft: "low", medium: "medium", hard: "high" };
-  const mappedIntensity = intensityMap[intensity] || "medium";
+  return `You are a senior marketing strategist analyzing a product to plan a high-converting landing page.
+
+Analyze the following product and return a JSON strategy object.
+
+## Product
+- Name: ${product.name}
+- Category: ${product.category}
+- Price: $${product.price} CLP
+- Target audience: ${product.target_audience}
+- Description: ${product.description || "N/A"}
+
+## Context
+- Mode: ${mode}
+- Intensity: ${intensity}
+- Has offer: ${hasOffer}
+- Guarantee: ${guarantee || "none"}
+- Plan: ${plan}
+
+## Return this exact JSON structure:
+{
+  "primary_angle": "the main persuasion angle (e.g. 'convenience and time savings', 'premium quality at accessible price')",
+  "tone": "the writing tone (e.g. 'conversational and confident', 'professional and aspirational')",
+  "persuasion_level": "low | medium | high",
+  "awareness_level": "unaware | problem-aware | solution-aware | product-aware | most-aware",
+  "key_objections": ["objection 1", "objection 2", "objection 3"],
+  "section_emphasis": { "hero": "strong", "benefits": "strong", "features": "medium", ... },
+  "category_context": "brief note on how to adapt copy for this product category",
+  "risky_blocks": ["list of block types that lack real data and should use safe neutral copy, e.g. testimonials, comparison"]
+}
+
+IMPORTANT:
+- If there are no real testimonials available, include "testimonials" in risky_blocks.
+- If there is no real competitor data, include "comparison" in risky_blocks.
+- Be honest about what data is missing. This helps the generator write safer copy.
+
+Return ONLY valid JSON. No markdown. No explanations.`;
+}
+
+// ─── Generator Prompt (Strategy-Aware) ──────────────────────────────────────
+
+function buildGeneratorPrompt(params: PromptParams, strategy: Strategy): string {
+  const { product, hasOffer, guarantee, plan } = params;
 
   const saasContext = product.category === "saas"
     ? `\n## SAAS PRODUCT CONTEXT\nThis is a SaaS/app product. Adapt the copy to sell software: emphasize ease of use, time savings, ROI, onboarding simplicity, and integrations. Use standard block types (hero, benefits, features, faq, cta, etc.) — do NOT use saas-prefixed block types.`
+    : "";
+
+  const riskyBlockInstructions = strategy.risky_blocks.length > 0
+    ? `\n## RISKY BLOCKS — USE SAFE COPY\nThe following blocks lack real user data: ${strategy.risky_blocks.join(", ")}.\nFor these blocks, use neutral trust-oriented copy. Do NOT invent specific names, dates, quantified results, or fake social proof. Use phrasing like "Nuestros clientes confirman que...", "Diseñado para quienes buscan...", etc.`
     : "";
 
   return `You are a conversion copywriter expert specialized in ecommerce / dropshipping in Chile.
@@ -109,6 +192,17 @@ Write in Spanish (Chilean). Prices are in CLP.
 
 Return ONLY valid JSON: { "blocks": [...] }.
 
+## STRATEGY (from planner)
+- Primary angle: ${strategy.primary_angle}
+- Tone: ${strategy.tone}
+- Persuasion level: ${strategy.persuasion_level}
+- Awareness level: ${strategy.awareness_level}
+- Key objections to address: ${strategy.key_objections.join("; ")}
+- Category context: ${strategy.category_context}
+
+## Section emphasis
+${Object.entries(strategy.section_emphasis).map(([k, v]) => `- ${k}: ${v}`).join("\n")}
+
 ## Output format
 
 Return a JSON object with a "blocks" array. Each block must include:
@@ -116,6 +210,7 @@ Return a JSON object with a "blocks" array. Each block must include:
 - "title" (string)
 - "content" (string OR array — see specific rules below)
 - "order" (number)
+- "_meta" (optional object with: "variant", "emphasis", "visual_intent" — for renderer hints)
 
 ## FAQ block format
 For blocks of type "faq", the "content" MUST be an array of objects with "q" (question) and "a" (answer) keys:
@@ -135,14 +230,8 @@ ${buildPlanSections(plan)}
 - Benefits > Features: always lead with what the customer GETS, not what the product HAS
 - Prices always in CLP format ($XX.XXX)
 - Never mention plan names inside the landing copy
-
-## Framework
-Mode: ${mode === "aida" ? "AIDA — structure each block content in AIDA style internally (Attention, Interest, Desire, Action), but still output the same blocks." : "Standard — standard direct-response sections."}
-
-Intensity: ${mappedIntensity}
-- low = softer, informative
-- medium = persuasive with social proof
-- high = strong direct-response, urgency, objections, tighter CTAs (without scams)
+- Maintain consistent tone across all blocks (guided by strategy above)
+- Each block should flow naturally into the next — avoid repetitive openers
 
 ## Offers / Guarantee
 ${hasOffer ? "hasOffer = true: Include an offer with discounted price + anchor price + savings in CLP." : "hasOffer = false: No discount pricing. Do NOT invent discounted prices. Use value-based and time-limited framing instead."}
@@ -156,6 +245,7 @@ ${guarantee ? `Guarantee: "${guarantee}" — include it in a guarantee block.` :
 - Do NOT include guarantee details unless guarantee text is provided (or plan requires a guarantee block, in which case use generic satisfaction guarantee).
 - If information is missing, write plausible but safe copy without inventing technical facts (no fake certifications, no medical claims, no guaranteed outcomes).
 - If the product is health-related, avoid medical promises; use softer wording (e.g., "ayuda", "puede ayudar", "muchos usuarios reportan mejoras").
+${riskyBlockInstructions}
 
 ## MICROCOPY (ALL PLANS)
 For ALL plans, include trust signals in the CTA block content or as a separate microcopy block: "Pago 100% seguro", "Envío en 24-48h", "Garantía de satisfacción".
@@ -171,9 +261,39 @@ ${saasContext}
 Return ONLY valid JSON. No markdown. No explanations.`;
 }
 
-// ─── OpenAI Call ─────────────────────────────────────────────────────────────
+// ─── Critic Prompt ──────────────────────────────────────────────────────────
 
-async function callOpenAI(apiKey: string, systemPrompt: string, productName: string): Promise<string> {
+function buildCriticPrompt(plan: string): string {
+  return `You are a QA editor reviewing landing page copy blocks for a Chilean ecommerce site.
+
+You will receive a JSON object with a "blocks" array. Each block has: type, title, content, order, and optionally _meta.
+
+Your job is to refine the copy and return the SAME structure with improvements.
+
+## QA Checklist — Apply ALL of these:
+1. REPETITION: Remove repeated phrases across blocks. Each block should have unique openers and angles.
+2. FAKE URGENCY: Remove or soften any urgency that sounds fabricated (e.g. "solo quedan 3", "últimas horas"). Replace with general time-based or value-based urgency.
+3. UNSUPPORTED CLAIMS: Soften any claims that sound like guarantees of specific outcomes (e.g. "ganarás X", "perderás X kilos"). Use "puede ayudar", "diseñado para", "muchos usuarios reportan".
+4. FAKE SOCIAL PROOF: If testimonials use specific names, dates, or quantified results, replace with generic trust phrasing.
+5. CTA CLARITY: Ensure CTA blocks have a clear, compelling call to action with a benefit reminder. Avoid generic "compra ahora" without context.
+6. TONE CONSISTENCY: Ensure all blocks maintain a consistent professional yet conversational Chilean Spanish tone.
+7. FLOW: Each block should transition naturally from the previous one without jarring shifts.
+
+## Rules:
+- Keep the exact same block types, order, and count.
+- Keep FAQ content as [{q, a}] format.
+- Keep array content as arrays, string content as strings.
+- Preserve _meta fields if present.
+- Plan: ${plan} — do not add or remove blocks.
+
+## Output:
+Return ONLY valid JSON: { "blocks": [...] }
+No markdown. No explanations. Same structure, refined copy.`;
+}
+
+// ─── OpenAI Call (Generic) ──────────────────────────────────────────────────
+
+async function callOpenAI(apiKey: string, systemPrompt: string, userMessage: string, temperature: number): Promise<string> {
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -184,9 +304,9 @@ async function callOpenAI(apiKey: string, systemPrompt: string, productName: str
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Generate the landing page blocks for "${productName}".` },
+        { role: "user", content: userMessage },
       ],
-      temperature: 0.8,
+      temperature,
       response_format: { type: "json_object" },
     }),
   });
@@ -199,6 +319,68 @@ async function callOpenAI(apiKey: string, systemPrompt: string, productName: str
 
   const aiData = await response.json();
   return aiData.choices?.[0]?.message?.content || "";
+}
+
+// ─── Pipeline Steps ─────────────────────────────────────────────────────────
+
+async function runPlannerStep(apiKey: string, params: PromptParams): Promise<Strategy> {
+  try {
+    const prompt = buildPlannerPrompt(params);
+    const raw = await callOpenAI(apiKey, prompt, `Analyze this product and create a strategy: "${params.product.name}"`, 0.6);
+    const parsed = JSON.parse(raw);
+
+    // Validate strategy structure
+    if (
+      typeof parsed.primary_angle === "string" &&
+      typeof parsed.tone === "string" &&
+      Array.isArray(parsed.key_objections)
+    ) {
+      return {
+        primary_angle: parsed.primary_angle,
+        tone: parsed.tone,
+        persuasion_level: parsed.persuasion_level || params.intensity,
+        awareness_level: parsed.awareness_level || "problem-aware",
+        key_objections: parsed.key_objections.slice(0, 6).map(String),
+        section_emphasis: typeof parsed.section_emphasis === "object" ? parsed.section_emphasis : {},
+        category_context: parsed.category_context || "",
+        risky_blocks: Array.isArray(parsed.risky_blocks) ? parsed.risky_blocks.map(String) : ["testimonials", "comparison"],
+      };
+    }
+    console.warn("Planner returned invalid structure, using defaults");
+    return getDefaultStrategy(params);
+  } catch (e) {
+    console.warn("Planner step failed, using default strategy:", e);
+    return getDefaultStrategy(params);
+  }
+}
+
+async function runGeneratorStep(apiKey: string, params: PromptParams, strategy: Strategy): Promise<unknown[]> {
+  try {
+    const prompt = buildGeneratorPrompt(params, strategy);
+    const raw = await callOpenAI(apiKey, prompt, `Generate the landing page blocks for "${params.product.name}".`, 0.8);
+    const blocks = parseBlocks(raw);
+    if (blocks.length > 0) return blocks;
+    console.warn("Generator returned empty blocks, using fallbacks");
+    return getFallbackBlocks(params.plan);
+  } catch (e) {
+    console.warn("Generator step failed, using fallbacks:", e);
+    return getFallbackBlocks(params.plan);
+  }
+}
+
+async function runCriticStep(apiKey: string, blocks: Block[], plan: string): Promise<Block[]> {
+  try {
+    const prompt = buildCriticPrompt(plan);
+    const blocksJson = JSON.stringify({ blocks });
+    const raw = await callOpenAI(apiKey, prompt, `Review and refine these landing blocks:\n${blocksJson}`, 0.3);
+    const refined = parseBlocks(raw);
+    if (refined.length > 0) return refined as Block[];
+    console.warn("Critic returned empty/invalid, using generator output");
+    return blocks;
+  } catch (e) {
+    console.warn("Critic step failed, using generator output:", e);
+    return blocks;
+  }
 }
 
 // ─── Block Parsing & Validation ─────────────────────────────────────────────
@@ -251,6 +433,12 @@ function sanitizeBlock(block: unknown): Block | null {
   return { type, title, content, order };
 }
 
+// ─── Strip Internal Metadata ────────────────────────────────────────────────
+
+function stripMeta(blocks: Block[]): Block[] {
+  return blocks.map(({ type, title, content, order }) => ({ type, title, content, order }));
+}
+
 // ─── Fallback Blocks ────────────────────────────────────────────────────────
 
 function getFallbackBlocks(plan: string): Block[] {
@@ -275,7 +463,6 @@ function getFallbackBlocks(plan: string): Block[] {
 
   if (plan === "starter") return starter;
 
-  // Pro fallback
   const pro: Block[] = [
     ...starter.slice(0, 5),
     { type: "comparison", title: "¿Por qué elegirnos?", content: ["Mayor durabilidad que alternativas genéricas", "Mejor relación calidad-precio en su categoría", "Soporte post-venta dedicado", "Materiales superiores certificados", "Diseño basado en necesidades reales", "Envío más rápido que el promedio del mercado"], order: 6 },
@@ -297,7 +484,6 @@ function validateBlocksForPlan(blocks: unknown[], plan: string): Block[] {
   const config = getPlanConfig(plan);
   const allowedTypes = new Set(config.blockTypes);
 
-  // Sanitize and filter to allowed types
   const sanitized: Block[] = [];
   const seenTypes = new Set<string>();
 
@@ -305,12 +491,11 @@ function validateBlocksForPlan(blocks: unknown[], plan: string): Block[] {
     const block = sanitizeBlock(raw);
     if (!block) continue;
     if (!allowedTypes.has(block.type)) continue;
-    if (seenTypes.has(block.type)) continue; // no duplicates
+    if (seenTypes.has(block.type)) continue;
     seenTypes.add(block.type);
     sanitized.push(block);
   }
 
-  // Fill missing required blocks with fallbacks
   const fallbacks = getFallbackBlocks(plan);
   for (const fb of fallbacks) {
     if (!seenTypes.has(fb.type)) {
@@ -319,11 +504,9 @@ function validateBlocksForPlan(blocks: unknown[], plan: string): Block[] {
     }
   }
 
-  // Sort by the plan's expected order, then re-number
   const typeOrder = new Map(config.blockTypes.map((t, i) => [t, i]));
   sanitized.sort((a, b) => (typeOrder.get(a.type) ?? 99) - (typeOrder.get(b.type) ?? 99));
 
-  // Cap to plan block count and re-number
   const final = sanitized.slice(0, config.blockCount);
   return final.map((block, i) => ({ ...block, order: i + 1 }));
 }
@@ -379,29 +562,34 @@ serve(async (req) => {
       userPlan = "free";
     }
 
-    // ── Build prompt & call AI ──
-    const systemPrompt = buildSystemPrompt({
+    const params: PromptParams = {
       product,
       mode: mode || "standard",
       intensity: intensity || "medium",
       hasOffer: !!hasOffer,
       guarantee,
       plan: userPlan,
-    });
+    };
 
-    const rawContent = await callOpenAI(openaiKey, systemPrompt, product.name);
+    // ── Step 1: Strategy Planner ──
+    console.log("Step 1: Running planner...");
+    const strategy = await runPlannerStep(openaiKey, params);
+    console.log("Planner result:", JSON.stringify(strategy).slice(0, 200));
 
-    // ── Parse, validate, fallback ──
-    let blocks = parseBlocks(rawContent);
+    // ── Step 2: Block Generator ──
+    console.log("Step 2: Running generator...");
+    const rawBlocks = await runGeneratorStep(openaiKey, params, strategy);
+    console.log("Generator produced", rawBlocks.length, "blocks");
 
-    if (blocks.length === 0) {
-      console.warn("AI returned empty/invalid blocks, using fallbacks for plan:", userPlan);
-      blocks = getFallbackBlocks(userPlan);
-    }
+    // ── Step 3: Critic / QA Pass ──
+    const validatedPreCritic = validateBlocksForPlan(rawBlocks, userPlan);
+    console.log("Step 3: Running critic...");
+    const refinedBlocks = await runCriticStep(openaiKey, validatedPreCritic, userPlan);
 
-    const validatedBlocks = validateBlocksForPlan(blocks, userPlan);
+    // ── Final validation & strip metadata ──
+    const finalBlocks = stripMeta(validateBlocksForPlan(refinedBlocks, userPlan));
 
-    return new Response(JSON.stringify({ blocks: validatedBlocks }), {
+    return new Response(JSON.stringify({ blocks: finalBlocks }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
