@@ -152,9 +152,10 @@ const LandingFullPreview = () => {
 
       <LandingRenderer
         blocks={landing.blocks as any[]}
-        product={product ? { name: product.name, price: product.price } : null}
+        product={product ? { name: product.name, price: product.price, category: product.category } : null}
         imagePreview={productImage}
         theme={theme}
+        hasOffer={!!(landing as any).has_offer}
       />
     </div>
   );
