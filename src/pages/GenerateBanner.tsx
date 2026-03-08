@@ -44,12 +44,25 @@ interface GeneratedBanner {
   totalInSequence: number;
 }
 
+type GenerationMode = "auto" | "custom";
+type BannerGoal = "sale" | "offer" | "awareness" | "benefit";
+type Tone = "premium" | "direct" | "minimal" | "bold";
+type VisualStyle = "auto" | "clean" | "premium" | "ecommerce" | "bold";
+
 interface FormState {
   description: string;
   customText: string;
   bannerCount: number;
   outputSize: string;
+  generationMode: GenerationMode;
+  bannerGoal: BannerGoal;
+  tone: Tone;
+  visualStyle: VisualStyle;
 }
+
+const GOAL_LABELS: Record<BannerGoal, string> = { sale: "Venta", offer: "Oferta", awareness: "Awareness", benefit: "Beneficio" };
+const TONE_LABELS: Record<Tone, string> = { premium: "Premium", direct: "Directo", minimal: "Minimalista", bold: "Llamativo" };
+const VISUAL_LABELS: Record<VisualStyle, string> = { auto: "Automático", clean: "Limpio", premium: "Premium", ecommerce: "Ecommerce", bold: "Llamativo" };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
