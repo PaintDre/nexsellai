@@ -16,9 +16,9 @@ import { Progress } from "@/components/ui/progress";
 import { themes, type LandingTheme } from "@/components/landing/themes";
 import LandingTemplatePicker, { landingTemplates } from "@/components/landing/LandingTemplates";
 
-type Product = Tables<"products">;
+import { LANDING_LIMITS } from "@/lib/constants";
 
-const planLimits: Record<string, number> = { free: 1, starter: 10, pro: 100 };
+type Product = Tables<"products">;
 
 const GenerateLanding = () => {
   const { id } = useParams();
@@ -49,7 +49,7 @@ const GenerateLanding = () => {
     });
   }, [id, user]);
 
-  const limit = planLimits[profile?.plan || "free"];
+  const limit = LANDING_LIMITS[profile?.plan || "free"];
   const used = profile?.landings_used || 0;
   const canGenerate = used < limit;
 

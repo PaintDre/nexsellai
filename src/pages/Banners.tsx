@@ -122,14 +122,19 @@ const Banners = () => {
 
   // Actions
   const handleDownload = async (banner: BannerWithProduct) => {
-    const response = await fetch(banner.image_url);
-    const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `banner-${banner.template_id}-${banner.output_size}.png`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const response = await fetch(banner.image_url);
+      if (!response.ok) throw new Error("Fetch failed");
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `banner-${banner.template_id}-${banner.output_size}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      toast.error("Error al descargar", { description: "No se pudo descargar el banner. Intenta de nuevo." });
+    }
   };
 
   const handleDelete = async (id: string) => {

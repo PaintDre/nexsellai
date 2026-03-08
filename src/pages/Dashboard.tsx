@@ -12,12 +12,11 @@ import {
   Package, FileText, Zap, Eye, History, Plus, Image,
   ArrowRight, Sparkles, Download, ImageIcon,
 } from "lucide-react";
+import { LANDING_LIMITS, BANNER_LIMITS } from "@/lib/constants";
+import { computeBannersUsed } from "@/lib/planUsage";
 
 type Product = Tables<"products">;
 type Landing = Tables<"landings">;
-
-const planLimits: Record<string, number> = { free: 1, starter: 10, pro: 100 };
-const bannerLimits: Record<string, number> = { free: 2, starter: 30, pro: 150 };
 
 interface RecentVersion {
   id: string;
@@ -75,14 +74,11 @@ const Dashboard = () => {
     load();
   }, [user]);
 
-  const limit = planLimits[profile?.plan || "free"];
+  const limit = LANDING_LIMITS[profile?.plan || "free"];
   const used = profile?.landings_used || 0;
   const usagePercent = Math.min((used / limit) * 100, 100);
-  const bannerLimit = bannerLimits[profile?.plan || "free"];
-  const bannerResetAt = profile?.banners_reset_at ? new Date(profile.banners_reset_at) : null;
-  const now = new Date();
-  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-  const bannersUsed = (!bannerResetAt || (now.getTime() - bannerResetAt.getTime()) >= thirtyDaysMs) ? 0 : (profile?.banners_used || 0);
+  const bannerLimit = BANNER_LIMITS[profile?.plan || "free"];
+  const bannersUsed = computeBannersUsed(profile);
   const bannerUsagePercent = Math.min((bannersUsed / bannerLimit) * 100, 100);
   const isNewUser = products.length === 0;
   const hasNoLandings = products.length > 0 && landings.length === 0;
@@ -306,7 +302,7 @@ const Dashboard = () => {
 
 /* Quick Action Card */
 const QuickActionCard = ({ to, icon: Icon, title, description, variant }: {
-  to: string; icon: any; title: string; description: string; variant?: "primary";
+  to: string; icon: React.ComponentType<{ className?: string }>; title: string; description: string; variant?: "primary";
 }) => (
   <Card className={`hover:shadow-md transition-all group cursor-pointer ${variant === "primary" ? "border-primary/30 bg-primary/5" : ""}`}>
     <Link to={to}>

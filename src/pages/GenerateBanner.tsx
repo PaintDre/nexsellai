@@ -16,9 +16,8 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, AlertTriangle, Zap, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-const BANNER_LIMITS: Record<string, number> = { free: 2, starter: 30, pro: 150 };
+import { BANNER_LIMITS } from "@/lib/constants";
+import { computeBannersUsed } from "@/lib/planUsage";
 
 const STEPS = [
   { label: "Descripción", icon: "✍️" },
@@ -72,16 +71,6 @@ const getTemplateName = (id: string): string =>
 const getSequence = (count: number): string[] =>
   SEQUENCES[count] || SEQUENCES[3];
 
-const computeBannersUsed = (profile: Tables<"profiles"> | null): number => {
-  if (!profile) return 0;
-  const resetAt = profile.banners_reset_at ? new Date(profile.banners_reset_at) : null;
-  const now = new Date();
-  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-  if (!resetAt || now.getTime() - resetAt.getTime() >= thirtyDaysMs) {
-    return 0;
-  }
-  return profile.banners_used || 0;
-};
 
 const buildBannerPayload = (
   product: Product,

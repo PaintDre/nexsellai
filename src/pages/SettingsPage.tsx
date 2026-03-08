@@ -21,9 +21,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-
-const PLAN_LIMITS: Record<string, number> = { free: 1, starter: 10, pro: 100 };
-const BANNER_LIMITS: Record<string, number> = { free: 2, starter: 30, pro: 150 };
+import { LANDING_LIMITS, BANNER_LIMITS } from "@/lib/constants";
+import { computeBannersUsed } from "@/lib/planUsage";
 
 const SettingsPage = () => {
   const { user, profile, refreshProfile, isAdmin } = useAuth();
@@ -87,13 +86,11 @@ const SettingsPage = () => {
 
   const plan = profile?.plan || "free";
   const landingsUsed = profile?.landings_used || 0;
-  const limit = PLAN_LIMITS[plan] || 1;
+  const limit = LANDING_LIMITS[plan] || 1;
   const usagePercent = Math.min((landingsUsed / limit) * 100, 100);
 
   const bannerLimit = BANNER_LIMITS[plan] || 2;
-  const bannerResetAt = profile?.banners_reset_at ? new Date(profile.banners_reset_at) : null;
-  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-  const bannersUsed = (!bannerResetAt || (Date.now() - bannerResetAt.getTime()) >= thirtyDaysMs) ? 0 : (profile?.banners_used || 0);
+  const bannersUsed = computeBannersUsed(profile);
   const bannerUsagePercent = Math.min((bannersUsed / bannerLimit) * 100, 100);
 
   return (

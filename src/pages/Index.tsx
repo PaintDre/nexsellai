@@ -16,14 +16,7 @@ import {
   CheckCircle2, Upload, Wand2, Download, ChevronDown, ChevronUp,
   ImagePlus, X, XCircle, Image, FileCode, Layers,
 } from "lucide-react";
-
-const categories = [
-  { value: "home", label: "Hogar" },
-  { value: "fitness", label: "Fitness" },
-  { value: "beauty", label: "Belleza" },
-  { value: "gadget", label: "Gadgets" },
-  { value: "pets", label: "Mascotas" },
-];
+import { PRODUCT_CATEGORIES } from "@/lib/constants";
 
 const faqs = [
   { q: "¿Necesito saber programar?", a: "No. Nexsell genera todo el contenido listo para usar. Solo describe tu producto y la IA hace el resto." },
@@ -380,7 +373,7 @@ const Index = () => {
                     <Select value={demoCategory} onValueChange={setDemoCategory}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        {categories.map((cat) => (
+                        {PRODUCT_CATEGORIES.map((cat) => (
                           <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                         ))}
                       </SelectContent>

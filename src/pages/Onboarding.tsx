@@ -11,14 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Upload, X, Loader2, Sparkles, Rocket, ArrowRight } from "lucide-react";
-
-const categories = [
-  { value: "home", label: "Hogar" },
-  { value: "fitness", label: "Fitness" },
-  { value: "beauty", label: "Belleza" },
-  { value: "gadget", label: "Gadgets" },
-  { value: "pets", label: "Mascotas" },
-];
+import { PRODUCT_CATEGORIES } from "@/lib/constants";
 
 const loadingMessages = [
   "Analizando tu producto...",
@@ -276,7 +269,7 @@ const Onboarding = () => {
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {categories.map((cat) => (
+                    {PRODUCT_CATEGORIES.map((cat) => (
                       <SelectItem key={cat.value} value={cat.value}>{cat.label}</SelectItem>
                     ))}
                   </SelectContent>
