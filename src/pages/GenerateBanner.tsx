@@ -571,7 +571,14 @@ const GenerateBanner = () => {
             <div className="space-y-6">
               <Card>
                 <CardContent className="pt-6">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-center">
+                  <div className={cn(
+                    "grid gap-4 text-center",
+                    formState.generationMode === "custom" ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-6" : "grid-cols-2 sm:grid-cols-4"
+                  )}>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Modo</p>
+                      <p className="font-semibold text-sm">{formState.generationMode === "auto" ? "Automático" : "Personalizado"}</p>
+                    </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Secuencia</p>
                       <p className="font-semibold text-sm">{sequence.length} etapas</p>
@@ -584,6 +591,18 @@ const GenerateBanner = () => {
                       <p className="text-xs text-muted-foreground">Total</p>
                       <p className="font-semibold text-sm">{sequence.length} banners</p>
                     </div>
+                    {formState.generationMode === "custom" && (
+                      <>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Objetivo</p>
+                          <p className="font-semibold text-sm">{GOAL_LABELS[formState.bannerGoal]}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Tono / Estilo</p>
+                          <p className="font-semibold text-sm">{TONE_LABELS[formState.tone]} · {VISUAL_LABELS[formState.visualStyle]}</p>
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div className="flex flex-wrap gap-1.5 mt-4 justify-center">
                     {sequence.map((tid, i) => {
