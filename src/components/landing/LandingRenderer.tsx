@@ -200,70 +200,51 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
 
       {/* ═══ HERO ═══ */}
       {hero && (
-        <EditableSection blockType="hero" blockTitle={hero.title} className={`relative overflow-hidden ${hero.image_url ? 'py-0' : `py-20 md:py-28 ${heroStyle.bgClass}`}`}>
-          {hero.image_url ? (
-            <div className="relative min-h-[400px] md:min-h-[600px] flex items-center">
-              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${hero.image_url})` }} />
-              <div className={`absolute inset-0 ${heroStyle.overlayClass}`} />
-              <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-16 md:py-28">
-                <div className="max-w-2xl space-y-6 sm:space-y-8">
-                  <EditableText
-                    value={hero.title || ""}
-                    onChange={(v) => updateBlock("hero", { title: v })}
-                    editable={editable}
-                    tag="h1"
-                    className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-white drop-shadow-lg"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  />
-                  {hero.content && (
-                    <EditableText
-                      value={typeof hero.content === "string" ? hero.content : ""}
-                      onChange={(v) => updateBlock("hero", { content: v })}
-                      editable={editable}
-                      tag="p"
-                      className="text-base sm:text-lg md:text-xl leading-relaxed max-w-xl text-gray-200"
-                    />
-                  )}
-                  <SocialProof theme={theme} />
-                  <CTAWithTrust className="items-start" trustColor="text-gray-400" />
-                </div>
+        <EditableSection blockType="hero" blockTitle={hero.title} className={`relative overflow-hidden py-20 md:py-28 ${heroStyle.bgClass}`}>
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            {/* Banner image shown inline above content if provided */}
+            {hero.image_url && (
+              <div className="mb-8 md:mb-12 -mt-8 md:-mt-12 mx-auto max-w-4xl">
+                <img
+                  src={hero.image_url}
+                  alt={productName}
+                  className="w-full h-auto rounded-2xl shadow-xl object-contain"
+                  loading="eager"
+                />
               </div>
-            </div>
-          ) : (
-            <div className="mx-auto max-w-6xl px-4 sm:px-6">
-              <div className={`grid ${imagePreview ? "lg:grid-cols-2" : ""} gap-8 lg:gap-12 items-center`}>
-                <div className="space-y-6 sm:space-y-8">
+            )}
+            <div className={`grid ${imagePreview && !hero.image_url ? "lg:grid-cols-2" : ""} gap-8 lg:gap-12 items-center`}>
+              <div className="space-y-6 sm:space-y-8">
+                <EditableText
+                  value={hero.title || ""}
+                  onChange={(v) => updateBlock("hero", { title: v })}
+                  editable={editable}
+                  tag="h1"
+                  className={`text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] ${heroStyle.textClass}`}
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                />
+                {hero.content && (
                   <EditableText
-                    value={hero.title || ""}
-                    onChange={(v) => updateBlock("hero", { title: v })}
+                    value={typeof hero.content === "string" ? hero.content : ""}
+                    onChange={(v) => updateBlock("hero", { content: v })}
                     editable={editable}
-                    tag="h1"
-                    className={`text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] ${heroStyle.textClass}`}
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                    tag="p"
+                    className={`text-base sm:text-lg md:text-xl leading-relaxed max-w-xl ${heroStyle.subtextClass}`}
                   />
-                  {hero.content && (
-                    <EditableText
-                      value={typeof hero.content === "string" ? hero.content : ""}
-                      onChange={(v) => updateBlock("hero", { content: v })}
-                      editable={editable}
-                      tag="p"
-                      className={`text-base sm:text-lg md:text-xl leading-relaxed max-w-xl ${heroStyle.subtextClass}`}
-                    />
-                  )}
-                  <SocialProof theme={theme} />
-                  <CTAWithTrust className="items-start" trustColor={isDarkHero ? "text-gray-500" : undefined} />
-                </div>
-                {imagePreview && (
-                  <div className="flex justify-center lg:justify-end">
-                    <div className="relative">
-                      <img src={imagePreview} alt={productName} className={`rounded-2xl shadow-2xl max-h-[480px] object-contain w-full max-w-md ring-1 ${heroStyle.imageRingClass}`} />
-                      <div className={`absolute -inset-1 rounded-2xl bg-gradient-to-tr ${heroStyle.accentClass} pointer-events-none`} />
-                    </div>
-                  </div>
                 )}
+                <SocialProof theme={theme} />
+                <CTAWithTrust className="items-start" trustColor={isDarkHero ? "text-gray-500" : undefined} />
               </div>
+              {imagePreview && !hero.image_url && (
+                <div className="flex justify-center lg:justify-end">
+                  <div className="relative">
+                    <img src={imagePreview} alt={productName} className={`rounded-2xl shadow-2xl max-h-[480px] object-contain w-full max-w-md ring-1 ${heroStyle.imageRingClass}`} />
+                    <div className={`absolute -inset-1 rounded-2xl bg-gradient-to-tr ${heroStyle.accentClass} pointer-events-none`} />
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </EditableSection>
       )}
 
