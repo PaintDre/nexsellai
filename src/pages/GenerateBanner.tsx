@@ -381,9 +381,12 @@ const GenerateBanner = () => {
                     <SlidersHorizontal className="h-4 w-4 text-primary" />
                     <span className="font-semibold text-sm">Personalizado</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Más control — define el enfoque y estilo del banner</p>
+                  <p className="text-xs text-muted-foreground">Más control — define el objetivo, tono y estilo visual del banner.</p>
                 </button>
               </div>
+              <p className="text-xs text-muted-foreground text-center">
+                Incluso en modo automático, la IA analiza tu producto y crea una secuencia de banners optimizada para ventas.
+              </p>
 
               <Card>
                 <CardHeader>
