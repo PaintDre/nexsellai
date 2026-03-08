@@ -6,8 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Sparkles, ImageIcon, FileText, Eye, Package, ChevronRight, Home, ArrowRight } from "lucide-react";
-import { Link as BreadcrumbLink } from "react-router-dom";
+import { Pencil, Sparkles, ImageIcon, FileText, Eye, Package, ChevronRight, ArrowRight } from "lucide-react";
 
 type Product = Tables<"products">;
 type Landing = Tables<"landings">;
