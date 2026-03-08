@@ -35,7 +35,7 @@ interface LandingRendererProps {
   hasOffer?: boolean;
 }
 
-const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", editable = false, onBlocksChange }: LandingRendererProps) => {
+const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", editable = false, onBlocksChange, hasOffer = false }: LandingRendererProps) => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const t = themes[theme];
 
