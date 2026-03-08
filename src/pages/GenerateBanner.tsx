@@ -366,7 +366,7 @@ const GenerateBanner = () => {
                     <Zap className="h-4 w-4 text-primary" />
                     <span className="font-semibold text-sm">Automático</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Rápido y simple — la IA decide la mejor dirección creativa</p>
+                  <p className="text-xs text-muted-foreground">Rápido y simple — la IA decide el mejor enfoque para tu producto.</p>
                 </button>
                 <button
                   onClick={() => updateForm("generationMode", "custom")}
