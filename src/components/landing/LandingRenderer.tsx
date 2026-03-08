@@ -32,9 +32,10 @@ interface LandingRendererProps {
   theme?: LandingTheme;
   editable?: boolean;
   onBlocksChange?: (blocks: Block[]) => void;
+  hasOffer?: boolean;
 }
 
-const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", editable = false, onBlocksChange }: LandingRendererProps) => {
+const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", editable = false, onBlocksChange, hasOffer = false }: LandingRendererProps) => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const t = themes[theme];
 
@@ -199,70 +200,51 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
 
       {/* ═══ HERO ═══ */}
       {hero && (
-        <EditableSection blockType="hero" blockTitle={hero.title} className={`relative overflow-hidden ${hero.image_url ? 'py-0' : `py-20 md:py-28 ${heroStyle.bgClass}`}`}>
-          {hero.image_url ? (
-            <div className="relative min-h-[400px] md:min-h-[600px] flex items-center">
-              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${hero.image_url})` }} />
-              <div className={`absolute inset-0 ${heroStyle.overlayClass}`} />
-              <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 py-16 md:py-28">
-                <div className="max-w-2xl space-y-6 sm:space-y-8">
-                  <EditableText
-                    value={hero.title || ""}
-                    onChange={(v) => updateBlock("hero", { title: v })}
-                    editable={editable}
-                    tag="h1"
-                    className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-white drop-shadow-lg"
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  />
-                  {hero.content && (
-                    <EditableText
-                      value={typeof hero.content === "string" ? hero.content : ""}
-                      onChange={(v) => updateBlock("hero", { content: v })}
-                      editable={editable}
-                      tag="p"
-                      className="text-base sm:text-lg md:text-xl leading-relaxed max-w-xl text-gray-200"
-                    />
-                  )}
-                  <SocialProof theme={theme} />
-                  <CTAWithTrust className="items-start" trustColor="text-gray-400" />
-                </div>
+        <EditableSection blockType="hero" blockTitle={hero.title} className={`relative overflow-hidden py-20 md:py-28 ${heroStyle.bgClass}`}>
+          <div className="mx-auto max-w-6xl px-4 sm:px-6">
+            {/* Banner image shown inline above content if provided */}
+            {hero.image_url && (
+              <div className="mb-8 md:mb-12 -mt-8 md:-mt-12 mx-auto max-w-4xl">
+                <img
+                  src={hero.image_url}
+                  alt={productName}
+                  className="w-full h-auto rounded-2xl shadow-xl object-contain"
+                  loading="eager"
+                />
               </div>
-            </div>
-          ) : (
-            <div className="mx-auto max-w-6xl px-4 sm:px-6">
-              <div className={`grid ${imagePreview ? "lg:grid-cols-2" : ""} gap-8 lg:gap-12 items-center`}>
-                <div className="space-y-6 sm:space-y-8">
+            )}
+            <div className={`grid ${imagePreview && !hero.image_url ? "lg:grid-cols-2" : ""} gap-8 lg:gap-12 items-center`}>
+              <div className="space-y-6 sm:space-y-8">
+                <EditableText
+                  value={hero.title || ""}
+                  onChange={(v) => updateBlock("hero", { title: v })}
+                  editable={editable}
+                  tag="h1"
+                  className={`text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] ${heroStyle.textClass}`}
+                  style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                />
+                {hero.content && (
                   <EditableText
-                    value={hero.title || ""}
-                    onChange={(v) => updateBlock("hero", { title: v })}
+                    value={typeof hero.content === "string" ? hero.content : ""}
+                    onChange={(v) => updateBlock("hero", { content: v })}
                     editable={editable}
-                    tag="h1"
-                    className={`text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] ${heroStyle.textClass}`}
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+                    tag="p"
+                    className={`text-base sm:text-lg md:text-xl leading-relaxed max-w-xl ${heroStyle.subtextClass}`}
                   />
-                  {hero.content && (
-                    <EditableText
-                      value={typeof hero.content === "string" ? hero.content : ""}
-                      onChange={(v) => updateBlock("hero", { content: v })}
-                      editable={editable}
-                      tag="p"
-                      className={`text-base sm:text-lg md:text-xl leading-relaxed max-w-xl ${heroStyle.subtextClass}`}
-                    />
-                  )}
-                  <SocialProof theme={theme} />
-                  <CTAWithTrust className="items-start" trustColor={isDarkHero ? "text-gray-500" : undefined} />
-                </div>
-                {imagePreview && (
-                  <div className="flex justify-center lg:justify-end">
-                    <div className="relative">
-                      <img src={imagePreview} alt={productName} className={`rounded-2xl shadow-2xl max-h-[480px] object-contain w-full max-w-md ring-1 ${heroStyle.imageRingClass}`} />
-                      <div className={`absolute -inset-1 rounded-2xl bg-gradient-to-tr ${heroStyle.accentClass} pointer-events-none`} />
-                    </div>
-                  </div>
                 )}
+                <SocialProof theme={theme} />
+                <CTAWithTrust className="items-start" trustColor={isDarkHero ? "text-gray-500" : undefined} />
               </div>
+              {imagePreview && !hero.image_url && (
+                <div className="flex justify-center lg:justify-end">
+                  <div className="relative">
+                    <img src={imagePreview} alt={productName} className={`rounded-2xl shadow-2xl max-h-[480px] object-contain w-full max-w-md ring-1 ${heroStyle.imageRingClass}`} />
+                    <div className={`absolute -inset-1 rounded-2xl bg-gradient-to-tr ${heroStyle.accentClass} pointer-events-none`} />
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </EditableSection>
       )}
 
@@ -522,84 +504,37 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
 
       {/* ═══ OFFER / URGENCY ═══ */}
       {(offer || urgency) && (
-        <EditableSection blockType="offer" blockTitle={offer?.title || "Oferta"} className={`relative overflow-hidden ${offer?.image_url ? 'py-0' : `py-16 md:py-24 ${t.accentBg}`}`}>
-          {offer?.image_url ? (
-            <div className="relative min-h-[400px] flex items-center">
-              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${offer.image_url})` }} />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/60 to-black/40" />
-              <div className="relative z-10 mx-auto max-w-3xl px-6 py-16 md:py-24 text-center space-y-6">
-                {urgency && (
-                  <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-red-500/90 text-white">
-                    <Clock className="h-4 w-4" />
-                    {typeof urgency.content === "string" ? urgency.content : urgency.title}
-                  </span>
-                )}
+        <EditableSection blockType="offer" blockTitle={offer?.title || "Oferta"} className={`relative overflow-hidden ${`py-16 md:py-24 ${t.accentBg}`}`}>
+          <div className="mx-auto max-w-3xl px-6 text-center space-y-6">
+            {urgency && (
+              <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${t.urgencyBg} ${t.urgencyText}`}>
+                <Clock className="h-4 w-4" />
+                {typeof urgency.content === "string" ? urgency.content : urgency.title}
+              </span>
+            )}
+            {offer && (
+              <>
                 <EditableText
-                  value={offer?.title || ""}
+                  value={offer.title || ""}
                   onChange={(v) => updateBlock("offer", { title: v })}
                   editable={editable}
                   tag="h2"
-                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white"
+                  className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight ${t.headingColor}`}
                   style={{ fontFamily: "'Space Grotesk', sans-serif" }}
                 />
-                {offer?.content && (
+                {offer.content && (
                   <EditableText
                     value={typeof offer.content === "string" ? offer.content : ""}
                     onChange={(v) => updateBlock("offer", { content: v })}
                     editable={editable}
                     tag="p"
-                    className="text-base sm:text-lg text-gray-200"
+                    className={`text-lg ${t.bodyColor}`}
                   />
                 )}
-                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
-                  <span className="text-lg sm:text-2xl line-through text-gray-400">{formattedPrice}</span>
-                  <span className="text-2xl sm:text-4xl font-extrabold text-emerald-400" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                    {`$${Math.round(price * 0.7).toLocaleString("es-CL")}`}
-                  </span>
-                  <span className="inline-block bg-red-500 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-1 rounded-full">-30%</span>
-                </div>
-                <CTAWithTrust trustColor="text-gray-400" />
-              </div>
-            </div>
-          ) : (
-            <div className="mx-auto max-w-3xl px-6 text-center space-y-6">
-              {urgency && (
-                <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${t.urgencyBg} ${t.urgencyText}`}>
-                  <Clock className="h-4 w-4" />
-                  {typeof urgency.content === "string" ? urgency.content : urgency.title}
-                </span>
-              )}
-              {offer && (
-                <>
-                  <EditableText
-                    value={offer.title || ""}
-                    onChange={(v) => updateBlock("offer", { title: v })}
-                    editable={editable}
-                    tag="h2"
-                    className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight ${t.headingColor}`}
-                    style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-                  />
-                  {offer.content && (
-                    <EditableText
-                      value={typeof offer.content === "string" ? offer.content : ""}
-                      onChange={(v) => updateBlock("offer", { content: v })}
-                      editable={editable}
-                      tag="p"
-                      className={`text-lg ${t.bodyColor}`}
-                    />
-                  )}
-                  <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
-                    <span className={`text-lg sm:text-2xl line-through ${t.mutedColor}`}>{formattedPrice}</span>
-                    <span className="text-2xl sm:text-4xl font-extrabold text-emerald-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                      {`$${Math.round(price * 0.7).toLocaleString("es-CL")}`}
-                    </span>
-                    <span className="inline-block bg-red-500 text-white text-xs sm:text-sm font-bold px-2 sm:px-3 py-1 rounded-full">-30%</span>
-                  </div>
-                </>
-              )}
-              <CTAWithTrust />
-            </div>
-          )}
+              </>
+            )}
+            <CTAWithTrust />
+          </div>
         </EditableSection>
       )}
 
@@ -634,54 +569,32 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
       <SectionDivider theme={theme} from="alt" to="cta" />
 
       {/* ═══ FINAL CTA ═══ */}
-      <EditableSection blockType="cta" blockTitle="CTA Final" className={`relative overflow-hidden ${cta?.image_url ? 'py-0' : `py-20 md:py-28 ${t.sectionAltBg}`}`}>
-        {cta?.image_url ? (
-          <div className="relative min-h-[350px] flex items-center">
-            <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${cta.image_url})` }} />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-black/30" />
-            <div className="relative z-10 mx-auto max-w-2xl px-6 py-20 md:py-28 text-center space-y-8">
-              <EditableText
-                value={cta?.title || "¿Listo para probarlo?"}
-                onChange={(v) => updateBlock("cta", { title: v })}
-                editable={editable}
-                tag="h2"
-                className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-white"
-                style={{ fontFamily: "'Space Grotesk', sans-serif" }}
-              />
-              {cta?.content && (
-                <EditableText
-                  value={typeof cta.content === "string" ? cta.content : ""}
-                  onChange={(v) => updateBlock("cta", { content: v })}
-                  editable={editable}
-                  tag="p"
-                  className="text-base sm:text-lg text-gray-200"
-                />
-              )}
-              <CTAWithTrust trustColor="text-gray-400" />
-            </div>
-          </div>
-        ) : (
-          <div className="mx-auto max-w-2xl px-6 text-center space-y-8">
+      <EditableSection blockType="cta" blockTitle="CTA Final" className={`relative overflow-hidden py-20 md:py-28 ${t.sectionAltBg}`}>
+        <div className="mx-auto max-w-2xl px-6 text-center space-y-8">
+          <EditableText
+            value={cta?.title || "¿Listo para probarlo?"}
+            onChange={(v) => updateBlock("cta", { title: v })}
+            editable={editable}
+            tag="h2"
+            className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight ${getHeading(true)}`}
+            style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+          />
+          {cta?.content && (
             <EditableText
-              value={cta?.title || "¿Listo para probarlo?"}
-              onChange={(v) => updateBlock("cta", { title: v })}
+              value={typeof cta.content === "string" ? cta.content : ""}
+              onChange={(v) => updateBlock("cta", { content: v })}
               editable={editable}
-              tag="h2"
-              className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight ${getHeading(true)}`}
-              style={{ fontFamily: "'Space Grotesk', sans-serif" }}
+              tag="p"
+              className={`text-lg ${getBody(true)}`}
             />
-            {cta?.content && (
-              <EditableText
-                value={typeof cta.content === "string" ? cta.content : ""}
-                onChange={(v) => updateBlock("cta", { content: v })}
-                editable={editable}
-                tag="p"
-                className={`text-lg ${getBody(true)}`}
-              />
-            )}
-            <CTAWithTrust trustColor={theme === "bold" ? "text-gray-500" : undefined} />
-          </div>
-        )}
+          )}
+          {cta?.image_url && (
+            <div className="mx-auto max-w-sm">
+              <img src={cta.image_url} alt="Producto" className="rounded-2xl shadow-xl w-full h-auto object-contain" loading="lazy" />
+            </div>
+          )}
+          <CTAWithTrust trustColor={theme === "bold" ? "text-gray-500" : undefined} />
+        </div>
       </EditableSection>
 
       {/* ═══ STICKY MOBILE CTA ═══ */}
