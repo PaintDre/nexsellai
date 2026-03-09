@@ -1,73 +1,78 @@
 
 
-## Plan: Actualizar Prompt del Banner "Hook"
+# Plan: Actualizar Prompt del Banner "Solución"
 
-### Contexto
-El usuario está proporcionando el primer prompt específico de los 7 tipos de banners. Este es para el tipo **"hook-visual"** (Etapa 1: captar atención).
-
-### Cambio a realizar
+## Cambio a realizar
 
 **Archivo**: `supabase/functions/generate-banner/index.ts`  
-**Líneas**: 58-68 (dentro del objeto `templatePrompts`)
+**Líneas**: 82-92 (clave `"solucion"` dentro de `templatePrompts`)
 
-**Estado actual**: Prompt en inglés genérico enfocado en "stop the scroll"
+**Estado actual**: Prompt en inglés genérico enfocado en "transition from problem to hope"
 
-**Nuevo prompt**: Prompt en español mucho más específico con:
-- Instrucciones detalladas de composición hiperrealista
-- Jerarquía tipográfica clara (título de problema + subtítulo de beneficio + precio)
-- Estructura visual definida (superior = problema, centro = producto, abajo = beneficio)
-- Ejemplo concreto para referencia (linterna táctica)
-- Énfasis en formato 1080x1920 para stories/ads
+**Nuevo prompt**: Prompt en español mucho más detallado con:
+- Producto mostrado en uso por una persona real
+- Expresión de alivio/comodidad del usuario
+- Iluminación cinematográfica y elementos modernos
+- Jerarquía específica: título de solución + 2-3 bullets explicativos
+- Estructura visual clara (superior = título, centro = producto en uso, lateral/inferior = bullets)
+- Ejemplo concreto (afeitadora eléctrica)
+- Clave psicológica: "Ah... así funciona" en 1 segundo visual
 
-### Código exacto
+## Código a implementar
+
+Reemplazar las líneas 82-92 con:
 
 ```typescript
-"hook-visual": `Diseño de landing para e-commerce en formato historia 1080x1920.
+"solucion": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
 
-Escena hiperrealista de fotografía publicitaria con iluminación de estudio y estilo premium.
+Estilo hiperrealista de fotografía publicitaria premium.
 
-Fondo negro elegante con degradados de luz y partículas brillantes que generen profundidad.
+Fondo negro elegante con degradados de luz y efectos luminosos modernos para transmitir innovación y tecnología.
 
-El producto aparece en primer plano, muy grande, extremadamente nítido, con reflejos suaves y sombras naturales, como en una fotografía comercial de alta gama.
+La escena debe mostrar claramente el producto como la SOLUCIÓN al problema presentado anteriormente.
 
-El producto debe verse impactante y protagonista absoluto de la escena.
+El producto aparece en primer plano o siendo utilizado por una persona de manera natural (en la mano, aplicado, instalado o en uso dependiendo del producto).
 
-Agregar elementos visuales modernos alrededor del producto: destellos de luz, líneas luminosas, figuras geométricas sutiles y efectos de energía para transmitir innovación.
+La expresión de la persona debe transmitir alivio, comodidad o facilidad al usar el producto.
 
-Composición dinámica y moderna, no plana.
+Iluminación cinematográfica con reflejos suaves sobre el producto para resaltarlo como protagonista.
 
-Jerarquía tipográfica clara y muy visible:
-- TÍTULO GRANDE en la parte superior que exprese el dolor principal del cliente
-- Subtítulo corto con el beneficio principal del producto
-- Precio visible en la moneda establecida dentro de un elemento destacado como etiqueta o badge luminoso
+Agregar elementos visuales modernos alrededor del producto como líneas luminosas, partículas brillantes, destellos o pequeños iconos señalando características clave.
 
-El producto debe ocupar el centro o ligeramente hacia abajo para dejar espacio al texto superior.
+Composición dinámica y visualmente rica, con profundidad de campo y enfoque claro en el producto.
 
-Diseño limpio pero visualmente rico, estilo publicidad premium de e-commerce.
+Jerarquía tipográfica clara:
+- Título grande en la parte superior que comunique que el producto es la solución
+- Debajo del producto incluir 2–3 bullets cortos explicando: cómo funciona, por qué es práctico, qué lo hace diferente
 
-Respetar margen interno de 20 px en todos los bordes.
+Mantener márgenes internos de 20 px en todos los bordes para evitar cortes.
 
-Estilo completamente fotográfico e hiperrealista, no caricatura, no ilustración.
+Estilo completamente fotográfico e hiperrealista, no ilustración ni caricatura.
 
 Pensado para anuncios de Meta Ads y TikTok Ads.
 
 ESTRUCTURA VISUAL:
-- Parte superior: Título que toque el problema
-- Centro: Producto grande y llamativo
-- Debajo o lateral: Beneficio principal
-- Elemento destacado: Precio según coloca el usuario
+- Parte superior: Título que presenta la solución
+- Centro: Producto en uso o claramente visible
+- Lateral o parte inferior: 2–3 bullets explicativos
 
 EJEMPLO DE REFERENCIA:
-Si el producto fuera una linterna táctica, el texto podría ser:
-Título: "No vuelvas a quedarte a oscuras"
-Subtítulo: Linterna táctica ultra potente
-Precio: $89.900`,
+Si el producto fuera una afeitadora eléctrica portátil:
+Título: "La forma fácil de afeitarte en segundos"
+Bullets:
+✔ Diseño compacto y portátil
+✔ Corte preciso y rápido
+✔ Ideal para usar en cualquier lugar
+
+CLAVE PSICOLÓGICA:
+El cliente debe pensar inmediatamente: "Ah… así funciona."
+No debe haber confusión. La escena debe explicar el producto en 1 segundo visual.`,
 ```
 
-### Próximos pasos
-Una vez implementado, estaré listo para recibir los otros 6 prompts:
+## Próximos pasos
+
+Una vez implementado, quedarán 5 prompts por actualizar:
 - Problema
-- Solución
 - Beneficio
 - Prueba Social
 - Oferta
