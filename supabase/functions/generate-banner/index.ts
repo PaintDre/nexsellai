@@ -67,17 +67,47 @@ COMPOSITION:
 
 MOOD: High energy, bold, attention-grabbing. The product should feel like it's jumping off the screen.`,
 
-  "problema": `BANNER TYPE: PROBLEM — Create emotional connection.
+  "problema": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
 
-GOAL: Make the viewer feel understood. Show the frustration they experience without this product.
+Estilo hiperrealista de fotografía publicitaria profesional.
 
-COMPOSITION:
-- Product: 30-40% of canvas, positioned to one side as a "distant solution"
-- Empathetic headline addressing the customer's specific pain point (max 8 words)
-- Visual split: muted/desaturated tones on the problem side, hint of brightness near the product
-- Background: subdued, serious tones that complement the product but convey frustration
+Fondo negro elegante con degradados suaves y ligeros destellos de luz para mantener un estilo premium.
 
-MOOD: Empathetic, relatable. The text should feel like it's reading the customer's mind.`,
+La escena debe mostrar claramente el PROBLEMA que experimenta el cliente al no tener el producto.
+
+Una persona aparece enfrentando la dificultad o frustración relacionada con el problema principal del producto. La expresión debe transmitir incomodidad, dificultad o frustración de manera natural y realista.
+
+El producto puede aparecer de forma secundaria o insinuada, pero el foco visual principal es el problema.
+
+Iluminación cinematográfica con sombras suaves y profundidad de campo para generar dramatismo.
+
+Agregar elementos visuales sutiles como líneas de energía, partículas de luz o iconos pequeños que refuercen visualmente el problema.
+
+Composición dinámica y visualmente rica, no plana.
+
+Jerarquía tipográfica clara:
+- Título grande en la parte superior que describa el problema del cliente
+- Subtítulo corto que refuerce la frustración o dificultad que genera ese problema
+
+Mantener márgenes internos de 20 px en todos los bordes para evitar cortes.
+
+Estilo completamente fotográfico e hiperrealista, no ilustración ni caricatura.
+
+Pensado para anuncios de Meta Ads y TikTok Ads.
+
+ESTRUCTURA VISUAL:
+- Parte superior: Título del problema
+- Centro: Persona enfrentando el problema
+- Parte inferior: Subtítulo corto que intensifique el dolor
+
+EJEMPLO DE REFERENCIA:
+Si el producto fuera un corrector de postura:
+Título: "¿Pasas horas con dolor de espalda?"
+Subtítulo: "La mala postura puede afectar tu día a día."
+
+CLAVE PSICOLÓGICA:
+La escena debe mostrar una situación con la que el cliente se identifique inmediatamente: frustración, incomodidad, pérdida de tiempo, dificultad, desorden, cansancio.
+El usuario debe pensar: "Ese soy yo."`,
 
   "solucion": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
 
