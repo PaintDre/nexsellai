@@ -24,7 +24,7 @@ function formatPrice(price: number, currencyCode: string): string {
 
 // --- Professional agency-level prompt system ---
 
-const SYSTEM_PROMPT = `Diseño de landing para e-commerce en formato historia 1080x1920.
+const SYSTEM_PROMPT = `Diseño de banner para e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista, fotografía publicitaria profesional, composición rica en elementos visuales, profundidad de campo, iluminación cinematográfica.
 
@@ -67,7 +67,7 @@ COMPOSITION:
 
 MOOD: High energy, bold, attention-grabbing. The product should feel like it's jumping off the screen.`,
 
-  "problema": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
+  "problema": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista de fotografía publicitaria profesional.
 
@@ -109,7 +109,7 @@ CLAVE PSICOLÓGICA:
 La escena debe mostrar una situación con la que el cliente se identifique inmediatamente: frustración, incomodidad, pérdida de tiempo, dificultad, desorden, cansancio.
 El usuario debe pensar: "Ese soy yo."`,
 
-  "solucion": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
+  "solucion": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista de fotografía publicitaria premium.
 
@@ -154,7 +154,7 @@ CLAVE PSICOLÓGICA:
 El cliente debe pensar inmediatamente: "Ah… así funciona."
 No debe haber confusión. La escena debe explicar el producto en 1 segundo visual.`,
 
-  "beneficio": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
+  "beneficio": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista de fotografía publicitaria premium.
 
@@ -200,7 +200,7 @@ CLAVE PSICOLÓGICA:
 El usuario debe imaginar: "Así se vería mi vida si tuviera esto."
 Las escenas funcionan mejor mostrando: tranquilidad, orden, comodidad, eficiencia, satisfacción.`,
 
-  "prueba-social": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
+  "prueba-social": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista de fotografía publicitaria premium.
 
@@ -242,7 +242,7 @@ CLAVE PSICOLÓGICA:
 Las personas compran cuando sienten que no están tomando el riesgo solos.
 Funcionan muy bien: ⭐ estrellas, 🧾 mini reseñas, 👥 número de clientes, 📦 pedidos entregados.`,
 
-  "oferta": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
+  "oferta": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista de fotografía publicitaria premium para e-commerce.
 
@@ -288,7 +288,7 @@ Aquí activas dos gatillos mentales fuertes:
 
 Esto hace que el cliente piense: "Si lo voy a comprar, mejor ahora."`,
 
-  "cta": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
+  "cta": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista de fotografía publicitaria premium.
 
@@ -396,8 +396,11 @@ serve(async (req) => {
 
     // --- Build prompt ---
     const actualTemplateId = templateId || "hook-visual";
-    const templateStyle = templatePrompts[actualTemplateId] || templatePrompts["hook-visual"];
+    const templateStyleRaw = templatePrompts[actualTemplateId] || templatePrompts["hook-visual"];
     const [width, height] = (outputSize || "1080x1080").split("x").map(Number);
+    const formatDesc = height > width ? "formato vertical" : width > height ? "formato horizontal" : "formato cuadrado";
+    const templateStyle = templateStyleRaw.replaceAll("{{DIMENSIONS}}", `${width}x${height}`).replaceAll("{{FORMAT_DESC}}", formatDesc);
+    const resolvedSystemPrompt = SYSTEM_PROMPT.replaceAll("{{DIMENSIONS}}", `${width}x${height}`).replaceAll("{{FORMAT_DESC}}", formatDesc);
 
     const currencyCode = "CLP"; // Default currency
     const priceFormatted = formatPrice(product.price, currencyCode);
@@ -515,7 +518,7 @@ ${customText ? `\nCUSTOM SLOGAN (include prominently): "${customText}"` : ""}`;
       body: JSON.stringify({
         model: "google/gemini-3-pro-image-preview",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: resolvedSystemPrompt },
           { role: "user", content: userContent },
         ],
         modalities: ["image", "text"],
