@@ -7,8 +7,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 
 const planColors: Record<string, string> = {
   free: "bg-muted text-muted-foreground",
-  starter: "bg-warning/20 text-warning",
-  pro: "bg-primary/20 text-primary",
+  starter: "bg-warning/15 text-warning",
+  pro: "bg-primary/15 text-primary",
 };
 
 interface SidebarContentProps {
@@ -38,16 +38,18 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
 
   return (
     <div className="flex h-full flex-col">
-      <div className={cn("flex items-center gap-2 py-5", collapsed ? "justify-center px-2" : "px-6")}>
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg shrink-0 overflow-hidden">
-          <img src="/logo-ns.png" alt="Nexsell" className="h-9 w-9 object-contain" />
+      {/* Logo */}
+      <div className={cn("flex items-center gap-2.5 py-6", collapsed ? "justify-center px-2" : "px-6")}>
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0 overflow-hidden">
+          <img src="/logo-ns.png" alt="Nexsell" className="h-8 w-8 object-contain" />
         </div>
         {!collapsed && (
-          <span className="text-xl font-bold font-display tracking-tight text-sidebar-primary-foreground">Nexsell</span>
+          <span className="text-lg font-bold font-display tracking-tight text-sidebar-primary-foreground">Nexsell</span>
         )}
       </div>
 
-      <nav className={cn("flex-1 space-y-1 py-4", collapsed ? "px-2" : "px-3")}>
+      {/* Navigation */}
+      <nav className={cn("flex-1 space-y-0.5 py-2", collapsed ? "px-2" : "px-3")}>
         {navItems.map((item) => {
           const active = pathname.startsWith(item.href);
           return (
@@ -56,15 +58,15 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
               to={item.href}
               onClick={onNavigate}
               className={cn(
-                "flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg py-2 text-[13px] font-medium transition-all duration-200",
                 collapsed ? "justify-center px-2" : "px-3",
                 active
                   ? "bg-sidebar-accent text-sidebar-primary"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
               )}
               title={collapsed ? item.label : undefined}
             >
-              <item.icon className="h-4 w-4 shrink-0" />
+              <item.icon className={cn("h-[18px] w-[18px] shrink-0 transition-colors", active && "text-sidebar-primary")} />
               {!collapsed && item.label}
             </Link>
           );
@@ -72,8 +74,8 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
 
         {adminItems.length > 0 && (
           <>
-            <div className={cn("my-3 border-t border-sidebar-border", collapsed ? "mx-1" : "mx-2")} />
-            {!collapsed && <p className="px-3 text-[10px] uppercase tracking-wider text-sidebar-foreground/50 mb-1">Admin</p>}
+            <div className={cn("my-3 border-t border-sidebar-border/50", collapsed ? "mx-1" : "mx-2")} />
+            {!collapsed && <p className="px-3 text-[10px] uppercase tracking-widest text-sidebar-foreground/40 mb-1 font-medium">Admin</p>}
             {adminItems.map((item) => {
               const active = pathname.startsWith(item.href);
               return (
@@ -82,15 +84,15 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
                   to={item.href}
                   onClick={onNavigate}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg py-2.5 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-lg py-2 text-[13px] font-medium transition-all duration-200",
                     collapsed ? "justify-center px-2" : "px-3",
                     active
                       ? "bg-sidebar-accent text-sidebar-primary"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
                   )}
                   title={collapsed ? item.label : undefined}
                 >
-                  <item.icon className="h-4 w-4 shrink-0" />
+                  <item.icon className={cn("h-[18px] w-[18px] shrink-0", active && "text-sidebar-primary")} />
                   {!collapsed && item.label}
                 </Link>
               );
@@ -99,28 +101,29 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
         )}
       </nav>
 
-      <div className={cn("border-t border-sidebar-border p-4 space-y-3", collapsed && "px-2")}>
+      {/* Footer */}
+      <div className={cn("border-t border-sidebar-border/40 p-4 space-y-3", collapsed && "px-2")}>
         {profile && !collapsed && (
           <div className="flex items-center gap-2">
-            <div className={cn("rounded-md px-2 py-0.5 text-xs font-semibold uppercase", planColors[profile.plan] || planColors.free)}>
+            <div className={cn("rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide", planColors[profile.plan] || planColors.free)}>
               {profile.plan}
             </div>
-            <span className="text-xs text-sidebar-foreground truncate">{profile.full_name || "Usuario"}</span>
+            <span className="text-xs text-sidebar-foreground/70 truncate">{profile.full_name || "Usuario"}</span>
           </div>
         )}
-        <div className={cn("flex", collapsed ? "flex-col items-center gap-2" : "gap-2")}>
+        <div className={cn("flex", collapsed ? "flex-col items-center gap-1.5" : "gap-1.5")}>
           <ThemeToggle collapsed={collapsed} />
           {!collapsed ? (
-            <Button variant="ghost" size="sm" className="flex-1 justify-start gap-2 text-sidebar-foreground" asChild onClick={onNavigate}>
-              <Link to="/settings"><Settings className="h-4 w-4" /> Ajustes</Link>
+            <Button variant="ghost" size="sm" className="flex-1 justify-start gap-2 text-sidebar-foreground text-xs h-8" asChild onClick={onNavigate}>
+              <Link to="/settings"><Settings className="h-3.5 w-3.5" /> Ajustes</Link>
             </Button>
           ) : (
-            <Button variant="ghost" size="icon" className="text-sidebar-foreground" asChild onClick={onNavigate}>
-              <Link to="/settings" title="Ajustes"><Settings className="h-4 w-4" /></Link>
+            <Button variant="ghost" size="icon" className="text-sidebar-foreground h-8 w-8" asChild onClick={onNavigate}>
+              <Link to="/settings" title="Ajustes"><Settings className="h-3.5 w-3.5" /></Link>
             </Button>
           )}
-          <Button variant="ghost" size="icon" className="text-sidebar-foreground hover:text-destructive shrink-0" onClick={signOut}>
-            <LogOut className="h-4 w-4" />
+          <Button variant="ghost" size="icon" className="text-sidebar-foreground hover:text-destructive shrink-0 h-8 w-8" onClick={signOut}>
+            <LogOut className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
@@ -131,8 +134,8 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
 export const AppSidebar = ({ collapsed = false }: { collapsed?: boolean }) => {
   return (
     <aside className={cn(
-      "hidden md:flex h-screen flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-all duration-200",
-      collapsed ? "w-16" : "w-64"
+      "hidden md:flex h-screen flex-col border-r border-sidebar-border/50 bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out",
+      collapsed ? "w-[60px]" : "w-60"
     )}>
       <SidebarContent collapsed={collapsed} />
     </aside>
