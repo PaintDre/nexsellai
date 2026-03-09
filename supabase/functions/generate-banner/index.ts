@@ -67,7 +67,7 @@ COMPOSITION:
 
 MOOD: High energy, bold, attention-grabbing. The product should feel like it's jumping off the screen.`,
 
-  "problema": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
+  "problema": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista de fotografía publicitaria profesional.
 
