@@ -3,6 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { LayoutDashboard, Package, FileText, CreditCard, Settings, LogOut, Shield, ShieldCheck, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const planColors: Record<string, string> = {
   free: "bg-muted text-muted-foreground",
