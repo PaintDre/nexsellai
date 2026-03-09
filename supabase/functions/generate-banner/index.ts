@@ -109,7 +109,7 @@ CLAVE PSICOLÓGICA:
 La escena debe mostrar una situación con la que el cliente se identifique inmediatamente: frustración, incomodidad, pérdida de tiempo, dificultad, desorden, cansancio.
 El usuario debe pensar: "Ese soy yo."`,
 
-  "solucion": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
+  "solucion": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista de fotografía publicitaria premium.
 
