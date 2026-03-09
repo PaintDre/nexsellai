@@ -24,11 +24,27 @@ function formatPrice(price: number, currencyCode: string): string {
 
 // --- Professional agency-level prompt system ---
 
-const SYSTEM_PROMPT = `Diseño de banner para e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
+const SYSTEM_PROMPT = `CRITICAL IMAGE INSTRUCTION:
+Una imagen del producto REAL está incluida en este prompt.
+DEBES usar esa imagen exacta del producto como referencia visual principal.
+
+Analiza la imagen del producto para:
+- Extraer la paleta de colores dominante (colores principales, secundarios y de acento)
+- Identificar el estilo visual (moderno, clásico, tecnológico, natural, minimalista, premium)
+- Mantener proporciones y características reales del producto
+- Integrar el producto de forma natural en la composición
+- Usar los colores dominantes del producto para elementos del fondo, tipografía y acentos
+
+NO RECREAR el producto desde cero. NO INVENTAR una versión diferente del producto.
+USA la imagen proporcionada como el elemento visual EXACTO.
+
+---
+
+Diseño de banner para e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista, fotografía publicitaria profesional, composición rica en elementos visuales, profundidad de campo, iluminación cinematográfica.
 
-Fondo negro elegante en toda la composición.
+El fondo debe complementar los colores del producto: usa degradados, tonos sólidos o efectos que armonicen con la paleta extraída del producto real.
 
 El producto debe verse extremadamente nítido y realista, con iluminación de estudio, reflejos suaves y sombras naturales.
 
@@ -44,7 +60,7 @@ Jerarquía tipográfica clara con:
 - precio en COP si aplica
 - llamado a la acción si corresponde a la etapa AIDA
 
-El producto debe ser el protagonista visual de la escena.
+El producto (DE LA IMAGEN PROPORCIONADA) debe ser el protagonista visual de la escena.
 
 Respetar margen interno de 20 px en todos los bordes para evitar recortes.
 
@@ -59,25 +75,34 @@ const templatePrompts: Record<string, string> = {
 
 GOAL: Create instant curiosity. The viewer sees this and MUST stop scrolling.
 
-COMPOSITION:
-- Product: 55-65% of canvas, centered hero shot, larger than life
-- One bold provocative question OR shocking statement (max 6 words) in ultra-bold typography
-- Background: derived from product colors, gradient or solid — whatever creates maximum contrast
-- Optional: subtle motion lines or glow effect around product to draw the eye
+PRODUCT IMAGE COMPOSITION (CRITICAL):
+- The REAL product image provided MUST be the main visual element (55-65% of canvas)
+- Extract the dominant colors from the product and use them for gradients, glows, and accents
+- Center the product as a hero shot, larger than life
+- Add subtle motion lines or glow effects around the ACTUAL product to draw the eye
 
-MOOD: High energy, bold, attention-grabbing. The product should feel like it's jumping off the screen.`,
+COMPOSITION:
+- One bold provocative question OR shocking statement (max 6 words) in ultra-bold typography
+- Background: Use gradients derived from the product's color palette for maximum harmony
+- Maintain the product's exact appearance - do not recreate it
+
+MOOD: High energy, bold, attention-grabbing. The REAL product should feel like it's jumping off the screen.`,
 
   "problema": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
+PRODUCT IMAGE COMPOSITION (CRITICAL):
+- El producto REAL de la imagen proporcionada debe aparecer de forma secundaria (30-40% del espacio)
+- Colocar el producto en una esquina o lateral, visible pero no dominante
+- Extraer la paleta de colores del producto para los elementos del fondo y acentos
+- NO recrear el producto - usar la imagen exacta proporcionada
+
 Estilo hiperrealista de fotografía publicitaria profesional.
 
-Fondo negro elegante con degradados suaves y ligeros destellos de luz para mantener un estilo premium.
+Fondo con degradados suaves que complementen los colores del producto, con ligeros destellos de luz para mantener un estilo premium.
 
 La escena debe mostrar claramente el PROBLEMA que experimenta el cliente al no tener el producto.
 
 Una persona aparece enfrentando la dificultad o frustración relacionada con el problema principal del producto. La expresión debe transmitir incomodidad, dificultad o frustración de manera natural y realista.
-
-El producto puede aparecer de forma secundaria o insinuada, pero el foco visual principal es el problema.
 
 Iluminación cinematográfica con sombras suaves y profundidad de campo para generar dramatismo.
 
@@ -93,37 +118,38 @@ Mantener márgenes internos de 20 px en todos los bordes para evitar cortes.
 
 Estilo completamente fotográfico e hiperrealista, no ilustración ni caricatura.
 
-Pensado para anuncios de Meta Ads y TikTok Ads.
-
 ESTRUCTURA VISUAL:
 - Parte superior: Título del problema
 - Centro: Persona enfrentando el problema
+- Esquina/lateral: Producto REAL visible pero secundario
 - Parte inferior: Subtítulo corto que intensifique el dolor
 
-EJEMPLO DE REFERENCIA:
-Si el producto fuera un corrector de postura:
-Título: "¿Pasas horas con dolor de espalda?"
-Subtítulo: "La mala postura puede afectar tu día a día."
-
 CLAVE PSICOLÓGICA:
-La escena debe mostrar una situación con la que el cliente se identifique inmediatamente: frustración, incomodidad, pérdida de tiempo, dificultad, desorden, cansancio.
+La escena debe mostrar una situación con la que el cliente se identifique inmediatamente.
 El usuario debe pensar: "Ese soy yo."`,
 
   "solucion": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
+PRODUCT IMAGE COMPOSITION (CRITICAL):
+- El producto REAL de la imagen proporcionada DEBE ser el elemento central (50-60% del espacio)
+- Colocar la imagen exacta del producto en primer plano o siendo utilizada por una persona
+- Extraer los colores DOMINANTES del producto y usarlos para el fondo, degradados y acentos
+- Agregar destellos o brillos que complementen los colores del producto
+- NO RECREAR el producto desde cero - usar la imagen EXACTA proporcionada
+
 Estilo hiperrealista de fotografía publicitaria premium.
 
-Fondo negro elegante con degradados de luz y efectos luminosos modernos para transmitir innovación y tecnología.
+Fondo con degradados de luz y efectos luminosos que armonicen con la paleta de colores del producto.
 
 La escena debe mostrar claramente el producto como la SOLUCIÓN al problema presentado anteriormente.
 
-El producto aparece en primer plano o siendo utilizado por una persona de manera natural (en la mano, aplicado, instalado o en uso dependiendo del producto).
+El producto aparece en primer plano o siendo utilizado por una persona de manera natural.
 
 La expresión de la persona debe transmitir alivio, comodidad o facilidad al usar el producto.
 
 Iluminación cinematográfica con reflejos suaves sobre el producto para resaltarlo como protagonista.
 
-Agregar elementos visuales modernos alrededor del producto como líneas luminosas, partículas brillantes, destellos o pequeños iconos señalando características clave.
+Agregar elementos visuales modernos alrededor del producto como líneas luminosas, partículas brillantes que usen la paleta de colores del producto.
 
 Composición dinámica y visualmente rica, con profundidad de campo y enfoque claro en el producto.
 
@@ -135,20 +161,10 @@ Mantener márgenes internos de 20 px en todos los bordes para evitar cortes.
 
 Estilo completamente fotográfico e hiperrealista, no ilustración ni caricatura.
 
-Pensado para anuncios de Meta Ads y TikTok Ads.
-
 ESTRUCTURA VISUAL:
 - Parte superior: Título que presenta la solución
-- Centro: Producto en uso o claramente visible
+- Centro: Producto REAL de la imagen en uso o claramente visible
 - Lateral o parte inferior: 2–3 bullets explicativos
-
-EJEMPLO DE REFERENCIA:
-Si el producto fuera una afeitadora eléctrica portátil:
-Título: "La forma fácil de afeitarte en segundos"
-Bullets:
-✔ Diseño compacto y portátil
-✔ Corte preciso y rápido
-✔ Ideal para usar en cualquier lugar
 
 CLAVE PSICOLÓGICA:
 El cliente debe pensar inmediatamente: "Ah… así funciona."
@@ -156,15 +172,20 @@ No debe haber confusión. La escena debe explicar el producto en 1 segundo visua
 
   "beneficio": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
+PRODUCT IMAGE COMPOSITION (CRITICAL):
+- El producto REAL de la imagen proporcionada debe estar presente y claramente visible (40-50% del espacio)
+- Integrar el producto EXACTO de forma natural dentro de la escena aspiracional
+- Extraer la paleta de colores del producto para crear degradados luminosos y efectos de partículas
+- Los brillos y acentos deben usar los colores dominantes del producto
+- NO recrear el producto - usar la imagen EXACTA proporcionada
+
 Estilo hiperrealista de fotografía publicitaria premium.
 
-Fondo negro elegante con degradados luminosos, destellos suaves y efectos de partículas que transmitan una sensación aspiracional y moderna.
+Fondo con degradados luminosos, destellos suaves y efectos de partículas que usen la paleta de colores del producto.
 
 La escena debe mostrar el BENEFICIO principal del producto en una situación positiva y deseable.
 
 Una persona aparece disfrutando el resultado de usar el producto: comodidad, satisfacción, facilidad o mejora visible en su vida cotidiana.
-
-El producto debe estar presente y claramente visible, integrado de forma natural dentro de la escena.
 
 Iluminación cinematográfica con luces suaves que resalten el producto y la escena aspiracional.
 
@@ -175,153 +196,135 @@ Composición dinámica con profundidad de campo y enfoque claro en el resultado 
 Jerarquía tipográfica clara:
 - Título grande en la parte superior destacando el beneficio principal
 - Debajo o al lado del producto incluir 3 beneficios cortos en formato bullet
-- Opcional: agregar pequeños elementos de confianza como estrellas de valoración o un mini testimonio corto
+- Opcional: agregar pequeños elementos de confianza como estrellas de valoración
 
 Mantener margen interno de 20 px en todos los bordes para evitar cortes.
 
 Estilo completamente fotográfico hiperrealista, no caricatura ni ilustración.
 
-Pensado para anuncios de Meta Ads y TikTok Ads.
-
 ESTRUCTURA VISUAL:
 - Parte superior: Título aspiracional
-- Centro: Persona disfrutando el resultado
+- Centro: Persona disfrutando el resultado con producto REAL visible
 - Lateral o inferior: 3 beneficios claros
 
-EJEMPLO DE REFERENCIA:
-Si el producto fuera un organizador de cables:
-Título: "Tu espacio siempre ordenado"
-Beneficios:
-✔ Escritorio limpio y organizado
-✔ Instalación rápida en segundos
-✔ Ideal para casa u oficina
-
 CLAVE PSICOLÓGICA:
-El usuario debe imaginar: "Así se vería mi vida si tuviera esto."
-Las escenas funcionan mejor mostrando: tranquilidad, orden, comodidad, eficiencia, satisfacción.`,
+El usuario debe imaginar: "Así se vería mi vida si tuviera esto."`,
 
   "prueba-social": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
+PRODUCT IMAGE COMPOSITION (CRITICAL):
+- El producto REAL de la imagen proporcionada debe aparecer claramente visible (45-55% del espacio)
+- Usar la imagen EXACTA del producto, bien iluminada con iluminación de estudio
+- Extraer la paleta de colores del producto para el fondo y elementos decorativos
+- Los elementos de confianza (estrellas, badges) deben usar colores que armonicen con el producto
+- NO recrear el producto - usar la imagen EXACTA proporcionada
+
 Estilo hiperrealista de fotografía publicitaria premium.
 
-Fondo negro elegante con degradados suaves y destellos sutiles para mantener coherencia visual con las imágenes anteriores.
+Fondo con degradados suaves y destellos sutiles que complementen los colores del producto.
 
 La escena debe transmitir confianza y validación social del producto.
 
 Mostrar el producto en un entorno realista acompañado de elementos que representen la satisfacción de clientes: reseñas positivas, calificaciones con estrellas, mini testimonios o indicadores de popularidad.
 
-El producto aparece claramente visible y bien iluminado con iluminación de estudio y sombras suaves.
+Opcional: incluir una persona usando el producto REAL con expresión de satisfacción.
 
-Opcional: incluir una persona usando el producto con expresión de satisfacción o mostrando el resultado positivo.
-
-Agregar elementos visuales modernos como brillos suaves, pequeñas estrellas luminosas o iconos sutiles que refuercen la idea de calidad y confianza.
+Agregar elementos visuales modernos como brillos suaves, pequeñas estrellas luminosas o iconos sutiles.
 
 Composición dinámica y visualmente rica, con profundidad de campo y enfoque claro en el producto.
 
 Jerarquía tipográfica clara:
 - Título grande en la parte superior que refuerce la confianza del producto
-- Debajo del producto incluir: calificación visual con estrellas, un mini testimonio corto, un indicador de popularidad (ej: miles de clientes satisfechos)
+- Debajo del producto incluir: calificación visual con estrellas, un mini testimonio corto, un indicador de popularidad
 
 Mantener margen interno de 20 px en todos los bordes para evitar cortes.
 
 Estilo completamente fotográfico hiperrealista, no caricatura ni ilustración.
 
-Pensado para anuncios de Meta Ads y TikTok Ads.
-
 ESTRUCTURA VISUAL:
 - Parte superior: Título de confianza
-- Centro: Producto + cliente satisfecho o escena de uso
-- Debajo: ⭐⭐⭐⭐⭐ + "Me sorprendió la calidad, lo uso todos los días" + "Más de 5.000 clientes satisfechos"
-
-EJEMPLO DE REFERENCIA:
-Título: "Clientes que ya lo probaron lo recomiendan"
-Testimonio corto: "Llegó rápido y funciona perfecto."
-Calificación: ⭐⭐⭐⭐⭐ 4.8/5
+- Centro: Producto REAL + cliente satisfecho o escena de uso
+- Debajo: ⭐⭐⭐⭐⭐ + testimonio + indicador de popularidad
 
 CLAVE PSICOLÓGICA:
-Las personas compran cuando sienten que no están tomando el riesgo solos.
-Funcionan muy bien: ⭐ estrellas, 🧾 mini reseñas, 👥 número de clientes, 📦 pedidos entregados.`,
+Las personas compran cuando sienten que no están tomando el riesgo solos.`,
 
   "oferta": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
+PRODUCT IMAGE COMPOSITION (CRITICAL):
+- El producto REAL de la imagen proporcionada debe ser el centro de la composición (55-65% del espacio)
+- Usar la imagen EXACTA del producto, muy nítida, iluminada con iluminación de estudio
+- Extraer los colores del producto para crear degradados luminosos y efectos de brillo promocional
+- Los badges de oferta deben contrastar pero armonizar con la paleta del producto
+- NO recrear el producto - usar la imagen EXACTA proporcionada
+
 Estilo hiperrealista de fotografía publicitaria premium para e-commerce.
 
-Fondo negro elegante con degradados luminosos y efectos de brillo que transmitan sensación de promoción especial.
-
-El producto aparece en el centro de la composición, muy nítido, iluminado con iluminación de estudio y reflejos suaves para destacarlo como protagonista.
+Fondo con degradados luminosos y efectos de brillo que complementen los colores del producto.
 
 La escena debe transmitir claramente que existe una oferta especial o promoción activa.
 
-Agregar elementos visuales modernos como destellos de luz, líneas luminosas, badges o etiquetas de oferta que resalten el precio o promoción.
+Agregar elementos visuales modernos como destellos de luz, líneas luminosas, badges o etiquetas de oferta.
 
 Composición dinámica, moderna y visualmente rica, con profundidad de campo.
 
 Jerarquía tipográfica clara:
 - Título grande en la parte superior anunciando la promoción
-- Elemento destacado en el centro o cerca del producto mostrando el precio en COP o el descuento
+- Elemento destacado en el centro o cerca del producto mostrando el precio
 - Texto secundario indicando que la oferta es limitada o especial
 
-El producto debe mantenerse claramente visible y ser el foco principal.
+El producto REAL debe mantenerse claramente visible y ser el foco principal.
 
-Agregar elementos visuales como brillos, partículas de luz o figuras geométricas sutiles que refuercen el carácter promocional.
+Agregar elementos visuales como brillos, partículas de luz que usen la paleta de colores del producto.
 
 Mantener margen interno de 20 px en todos los bordes para evitar cortes.
 
 Estilo completamente fotográfico hiperrealista, no caricatura ni ilustración.
 
-Pensado para anuncios de Meta Ads y TikTok Ads.
-
 ESTRUCTURA VISUAL RECOMENDADA:
 - Parte superior: Título de promoción
-- Centro: Producto + badge de precio
+- Centro: Producto REAL + badge de precio
 - Parte inferior: Texto de urgencia
 
-EJEMPLO VISUAL:
-Título: "Oferta especial por tiempo limitado"
-Precio destacado: $89.900 COP
-Texto inferior: Promoción válida hasta agotar stock
-
 CLAVE PSICOLÓGICA DE LA IMAGEN OFERTA:
-Aquí activas dos gatillos mentales fuertes:
-- escasez → "hasta agotar stock"
-- oportunidad → "oferta especial"
-
-Esto hace que el cliente piense: "Si lo voy a comprar, mejor ahora."`,
+Activas escasez y oportunidad para que el cliente piense: "Si lo voy a comprar, mejor ahora."`,
 
   "cta": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
+PRODUCT IMAGE COMPOSITION (CRITICAL):
+- El producto REAL de la imagen proporcionada debe aparecer en el centro (50-60% del espacio)
+- Usar la imagen EXACTA del producto, extremadamente nítido
+- Extraer la paleta de colores del producto para los degradados luminosos y destellos
+- El botón CTA debe contrastar pero armonizar con los colores del producto
+- NO recrear el producto - usar la imagen EXACTA proporcionada
+
 Estilo hiperrealista de fotografía publicitaria premium.
 
-Fondo negro elegante con degradados luminosos y destellos suaves que transmitan una sensación de cierre de compra y energía positiva.
-
-El producto aparece en el centro o ligeramente hacia abajo de la composición, extremadamente nítido, con iluminación de estudio y reflejos suaves que lo hagan destacar.
+Fondo con degradados luminosos y destellos suaves que usen los colores del producto.
 
 La escena debe transmitir claramente una invitación a tomar acción inmediata.
 
-Agregar elementos visuales modernos como líneas luminosas, partículas brillantes y destellos sutiles que dirijan la atención hacia el botón de acción.
+Agregar elementos visuales modernos como líneas luminosas, partículas brillantes que dirijan la atención hacia el botón de acción.
 
 Composición dinámica y visualmente rica, con profundidad de campo y enfoque claro en el producto y el botón CTA.
 
 Jerarquía tipográfica clara:
 - Título grande en la parte superior invitando a comprar
-- Debajo del producto incluir mensajes de confianza como: pago contra entrega, envíos a todo el país, proceso de compra fácil
-- Botón visual grande en la parte inferior con el llamado a la acción, llamativo, moderno y fácil de leer
+- Debajo del producto incluir mensajes de confianza: pago contra entrega, envíos a todo el país
+- Botón visual grande en la parte inferior con el llamado a la acción
 
 Mantener margen interno de 20 px en todos los bordes para evitar cortes.
 
 Estilo completamente fotográfico hiperrealista, no caricatura ni ilustración.
 
-Pensado para anuncios de Meta Ads y TikTok Ads.
-
 ESTRUCTURA VISUAL:
-- Parte superior: Título de acción (ej: "Pide el tuyo hoy mismo")
-- Centro: Producto destacado
-- Debajo: Elementos de confianza (✔ Pago contra entrega, ✔ Envíos a todo el país, ✔ Compra rápida y segura)
-- Parte inferior: Botón CTA grande (ej: "QUIERO MI PRODUCTO")
+- Parte superior: Título de acción
+- Centro: Producto REAL destacado
+- Debajo: Elementos de confianza (✔ Pago contra entrega, ✔ Envíos a todo el país)
+- Parte inferior: Botón CTA grande
 
 CLAVE PSICOLÓGICA:
-El usuario debe sentir que es fácil comprar, es seguro, y que debería hacerlo ahora.
-Siempre funcionan: botón grande, pago contra entrega, envíos nacionales, mensaje simple.`,
+El usuario debe sentir que es fácil comprar, es seguro, y que debería hacerlo ahora.`,
 };
 
 serve(async (req) => {
@@ -419,7 +422,11 @@ serve(async (req) => {
       };
       sequenceInstruction = `\n\nSALES SEQUENCE: Banner ${sequencePosition} of ${totalInSequence}.
 Stage: ${stageNames[actualTemplateId] || actualTemplateId}
-CRITICAL: This banner's messaging must be COMPLETELY DIFFERENT from other banners in the sequence. Focus ONLY on this stage's unique angle.`;
+CRITICAL SEQUENCE RULES:
+1. This banner's messaging must be COMPLETELY DIFFERENT from other banners in the sequence. Focus ONLY on this stage's unique angle.
+2. VISUAL CONSISTENCY: Maintain the SAME color palette extracted from the product image across ALL banners in the sequence.
+3. Maintain the same photographic style and lighting approach throughout the sequence.
+4. Vary only the composition angle and scene — NOT the visual style or product rendering.`;
     }
 
     let sectionContext = "";
@@ -481,6 +488,9 @@ ${toneInstruction ? `\nTONE: ${toneInstruction}` : ""}
 ${styleInstruction ? `\n${styleInstruction}` : ""}`;
     }
 
+    const hasProductImage = product.images && product.images.length > 0;
+    console.log(hasProductImage ? `✅ Product image available: ${product.images[0]}` : `⚠️ No product image for: ${product.name}`);
+
     const textPrompt = `Generate a professional ecommerce marketing banner image.
 
 PRODUCT DATA:
@@ -489,6 +499,13 @@ PRODUCT DATA:
 - Category: ${product.category}
 - Target Audience: ${product.target_audience}
 ${benefitsText}
+
+${hasProductImage ? `CRITICAL IMAGE INSTRUCTION:
+The REAL product image is attached to this message. You MUST use this EXACT product image as the primary visual element.
+- Analyze its colors, textures, shape, and style
+- Extract the dominant color palette and use it for backgrounds, gradients, and accents
+- Do NOT recreate or reimagine the product from scratch
+- The product in the banner must match the attached image exactly` : "No product image provided — generate a representative product visualization."}
 
 BANNER DIMENSIONS: ${width}x${height} pixels
 
