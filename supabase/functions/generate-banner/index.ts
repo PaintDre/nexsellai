@@ -488,8 +488,12 @@ ${toneInstruction ? `\nTONE: ${toneInstruction}` : ""}
 ${styleInstruction ? `\n${styleInstruction}` : ""}`;
     }
 
-    const hasProductImage = product.images && product.images.length > 0;
-    console.log(hasProductImage ? `✅ Product image available: ${product.images[0]}` : `⚠️ No product image for: ${product.name}`);
+    const productImages = (product.images || []).slice(0, 3);
+    const imageCount = productImages.length;
+    console.log(imageCount > 0
+      ? `✅ Sending ${imageCount} product image(s) for: ${product.name} → [${productImages.join(", ")}]`
+      : `⚠️ No product image for: ${product.name}`
+    );
 
     const textPrompt = `Generate a professional ecommerce marketing banner image.
 
@@ -500,12 +504,15 @@ PRODUCT DATA:
 - Target Audience: ${product.target_audience}
 ${benefitsText}
 
-${hasProductImage ? `CRITICAL IMAGE INSTRUCTION:
-The REAL product image is attached to this message. You MUST use this EXACT product image as the primary visual element.
-- Analyze its colors, textures, shape, and style
+${imageCount > 0
+  ? `CRITICAL IMAGE INSTRUCTION:
+${imageCount} REAL product image(s) are attached to this message.${imageCount > 1 ? ` These images show the SAME product from different angles/views — use all of them to understand the product fully.` : ""}
+You MUST use this EXACT product image as the primary visual element.
+- Analyze its colors, textures, shape, and style across ALL provided images
 - Extract the dominant color palette and use it for backgrounds, gradients, and accents
 - Do NOT recreate or reimagine the product from scratch
-- The product in the banner must match the attached image exactly` : "No product image provided — generate a representative product visualization."}
+- The product in the banner must match the attached image(s) exactly`
+  : "No product image provided — generate a representative product visualization."}
 
 BANNER DIMENSIONS: ${width}x${height} pixels
 
@@ -516,13 +523,13 @@ ${sequenceInstruction}
 ${customModeInstruction}
 ${customText ? `\nCUSTOM SLOGAN (include prominently): "${customText}"` : ""}`;
 
-    // Build messages with system prompt + product image
+    // Build messages with system prompt + up to 3 product images
     const userContent: any[] = [{ type: "text", text: textPrompt }];
     
-    if (product.images && product.images.length > 0) {
+    for (const imgUrl of productImages) {
       userContent.push({
         type: "image_url",
-        image_url: { url: product.images[0] },
+        image_url: { url: imgUrl },
       });
     }
 
