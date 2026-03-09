@@ -38,9 +38,9 @@ const ProductDetail = () => {
   if (!product) return null;
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto space-y-8">
+    <div className="p-5 md:p-8 lg:p-10 max-w-4xl mx-auto space-y-8">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+      <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Link to="/products" className="hover:text-foreground transition-colors">Productos</Link>
         <ChevronRight className="h-3 w-3" />
         <span className="text-foreground font-medium truncate">{product.name}</span>
@@ -48,25 +48,25 @@ const ProductDetail = () => {
 
       {/* Product Header */}
       <div className="flex flex-col md:flex-row gap-6">
-        <div className="w-full md:w-48 aspect-square rounded-lg overflow-hidden border bg-muted shrink-0">
+        <div className="w-full md:w-44 aspect-square rounded-xl overflow-hidden border bg-muted shrink-0">
           {product.images[0] ? (
             <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
           ) : (
             <div className="h-full w-full flex items-center justify-center">
-              <Package className="h-10 w-10 text-muted-foreground/40" />
+              <Package className="h-10 w-10 text-muted-foreground/20" />
             </div>
           )}
         </div>
         <div className="flex-1 space-y-2">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold font-display tracking-tight">{product.name}</h1>
-              <p className="text-lg text-muted-foreground">${product.price.toLocaleString("es-CL")}</p>
+              <h1 className="text-xl font-bold font-display">{product.name}</h1>
+              <p className="text-base text-muted-foreground">${product.price.toLocaleString("es-CL")}</p>
             </div>
-            <Badge variant="secondary" className="capitalize text-xs shrink-0">{product.category}</Badge>
+            <Badge variant="secondary" className="capitalize text-[10px] shrink-0">{product.category}</Badge>
           </div>
           {product.description && (
-            <p className="text-sm text-muted-foreground">{product.description}</p>
+            <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
           )}
           <p className="text-xs text-muted-foreground">
             Audiencia: {product.target_audience}
@@ -75,47 +75,47 @@ const ProductDetail = () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Button size="lg" asChild className="h-auto py-4 flex-col gap-1">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <Button size="lg" asChild className="h-auto py-3.5 flex-col gap-0.5">
           <Link to={`/products/${id}/generate`}>
-            <Sparkles className="h-5 w-5" />
-            <span className="font-semibold">Generar Landing</span>
-            <span className="text-xs opacity-70">Crea una página de venta</span>
+            <Sparkles className="h-4 w-4" />
+            <span className="font-semibold text-sm">Generar Landing</span>
+            <span className="text-[10px] opacity-70">Crea una página de venta</span>
           </Link>
         </Button>
-        <Button size="lg" variant="secondary" asChild className="h-auto py-4 flex-col gap-1">
+        <Button size="lg" variant="secondary" asChild className="h-auto py-3.5 flex-col gap-0.5">
           <Link to={`/products/${id}/banner`}>
-            <ImageIcon className="h-5 w-5" />
-            <span className="font-semibold">Generar Banners</span>
-            <span className="text-xs opacity-70">Crea banners para ads</span>
+            <ImageIcon className="h-4 w-4" />
+            <span className="font-semibold text-sm">Generar Banners</span>
+            <span className="text-[10px] opacity-70">Crea banners para ads</span>
           </Link>
         </Button>
-        <Button size="lg" variant="outline" asChild className="h-auto py-4 flex-col gap-1">
+        <Button size="lg" variant="outline" asChild className="h-auto py-3.5 flex-col gap-0.5">
           <Link to={`/products/${id}/edit`}>
-            <Pencil className="h-5 w-5" />
-            <span className="font-semibold">Editar Producto</span>
-            <span className="text-xs opacity-70">Modifica los datos</span>
+            <Pencil className="h-4 w-4" />
+            <span className="font-semibold text-sm">Editar Producto</span>
+            <span className="text-[10px] opacity-70">Modifica los datos</span>
           </Link>
         </Button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <FileText className="h-5 w-5 text-primary" />
+            <FileText className="h-4 w-4 text-primary" />
             <div>
-              <p className="text-2xl font-bold font-display">{landings.length}</p>
-              <p className="text-xs text-muted-foreground">Landings generadas</p>
+              <p className="text-xl font-bold font-display">{landings.length}</p>
+              <p className="text-[11px] text-muted-foreground">Landings generadas</p>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
-            <ImageIcon className="h-5 w-5 text-primary" />
+            <ImageIcon className="h-4 w-4 text-primary" />
             <div>
-              <p className="text-2xl font-bold font-display">{bannerCount}</p>
-              <p className="text-xs text-muted-foreground">Banners generados</p>
+              <p className="text-xl font-bold font-display">{bannerCount}</p>
+              <p className="text-[11px] text-muted-foreground">Banners generados</p>
             </div>
           </CardContent>
         </Card>
@@ -123,15 +123,15 @@ const ProductDetail = () => {
 
       {/* CTA when no landings */}
       {landings.length === 0 && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="flex flex-col sm:flex-row items-center gap-4 p-6">
-            <Sparkles className="h-8 w-8 text-primary shrink-0" />
+        <Card className="border-primary/15 bg-accent/30">
+          <CardContent className="flex flex-col sm:flex-row items-center gap-4 p-5">
+            <Sparkles className="h-7 w-7 text-primary shrink-0" />
             <div className="flex-1 text-center sm:text-left">
-              <h3 className="font-semibold">¡Genera tu primera landing!</h3>
-              <p className="text-sm text-muted-foreground">La IA creará una página de venta profesional para este producto.</p>
+              <h3 className="font-semibold text-sm">¡Genera tu primera landing!</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">La IA creará una página de venta profesional para este producto.</p>
             </div>
-            <Button asChild>
-              <Link to={`/products/${id}/generate`}>Generar ahora <ArrowRight className="h-4 w-4 ml-1" /></Link>
+            <Button asChild size="sm">
+              <Link to={`/products/${id}/generate`}>Generar ahora <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
             </Button>
           </CardContent>
         </Card>
@@ -140,23 +140,23 @@ const ProductDetail = () => {
       {/* Landings List */}
       {landings.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold font-display mb-3">Landings de este producto</h2>
-          <div className="space-y-3">
+          <h2 className="text-base font-semibold font-display mb-3">Landings de este producto</h2>
+          <div className="space-y-2">
             {landings.map((landing) => (
-              <Card key={landing.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4">
+              <Card key={landing.id} className="hover:shadow-md transition-all duration-200">
+                <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5">
                   <div className="flex items-center gap-3 min-w-0">
-                    <FileText className="h-5 w-5 text-primary shrink-0" />
+                    <FileText className="h-4 w-4 text-primary shrink-0" />
                     <div className="min-w-0">
-                      <h3 className="font-semibold text-sm truncate">{landing.name}</h3>
-                      <p className="text-xs text-muted-foreground">
+                      <h3 className="font-medium text-sm truncate">{landing.name}</h3>
+                      <p className="text-[11px] text-muted-foreground">
                         {new Date(landing.created_at).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" })}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <Badge variant="secondary" className="capitalize text-xs">{landing.theme}</Badge>
-                    <Button variant="outline" size="sm" asChild className="min-h-[44px] sm:min-h-0">
+                    <Badge variant="secondary" className="capitalize text-[10px]">{landing.theme}</Badge>
+                    <Button variant="outline" size="sm" asChild className="h-8 text-xs">
                       <Link to={`/landings/${landing.id}/preview`}>
                         <Eye className="h-3 w-3 mr-1" /> Ver
                       </Link>
