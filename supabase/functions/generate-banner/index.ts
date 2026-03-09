@@ -154,7 +154,7 @@ CLAVE PSICOLÓGICA:
 El cliente debe pensar inmediatamente: "Ah… así funciona."
 No debe haber confusión. La escena debe explicar el producto en 1 segundo visual.`,
 
-  "beneficio": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
+  "beneficio": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista de fotografía publicitaria premium.
 
