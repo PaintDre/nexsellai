@@ -33,7 +33,7 @@ const plans = [
     name: "Starter",
     monthlyPrice: 14990,
     annualPrice: 149900,
-    description: "Ideal para lanzar y testear productos cada mes",
+    description: "Ideal para lanzar y testear productos",
     features: [
       "10 landings / mes",
       "30 banners / mes",
@@ -50,7 +50,7 @@ const plans = [
     name: "Pro",
     monthlyPrice: 34990,
     annualPrice: 349900,
-    description: "Para vendedores que escalan con ads todos los días",
+    description: "Para vendedores que escalan con ads",
     features: [
       "100 landings / mes",
       "150 banners / mes",
@@ -120,24 +120,24 @@ const Pricing = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-8">
-      <div className="text-center max-w-2xl mx-auto space-y-4">
-        <h1 className="text-3xl font-bold font-display tracking-tight">Planes y Precios</h1>
-        <p className="text-muted-foreground">Elige el plan que mejor se adapte a tu volumen de ventas</p>
+    <div className="p-5 md:p-8 lg:p-10 space-y-8">
+      <div className="text-center max-w-xl mx-auto space-y-3">
+        <h1 className="text-2xl md:text-3xl font-bold font-display">Planes y Precios</h1>
+        <p className="text-sm text-muted-foreground">Elige el plan que mejor se adapte a tu volumen de ventas</p>
 
-        <div className="flex justify-center">
+        <div className="flex justify-center pt-1">
           <Tabs value={billingPeriod} onValueChange={(v) => setBillingPeriod(v as BillingPeriod)}>
-            <TabsList>
-              <TabsTrigger value="monthly">Mensual</TabsTrigger>
-              <TabsTrigger value="annual" className="gap-2">
-                Anual <Badge variant="secondary" className="text-xs bg-primary/10 text-primary">Ahorra 2 meses</Badge>
+            <TabsList className="h-9">
+              <TabsTrigger value="monthly" className="text-xs">Mensual</TabsTrigger>
+              <TabsTrigger value="annual" className="text-xs gap-1.5">
+                Anual <Badge variant="secondary" className="text-[10px] bg-accent text-accent-foreground">-17%</Badge>
               </TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
+      <div className="grid gap-4 md:grid-cols-3 max-w-4xl mx-auto">
         {plans.map((plan) => {
           const isCurrent = profile?.plan === plan.id;
           const price = getPrice(plan);
@@ -145,28 +145,31 @@ const Pricing = () => {
           const isLoading = loadingPlan === plan.id;
 
           return (
-            <Card key={plan.id} className={cn("relative", plan.popular && "border-primary shadow-lg")}>
+            <Card key={plan.id} className={cn(
+              "relative transition-all duration-200",
+              plan.popular && "border-primary shadow-md ring-1 ring-primary/10"
+            )}>
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary text-primary-foreground">Más popular</Badge>
+                <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
+                  <Badge className="bg-primary text-primary-foreground text-[10px] px-2.5">Más popular</Badge>
                 </div>
               )}
               <CardHeader className="text-center pb-2">
-                <CardTitle className="font-display">{plan.name}</CardTitle>
-                <CardDescription>{plan.description}</CardDescription>
-                <div className="mt-4">
+                <CardTitle className="font-display text-base">{plan.name}</CardTitle>
+                <CardDescription className="text-xs">{plan.description}</CardDescription>
+                <div className="mt-3">
                   {price === 0 ? (
-                    <span className="text-4xl font-bold font-display">Gratis</span>
+                    <span className="text-3xl font-bold font-display">Gratis</span>
                   ) : (
                     <div>
-                      <span className="text-4xl font-bold font-display">
+                      <span className="text-3xl font-bold font-display">
                         ${price.toLocaleString("es-CL")}
                       </span>
-                      <span className="text-muted-foreground">
+                      <span className="text-xs text-muted-foreground ml-1">
                         /{billingPeriod === "annual" ? "año" : "mes"}
                       </span>
                       {monthlyEq && (
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mt-0.5">
                           ${monthlyEq.toLocaleString("es-CL")}/mes
                         </p>
                       )}
@@ -175,27 +178,28 @@ const Pricing = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <ul className="space-y-2">
+                <ul className="space-y-1.5">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm">
-                      <Check className="h-4 w-4 text-success mt-0.5 shrink-0" />
+                    <li key={f} className="flex items-start gap-2 text-xs">
+                      <Check className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
                       {f}
                     </li>
                   ))}
                   {plan.excluded?.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground line-through">
+                    <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground line-through">
                       {f}
                     </li>
                   ))}
                 </ul>
                 <Button
-                  className="w-full min-h-[44px]"
+                  className="w-full"
+                  size="sm"
                   variant={isCurrent ? "secondary" : plan.popular ? "default" : "outline"}
                   disabled={isCurrent || isLoading || plan.id === "free"}
                   onClick={() => handleSubscribe(plan.id)}
                 >
                   {isLoading ? (
-                    <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Procesando...</>
+                    <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Procesando...</>
                   ) : isCurrent ? (
                     "Plan actual"
                   ) : plan.id === "free" ? (

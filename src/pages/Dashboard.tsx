@@ -53,7 +53,6 @@ const Dashboard = () => {
       setLandings(landRes.data || []);
       setVersionsCount(verCountRes.count || 0);
 
-      // Recent versions
       const { data: versions } = await supabase
         .from("landing_versions")
         .select("id, created_at, version_number, landing_id")
@@ -86,19 +85,19 @@ const Dashboard = () => {
   if (loading) return <DashboardSkeleton />;
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-8">
+    <div className="p-5 md:p-8 lg:p-10 space-y-8 max-w-6xl mx-auto">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight">
-          {getGreeting()}, {profile?.full_name?.split(" ")[0] || "usuario"} 👋
+      <div className="space-y-1">
+        <h1 className="text-2xl md:text-3xl font-bold font-display">
+          {getGreeting()}, {profile?.full_name?.split(" ")[0] || "usuario"}
         </h1>
-        <p className="text-muted-foreground mt-1">
-          Tienes {products.length} producto{products.length !== 1 ? "s" : ""} y {landings.length} landing{landings.length !== 1 ? "s" : ""}
+        <p className="text-sm text-muted-foreground">
+          {products.length} producto{products.length !== 1 ? "s" : ""} · {landings.length} landing{landings.length !== 1 ? "s" : ""}
         </p>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
         <QuickActionCard
           to="/products/new"
           icon={Plus}
@@ -122,134 +121,130 @@ const Dashboard = () => {
 
       {/* Onboarding guide for new users */}
       {isNewUser && (
-        <Card className="border-primary/20 bg-primary/5">
+        <Card className="border-primary/15 bg-accent/30">
           <CardContent className="p-6">
-            <h2 className="text-lg font-semibold font-display mb-4">🚀 Comienza en 3 pasos</h2>
-            <div className="grid gap-4 sm:grid-cols-3">
+            <h2 className="text-base font-semibold font-display mb-4">Comienza en 3 pasos</h2>
+            <div className="grid gap-3 sm:grid-cols-3">
               {[
                 { step: 1, title: "Crea un producto", desc: "Agrega nombre, precio e imágenes", icon: Package, active: true },
                 { step: 2, title: "Genera una landing", desc: "La IA crea tu página de venta", icon: Sparkles, active: false },
                 { step: 3, title: "Exporta y vende", desc: "Descarga o publica tu landing", icon: Download, active: false },
               ].map(s => (
-                <div key={s.step} className={`flex items-start gap-3 p-3 rounded-lg ${s.active ? "bg-primary/10" : "bg-muted/50"}`}>
-                  <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${s.active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                <div key={s.step} className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${s.active ? "bg-primary/8" : "bg-muted/40"}`}>
+                  <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${s.active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
                     {s.step}
                   </div>
                   <div>
                     <p className="font-medium text-sm">{s.title}</p>
-                    <p className="text-xs text-muted-foreground">{s.desc}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{s.desc}</p>
                   </div>
                 </div>
               ))}
             </div>
-            <Button asChild className="mt-4">
-              <Link to="/products/new"><Plus className="h-4 w-4 mr-2" /> Crear mi primer producto</Link>
+            <Button asChild size="sm" className="mt-4">
+              <Link to="/products/new"><Plus className="h-3.5 w-3.5 mr-1.5" /> Crear mi primer producto</Link>
             </Button>
           </CardContent>
         </Card>
       )}
 
       {hasNoLandings && (
-        <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="flex flex-col sm:flex-row items-center gap-4 p-6">
-            <Sparkles className="h-8 w-8 text-primary shrink-0" />
+        <Card className="border-primary/15 bg-accent/30">
+          <CardContent className="flex flex-col sm:flex-row items-center gap-4 p-5">
+            <Sparkles className="h-7 w-7 text-primary shrink-0" />
             <div className="flex-1 text-center sm:text-left">
-              <h3 className="font-semibold">¡Genera tu primera landing!</h3>
-              <p className="text-sm text-muted-foreground">Selecciona un producto y la IA creará una página de venta profesional.</p>
+              <h3 className="font-semibold text-sm">¡Genera tu primera landing!</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Selecciona un producto y la IA creará una página de venta profesional.</p>
             </div>
-            <Button asChild>
-              <Link to="/products">Ver productos <ArrowRight className="h-4 w-4 ml-1" /></Link>
+            <Button asChild size="sm">
+              <Link to="/products">Ver productos <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
             </Button>
           </CardContent>
         </Card>
       )}
 
       {/* Usage Stats */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Landings Usadas</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold font-display">
-              {used} <span className="text-lg text-muted-foreground font-normal">/ {limit}</span>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-muted-foreground">Landings</span>
+              <FileText className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
-            <Progress value={usagePercent} className="h-2 mt-2" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Banners Usados</CardTitle>
-            <Image className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold font-display">
-              {bannersUsed} <span className="text-lg text-muted-foreground font-normal">/ {bannerLimit}</span>
+            <div className="text-2xl font-bold font-display">
+              {used}<span className="text-sm text-muted-foreground font-normal ml-0.5">/{limit}</span>
             </div>
-            <Progress value={bannerUsagePercent} className="h-2 mt-2" />
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Productos</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold font-display">{products.length}</div>
+            <Progress value={usagePercent} className="h-1.5 mt-2" />
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Plan Actual</CardTitle>
-            <Zap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold font-display capitalize">{profile?.plan || "free"}</div>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-muted-foreground">Banners</span>
+              <Image className="h-3.5 w-3.5 text-muted-foreground/60" />
+            </div>
+            <div className="text-2xl font-bold font-display">
+              {bannersUsed}<span className="text-sm text-muted-foreground font-normal ml-0.5">/{bannerLimit}</span>
+            </div>
+            <Progress value={bannerUsagePercent} className="h-1.5 mt-2" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-muted-foreground">Productos</span>
+              <Package className="h-3.5 w-3.5 text-muted-foreground/60" />
+            </div>
+            <div className="text-2xl font-bold font-display">{products.length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-muted-foreground">Plan</span>
+              <Zap className="h-3.5 w-3.5 text-muted-foreground/60" />
+            </div>
+            <div className="text-2xl font-bold font-display capitalize">{profile?.plan || "free"}</div>
             {profile?.plan === "free" && (
-              <Button variant="link" asChild className="px-0 text-primary text-sm">
-                <Link to="/pricing">Actualizar plan →</Link>
+              <Button variant="link" asChild className="px-0 text-primary text-xs h-auto p-0 mt-1">
+                <Link to="/pricing">Actualizar →</Link>
               </Button>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Landings + Activity in 2-column layout on desktop */}
+      {/* Landings + Activity */}
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Recent Landings (2/3 width) */}
         <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold font-display">Landings Recientes</h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-base font-semibold font-display">Landings Recientes</h2>
             {landings.length > 0 && (
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" asChild className="text-xs h-8">
                 <Link to="/landings">Ver todas <ArrowRight className="h-3 w-3 ml-1" /></Link>
               </Button>
             )}
           </div>
           {landings.length === 0 ? (
             <Card className="border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
-                <p className="text-muted-foreground mb-2">No tienes landings aún</p>
-                <p className="text-sm text-muted-foreground">Crea tu primer producto para empezar</p>
+              <CardContent className="flex flex-col items-center justify-center py-10">
+                <FileText className="h-10 w-10 text-muted-foreground/30 mb-3" />
+                <p className="text-sm text-muted-foreground">No tienes landings aún</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Crea tu primer producto para empezar</p>
               </CardContent>
             </Card>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {landings.slice(0, 8).map((landing) => (
-                <Card key={landing.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4">
-                    <div className="flex items-center gap-4 min-w-0">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 shrink-0">
-                        <FileText className="h-5 w-5 text-primary" />
+                <Card key={landing.id} className="hover:shadow-md transition-all duration-200">
+                  <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent shrink-0">
+                        <FileText className="h-4 w-4 text-accent-foreground" />
                       </div>
                       <div className="min-w-0">
-                        <h3 className="font-semibold truncate">{landing.name}</h3>
-                        <p className="text-sm text-muted-foreground">
+                        <h3 className="font-medium text-sm truncate">{landing.name}</h3>
+                        <p className="text-xs text-muted-foreground">
                           {new Date(landing.created_at).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" })}
                         </p>
                       </div>
@@ -259,7 +254,7 @@ const Dashboard = () => {
                         {landing.published ? "Publicada" : "Borrador"}
                       </Badge>
                       <Badge variant="outline" className="capitalize text-[10px]">{landing.theme}</Badge>
-                      <Button variant="outline" size="sm" asChild className="min-h-[36px]">
+                      <Button variant="outline" size="sm" asChild className="h-8 text-xs">
                         <Link to={`/landings/${landing.id}/preview`}>
                           <Eye className="h-3 w-3 mr-1" /> Ver
                         </Link>
@@ -272,20 +267,19 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Activity (1/3 width) */}
         {recentVersions.length > 0 && (
           <div>
-            <h2 className="text-xl font-semibold font-display mb-4">Actividad</h2>
+            <h2 className="text-base font-semibold font-display mb-3">Actividad</h2>
             <div className="space-y-2">
               {recentVersions.map((v) => (
                 <Card key={v.id}>
                   <CardContent className="flex items-center gap-3 p-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted shrink-0">
-                      <History className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted shrink-0">
+                      <History className="h-3.5 w-3.5 text-muted-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">Versión guardada de {v.landing_name}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs font-medium truncate">{v.landing_name}</p>
+                      <p className="text-[11px] text-muted-foreground">
                         v{v.version_number} · {new Date(v.created_at).toLocaleDateString("es-CL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                       </p>
                     </div>
@@ -304,37 +298,37 @@ const Dashboard = () => {
 const QuickActionCard = ({ to, icon: Icon, title, description, variant }: {
   to: string; icon: React.ComponentType<{ className?: string }>; title: string; description: string; variant?: "primary";
 }) => (
-  <Card className={`hover:shadow-md transition-all group cursor-pointer ${variant === "primary" ? "border-primary/30 bg-primary/5" : ""}`}>
-    <Link to={to}>
-      <CardContent className="flex items-center gap-4 p-4">
-        <div className={`flex h-10 w-10 items-center justify-center rounded-lg shrink-0 ${variant === "primary" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-          <Icon className="h-5 w-5" />
+  <Link to={to} className="group block">
+    <Card className={`transition-all duration-200 group-hover:shadow-md ${variant === "primary" ? "border-primary/20 bg-accent/20" : ""}`}>
+      <CardContent className="flex items-center gap-3.5 p-4">
+        <div className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 transition-colors ${variant === "primary" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+          <Icon className="h-4 w-4" />
         </div>
-        <div className="min-w-0">
-          <p className="font-semibold text-sm group-hover:text-primary transition-colors">{title}</p>
-          <p className="text-xs text-muted-foreground">{description}</p>
+        <div className="min-w-0 flex-1">
+          <p className="font-medium text-sm group-hover:text-primary transition-colors">{title}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
         </div>
-        <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
       </CardContent>
-    </Link>
-  </Card>
+    </Card>
+  </Link>
 );
 
 /* Skeleton */
 const DashboardSkeleton = () => (
-  <div className="p-4 md:p-6 lg:p-8 space-y-8">
+  <div className="p-5 md:p-8 lg:p-10 space-y-8 max-w-6xl mx-auto">
     <div className="space-y-2">
       <Skeleton className="h-8 w-64" />
-      <Skeleton className="h-4 w-48" />
+      <Skeleton className="h-4 w-40" />
     </div>
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-      {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 rounded-lg" />)}
+    <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
+      {[1, 2, 3].map(i => <Skeleton key={i} className="h-[72px] rounded-xl" />)}
     </div>
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
-      {[1, 2].map(i => <Skeleton key={i} className="h-28 rounded-lg" />)}
+    <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+      {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
     </div>
-    <div className="space-y-3">
-      {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 rounded-lg" />)}
+    <div className="space-y-2">
+      {[1, 2, 3].map(i => <Skeleton key={i} className="h-14 rounded-xl" />)}
     </div>
   </div>
 );

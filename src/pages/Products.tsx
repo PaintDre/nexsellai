@@ -24,11 +24,11 @@ const Products = () => {
   }, [user]);
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="p-5 md:p-8 lg:p-10 space-y-6 max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight">Productos</h1>
-        <Button asChild className="w-full sm:w-auto min-h-[44px]">
-          <Link to="/products/new"><Plus className="h-4 w-4 mr-2" /> Nuevo</Link>
+        <h1 className="text-2xl md:text-3xl font-bold font-display">Productos</h1>
+        <Button asChild size="sm">
+          <Link to="/products/new"><Plus className="h-3.5 w-3.5 mr-1.5" /> Nuevo</Link>
         </Button>
       </div>
 
@@ -36,13 +36,13 @@ const Products = () => {
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3].map(i => (
             <Card key={i}>
-              <Skeleton className="aspect-video rounded-t-lg" />
+              <Skeleton className="aspect-video rounded-t-xl" />
               <CardContent className="p-4 space-y-3">
                 <Skeleton className="h-5 w-3/4" />
                 <Skeleton className="h-4 w-1/3" />
                 <div className="flex gap-2">
-                  <Skeleton className="h-10 flex-1" />
-                  <Skeleton className="h-10 flex-1" />
+                  <Skeleton className="h-9 flex-1 rounded-lg" />
+                  <Skeleton className="h-9 flex-1 rounded-lg" />
                 </div>
               </CardContent>
             </Card>
@@ -51,38 +51,40 @@ const Products = () => {
       ) : products.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <Package className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground mb-4">Aún no tienes productos</p>
-            <Button asChild><Link to="/products/new"><Plus className="h-4 w-4 mr-2" /> Crear producto</Link></Button>
+            <Package className="h-10 w-10 text-muted-foreground/30 mb-4" />
+            <p className="text-sm text-muted-foreground mb-4">Aún no tienes productos</p>
+            <Button asChild size="sm"><Link to="/products/new"><Plus className="h-3.5 w-3.5 mr-1.5" /> Crear producto</Link></Button>
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => (
-            <Card key={product.id} className="group hover:shadow-md transition-shadow">
-              <div className="aspect-video overflow-hidden rounded-t-lg bg-muted">
-                {product.images[0] ? (
-                  <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform" />
-                ) : (
-                  <div className="h-full w-full flex items-center justify-center"><Package className="h-8 w-8 text-muted-foreground/40" /></div>
-                )}
-              </div>
+            <Card key={product.id} className="group overflow-hidden hover:shadow-md transition-all duration-200">
+              <Link to={`/products/${product.id}`} className="block">
+                <div className="aspect-video overflow-hidden bg-muted">
+                  {product.images[0] ? (
+                    <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
+                  ) : (
+                    <div className="h-full w-full flex items-center justify-center"><Package className="h-8 w-8 text-muted-foreground/20" /></div>
+                  )}
+                </div>
+              </Link>
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold truncate">{product.name}</h3>
-                  <Badge variant="secondary" className="capitalize text-xs">{product.category}</Badge>
+                  <h3 className="font-medium text-sm truncate">{product.name}</h3>
+                  <Badge variant="secondary" className="capitalize text-[10px] shrink-0">{product.category}</Badge>
                 </div>
-                <p className="text-sm text-muted-foreground">${product.price.toLocaleString("es-CL")}</p>
+                <p className="text-xs text-muted-foreground">${product.price.toLocaleString("es-CL")}</p>
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" asChild className="flex-1 min-h-[44px]">
+                    <Button variant="outline" size="sm" asChild className="flex-1 h-9 text-xs">
                       <Link to={`/products/${product.id}/edit`}><Pencil className="h-3 w-3 mr-1" /> Editar</Link>
                     </Button>
-                    <Button size="sm" asChild className="flex-1 min-h-[44px]">
+                    <Button size="sm" asChild className="flex-1 h-9 text-xs">
                       <Link to={`/products/${product.id}/generate`}><Sparkles className="h-3 w-3 mr-1" /> Landing</Link>
                     </Button>
                   </div>
-                  <Button variant="secondary" size="sm" asChild className="w-full min-h-[44px]">
+                  <Button variant="secondary" size="sm" asChild className="w-full h-9 text-xs">
                     <Link to={`/products/${product.id}/banner`}><ImageIcon className="h-3 w-3 mr-1" /> Generar Banner</Link>
                   </Button>
                 </div>

@@ -30,7 +30,7 @@ export const AppLayout = () => {
       {/* Mobile sheet */}
       {isMobile && (
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetContent side="left" className="w-64 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border">
+          <SheetContent side="left" className="w-60 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border">
             <VisuallyHidden>
               <SheetTitle>Menú de navegación</SheetTitle>
             </VisuallyHidden>
@@ -42,29 +42,29 @@ export const AppLayout = () => {
       <div className="flex flex-1 flex-col overflow-hidden max-w-full">
         {/* Mobile header */}
         {isMobile && (
-          <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-sidebar-border bg-sidebar px-4">
-            <Button variant="ghost" size="icon" className="text-sidebar-foreground" onClick={() => setMobileOpen(true)}>
+          <header className="sticky top-0 z-40 flex h-13 items-center gap-3 border-b border-border bg-background px-4">
+            <Button variant="ghost" size="icon" className="text-foreground h-9 w-9" onClick={() => setMobileOpen(true)}>
               <Menu className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg overflow-hidden">
-                <img src="/logo-ns.png" alt="Nexsell" className="h-8 w-8 object-contain" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden">
+                <img src="/logo-ns.png" alt="Nexsell" className="h-7 w-7 object-contain" />
               </div>
-              <span className="text-lg font-bold font-display tracking-tight text-sidebar-primary-foreground">Nexsell</span>
+              <span className="text-base font-bold font-display tracking-tight">Nexsell</span>
             </div>
           </header>
         )}
 
         {/* Desktop/Tablet header with breadcrumbs */}
         {!isMobile && (
-          <header className="sticky top-0 z-40 flex h-12 items-center justify-between border-b border-border bg-background/95 backdrop-blur-sm px-6">
+          <header className="sticky top-0 z-40 flex h-12 items-center justify-between border-b border-border/60 bg-background/80 backdrop-blur-sm px-6">
             <PageBreadcrumb />
             {profile && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground truncate max-w-[150px]">
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs text-muted-foreground truncate max-w-[150px]">
                   {profile.full_name || "Usuario"}
                 </span>
-                <Badge variant="secondary" className="text-[10px] uppercase font-semibold">
+                <Badge variant="secondary" className="text-[10px] uppercase font-semibold tracking-wide">
                   {planLabels[profile.plan] || "Free"}
                 </Badge>
               </div>
