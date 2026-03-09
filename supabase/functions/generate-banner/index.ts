@@ -212,45 +212,42 @@ El usuario debe imaginar: "Así se vería mi vida si tuviera esto."`,
 
   "prueba-social": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
+PRODUCT IMAGE COMPOSITION (CRITICAL):
+- El producto REAL de la imagen proporcionada debe aparecer claramente visible (45-55% del espacio)
+- Usar la imagen EXACTA del producto, bien iluminada con iluminación de estudio
+- Extraer la paleta de colores del producto para el fondo y elementos decorativos
+- Los elementos de confianza (estrellas, badges) deben usar colores que armonicen con el producto
+- NO recrear el producto - usar la imagen EXACTA proporcionada
+
 Estilo hiperrealista de fotografía publicitaria premium.
 
-Fondo negro elegante con degradados suaves y destellos sutiles para mantener coherencia visual con las imágenes anteriores.
+Fondo con degradados suaves y destellos sutiles que complementen los colores del producto.
 
 La escena debe transmitir confianza y validación social del producto.
 
 Mostrar el producto en un entorno realista acompañado de elementos que representen la satisfacción de clientes: reseñas positivas, calificaciones con estrellas, mini testimonios o indicadores de popularidad.
 
-El producto aparece claramente visible y bien iluminado con iluminación de estudio y sombras suaves.
+Opcional: incluir una persona usando el producto REAL con expresión de satisfacción.
 
-Opcional: incluir una persona usando el producto con expresión de satisfacción o mostrando el resultado positivo.
-
-Agregar elementos visuales modernos como brillos suaves, pequeñas estrellas luminosas o iconos sutiles que refuercen la idea de calidad y confianza.
+Agregar elementos visuales modernos como brillos suaves, pequeñas estrellas luminosas o iconos sutiles.
 
 Composición dinámica y visualmente rica, con profundidad de campo y enfoque claro en el producto.
 
 Jerarquía tipográfica clara:
 - Título grande en la parte superior que refuerce la confianza del producto
-- Debajo del producto incluir: calificación visual con estrellas, un mini testimonio corto, un indicador de popularidad (ej: miles de clientes satisfechos)
+- Debajo del producto incluir: calificación visual con estrellas, un mini testimonio corto, un indicador de popularidad
 
 Mantener margen interno de 20 px en todos los bordes para evitar cortes.
 
 Estilo completamente fotográfico hiperrealista, no caricatura ni ilustración.
 
-Pensado para anuncios de Meta Ads y TikTok Ads.
-
 ESTRUCTURA VISUAL:
 - Parte superior: Título de confianza
-- Centro: Producto + cliente satisfecho o escena de uso
-- Debajo: ⭐⭐⭐⭐⭐ + "Me sorprendió la calidad, lo uso todos los días" + "Más de 5.000 clientes satisfechos"
-
-EJEMPLO DE REFERENCIA:
-Título: "Clientes que ya lo probaron lo recomiendan"
-Testimonio corto: "Llegó rápido y funciona perfecto."
-Calificación: ⭐⭐⭐⭐⭐ 4.8/5
+- Centro: Producto REAL + cliente satisfecho o escena de uso
+- Debajo: ⭐⭐⭐⭐⭐ + testimonio + indicador de popularidad
 
 CLAVE PSICOLÓGICA:
-Las personas compran cuando sienten que no están tomando el riesgo solos.
-Funcionan muy bien: ⭐ estrellas, 🧾 mini reseñas, 👥 número de clientes, 📦 pedidos entregados.`,
+Las personas compran cuando sienten que no están tomando el riesgo solos.`,
 
   "oferta": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
