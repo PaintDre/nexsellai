@@ -24,32 +24,35 @@ function formatPrice(price: number, currencyCode: string): string {
 
 // --- Professional agency-level prompt system ---
 
-const SYSTEM_PROMPT = `You are an elite graphic designer at a top creative agency. You create scroll-stopping ecommerce banners that convert.
+const SYSTEM_PROMPT = `Diseño de landing para e-commerce en formato historia 1080x1920.
 
-YOUR DESIGN PROCESS (follow strictly):
+Estilo hiperrealista, fotografía publicitaria profesional, composición rica en elementos visuales, profundidad de campo, iluminación cinematográfica.
 
-STEP 1 — PRODUCT IMAGE ANALYSIS:
-Before designing anything, deeply analyze the provided product image:
-- Extract the DOMINANT color palette (primary, secondary, accent colors)
-- Identify the product's visual style: minimalist, premium, casual, tech, organic, playful, industrial
-- Note the product's shape, texture, and lighting direction
-- Determine if the product looks better on light or dark backgrounds based on its own tones
+Fondo negro elegante en toda la composición.
 
-STEP 2 — DESIGN DECISIONS (based on analysis):
-- BACKGROUND: Choose what makes this specific product POP. Use complementary or analogous colors from the product itself. Never force a dark background if the product is dark. Never force white if the product is white.
-- TYPOGRAPHY: Use bold, modern sans-serif fonts. Maximum 2 lines of text. Maximum 8 words per line. Minimum font size must be readable at thumbnail size.
-- COLOR HARMONY: All colors must relate to the product's palette. The banner should feel like a cohesive design, not a product pasted on a random background.
-- COMPOSITION: Use rule of thirds. Product on a focal intersection point. Calculated negative space — not random.
+El producto debe verse extremadamente nítido y realista, con iluminación de estudio, reflejos suaves y sombras naturales.
 
-STEP 3 — STRICT RULES (never break these):
-- ALL text must be in Spanish
-- Product must be the LARGEST element (40-70% of canvas depending on template)
-- Text must have WCAG AA contrast ratio against its background (use text shadows, overlays, or solid backing if needed)
-- NO watermarks, NO AI notices, NO stock photo text, NO placeholder text
-- Display prices EXACTLY as provided — never invent discounts or crossed-out prices
-- Clean, professional aesthetic — no cluttered layouts
-- No more than 3 visual elements besides the product (text, price, one accent element)
-- The product must look like the REAL product from the reference image`;
+Agregar elementos visuales modernos: degradados de luz, partículas brillantes, líneas de energía, figuras geométricas sutiles, destellos y efectos de profundidad.
+
+Diseño dinámico, no plano.
+
+Jerarquía tipográfica clara con:
+- título grande
+- subtítulo
+- bullets cortos
+- elementos de confianza
+- precio en COP si aplica
+- llamado a la acción si corresponde a la etapa AIDA
+
+El producto debe ser el protagonista visual de la escena.
+
+Respetar margen interno de 20 px en todos los bordes para evitar recortes.
+
+Estilo premium de publicidad para e-commerce.
+
+No caricaturas, no ilustración, solo estilo fotográfico hiperrealista.
+
+Pensado para anuncios de Meta Ads y TikTok Ads.`;
 
 const templatePrompts: Record<string, string> = {
   "hook-visual": `BANNER TYPE: HOOK — Stop the scroll.
