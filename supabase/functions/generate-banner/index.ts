@@ -130,19 +130,26 @@ El usuario debe pensar: "Ese soy yo."`,
 
   "solucion": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
+PRODUCT IMAGE COMPOSITION (CRITICAL):
+- El producto REAL de la imagen proporcionada DEBE ser el elemento central (50-60% del espacio)
+- Colocar la imagen exacta del producto en primer plano o siendo utilizada por una persona
+- Extraer los colores DOMINANTES del producto y usarlos para el fondo, degradados y acentos
+- Agregar destellos o brillos que complementen los colores del producto
+- NO RECREAR el producto desde cero - usar la imagen EXACTA proporcionada
+
 Estilo hiperrealista de fotografía publicitaria premium.
 
-Fondo negro elegante con degradados de luz y efectos luminosos modernos para transmitir innovación y tecnología.
+Fondo con degradados de luz y efectos luminosos que armonicen con la paleta de colores del producto.
 
 La escena debe mostrar claramente el producto como la SOLUCIÓN al problema presentado anteriormente.
 
-El producto aparece en primer plano o siendo utilizado por una persona de manera natural (en la mano, aplicado, instalado o en uso dependiendo del producto).
+El producto aparece en primer plano o siendo utilizado por una persona de manera natural.
 
 La expresión de la persona debe transmitir alivio, comodidad o facilidad al usar el producto.
 
 Iluminación cinematográfica con reflejos suaves sobre el producto para resaltarlo como protagonista.
 
-Agregar elementos visuales modernos alrededor del producto como líneas luminosas, partículas brillantes, destellos o pequeños iconos señalando características clave.
+Agregar elementos visuales modernos alrededor del producto como líneas luminosas, partículas brillantes que usen la paleta de colores del producto.
 
 Composición dinámica y visualmente rica, con profundidad de campo y enfoque claro en el producto.
 
@@ -154,20 +161,10 @@ Mantener márgenes internos de 20 px en todos los bordes para evitar cortes.
 
 Estilo completamente fotográfico e hiperrealista, no ilustración ni caricatura.
 
-Pensado para anuncios de Meta Ads y TikTok Ads.
-
 ESTRUCTURA VISUAL:
 - Parte superior: Título que presenta la solución
-- Centro: Producto en uso o claramente visible
+- Centro: Producto REAL de la imagen en uso o claramente visible
 - Lateral o parte inferior: 2–3 bullets explicativos
-
-EJEMPLO DE REFERENCIA:
-Si el producto fuera una afeitadora eléctrica portátil:
-Título: "La forma fácil de afeitarte en segundos"
-Bullets:
-✔ Diseño compacto y portátil
-✔ Corte preciso y rápido
-✔ Ideal para usar en cualquier lugar
 
 CLAVE PSICOLÓGICA:
 El cliente debe pensar inmediatamente: "Ah… así funciona."
