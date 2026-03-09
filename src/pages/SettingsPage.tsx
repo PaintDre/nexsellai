@@ -27,7 +27,8 @@ import { computeBannersUsed } from "@/lib/planUsage";
 
 const SettingsPage = () => {
   const { user, profile, refreshProfile, isAdmin } = useAuth();
-  
+  const { theme, setTheme } = useTheme();
+
 
   // Account
   const [fullName, setFullName] = useState("");
