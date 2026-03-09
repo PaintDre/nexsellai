@@ -422,7 +422,11 @@ serve(async (req) => {
       };
       sequenceInstruction = `\n\nSALES SEQUENCE: Banner ${sequencePosition} of ${totalInSequence}.
 Stage: ${stageNames[actualTemplateId] || actualTemplateId}
-CRITICAL: This banner's messaging must be COMPLETELY DIFFERENT from other banners in the sequence. Focus ONLY on this stage's unique angle.`;
+CRITICAL SEQUENCE RULES:
+1. This banner's messaging must be COMPLETELY DIFFERENT from other banners in the sequence. Focus ONLY on this stage's unique angle.
+2. VISUAL CONSISTENCY: Maintain the SAME color palette extracted from the product image across ALL banners in the sequence.
+3. Maintain the same photographic style and lighting approach throughout the sequence.
+4. Vary only the composition angle and scene — NOT the visual style or product rendering.`;
     }
 
     let sectionContext = "";
