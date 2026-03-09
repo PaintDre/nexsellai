@@ -288,7 +288,7 @@ Aquí activas dos gatillos mentales fuertes:
 
 Esto hace que el cliente piense: "Si lo voy a comprar, mejor ahora."`,
 
-  "cta": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
+  "cta": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista de fotografía publicitaria premium.
 
