@@ -242,7 +242,7 @@ CLAVE PSICOLÓGICA:
 Las personas compran cuando sienten que no están tomando el riesgo solos.
 Funcionan muy bien: ⭐ estrellas, 🧾 mini reseñas, 👥 número de clientes, 📦 pedidos entregados.`,
 
-  "oferta": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
+  "oferta": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista de fotografía publicitaria premium para e-commerce.
 
