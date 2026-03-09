@@ -396,8 +396,11 @@ serve(async (req) => {
 
     // --- Build prompt ---
     const actualTemplateId = templateId || "hook-visual";
-    const templateStyle = templatePrompts[actualTemplateId] || templatePrompts["hook-visual"];
+    const templateStyleRaw = templatePrompts[actualTemplateId] || templatePrompts["hook-visual"];
     const [width, height] = (outputSize || "1080x1080").split("x").map(Number);
+    const formatDesc = height > width ? "formato vertical" : width > height ? "formato horizontal" : "formato cuadrado";
+    const templateStyle = templateStyleRaw.replaceAll("{{DIMENSIONS}}", `${width}x${height}`).replaceAll("{{FORMAT_DESC}}", formatDesc);
+    const resolvedSystemPrompt = SYSTEM_PROMPT.replaceAll("{{DIMENSIONS}}", `${width}x${height}`).replaceAll("{{FORMAT_DESC}}", formatDesc);
 
     const currencyCode = "CLP"; // Default currency
     const priceFormatted = formatPrice(product.price, currencyCode);
