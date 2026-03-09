@@ -90,15 +90,19 @@ MOOD: High energy, bold, attention-grabbing. The REAL product should feel like i
 
   "problema": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
+PRODUCT IMAGE COMPOSITION (CRITICAL):
+- El producto REAL de la imagen proporcionada debe aparecer de forma secundaria (30-40% del espacio)
+- Colocar el producto en una esquina o lateral, visible pero no dominante
+- Extraer la paleta de colores del producto para los elementos del fondo y acentos
+- NO recrear el producto - usar la imagen exacta proporcionada
+
 Estilo hiperrealista de fotografía publicitaria profesional.
 
-Fondo negro elegante con degradados suaves y ligeros destellos de luz para mantener un estilo premium.
+Fondo con degradados suaves que complementen los colores del producto, con ligeros destellos de luz para mantener un estilo premium.
 
 La escena debe mostrar claramente el PROBLEMA que experimenta el cliente al no tener el producto.
 
 Una persona aparece enfrentando la dificultad o frustración relacionada con el problema principal del producto. La expresión debe transmitir incomodidad, dificultad o frustración de manera natural y realista.
-
-El producto puede aparecer de forma secundaria o insinuada, pero el foco visual principal es el problema.
 
 Iluminación cinematográfica con sombras suaves y profundidad de campo para generar dramatismo.
 
@@ -114,20 +118,14 @@ Mantener márgenes internos de 20 px en todos los bordes para evitar cortes.
 
 Estilo completamente fotográfico e hiperrealista, no ilustración ni caricatura.
 
-Pensado para anuncios de Meta Ads y TikTok Ads.
-
 ESTRUCTURA VISUAL:
 - Parte superior: Título del problema
 - Centro: Persona enfrentando el problema
+- Esquina/lateral: Producto REAL visible pero secundario
 - Parte inferior: Subtítulo corto que intensifique el dolor
 
-EJEMPLO DE REFERENCIA:
-Si el producto fuera un corrector de postura:
-Título: "¿Pasas horas con dolor de espalda?"
-Subtítulo: "La mala postura puede afectar tu día a día."
-
 CLAVE PSICOLÓGICA:
-La escena debe mostrar una situación con la que el cliente se identifique inmediatamente: frustración, incomodidad, pérdida de tiempo, dificultad, desorden, cansancio.
+La escena debe mostrar una situación con la que el cliente se identifique inmediatamente.
 El usuario debe pensar: "Ese soy yo."`,
 
   "solucion": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
