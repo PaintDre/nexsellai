@@ -75,13 +75,18 @@ const templatePrompts: Record<string, string> = {
 
 GOAL: Create instant curiosity. The viewer sees this and MUST stop scrolling.
 
-COMPOSITION:
-- Product: 55-65% of canvas, centered hero shot, larger than life
-- One bold provocative question OR shocking statement (max 6 words) in ultra-bold typography
-- Background: derived from product colors, gradient or solid — whatever creates maximum contrast
-- Optional: subtle motion lines or glow effect around product to draw the eye
+PRODUCT IMAGE COMPOSITION (CRITICAL):
+- The REAL product image provided MUST be the main visual element (55-65% of canvas)
+- Extract the dominant colors from the product and use them for gradients, glows, and accents
+- Center the product as a hero shot, larger than life
+- Add subtle motion lines or glow effects around the ACTUAL product to draw the eye
 
-MOOD: High energy, bold, attention-grabbing. The product should feel like it's jumping off the screen.`,
+COMPOSITION:
+- One bold provocative question OR shocking statement (max 6 words) in ultra-bold typography
+- Background: Use gradients derived from the product's color palette for maximum harmony
+- Maintain the product's exact appearance - do not recreate it
+
+MOOD: High energy, bold, attention-grabbing. The REAL product should feel like it's jumping off the screen.`,
 
   "problema": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
