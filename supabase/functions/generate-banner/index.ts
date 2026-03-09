@@ -251,49 +251,43 @@ Las personas compran cuando sienten que no están tomando el riesgo solos.`,
 
   "oferta": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
+PRODUCT IMAGE COMPOSITION (CRITICAL):
+- El producto REAL de la imagen proporcionada debe ser el centro de la composición (55-65% del espacio)
+- Usar la imagen EXACTA del producto, muy nítida, iluminada con iluminación de estudio
+- Extraer los colores del producto para crear degradados luminosos y efectos de brillo promocional
+- Los badges de oferta deben contrastar pero armonizar con la paleta del producto
+- NO recrear el producto - usar la imagen EXACTA proporcionada
+
 Estilo hiperrealista de fotografía publicitaria premium para e-commerce.
 
-Fondo negro elegante con degradados luminosos y efectos de brillo que transmitan sensación de promoción especial.
-
-El producto aparece en el centro de la composición, muy nítido, iluminado con iluminación de estudio y reflejos suaves para destacarlo como protagonista.
+Fondo con degradados luminosos y efectos de brillo que complementen los colores del producto.
 
 La escena debe transmitir claramente que existe una oferta especial o promoción activa.
 
-Agregar elementos visuales modernos como destellos de luz, líneas luminosas, badges o etiquetas de oferta que resalten el precio o promoción.
+Agregar elementos visuales modernos como destellos de luz, líneas luminosas, badges o etiquetas de oferta.
 
 Composición dinámica, moderna y visualmente rica, con profundidad de campo.
 
 Jerarquía tipográfica clara:
 - Título grande en la parte superior anunciando la promoción
-- Elemento destacado en el centro o cerca del producto mostrando el precio en COP o el descuento
+- Elemento destacado en el centro o cerca del producto mostrando el precio
 - Texto secundario indicando que la oferta es limitada o especial
 
-El producto debe mantenerse claramente visible y ser el foco principal.
+El producto REAL debe mantenerse claramente visible y ser el foco principal.
 
-Agregar elementos visuales como brillos, partículas de luz o figuras geométricas sutiles que refuercen el carácter promocional.
+Agregar elementos visuales como brillos, partículas de luz que usen la paleta de colores del producto.
 
 Mantener margen interno de 20 px en todos los bordes para evitar cortes.
 
 Estilo completamente fotográfico hiperrealista, no caricatura ni ilustración.
 
-Pensado para anuncios de Meta Ads y TikTok Ads.
-
 ESTRUCTURA VISUAL RECOMENDADA:
 - Parte superior: Título de promoción
-- Centro: Producto + badge de precio
+- Centro: Producto REAL + badge de precio
 - Parte inferior: Texto de urgencia
 
-EJEMPLO VISUAL:
-Título: "Oferta especial por tiempo limitado"
-Precio destacado: $89.900 COP
-Texto inferior: Promoción válida hasta agotar stock
-
 CLAVE PSICOLÓGICA DE LA IMAGEN OFERTA:
-Aquí activas dos gatillos mentales fuertes:
-- escasez → "hasta agotar stock"
-- oportunidad → "oferta especial"
-
-Esto hace que el cliente piense: "Si lo voy a comprar, mejor ahora."`,
+Activas escasez y oportunidad para que el cliente piense: "Si lo voy a comprar, mejor ahora."`,
 
   "cta": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
