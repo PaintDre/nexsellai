@@ -200,18 +200,47 @@ CLAVE PSICOLÓGICA:
 El usuario debe imaginar: "Así se vería mi vida si tuviera esto."
 Las escenas funcionan mejor mostrando: tranquilidad, orden, comodidad, eficiencia, satisfacción.`,
 
-  "prueba-social": `BANNER TYPE: SOCIAL PROOF — Build trust and credibility.
+  "prueba-social": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
 
-GOAL: Show that thousands trust this product. Create confidence through social proof.
+Estilo hiperrealista de fotografía publicitaria premium.
 
-COMPOSITION:
-- Product: 40-50% of canvas, centered
-- Large 5-star rating: "⭐⭐⭐⭐⭐ 4.9/5" prominently displayed
-- Customer counter: "+5,000 clientes satisfechos"
-- One short testimonial quote (max 10 words) with a name
-- Gold/amber accents for ratings elements
+Fondo negro elegante con degradados suaves y destellos sutiles para mantener coherencia visual con las imágenes anteriores.
 
-MOOD: Warm, trustworthy, established. The product should feel proven and loved.`,
+La escena debe transmitir confianza y validación social del producto.
+
+Mostrar el producto en un entorno realista acompañado de elementos que representen la satisfacción de clientes: reseñas positivas, calificaciones con estrellas, mini testimonios o indicadores de popularidad.
+
+El producto aparece claramente visible y bien iluminado con iluminación de estudio y sombras suaves.
+
+Opcional: incluir una persona usando el producto con expresión de satisfacción o mostrando el resultado positivo.
+
+Agregar elementos visuales modernos como brillos suaves, pequeñas estrellas luminosas o iconos sutiles que refuercen la idea de calidad y confianza.
+
+Composición dinámica y visualmente rica, con profundidad de campo y enfoque claro en el producto.
+
+Jerarquía tipográfica clara:
+- Título grande en la parte superior que refuerce la confianza del producto
+- Debajo del producto incluir: calificación visual con estrellas, un mini testimonio corto, un indicador de popularidad (ej: miles de clientes satisfechos)
+
+Mantener margen interno de 20 px en todos los bordes para evitar cortes.
+
+Estilo completamente fotográfico hiperrealista, no caricatura ni ilustración.
+
+Pensado para anuncios de Meta Ads y TikTok Ads.
+
+ESTRUCTURA VISUAL:
+- Parte superior: Título de confianza
+- Centro: Producto + cliente satisfecho o escena de uso
+- Debajo: ⭐⭐⭐⭐⭐ + "Me sorprendió la calidad, lo uso todos los días" + "Más de 5.000 clientes satisfechos"
+
+EJEMPLO DE REFERENCIA:
+Título: "Clientes que ya lo probaron lo recomiendan"
+Testimonio corto: "Llegó rápido y funciona perfecto."
+Calificación: ⭐⭐⭐⭐⭐ 4.8/5
+
+CLAVE PSICOLÓGICA:
+Las personas compran cuando sienten que no están tomando el riesgo solos.
+Funcionan muy bien: ⭐ estrellas, 🧾 mini reseñas, 👥 número de clientes, 📦 pedidos entregados.`,
 
   "oferta": `BANNER TYPE: OFFER — Make the deal irresistible.
 
