@@ -157,89 +157,89 @@ const Landings = () => {
 
   if (loading) {
     return (
-      <div className="p-4 md:p-6 lg:p-8 flex items-center justify-center min-h-[50vh]">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      <div className="p-5 md:p-8 lg:p-10 flex items-center justify-center min-h-[50vh]">
+        <div className="h-7 w-7 animate-spin rounded-full border-2 border-primary border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
-      <h1 className="text-3xl font-bold font-display tracking-tight">Mis Landings</h1>
+    <div className="p-5 md:p-8 lg:p-10 space-y-6 max-w-6xl mx-auto">
+      <h1 className="text-2xl md:text-3xl font-bold font-display">Mis Landings</h1>
 
       {landings.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <FileText className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground mb-4">No tienes landings generadas aún</p>
-            <Button asChild><Link to="/products">Ver productos para generar</Link></Button>
+            <FileText className="h-10 w-10 text-muted-foreground/30 mb-4" />
+            <p className="text-sm text-muted-foreground mb-4">No tienes landings generadas aún</p>
+            <Button asChild size="sm"><Link to="/products">Ver productos para generar</Link></Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {landings.map((landing) => {
             const hero = getHeroBlock(landing.blocks);
             const image = getProductImage(landing.product);
             const theme = (landing as any).theme || "clean";
 
             return (
-              <Card key={landing.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
+              <Card key={landing.id} className="overflow-hidden hover:shadow-md transition-all duration-200 group">
                 <Link to={`/landings/${landing.id}/preview`} className="block">
-                  <div className="relative h-40 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-50">
+                  <div className="relative h-36 overflow-hidden bg-muted">
                     {image && (
                       <img
                         src={image}
                         alt={landing.name}
-                        className="absolute right-0 top-0 h-full w-1/2 object-contain opacity-80 group-hover:scale-105 transition-transform duration-500"
+                        className="absolute right-0 top-0 h-full w-1/2 object-contain opacity-70 group-hover:scale-105 transition-transform duration-500"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/70 to-transparent p-5 flex flex-col justify-end">
-                      <p className="text-xs font-medium text-muted-foreground mb-1 uppercase tracking-wider">
+                    <div className="absolute inset-0 bg-gradient-to-r from-card/95 via-card/70 to-transparent p-4 flex flex-col justify-end">
+                      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
                         {landing.product?.name || "Producto"}
                       </p>
-                      <h3 className="text-sm font-bold text-foreground leading-tight line-clamp-2">
+                      <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2 mt-0.5">
                         {hero?.title || landing.name}
                       </h3>
                     </div>
-                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <div className="bg-background/90 backdrop-blur-sm rounded-full p-1.5 shadow-sm">
-                        <Maximize2 className="h-3.5 w-3.5 text-foreground" />
+                    <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="bg-background/80 backdrop-blur-sm rounded-full p-1.5">
+                        <Maximize2 className="h-3 w-3 text-foreground" />
                       </div>
                     </div>
                   </div>
                 </Link>
 
-                <CardContent className="p-4 space-y-3">
+                <CardContent className="p-3.5 space-y-2.5">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold text-sm truncate">{landing.name}</h3>
+                    <h3 className="font-medium text-sm truncate">{landing.name}</h3>
                     <div className="flex gap-1 shrink-0">
                       <Badge variant="secondary" className="capitalize text-[10px] px-1.5">{theme}</Badge>
                       <Badge variant="outline" className="capitalize text-[10px] px-1.5">{landing.intensity}</Badge>
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">{new Date(landing.created_at).toLocaleDateString("es-CL")}</p>
-                    <div className="space-y-2">
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" asChild className="flex-1 text-xs min-h-[44px]">
-                          <Link to={`/landings/${landing.id}`}><Eye className="h-3 w-3 mr-1" /> Editor</Link>
-                        </Button>
-                        <Button variant="default" size="sm" asChild className="flex-1 text-xs min-h-[44px]">
-                          <Link to={`/landings/${landing.id}/preview`}><Maximize2 className="h-3 w-3 mr-1" /> Preview</Link>
-                        </Button>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <Button variant="secondary" size="sm" className="text-xs flex-1 min-h-[44px]" onClick={() => handleDuplicate(landing)}>
-                          <Copy className="h-3 w-3 mr-1" /> Duplicar
-                        </Button>
-                        <Button variant="secondary" size="sm" className="text-xs flex-1 min-h-[44px]" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
-                          {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Download className="h-3 w-3 mr-1" /> Exportar</>}
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm" className="text-xs min-h-[44px]" disabled={deletingId === landing.id}>
-                              {deletingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
-                            </Button>
-                          </AlertDialogTrigger>
+                  <p className="text-[11px] text-muted-foreground">{new Date(landing.created_at).toLocaleDateString("es-CL")}</p>
+                  <div className="space-y-1.5">
+                    <div className="flex gap-1.5">
+                      <Button variant="outline" size="sm" asChild className="flex-1 text-xs h-8">
+                        <Link to={`/landings/${landing.id}`}><Eye className="h-3 w-3 mr-1" /> Editor</Link>
+                      </Button>
+                      <Button variant="default" size="sm" asChild className="flex-1 text-xs h-8">
+                        <Link to={`/landings/${landing.id}/preview`}><Maximize2 className="h-3 w-3 mr-1" /> Preview</Link>
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      <Button variant="secondary" size="sm" className="text-xs flex-1 h-8" onClick={() => handleDuplicate(landing)}>
+                        <Copy className="h-3 w-3 mr-1" /> Duplicar
+                      </Button>
+                      <Button variant="secondary" size="sm" className="text-xs flex-1 h-8" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
+                        {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Download className="h-3 w-3 mr-1" /> Exportar</>}
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive h-8 px-2" disabled={deletingId === landing.id}>
+                            {deletingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+                          </Button>
+                        </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
                             <AlertDialogTitle>¿Eliminar landing?</AlertDialogTitle>
@@ -253,8 +253,8 @@ const Landings = () => {
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>
-                      </div>
                     </div>
+                  </div>
                 </CardContent>
               </Card>
             );
