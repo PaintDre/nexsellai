@@ -24,7 +24,7 @@ function formatPrice(price: number, currencyCode: string): string {
 
 // --- Professional agency-level prompt system ---
 
-const SYSTEM_PROMPT = `Diseño de landing para e-commerce en formato historia 1080x1920.
+const SYSTEM_PROMPT = `Diseño de banner para e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista, fotografía publicitaria profesional, composición rica en elementos visuales, profundidad de campo, iluminación cinematográfica.
 
