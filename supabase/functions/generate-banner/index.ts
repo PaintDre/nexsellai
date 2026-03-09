@@ -79,17 +79,50 @@ COMPOSITION:
 
 MOOD: Empathetic, relatable. The text should feel like it's reading the customer's mind.`,
 
-  "solucion": `BANNER TYPE: SOLUTION — The product IS the answer.
+  "solucion": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
 
-GOAL: Present the product as the definitive solution. Transition from problem to hope.
+Estilo hiperrealista de fotografía publicitaria premium.
 
-COMPOSITION:
-- Product: 60-70% of canvas, front and center, hero shot with dramatic lighting
-- Solution statement (max 7 words) in bright, confident typography
-- Background: optimistic, bright colors derived from the product's own palette
-- Visual feel: clean, bright, hopeful — a breath of fresh air
+Fondo negro elegante con degradados de luz y efectos luminosos modernos para transmitir innovación y tecnología.
 
-MOOD: Confidence, relief, optimism. The product should look like the answer to everything.`,
+La escena debe mostrar claramente el producto como la SOLUCIÓN al problema presentado anteriormente.
+
+El producto aparece en primer plano o siendo utilizado por una persona de manera natural (en la mano, aplicado, instalado o en uso dependiendo del producto).
+
+La expresión de la persona debe transmitir alivio, comodidad o facilidad al usar el producto.
+
+Iluminación cinematográfica con reflejos suaves sobre el producto para resaltarlo como protagonista.
+
+Agregar elementos visuales modernos alrededor del producto como líneas luminosas, partículas brillantes, destellos o pequeños iconos señalando características clave.
+
+Composición dinámica y visualmente rica, con profundidad de campo y enfoque claro en el producto.
+
+Jerarquía tipográfica clara:
+- Título grande en la parte superior que comunique que el producto es la solución
+- Debajo del producto incluir 2–3 bullets cortos explicando: cómo funciona, por qué es práctico, qué lo hace diferente
+
+Mantener márgenes internos de 20 px en todos los bordes para evitar cortes.
+
+Estilo completamente fotográfico e hiperrealista, no ilustración ni caricatura.
+
+Pensado para anuncios de Meta Ads y TikTok Ads.
+
+ESTRUCTURA VISUAL:
+- Parte superior: Título que presenta la solución
+- Centro: Producto en uso o claramente visible
+- Lateral o parte inferior: 2–3 bullets explicativos
+
+EJEMPLO DE REFERENCIA:
+Si el producto fuera una afeitadora eléctrica portátil:
+Título: "La forma fácil de afeitarte en segundos"
+Bullets:
+✔ Diseño compacto y portátil
+✔ Corte preciso y rápido
+✔ Ideal para usar en cualquier lugar
+
+CLAVE PSICOLÓGICA:
+El cliente debe pensar inmediatamente: "Ah… así funciona."
+No debe haber confusión. La escena debe explicar el producto en 1 segundo visual.`,
 
   "beneficio": `BANNER TYPE: KEY BENEFIT — One irresistible advantage.
 
