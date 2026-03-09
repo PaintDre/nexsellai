@@ -242,17 +242,51 @@ CLAVE PSICOLÓGICA:
 Las personas compran cuando sienten que no están tomando el riesgo solos.
 Funcionan muy bien: ⭐ estrellas, 🧾 mini reseñas, 👥 número de clientes, 📦 pedidos entregados.`,
 
-  "oferta": `BANNER TYPE: OFFER — Make the deal irresistible.
+  "oferta": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
 
-GOAL: Present the product with its price in a way that feels like incredible value.
+Estilo hiperrealista de fotografía publicitaria premium para e-commerce.
 
-COMPOSITION:
-- Product: 50% of canvas, large and prominent
-- Price displayed EXACTLY as provided — large, bold, unmissable
-- Optional urgency element: "Disponible ahora" or "Stock limitado" (max 3 words)
-- Background: energetic colors that complement the product
+Fondo negro elegante con degradados luminosos y efectos de brillo que transmitan sensación de promoción especial.
 
-MOOD: Exciting, valuable, urgent. The viewer should feel this is a deal they can't miss.`,
+El producto aparece en el centro de la composición, muy nítido, iluminado con iluminación de estudio y reflejos suaves para destacarlo como protagonista.
+
+La escena debe transmitir claramente que existe una oferta especial o promoción activa.
+
+Agregar elementos visuales modernos como destellos de luz, líneas luminosas, badges o etiquetas de oferta que resalten el precio o promoción.
+
+Composición dinámica, moderna y visualmente rica, con profundidad de campo.
+
+Jerarquía tipográfica clara:
+- Título grande en la parte superior anunciando la promoción
+- Elemento destacado en el centro o cerca del producto mostrando el precio en COP o el descuento
+- Texto secundario indicando que la oferta es limitada o especial
+
+El producto debe mantenerse claramente visible y ser el foco principal.
+
+Agregar elementos visuales como brillos, partículas de luz o figuras geométricas sutiles que refuercen el carácter promocional.
+
+Mantener margen interno de 20 px en todos los bordes para evitar cortes.
+
+Estilo completamente fotográfico hiperrealista, no caricatura ni ilustración.
+
+Pensado para anuncios de Meta Ads y TikTok Ads.
+
+ESTRUCTURA VISUAL RECOMENDADA:
+- Parte superior: Título de promoción
+- Centro: Producto + badge de precio
+- Parte inferior: Texto de urgencia
+
+EJEMPLO VISUAL:
+Título: "Oferta especial por tiempo limitado"
+Precio destacado: $89.900 COP
+Texto inferior: Promoción válida hasta agotar stock
+
+CLAVE PSICOLÓGICA DE LA IMAGEN OFERTA:
+Aquí activas dos gatillos mentales fuertes:
+- escasez → "hasta agotar stock"
+- oportunidad → "oferta especial"
+
+Esto hace que el cliente piense: "Si lo voy a comprar, mejor ahora."`,
 
   "cta": `BANNER TYPE: CTA — Close the sale NOW.
 
