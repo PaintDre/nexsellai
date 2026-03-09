@@ -24,19 +24,17 @@ import {
 } from "@/components/ui/alert-dialog";
 import { LANDING_LIMITS, BANNER_LIMITS } from "@/lib/constants";
 import { computeBannersUsed } from "@/lib/planUsage";
+import { cn } from "@/lib/utils";
 
 const SettingsPage = () => {
   const { user, profile, refreshProfile, isAdmin } = useAuth();
   const { theme, setTheme } = useTheme();
 
-
-  // Account
   const [fullName, setFullName] = useState("");
   const [saving, setSaving] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
 
-  // Generator preferences
   const [defaultIntensity, setDefaultIntensity] = useState(() => localStorage.getItem("pref_intensity") || "medium");
   const [defaultMode, setDefaultMode] = useState(() => localStorage.getItem("pref_mode") || "aida");
 
@@ -95,31 +93,37 @@ const SettingsPage = () => {
   const bannersUsed = computeBannersUsed(profile);
   const bannerUsagePercent = Math.min((bannersUsed / bannerLimit) * 100, 100);
 
-  return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-2xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold font-display tracking-tight">Ajustes</h1>
+  const themeOptions = [
+    { value: "light", label: "Claro", icon: Sun },
+    { value: "dark", label: "Oscuro", icon: Moon },
+    { value: "system", label: "Sistema", icon: Monitor },
+  ];
 
-      {/* A) Account */}
+  return (
+    <div className="p-5 md:p-8 lg:p-10 max-w-2xl mx-auto space-y-6">
+      <h1 className="text-2xl md:text-3xl font-bold font-display">Ajustes</h1>
+
+      {/* Account */}
       <Card>
         <CardHeader>
-          <CardTitle className="font-display">Cuenta</CardTitle>
+          <CardTitle className="font-display text-base">Cuenta</CardTitle>
           <CardDescription>Tu información personal</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Email</Label>
-            <Input value={user?.email || ""} disabled />
+          <div className="space-y-1.5">
+            <Label className="text-xs">Email</Label>
+            <Input value={user?.email || ""} disabled className="bg-muted/50" />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="name">Nombre</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="name" className="text-xs">Nombre</Label>
             <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
           </div>
-          <Button onClick={handleSaveProfile} disabled={saving || fullName === (profile?.full_name || "")} className="w-full sm:w-auto">
-            <Save className="h-4 w-4 mr-2" /> {saving ? "Guardando..." : "Guardar nombre"}
+          <Button onClick={handleSaveProfile} disabled={saving || fullName === (profile?.full_name || "")} size="sm" className="w-full sm:w-auto">
+            <Save className="h-3.5 w-3.5 mr-1.5" /> {saving ? "Guardando..." : "Guardar nombre"}
           </Button>
 
           <div className="border-t pt-4 space-y-2">
-            <Label htmlFor="newPassword">Cambiar contraseña</Label>
+            <Label htmlFor="newPassword" className="text-xs">Cambiar contraseña</Label>
             <div className="flex flex-col sm:flex-row gap-2">
               <Input
                 id="newPassword"
@@ -128,8 +132,8 @@ const SettingsPage = () => {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
               />
-              <Button onClick={handleChangePassword} disabled={changingPassword || !newPassword} variant="outline" className="w-full sm:w-auto shrink-0">
-                <Lock className="h-4 w-4 mr-2" /> {changingPassword ? "Cambiando..." : "Cambiar"}
+              <Button onClick={handleChangePassword} disabled={changingPassword || !newPassword} variant="outline" size="sm" className="w-full sm:w-auto shrink-0">
+                <Lock className="h-3.5 w-3.5 mr-1.5" /> {changingPassword ? "Cambiando..." : "Cambiar"}
               </Button>
             </div>
           </div>
@@ -137,8 +141,8 @@ const SettingsPage = () => {
           <div className="border-t pt-4">
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="ghost" className="text-destructive hover:text-destructive">
-                  <Trash2 className="h-4 w-4 mr-2" /> Eliminar cuenta
+                <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive text-xs">
+                  <Trash2 className="h-3.5 w-3.5 mr-1.5" /> Eliminar cuenta
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -163,73 +167,61 @@ const SettingsPage = () => {
       {/* Appearance */}
       <Card>
         <CardHeader>
-          <CardTitle className="font-display flex items-center gap-2">
-            <Palette className="h-5 w-5 text-primary" /> Apariencia
+          <CardTitle className="font-display text-base flex items-center gap-2">
+            <Palette className="h-4 w-4 text-primary" /> Apariencia
           </CardTitle>
           <CardDescription>Personaliza el tema de la interfaz</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Tema</Label>
-            <div className="grid grid-cols-3 gap-2">
-              <Button
-                variant={theme === "light" ? "default" : "outline"}
-                className="flex flex-col items-center gap-1 h-auto py-3"
-                onClick={() => setTheme("light")}
+        <CardContent>
+          <div className="grid grid-cols-3 gap-2">
+            {themeOptions.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => setTheme(opt.value)}
+                className={cn(
+                  "flex flex-col items-center gap-1.5 rounded-lg border-2 p-3 transition-all duration-200",
+                  theme === opt.value
+                    ? "border-primary bg-accent"
+                    : "border-transparent bg-muted/50 hover:bg-muted"
+                )}
               >
-                <Sun className="h-5 w-5" />
-                <span className="text-xs">Claro</span>
-              </Button>
-              <Button
-                variant={theme === "dark" ? "default" : "outline"}
-                className="flex flex-col items-center gap-1 h-auto py-3"
-                onClick={() => setTheme("dark")}
-              >
-                <Moon className="h-5 w-5" />
-                <span className="text-xs">Oscuro</span>
-              </Button>
-              <Button
-                variant={theme === "system" ? "default" : "outline"}
-                className="flex flex-col items-center gap-1 h-auto py-3"
-                onClick={() => setTheme("system")}
-              >
-                <Monitor className="h-5 w-5" />
-                <span className="text-xs">Sistema</span>
-              </Button>
-            </div>
+                <opt.icon className={cn("h-4 w-4", theme === opt.value ? "text-primary" : "text-muted-foreground")} />
+                <span className="text-xs font-medium">{opt.label}</span>
+              </button>
+            ))}
           </div>
         </CardContent>
       </Card>
 
-      {/* B) Plan & Usage */}
+      {/* Plan & Usage */}
       <Card>
         <CardHeader>
-          <CardTitle className="font-display flex items-center gap-2">
-            <Zap className="h-5 w-5 text-primary" /> Plan y uso
+          <CardTitle className="font-display text-base flex items-center gap-2">
+            <Zap className="h-4 w-4 text-primary" /> Plan y uso
           </CardTitle>
-          <CardDescription>Tu plan actual y consumo de landings y banners</CardDescription>
+          <CardDescription>Tu plan actual y consumo</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Plan actual</span>
-            <span className="font-semibold capitalize">{plan}</span>
+            <span className="text-xs text-muted-foreground">Plan actual</span>
+            <span className="font-medium text-sm capitalize">{plan}</span>
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
               <span>Landings usadas</span>
               <span className="font-medium">{landingsUsed} / {limit}</span>
             </div>
-            <Progress value={usagePercent} className="h-2" />
+            <Progress value={usagePercent} className="h-1.5" />
           </div>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span className="flex items-center gap-1"><Image className="h-3.5 w-3.5" /> Banners usados</span>
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="flex items-center gap-1"><Image className="h-3 w-3" /> Banners usados</span>
               <span className="font-medium">{bannersUsed} / {bannerLimit}</span>
             </div>
-            <Progress value={bannerUsagePercent} className="h-2" />
+            <Progress value={bannerUsagePercent} className="h-1.5" />
           </div>
           {plan !== "pro" && (
-            <Button asChild variant="outline" className="w-full">
+            <Button asChild variant="outline" size="sm" className="w-full">
               <Link to="/pricing">Mejorar plan</Link>
             </Button>
           )}
@@ -239,16 +231,14 @@ const SettingsPage = () => {
       {isAdmin() && (
       <Card>
         <CardHeader>
-          <CardTitle className="font-display">Preferencias del generador</CardTitle>
+          <CardTitle className="font-display text-base">Preferencias del generador</CardTitle>
           <CardDescription>Valores predeterminados al crear nuevas landings</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Intensidad por defecto</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Intensidad por defecto</Label>
             <Select value={defaultIntensity} onValueChange={setDefaultIntensity}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="soft">Suave</SelectItem>
                 <SelectItem value="medium">Media</SelectItem>
@@ -256,35 +246,33 @@ const SettingsPage = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2">
-            <Label>Framework por defecto</Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Framework por defecto</Label>
             <Select value={defaultMode} onValueChange={setDefaultMode}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="aida">AIDA</SelectItem>
                 <SelectItem value="standard">Estándar</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={handleSavePreferences} variant="outline" className="w-full sm:w-auto">
-            <Save className="h-4 w-4 mr-2" /> Guardar preferencias
+          <Button onClick={handleSavePreferences} variant="outline" size="sm" className="w-full sm:w-auto">
+            <Save className="h-3.5 w-3.5 mr-1.5" /> Guardar preferencias
           </Button>
         </CardContent>
       </Card>
       )}
 
-      {/* D) Help & Support */}
+      {/* Help */}
       <Card>
         <CardHeader>
-          <CardTitle className="font-display flex items-center gap-2">
-            <HelpCircle className="h-5 w-5" /> Ayuda y soporte
+          <CardTitle className="font-display text-base flex items-center gap-2">
+            <HelpCircle className="h-4 w-4" /> Ayuda y soporte
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          <a href="mailto:soporte@nexsell.ai" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <MessageSquare className="h-4 w-4" /> Reportar un problema
+        <CardContent>
+          <a href="mailto:soporte@nexsell.ai" className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors">
+            <MessageSquare className="h-3.5 w-3.5" /> Reportar un problema
           </a>
         </CardContent>
       </Card>
