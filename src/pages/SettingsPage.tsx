@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "next-themes";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Save, Lock, Trash2, ExternalLink, HelpCircle, MessageSquare, Zap, Image } from "lucide-react";
+import { Save, Lock, Trash2, HelpCircle, MessageSquare, Zap, Image, Palette, Sun, Moon, Monitor } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   AlertDialog,
@@ -26,7 +27,8 @@ import { computeBannersUsed } from "@/lib/planUsage";
 
 const SettingsPage = () => {
   const { user, profile, refreshProfile, isAdmin } = useAuth();
-  
+  const { theme, setTheme } = useTheme();
+
 
   // Account
   const [fullName, setFullName] = useState("");
@@ -154,6 +156,47 @@ const SettingsPage = () => {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Appearance */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-display flex items-center gap-2">
+            <Palette className="h-5 w-5 text-primary" /> Apariencia
+          </CardTitle>
+          <CardDescription>Personaliza el tema de la interfaz</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label>Tema</Label>
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                variant={theme === "light" ? "default" : "outline"}
+                className="flex flex-col items-center gap-1 h-auto py-3"
+                onClick={() => setTheme("light")}
+              >
+                <Sun className="h-5 w-5" />
+                <span className="text-xs">Claro</span>
+              </Button>
+              <Button
+                variant={theme === "dark" ? "default" : "outline"}
+                className="flex flex-col items-center gap-1 h-auto py-3"
+                onClick={() => setTheme("dark")}
+              >
+                <Moon className="h-5 w-5" />
+                <span className="text-xs">Oscuro</span>
+              </Button>
+              <Button
+                variant={theme === "system" ? "default" : "outline"}
+                className="flex flex-col items-center gap-1 h-auto py-3"
+                onClick={() => setTheme("system")}
+              >
+                <Monitor className="h-5 w-5" />
+                <span className="text-xs">Sistema</span>
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
