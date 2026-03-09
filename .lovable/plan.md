@@ -1,11 +1,24 @@
 
-# Plan: Actualización del Prompt Base
+# Plan: Implementación del Prompt Base
 
-He recibido tu **Prompt Base**. Es excelente, ya que define un estilo muy claro (hiperrealista, fondo negro, iluminación cinematográfica, elementos modernos, jerarquía AIDA) y evita ambigüedades.
+## Cambio a realizar
 
-Voy a reemplazar el `SYSTEM_PROMPT` actual de la Edge Function (`generate-banner`) con tu nueva instrucción. 
+Actualizaré el archivo `supabase/functions/generate-banner/index.ts` reemplazando el `SYSTEM_PROMPT` actual (líneas 27-52) con el nuevo prompt base que proporcionaste.
 
-### El cambio a realizar será el siguiente:
+### Antes (líneas 27-52):
+- Prompt en inglés enfocado en análisis de producto
+- Proceso de diseño en 3 pasos
+- Énfasis en paleta de colores y composición
+
+### Después:
+- Prompt en español orientado a formato historia 1080x1920
+- Estilo hiperrealista con fondo negro
+- Iluminación cinematográfica y elementos modernos
+- Jerarquía AIDA clara
+- Márgenes de 20px
+- Optimizado para Meta Ads y TikTok Ads
+
+## Código exacto a implementar
 
 ```typescript
 const SYSTEM_PROMPT = `Diseño de landing para e-commerce en formato historia 1080x1920.
@@ -39,8 +52,6 @@ No caricaturas, no ilustración, solo estilo fotográfico hiperrealista.
 Pensado para anuncios de Meta Ads y TikTok Ads.`;
 ```
 
-### Siguientes pasos:
+## Próximos pasos
 
-Si apruebas este plan, actualizaré el código base con este nuevo `SYSTEM_PROMPT`. 
-
-Mientras tanto o después de aprobar, **puedes enviarme los prompts específicos para los 7 tipos de banners** (Hook, Problema, Solución, Beneficio, Prueba Social, Oferta, CTA) para que actualicemos también la variable `templatePrompts` y completar la modificación de todo el agente.
+Una vez implementado este cambio, estarás listo para enviarme los **7 prompts específicos** para cada tipo de banner (Hook, Problema, Solución, Beneficio, Prueba Social, Oferta, CTA) y actualizaremos el objeto `templatePrompts`.
