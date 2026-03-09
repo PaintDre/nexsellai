@@ -85,4 +85,5 @@ export const bannerQuantityOptions = [
   { value: 2, label: "2 banners", description: "Secuencia rápida de venta" },
   { value: 3, label: "3 banners", description: "Balance ideal para campañas" },
   { value: 5, label: "5 banners", description: "Secuencia completa de venta" },
+  { value: 7, label: "7 banners", description: "Funnel de venta completo" },
 ];

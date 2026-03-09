@@ -29,6 +29,7 @@ const SEQUENCES: Record<number, string[]> = {
   2: ["hook-visual", "oferta"],
   3: ["hook-visual", "beneficio", "oferta"],
   5: ["hook-visual", "problema", "solucion", "beneficio", "oferta"],
+  7: ["hook-visual", "problema", "solucion", "beneficio", "prueba-social", "oferta", "cta"],
 };
 
 // ─── Types ───────────────────────────────────────────────────────────────────

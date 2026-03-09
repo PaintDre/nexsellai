@@ -518,7 +518,7 @@ ${customText ? `\nCUSTOM SLOGAN (include prominently): "${customText}"` : ""}`;
       body: JSON.stringify({
         model: "google/gemini-3-pro-image-preview",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: resolvedSystemPrompt },
           { role: "user", content: userContent },
         ],
         modalities: ["image", "text"],
