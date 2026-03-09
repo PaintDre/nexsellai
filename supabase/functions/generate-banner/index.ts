@@ -488,6 +488,9 @@ ${toneInstruction ? `\nTONE: ${toneInstruction}` : ""}
 ${styleInstruction ? `\n${styleInstruction}` : ""}`;
     }
 
+    const hasProductImage = product.images && product.images.length > 0;
+    console.log(hasProductImage ? `✅ Product image available: ${product.images[0]}` : `⚠️ No product image for: ${product.name}`);
+
     const textPrompt = `Generate a professional ecommerce marketing banner image.
 
 PRODUCT DATA:
@@ -496,6 +499,13 @@ PRODUCT DATA:
 - Category: ${product.category}
 - Target Audience: ${product.target_audience}
 ${benefitsText}
+
+${hasProductImage ? `CRITICAL IMAGE INSTRUCTION:
+The REAL product image is attached to this message. You MUST use this EXACT product image as the primary visual element.
+- Analyze its colors, textures, shape, and style
+- Extract the dominant color palette and use it for backgrounds, gradients, and accents
+- Do NOT recreate or reimagine the product from scratch
+- The product in the banner must match the attached image exactly` : "No product image provided — generate a representative product visualization."}
 
 BANNER DIMENSIONS: ${width}x${height} pixels
 
