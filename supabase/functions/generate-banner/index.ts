@@ -200,7 +200,7 @@ CLAVE PSICOLÓGICA:
 El usuario debe imaginar: "Así se vería mi vida si tuviera esto."
 Las escenas funcionan mejor mostrando: tranquilidad, orden, comodidad, eficiencia, satisfacción.`,
 
-  "prueba-social": `Diseño de imagen para landing de e-commerce en formato vertical 1080x1920.
+  "prueba-social": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista de fotografía publicitaria premium.
 
