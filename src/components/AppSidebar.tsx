@@ -109,6 +109,7 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
           </div>
         )}
         <div className={cn("flex", collapsed ? "flex-col items-center gap-2" : "gap-2")}>
+          <ThemeToggle collapsed={collapsed} />
           {!collapsed ? (
             <Button variant="ghost" size="sm" className="flex-1 justify-start gap-2 text-sidebar-foreground" asChild onClick={onNavigate}>
               <Link to="/settings"><Settings className="h-4 w-4" /> Ajustes</Link>
