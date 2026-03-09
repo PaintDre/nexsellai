@@ -172,15 +172,20 @@ No debe haber confusión. La escena debe explicar el producto en 1 segundo visua
 
   "beneficio": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
+PRODUCT IMAGE COMPOSITION (CRITICAL):
+- El producto REAL de la imagen proporcionada debe estar presente y claramente visible (40-50% del espacio)
+- Integrar el producto EXACTO de forma natural dentro de la escena aspiracional
+- Extraer la paleta de colores del producto para crear degradados luminosos y efectos de partículas
+- Los brillos y acentos deben usar los colores dominantes del producto
+- NO recrear el producto - usar la imagen EXACTA proporcionada
+
 Estilo hiperrealista de fotografía publicitaria premium.
 
-Fondo negro elegante con degradados luminosos, destellos suaves y efectos de partículas que transmitan una sensación aspiracional y moderna.
+Fondo con degradados luminosos, destellos suaves y efectos de partículas que usen la paleta de colores del producto.
 
 La escena debe mostrar el BENEFICIO principal del producto en una situación positiva y deseable.
 
 Una persona aparece disfrutando el resultado de usar el producto: comodidad, satisfacción, facilidad o mejora visible en su vida cotidiana.
-
-El producto debe estar presente y claramente visible, integrado de forma natural dentro de la escena.
 
 Iluminación cinematográfica con luces suaves que resalten el producto y la escena aspiracional.
 
@@ -191,30 +196,19 @@ Composición dinámica con profundidad de campo y enfoque claro en el resultado 
 Jerarquía tipográfica clara:
 - Título grande en la parte superior destacando el beneficio principal
 - Debajo o al lado del producto incluir 3 beneficios cortos en formato bullet
-- Opcional: agregar pequeños elementos de confianza como estrellas de valoración o un mini testimonio corto
+- Opcional: agregar pequeños elementos de confianza como estrellas de valoración
 
 Mantener margen interno de 20 px en todos los bordes para evitar cortes.
 
 Estilo completamente fotográfico hiperrealista, no caricatura ni ilustración.
 
-Pensado para anuncios de Meta Ads y TikTok Ads.
-
 ESTRUCTURA VISUAL:
 - Parte superior: Título aspiracional
-- Centro: Persona disfrutando el resultado
+- Centro: Persona disfrutando el resultado con producto REAL visible
 - Lateral o inferior: 3 beneficios claros
 
-EJEMPLO DE REFERENCIA:
-Si el producto fuera un organizador de cables:
-Título: "Tu espacio siempre ordenado"
-Beneficios:
-✔ Escritorio limpio y organizado
-✔ Instalación rápida en segundos
-✔ Ideal para casa u oficina
-
 CLAVE PSICOLÓGICA:
-El usuario debe imaginar: "Así se vería mi vida si tuviera esto."
-Las escenas funcionan mejor mostrando: tranquilidad, orden, comodidad, eficiencia, satisfacción.`,
+El usuario debe imaginar: "Así se vería mi vida si tuviera esto."`,
 
   "prueba-social": `Diseño de imagen para landing de e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
