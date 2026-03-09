@@ -24,11 +24,27 @@ function formatPrice(price: number, currencyCode: string): string {
 
 // --- Professional agency-level prompt system ---
 
-const SYSTEM_PROMPT = `Diseño de banner para e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
+const SYSTEM_PROMPT = `CRITICAL IMAGE INSTRUCTION:
+Una imagen del producto REAL está incluida en este prompt.
+DEBES usar esa imagen exacta del producto como referencia visual principal.
+
+Analiza la imagen del producto para:
+- Extraer la paleta de colores dominante (colores principales, secundarios y de acento)
+- Identificar el estilo visual (moderno, clásico, tecnológico, natural, minimalista, premium)
+- Mantener proporciones y características reales del producto
+- Integrar el producto de forma natural en la composición
+- Usar los colores dominantes del producto para elementos del fondo, tipografía y acentos
+
+NO RECREAR el producto desde cero. NO INVENTAR una versión diferente del producto.
+USA la imagen proporcionada como el elemento visual EXACTO.
+
+---
+
+Diseño de banner para e-commerce en {{FORMAT_DESC}} {{DIMENSIONS}}.
 
 Estilo hiperrealista, fotografía publicitaria profesional, composición rica en elementos visuales, profundidad de campo, iluminación cinematográfica.
 
-Fondo negro elegante en toda la composición.
+El fondo debe complementar los colores del producto: usa degradados, tonos sólidos o efectos que armonicen con la paleta extraída del producto real.
 
 El producto debe verse extremadamente nítido y realista, con iluminación de estudio, reflejos suaves y sombras naturales.
 
@@ -44,7 +60,7 @@ Jerarquía tipográfica clara con:
 - precio en COP si aplica
 - llamado a la acción si corresponde a la etapa AIDA
 
-El producto debe ser el protagonista visual de la escena.
+El producto (DE LA IMAGEN PROPORCIONADA) debe ser el protagonista visual de la escena.
 
 Respetar margen interno de 20 px en todos los bordes para evitar recortes.
 
