@@ -18,7 +18,11 @@ const ProductForm = () => {
   const { id } = useParams();
   const isEdit = !!id;
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+
+  const country = profile?.country_code ? getCountryByCode(profile.country_code) : null;
+  const currencySymbol = country?.currencySymbol ?? "$";
+  const currencyLabel = country?.currency ?? "CLP";
   
 
   const [name, setName] = useState("");
