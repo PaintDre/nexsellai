@@ -247,14 +247,14 @@ const Banners = () => {
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold font-display tracking-tight">Banners</h1>
+          <h1 className="text-xl sm:text-3xl font-bold font-display tracking-tight">Banners</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {banners.length} banner{banners.length !== 1 ? "s" : ""} generado{banners.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button onClick={() => setProductSelectorOpen(true)} className="gap-2">
+        <Button onClick={() => setProductSelectorOpen(true)} className="gap-2 w-full sm:w-auto min-h-[44px]">
           <Plus className="h-4 w-4" /> Generar Banners
         </Button>
       </div>
