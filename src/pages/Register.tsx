@@ -44,11 +44,18 @@ const Register = () => {
     }
 
     setLoading(true);
+    const selectedCountry = getCountryByCode(countryCode);
+    const timezone = getBrowserTimezone();
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: {
+          full_name: fullName,
+          country_code: countryCode || null,
+          timezone,
+          currency: selectedCountry?.currency || "USD",
+        },
         emailRedirectTo: `${window.location.origin}/onboarding`,
       },
     });
