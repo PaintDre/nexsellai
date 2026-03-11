@@ -27,6 +27,8 @@ interface PromptParams {
   hasOffer: boolean;
   guarantee?: string;
   plan: string;
+  currency?: string;
+  country_code?: string;
 }
 
 interface Strategy {
