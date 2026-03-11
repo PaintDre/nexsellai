@@ -248,11 +248,11 @@ Plan: ${plan}
 ${buildPlanSections(plan)}
 
 ## Style & tone rules
-- Every landing must feel like a professional Chilean ecommerce sales page
-- Use conversational but professional Spanish (Chilean)
+- Every landing must feel like a professional ecommerce sales page for the target country
+- ${countryInstruction}
 - Include emotional triggers: fear of missing out, social validation, aspiration
 - Benefits > Features: always lead with what the customer GETS, not what the product HAS
-- Prices always in CLP format ($XX.XXX)
+- Prices always in ${currencyCode} format
 - Never mention plan names inside the landing copy
 - Maintain consistent tone across all blocks (guided by strategy above)
 - Each block should flow naturally into the next — avoid repetitive openers
