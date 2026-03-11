@@ -29,6 +29,7 @@ const SuperAdminConfig = lazy(() => import("./pages/SuperAdminConfig"));
 const GenerateBanner = lazy(() => import("./pages/GenerateBanner"));
 const Banners = lazy(() => import("./pages/Banners"));
 const AdminPayments = lazy(() => import("./pages/AdminPayments"));
+const AdminEmailCampaigns = lazy(() => import("./pages/AdminEmailCampaigns"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PublicLanding = lazy(() => import("./pages/PublicLanding"));
@@ -79,6 +80,7 @@ const App = () => (
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/admin/users" element={<AdminUsers />} />
                   <Route path="/admin/payments" element={<AdminPayments />} />
+                  <Route path="/admin/email" element={<AdminEmailCampaigns />} />
                 </Route>
                 <Route element={<SuperAdminLayout />}>
                   <Route path="/admin/config" element={<SuperAdminConfig />} />

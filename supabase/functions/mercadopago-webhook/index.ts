@@ -6,6 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const PLAN_PRICES: Record<string, { monthly: number; annual: number }> = {
+  starter: { monthly: 14990, annual: 149900 },
+  pro: { monthly: 34990, annual: 349900 },
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -25,6 +30,19 @@ serve(async (req) => {
     const paymentId = body.data?.id;
     if (!paymentId) {
       return new Response("No payment ID", { status: 200, headers: corsHeaders });
+    }
+
+    // === IDEMPOTENCY CHECK ===
+    const { data: existingPayment } = await supabase
+      .from("payments")
+      .select("id, status")
+      .eq("mp_payment_id", String(paymentId))
+      .eq("status", "approved")
+      .maybeSingle();
+
+    if (existingPayment) {
+      console.log(`Payment ${paymentId} already processed, skipping`);
+      return new Response("OK", { status: 200, headers: corsHeaders });
     }
 
     // Fetch payment details from MP
@@ -52,10 +70,48 @@ serve(async (req) => {
       return new Response("OK", { status: 200, headers: corsHeaders });
     }
 
-    // Update user plan
+    // === AMOUNT VALIDATION ===
+    const expectedPrices = PLAN_PRICES[planId];
+    if (!expectedPrices) {
+      console.error("Unknown plan in external_reference:", planId);
+      return new Response("OK", { status: 200, headers: corsHeaders });
+    }
+
+    const expectedAmount = period === "annual" ? expectedPrices.annual : expectedPrices.monthly;
+    if (payment.transaction_amount !== expectedAmount) {
+      console.error(`Amount mismatch: expected ${expectedAmount}, got ${payment.transaction_amount} for plan ${planId}/${period}`);
+      return new Response("OK", { status: 200, headers: corsHeaders });
+    }
+
+    // === EXTERNAL_REFERENCE PROTECTION ===
+    // Verify the pending payment record matches the userId from the reference
+    if (payment.preference_id) {
+      const { data: pendingRecord } = await supabase
+        .from("payments")
+        .select("user_id")
+        .eq("mp_preference_id", payment.preference_id)
+        .eq("status", "pending")
+        .maybeSingle();
+
+      if (pendingRecord && pendingRecord.user_id !== userId) {
+        console.error(`User mismatch: preference belongs to ${pendingRecord.user_id}, but external_reference says ${userId}`);
+        return new Response("OK", { status: 200, headers: corsHeaders });
+      }
+    }
+
+    // === CALCULATE PLAN EXPIRATION ===
+    const now = new Date();
+    const expiresAt = new Date(now);
+    if (period === "annual") {
+      expiresAt.setDate(expiresAt.getDate() + 365);
+    } else {
+      expiresAt.setDate(expiresAt.getDate() + 30);
+    }
+
+    // Update user plan + expiration
     const { error: profileError } = await supabase
       .from("profiles")
-      .update({ plan: planId })
+      .update({ plan: planId, plan_expires_at: expiresAt.toISOString() })
       .eq("user_id", userId);
 
     if (profileError) {
@@ -70,7 +126,7 @@ serve(async (req) => {
       period: period || "monthly",
       mp_payment_id: String(paymentId),
       status: "approved",
-    }, { onConflict: "mp_payment_id" }).then(() => {});
+    }, { onConflict: "mp_payment_id" });
 
     // Also try updating by preference id
     if (payment.preference_id) {
@@ -81,7 +137,39 @@ serve(async (req) => {
         .eq("status", "pending");
     }
 
-    console.log(`Payment approved: user=${userId}, plan=${planId}`);
+    // === SEND PAYMENT CONFIRMATION EMAIL ===
+    try {
+      // Get user email
+      const { data: { user: authUser } } = await supabase.auth.admin.getUserById(userId);
+      if (authUser?.email) {
+        const { data: userProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("user_id", userId)
+          .single();
+
+        await fetch(`${supabaseUrl}/functions/v1/send-payment-email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${serviceKey}`,
+          },
+          body: JSON.stringify({
+            email: authUser.email,
+            name: userProfile?.full_name || "",
+            planName: planId === "pro" ? "Pro" : "Starter",
+            amount: payment.transaction_amount,
+            period: period || "monthly",
+            paymentId: String(paymentId),
+            expiresAt: expiresAt.toISOString(),
+          }),
+        });
+      }
+    } catch (emailErr) {
+      console.error("Error sending payment email (non-blocking):", emailErr);
+    }
+
+    console.log(`Payment approved: user=${userId}, plan=${planId}, expires=${expiresAt.toISOString()}`);
     return new Response("OK", { status: 200, headers: corsHeaders });
   } catch (err) {
     console.error("Webhook error:", err);

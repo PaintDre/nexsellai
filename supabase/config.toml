@@ -13,3 +13,7 @@ project_id = "fizryssrfsojiavxmhrt"
     verify_jwt = false
   [functions.mercadopago-webhook]
     verify_jwt = false
+  [functions.send-payment-email]
+    verify_jwt = false
+  [functions.send-campaign-email]
+    verify_jwt = false

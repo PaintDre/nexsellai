@@ -43,6 +43,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       .select("*")
       .eq("user_id", userId)
       .single();
+    
+    // Check plan expiration — downgrade to free if expired
+    if (data && data.plan !== "free" && data.plan_expires_at) {
+      const expiresAt = new Date(data.plan_expires_at);
+      if (expiresAt < new Date()) {
+        await supabase
+          .from("profiles")
+          .update({ plan: "free", plan_expires_at: null })
+          .eq("user_id", userId);
+        setProfile({ ...data, plan: "free" as any, plan_expires_at: null });
+        return;
+      }
+    }
     setProfile(data);
   };
 

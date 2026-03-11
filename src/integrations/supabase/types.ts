@@ -76,6 +76,77 @@ export type Database = {
         }
         Relationships: []
       }
+      email_campaigns: {
+        Row: {
+          audience: string
+          body_html: string
+          created_at: string
+          created_by: string
+          id: string
+          sent_at: string | null
+          sent_count: number
+          status: string
+          subject: string
+        }
+        Insert: {
+          audience?: string
+          body_html: string
+          created_at?: string
+          created_by: string
+          id?: string
+          sent_at?: string | null
+          sent_count?: number
+          status?: string
+          subject: string
+        }
+        Update: {
+          audience?: string
+          body_html?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          sent_at?: string | null
+          sent_count?: number
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
+      email_sends: {
+        Row: {
+          campaign_id: string
+          email: string
+          id: string
+          sent_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          campaign_id: string
+          email: string
+          id?: string
+          sent_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string
+          email?: string
+          id?: string
+          sent_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_sends_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "email_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       landing_versions: {
         Row: {
           blocks: Json
@@ -333,6 +404,7 @@ export type Database = {
           openai_api_key: string | null
           phone: string | null
           plan: Database["public"]["Enums"]["user_plan"]
+          plan_expires_at: string | null
           timezone: string | null
           updated_at: string
           user_id: string
@@ -350,6 +422,7 @@ export type Database = {
           openai_api_key?: string | null
           phone?: string | null
           plan?: Database["public"]["Enums"]["user_plan"]
+          plan_expires_at?: string | null
           timezone?: string | null
           updated_at?: string
           user_id: string
@@ -367,6 +440,7 @@ export type Database = {
           openai_api_key?: string | null
           phone?: string | null
           plan?: Database["public"]["Enums"]["user_plan"]
+          plan_expires_at?: string | null
           timezone?: string | null
           updated_at?: string
           user_id?: string
