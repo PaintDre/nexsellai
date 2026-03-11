@@ -32,6 +32,7 @@ export const SidebarContent = ({ expanded = false, onNavigate }: SidebarContentP
   const adminItems: typeof navItems = [];
   if (isAdmin()) {
     adminItems.push({ label: "Admin", icon: Shield, href: "/admin" });
+    adminItems.push({ label: "Pagos", icon: Banknote, href: "/admin/payments" });
   }
   if (isSuperAdmin()) {
     adminItems.push({ label: "Sistema", icon: ShieldCheck, href: "/admin/config" });

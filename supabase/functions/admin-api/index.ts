@@ -131,6 +131,35 @@ serve(async (req) => {
       return jsonResponse({ totalUsers, totalLandings, totalBanners, byPlan, topUsers });
     }
 
+    // GET /payments
+    if (req.method === "GET" && path === "/payments") {
+      const { data: payments } = await supabase
+        .from("payments")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      const userIds = [...new Set((payments || []).map((p: any) => p.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("user_id, full_name")
+        .in("user_id", userIds);
+
+      const nameMap = new Map((profiles || []).map((p: any) => [p.user_id, p.full_name]));
+      const emailMap = new Map<string, string>();
+      for (const uid of userIds) {
+        const { data: { user: authUser } } = await supabase.auth.admin.getUserById(uid);
+        if (authUser?.email) emailMap.set(uid, authUser.email);
+      }
+
+      const enriched = (payments || []).map((p: any) => ({
+        ...p,
+        user_name: nameMap.get(p.user_id) || null,
+        user_email: emailMap.get(p.user_id) || "",
+      }));
+
+      return jsonResponse({ payments: enriched });
+    }
+
     // GET /config
     if (req.method === "GET" && path === "/config") {
       if (!isSuperAdmin) return jsonResponse({ error: "Forbidden" }, 403);

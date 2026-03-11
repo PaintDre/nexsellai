@@ -156,11 +156,13 @@ const GenerateBanner = () => {
     setFormState((prev) => ({ ...prev, [key]: value }));
   }, []);
 
+  const { banner: bannerLimits } = usePlanLimits();
   const plan = profile?.plan || "free";
-  const bannerLimit = BANNER_LIMITS[plan] || 2;
+  const bannerLimit = bannerLimits[plan] || 2;
   const bannersUsed = useMemo(() => computeBannersUsed(profile), [profile]);
   const bannersRemaining = useMemo(() => Math.max(0, bannerLimit - bannersUsed), [bannerLimit, bannersUsed]);
   const hasReachedLimit = bannersRemaining <= 0;
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const sequence = useMemo(() => getSequence(formState.bannerCount), [formState.bannerCount]);
 
   const canGoNext = useMemo(() => {

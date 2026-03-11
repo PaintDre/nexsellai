@@ -165,6 +165,10 @@ const Dashboard = () => {
         </Card>
       )}
 
+      {/* Upgrade warnings */}
+      <UpgradeWarningBanner resource="landings" used={used} limit={limit} />
+      <UpgradeWarningBanner resource="banners" used={bannersUsed} limit={bannerLimit} />
+
       {/* Usage Stats */}
       <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
         <Card>
