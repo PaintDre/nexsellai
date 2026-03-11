@@ -97,6 +97,8 @@ const buildBannerPayload = (
     sequencePosition: index + 1,
     totalInSequence: total,
     generationMode: form.generationMode,
+    currency: form.currency,
+    country_code: form.country_code,
   };
   if (form.generationMode === "custom") {
     return { ...base, bannerGoal: form.bannerGoal, tone: form.tone, visualStyle: form.visualStyle };
