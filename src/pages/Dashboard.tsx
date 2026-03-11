@@ -12,8 +12,9 @@ import {
   Package, FileText, Zap, Eye, History, Plus, Image,
   ArrowRight, Sparkles, Download, ImageIcon,
 } from "lucide-react";
-import { LANDING_LIMITS, BANNER_LIMITS } from "@/lib/constants";
 import { computeBannersUsed } from "@/lib/planUsage";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { UpgradeWarningBanner } from "@/components/UpgradeWarningBanner";
 
 type Product = Tables<"products">;
 type Landing = Tables<"landings">;
