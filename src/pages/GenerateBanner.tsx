@@ -58,6 +58,8 @@ interface FormState {
   bannerGoal: BannerGoal;
   tone: Tone;
   visualStyle: VisualStyle;
+  currency: string;
+  country_code: string;
 }
 
 const GOAL_LABELS: Record<BannerGoal, string> = { sale: "Venta", offer: "Oferta", awareness: "Awareness", benefit: "Beneficio" };
