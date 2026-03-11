@@ -112,8 +112,31 @@ serve(async (req) => {
       return jsonResponse({ success: true });
     }
 
+    // GET /subscriptions
+    if (req.method === "GET" && path === "/subscriptions") {
+      const { data: subs, error: subsErr } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (subsErr) return jsonResponse({ error: subsErr.message }, 500);
+
+      const enriched = await Promise.all(
+        (subs || []).map(async (s: any) => {
+          const { data: profile } = await supabase.from("profiles").select("full_name").eq("user_id", s.user_id).single();
+          let email: string | null = null;
+          try {
+            const { data: userData } = await supabase.auth.admin.getUserById(s.user_id);
+            email = userData?.user?.email ?? null;
+          } catch {}
+          return { ...s, full_name: profile?.full_name ?? null, email };
+        })
+      );
+
+      return jsonResponse(enriched);
+    }
+
     // GET /stats
-    if (req.method === "GET" && path === "/stats") {
       const { count: totalUsers } = await supabase.from("profiles").select("*", { count: "exact", head: true });
       const { count: totalLandings } = await supabase.from("landings").select("*", { count: "exact", head: true });
       const { count: totalBanners } = await supabase.from("banners").select("*", { count: "exact", head: true });
