@@ -119,6 +119,15 @@ export const SidebarContent = ({ expanded = false, onNavigate }: SidebarContentP
             <span className="text-xs text-sidebar-foreground/70 truncate whitespace-nowrap">{profile.full_name || "Usuario"}</span>
           </div>
         )}
+        {/* Social links */}
+        <div className={cn("flex items-center", collapsed ? "justify-center gap-1" : "gap-2")}>
+          <a href="https://instagram.com/nexsellai" target="_blank" rel="noopener noreferrer" className="h-7 w-7 rounded-md flex items-center justify-center text-sidebar-foreground/60 hover:text-sidebar-primary hover:bg-sidebar-accent transition-colors" title="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+          </a>
+          <a href="https://x.com/nexsellai" target="_blank" rel="noopener noreferrer" className="h-7 w-7 rounded-md flex items-center justify-center text-sidebar-foreground/60 hover:text-sidebar-primary hover:bg-sidebar-accent transition-colors" title="X (Twitter)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+        </div>
         <div className={cn("flex", collapsed ? "flex-col items-center gap-1.5" : "gap-1.5")}>
           <ThemeToggle collapsed={collapsed} />
           {expanded ? (
