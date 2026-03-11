@@ -6,7 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const PLAN_PRICES: Record<string, { monthly: number; annual: number; name: string }> = {
+// CLP prices — the actual amount charged via MP (Chilean account)
+const CLP_PRICES: Record<string, { monthly: number; annual: number; name: string }> = {
   starter: { monthly: 14990, annual: 149900, name: "Starter" },
   pro: { monthly: 34990, annual: 349900, name: "Pro" },
 };
@@ -20,7 +21,6 @@ serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN")!;
 
-    // Auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "No autorizado" }), {
@@ -32,7 +32,6 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    // Fix: use getUser instead of getClaims
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     if (userError || !user) {
       return new Response(JSON.stringify({ error: "No autorizado" }), {
@@ -41,24 +40,22 @@ serve(async (req) => {
     }
     const userId = user.id;
 
-    const { planId, billingPeriod } = await req.json();
+    const { planId, billingPeriod, countryCode } = await req.json();
 
-    if (!PLAN_PRICES[planId]) {
+    if (!CLP_PRICES[planId]) {
       return new Response(JSON.stringify({ error: "Plan inválido" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const period = billingPeriod === "annual" ? "annual" : "monthly";
-    const plan = PLAN_PRICES[planId];
-    const price = plan[period];
+    const plan = CLP_PRICES[planId];
+    const price = plan[period]; // Always CLP
     const title = `Nexsell ${plan.name} — ${period === "annual" ? "Anual" : "Mensual"}`;
 
-    // Get origin for back_urls
     const origin = req.headers.get("origin") || "https://nexsellai.lovable.app";
     const webhookUrl = `${supabaseUrl}/functions/v1/mercadopago-webhook`;
 
-    // Create MP Preference
     const mpRes = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
@@ -92,7 +89,6 @@ serve(async (req) => {
       });
     }
 
-    // Record pending payment
     const adminSupabase = createClient(supabaseUrl, serviceKey);
     await adminSupabase.from("payments").insert({
       user_id: userId,
