@@ -55,16 +55,19 @@ const AdminDashboard = () => {
           <h1 className="text-2xl sm:text-3xl font-bold font-display text-foreground">Panel de Administración</h1>
           <p className="text-muted-foreground mt-1">Estadísticas y gestión de la plataforma</p>
         </div>
-        <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-          <Button asChild variant="outline" className="flex-1 sm:flex-none min-h-[44px]">
+        <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3 w-full sm:w-auto">
+          <Button asChild variant="outline" className="min-h-[44px]">
             <Link to="/admin/users"><Users className="h-4 w-4 mr-2" /> Usuarios</Link>
           </Button>
-          <Button asChild variant="outline" className="flex-1 sm:flex-none min-h-[44px]">
+          <Button asChild variant="outline" className="min-h-[44px]">
             <Link to="/admin/payments"><Banknote className="h-4 w-4 mr-2" /> Pagos</Link>
           </Button>
+          <Button asChild variant="outline" className="min-h-[44px]">
+            <Link to="/admin/subscriptions"><RefreshCw className="h-4 w-4 mr-2" /> Suscripciones</Link>
+          </Button>
           {isSuperAdmin() && (
-            <Button asChild className="flex-1 sm:flex-none min-h-[44px]">
-              <Link to="/admin/config"><Settings className="h-4 w-4 mr-2" /> Configuración</Link>
+            <Button asChild className="min-h-[44px]">
+              <Link to="/admin/config"><Settings className="h-4 w-4 mr-2" /> Config</Link>
             </Button>
           )}
         </div>
