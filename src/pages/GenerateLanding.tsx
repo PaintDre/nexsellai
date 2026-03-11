@@ -101,7 +101,17 @@ const GenerateLanding = () => {
       setProgress(20);
       const selectedTemplate = landingTemplates.find(t => t.id === templateId);
       const { data, error } = await supabase.functions.invoke("generate-landing", {
-        body: { product, mode, intensity, hasOffer, guarantee, plan: profile.plan, sections: selectedTemplate?.sections },
+        body: {
+          product,
+          mode,
+          intensity,
+          hasOffer,
+          guarantee,
+          plan: profile.plan,
+          sections: selectedTemplate?.sections,
+          currency: (profile as any)?.currency || "USD",
+          country_code: (profile as any)?.country_code || null,
+        },
       });
 
       if (error) throw error;
