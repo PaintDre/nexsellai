@@ -55,6 +55,12 @@ const SuperAdminConfig = () => {
           setLimitStarter(String(limits.value?.starter ?? 10));
           setLimitPro(String(limits.value?.pro ?? 100));
         }
+        const bLimits = items.find((c) => c.key === "banner_limits");
+        if (bLimits) {
+          setBannerLimitFree(String(bLimits.value?.free ?? 2));
+          setBannerLimitStarter(String(bLimits.value?.starter ?? 30));
+          setBannerLimitPro(String(bLimits.value?.pro ?? 150));
+        }
       }
       setLoading(false);
     };
