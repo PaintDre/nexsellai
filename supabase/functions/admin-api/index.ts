@@ -137,6 +137,7 @@ serve(async (req) => {
     }
 
     // GET /stats
+    if (req.method === "GET" && path === "/stats") {
       const { count: totalUsers } = await supabase.from("profiles").select("*", { count: "exact", head: true });
       const { count: totalLandings } = await supabase.from("landings").select("*", { count: "exact", head: true });
       const { count: totalBanners } = await supabase.from("banners").select("*", { count: "exact", head: true });
