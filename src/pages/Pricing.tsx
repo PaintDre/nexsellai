@@ -6,18 +6,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Check, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Check, Loader2, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { getPricingForCountry, formatPrice, PRICING_BY_CURRENCY } from "@/lib/pricing";
+import { COUNTRIES } from "@/lib/countries";
 
 type BillingPeriod = "monthly" | "annual";
 
-const plans = [
-  {
-    id: "free",
+const planFeatures = {
+  free: {
     name: "Free",
-    monthlyPrice: 0,
-    annualPrice: 0,
     description: "Explora Nexsell sin costo",
     features: [
       "1 landing total",
@@ -28,11 +28,8 @@ const plans = [
     ],
     excluded: ["Sin imágenes IA", "Sin edición avanzada"],
   },
-  {
-    id: "starter",
+  starter: {
     name: "Starter",
-    monthlyPrice: 14990,
-    annualPrice: 149900,
     description: "Ideal para lanzar y testear productos",
     features: [
       "10 landings / mes",
@@ -45,11 +42,8 @@ const plans = [
     ],
     popular: true,
   },
-  {
-    id: "pro",
+  pro: {
     name: "Pro",
-    monthlyPrice: 34990,
-    annualPrice: 349900,
     description: "Para vendedores que escalan con ads",
     features: [
       "100 landings / mes",
@@ -63,13 +57,20 @@ const plans = [
       "Exportar ZIP completo",
     ],
   },
-];
+};
 
 const Pricing = () => {
   const { profile, session } = useAuth();
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("monthly");
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
+  const [selectedCountry, setSelectedCountry] = useState<string>(profile?.country_code || "US");
+
+  useEffect(() => {
+    if (profile?.country_code) {
+      setSelectedCountry(profile.country_code);
+    }
+  }, [profile?.country_code]);
 
   useEffect(() => {
     const status = searchParams.get("status");
@@ -82,18 +83,18 @@ const Pricing = () => {
     }
   }, [searchParams]);
 
+  const pricing = getPricingForCountry(selectedCountry);
+
   const handleSubscribe = async (planId: string) => {
     if (!session) {
       toast.error("Debes iniciar sesión para suscribirte.");
       return;
     }
-
     setLoadingPlan(planId);
     try {
       const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { planId, billingPeriod },
+        body: { planId, billingPeriod, countryCode: selectedCountry },
       });
-
       if (error) throw error;
       if (data?.url) {
         window.location.href = data.url;
@@ -108,16 +109,25 @@ const Pricing = () => {
     }
   };
 
-  const getPrice = (plan: typeof plans[0]) => {
-    return billingPeriod === "annual" ? plan.annualPrice : plan.monthlyPrice;
+  const getPlanPrice = (planId: "starter" | "pro") => {
+    const plan = pricing[planId];
+    return billingPeriod === "annual" ? plan.annual : plan.monthly;
   };
 
-  const getMonthlyEquivalent = (plan: typeof plans[0]) => {
-    if (billingPeriod === "annual" && plan.annualPrice > 0) {
-      return Math.round(plan.annualPrice / 12);
+  const getUsdEquiv = (planId: "starter" | "pro") => {
+    const plan = pricing[planId];
+    return billingPeriod === "annual" ? plan.usdEquiv.annual : plan.usdEquiv.monthly;
+  };
+
+  const getMonthlyEquiv = (planId: "starter" | "pro") => {
+    if (billingPeriod === "annual") {
+      const annual = pricing[planId].annual;
+      return Math.round(annual / 12);
     }
     return null;
   };
+
+  const isUSD = pricing.currency === "USD";
 
   return (
     <div className="p-5 md:p-8 lg:p-10 space-y-8">
@@ -125,7 +135,7 @@ const Pricing = () => {
         <h1 className="text-2xl md:text-3xl font-bold font-display">Planes y Precios</h1>
         <p className="text-sm text-muted-foreground">Elige el plan que mejor se adapte a tu volumen de ventas</p>
 
-        <div className="flex justify-center pt-1">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
           <Tabs value={billingPeriod} onValueChange={(v) => setBillingPeriod(v as BillingPeriod)}>
             <TabsList className="h-9">
               <TabsTrigger value="monthly" className="text-xs">Mensual</TabsTrigger>
@@ -134,43 +144,62 @@ const Pricing = () => {
               </TabsTrigger>
             </TabsList>
           </Tabs>
+
+          <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+            <SelectTrigger className="w-[180px] h-9 text-xs">
+              <Globe className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {COUNTRIES.map((c) => (
+                <SelectItem key={c.code} value={c.code} className="text-xs">
+                  {c.name} ({c.currency})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3 max-w-4xl mx-auto">
-        {plans.map((plan) => {
-          const isCurrent = profile?.plan === plan.id;
-          const price = getPrice(plan);
-          const monthlyEq = getMonthlyEquivalent(plan);
-          const isLoading = loadingPlan === plan.id;
+        {(["free", "starter", "pro"] as const).map((planId) => {
+          const meta = planFeatures[planId];
+          const isCurrent = profile?.plan === planId;
+          const isLoading = loadingPlan === planId;
+          const isPaid = planId !== "free";
 
           return (
-            <Card key={plan.id} className={cn(
+            <Card key={planId} className={cn(
               "relative transition-all duration-200",
-              plan.popular && "border-primary shadow-md ring-1 ring-primary/10"
+              "popular" in meta && meta.popular && "border-primary shadow-md ring-1 ring-primary/10"
             )}>
-              {plan.popular && (
+              {"popular" in meta && meta.popular && (
                 <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
                   <Badge className="bg-primary text-primary-foreground text-[10px] px-2.5">Más popular</Badge>
                 </div>
               )}
               <CardHeader className="text-center pb-2">
-                <CardTitle className="font-display text-base">{plan.name}</CardTitle>
-                <CardDescription className="text-xs">{plan.description}</CardDescription>
+                <CardTitle className="font-display text-base">{meta.name}</CardTitle>
+                <CardDescription className="text-xs">{meta.description}</CardDescription>
                 <div className="mt-3">
-                  {price === 0 ? (
+                  {!isPaid ? (
                     <span className="text-3xl font-bold font-display">Gratis</span>
                   ) : (
                     <div>
                       <span className="text-3xl font-bold font-display">
-                        ${price.toLocaleString("es-CL")}
+                        {pricing.currencySymbol}{formatPrice(getPlanPrice(planId), pricing.currency, pricing.locale)}
                       </span>
                       <span className="text-xs text-muted-foreground ml-1">
-                        /{billingPeriod === "annual" ? "año" : "mes"}
+                        {pricing.currency}/{billingPeriod === "annual" ? "año" : "mes"}
                       </span>
-                      {monthlyEq && (
+                      {!isUSD && (
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          ${monthlyEq.toLocaleString("es-CL")}/mes
+                          ~USD ${getUsdEquiv(planId).toFixed(2)}
+                        </p>
+                      )}
+                      {billingPeriod === "annual" && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {pricing.currencySymbol}{formatPrice(getMonthlyEquiv(planId)!, pricing.currency, pricing.locale)}/mes
                         </p>
                       )}
                     </div>
@@ -179,13 +208,13 @@ const Pricing = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <ul className="space-y-1.5">
-                  {plan.features.map((f) => (
+                  {meta.features.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-xs">
                       <Check className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
                       {f}
                     </li>
                   ))}
-                  {plan.excluded?.map((f) => (
+                  {"excluded" in meta && meta.excluded?.map((f) => (
                     <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground line-through">
                       {f}
                     </li>
@@ -194,15 +223,15 @@ const Pricing = () => {
                 <Button
                   className="w-full"
                   size="sm"
-                  variant={isCurrent ? "secondary" : plan.popular ? "default" : "outline"}
-                  disabled={isCurrent || isLoading || plan.id === "free"}
-                  onClick={() => handleSubscribe(plan.id)}
+                  variant={isCurrent ? "secondary" : ("popular" in meta && meta.popular) ? "default" : "outline"}
+                  disabled={isCurrent || isLoading || !isPaid}
+                  onClick={() => handleSubscribe(planId)}
                 >
                   {isLoading ? (
                     <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Procesando...</>
                   ) : isCurrent ? (
                     "Plan actual"
-                  ) : plan.id === "free" ? (
+                  ) : !isPaid ? (
                     "Plan actual"
                   ) : (
                     "Suscribirse"
@@ -213,6 +242,12 @@ const Pricing = () => {
           );
         })}
       </div>
+
+      {pricing.currency !== "CLP" && (
+        <p className="text-center text-[11px] text-muted-foreground max-w-md mx-auto">
+          Los precios se muestran en {pricing.currency} como referencia. El cobro se procesa en CLP (pesos chilenos) al tipo de cambio vigente.
+        </p>
+      )}
     </div>
   );
 };
