@@ -177,8 +177,8 @@ const Dashboard = () => {
               <span className="text-xs font-medium text-muted-foreground">Landings</span>
               <FileText className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
-            <div className="text-2xl font-bold font-display">
-              {used}<span className="text-sm text-muted-foreground font-normal ml-0.5">/{limit}</span>
+            <div className="text-xl sm:text-2xl font-bold font-display">
+              {used}<span className="text-xs sm:text-sm text-muted-foreground font-normal ml-0.5">/{limit}</span>
             </div>
             <Progress value={usagePercent} className="h-1.5 mt-2" />
           </CardContent>
