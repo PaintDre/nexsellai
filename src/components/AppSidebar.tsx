@@ -33,6 +33,7 @@ export const SidebarContent = ({ expanded = false, onNavigate }: SidebarContentP
   if (isAdmin()) {
     adminItems.push({ label: "Admin", icon: Shield, href: "/admin" });
     adminItems.push({ label: "Pagos", icon: Banknote, href: "/admin/payments" });
+    adminItems.push({ label: "Email", icon: Mail, href: "/admin/email" });
   }
   if (isSuperAdmin()) {
     adminItems.push({ label: "Sistema", icon: ShieldCheck, href: "/admin/config" });
