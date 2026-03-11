@@ -594,6 +594,8 @@ serve(async (req) => {
       hasOffer: !!hasOffer,
       guarantee,
       plan: userPlan,
+      currency: currency || "CLP",
+      country_code: country_code || null,
     };
 
     // ── Step 1: Strategy Planner ──
