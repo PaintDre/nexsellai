@@ -278,9 +278,10 @@ ${saasContext}
 ## Product info
 - Name: ${product.name}
 - Category: ${product.category}
-- Price: $${product.price} CLP
+- Price: $${product.price} ${currencyCode}
 - Target audience: ${product.target_audience}
 - Description: ${product.description || "N/A"}
+- Country: ${country_code || "not specified"}
 
 Return ONLY valid JSON. No markdown. No explanations.`;
 }
