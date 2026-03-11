@@ -201,7 +201,7 @@ const Dashboard = () => {
               <span className="text-xs font-medium text-muted-foreground">Productos</span>
               <Package className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
-            <div className="text-2xl font-bold font-display">{products.length}</div>
+            <div className="text-xl sm:text-2xl font-bold font-display">{products.length}</div>
           </CardContent>
         </Card>
         <Card>
