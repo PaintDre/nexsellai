@@ -84,7 +84,6 @@ serve(async (req) => {
     }
 
     // === EXTERNAL_REFERENCE PROTECTION ===
-    // Verify the pending payment record matches the userId from the reference
     if (payment.preference_id) {
       const { data: pendingRecord } = await supabase
         .from("payments")
@@ -118,28 +117,41 @@ serve(async (req) => {
       console.error("Error updating profile:", profileError);
     }
 
-    // Record/update payment
-    await supabase.from("payments").upsert({
+    // Record/update payment with currency and provider
+    const paymentCurrency = payment.currency_id || "CLP";
+    const { data: upsertedPayment } = await supabase.from("payments").upsert({
       user_id: userId,
       plan: planId,
       amount: payment.transaction_amount || 0,
       period: period || "monthly",
+      currency: paymentCurrency,
+      provider: "mercadopago",
       mp_payment_id: String(paymentId),
       status: "approved",
-    }, { onConflict: "mp_payment_id" });
+    }, { onConflict: "mp_payment_id" }).select("id").single();
 
     // Also try updating by preference id
     if (payment.preference_id) {
       await supabase
         .from("payments")
-        .update({ mp_payment_id: String(paymentId), status: "approved" })
+        .update({ mp_payment_id: String(paymentId), status: "approved", currency: paymentCurrency })
         .eq("mp_preference_id", payment.preference_id)
         .eq("status", "pending");
     }
 
+    // === CREATE SUBSCRIPTION RECORD ===
+    const paymentRecordId = upsertedPayment?.id || null;
+    await supabase.from("subscriptions").insert({
+      user_id: userId,
+      plan_id: planId,
+      status: "active",
+      started_at: now.toISOString(),
+      expires_at: expiresAt.toISOString(),
+      payment_id: paymentRecordId,
+    });
+
     // === SEND PAYMENT CONFIRMATION EMAIL ===
     try {
-      // Get user email
       const { data: { user: authUser } } = await supabase.auth.admin.getUserById(userId);
       if (authUser?.email) {
         const { data: userProfile } = await supabase
@@ -169,7 +181,7 @@ serve(async (req) => {
       console.error("Error sending payment email (non-blocking):", emailErr);
     }
 
-    console.log(`Payment approved: user=${userId}, plan=${planId}, expires=${expiresAt.toISOString()}`);
+    console.log(`Payment approved: user=${userId}, plan=${planId}, currency=${paymentCurrency}, expires=${expiresAt.toISOString()}`);
     return new Response("OK", { status: 200, headers: corsHeaders });
   } catch (err) {
     console.error("Webhook error:", err);

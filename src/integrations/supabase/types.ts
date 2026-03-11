@@ -286,33 +286,39 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          currency: string
           id: string
           mp_payment_id: string | null
           mp_preference_id: string | null
           period: string
           plan: string
+          provider: string
           status: string
           user_id: string
         }
         Insert: {
           amount: number
           created_at?: string
+          currency?: string
           id?: string
           mp_payment_id?: string | null
           mp_preference_id?: string | null
           period?: string
           plan: string
+          provider?: string
           status?: string
           user_id: string
         }
         Update: {
           amount?: number
           created_at?: string
+          currency?: string
           id?: string
           mp_payment_id?: string | null
           mp_preference_id?: string | null
           period?: string
           plan?: string
+          provider?: string
           status?: string
           user_id?: string
         }
@@ -446,6 +452,47 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          payment_id: string | null
+          plan_id: string
+          started_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          payment_id?: string | null
+          plan_id: string
+          started_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          payment_id?: string | null
+          plan_id?: string
+          started_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       system_config: {
         Row: {
