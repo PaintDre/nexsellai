@@ -25,6 +25,7 @@ import {
 import { LANDING_LIMITS, BANNER_LIMITS } from "@/lib/constants";
 import { computeBannersUsed } from "@/lib/planUsage";
 import { cn } from "@/lib/utils";
+import { COUNTRIES, getCountryByCode } from "@/lib/countries";
 
 const SettingsPage = () => {
   const { user, profile, refreshProfile, isAdmin } = useAuth();
