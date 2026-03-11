@@ -22,8 +22,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { LANDING_LIMITS, BANNER_LIMITS } from "@/lib/constants";
 import { computeBannersUsed } from "@/lib/planUsage";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { cn } from "@/lib/utils";
 import { COUNTRIES, getCountryByCode } from "@/lib/countries";
 
