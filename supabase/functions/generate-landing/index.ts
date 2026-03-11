@@ -182,7 +182,23 @@ Return ONLY valid JSON. No markdown. No explanations.`;
 // ─── Generator Prompt (Strategy-Aware) ──────────────────────────────────────
 
 function buildGeneratorPrompt(params: PromptParams, strategy: Strategy): string {
-  const { product, hasOffer, guarantee, plan } = params;
+  const { product, hasOffer, guarantee, plan, currency, country_code } = params;
+  const currencyCode = currency || "CLP";
+
+  const countryContextMap: Record<string, string> = {
+    AR: "Write in Argentine Spanish (voseo). Cultural references for Argentina.",
+    CL: "Write in Chilean Spanish. Cultural references for Chile.",
+    CO: "Write in Colombian Spanish. Cultural references for Colombia.",
+    MX: "Write in Mexican Spanish. Cultural references for México.",
+    PE: "Write in Peruvian Spanish. Cultural references for Perú.",
+    BR: "Write in Brazilian Portuguese. Cultural references for Brasil.",
+    US: "Write in English or neutral Spanish. Cultural references for USA.",
+    ES: "Write in Castilian Spanish. Cultural references for Spain.",
+  };
+  const countryInstruction = country_code && countryContextMap[country_code]
+    ? countryContextMap[country_code]
+    : "Write in Spanish (Latin American).";
+
 
   const saasContext = product.category === "saas"
     ? `\n## SAAS PRODUCT CONTEXT\nThis is a SaaS/app product. Adapt the copy to sell software: emphasize ease of use, time savings, ROI, onboarding simplicity, and integrations. Use standard block types (hero, benefits, features, faq, cta, etc.) — do NOT use saas-prefixed block types.`
