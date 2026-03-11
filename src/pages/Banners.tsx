@@ -247,14 +247,14 @@ const Banners = () => {
   return (
     <div className="p-4 md:p-6 lg:p-8 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold font-display tracking-tight">Banners</h1>
+          <h1 className="text-xl sm:text-3xl font-bold font-display tracking-tight">Banners</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {banners.length} banner{banners.length !== 1 ? "s" : ""} generado{banners.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <Button onClick={() => setProductSelectorOpen(true)} className="gap-2">
+        <Button onClick={() => setProductSelectorOpen(true)} className="gap-2 w-full sm:w-auto min-h-[44px]">
           <Plus className="h-4 w-4" /> Generar Banners
         </Button>
       </div>
@@ -279,7 +279,7 @@ const Banners = () => {
             </TabsList>
 
             {/* Filters bar */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
               {selectionMode ? (
                 <>
                   <Button variant="outline" size="sm" onClick={selectAll}>
@@ -328,13 +328,13 @@ const Banners = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 text-xs"
+                    className="h-10 sm:h-8 text-xs min-h-[44px] sm:min-h-0"
                     onClick={() => setSortOrder((o) => o === "desc" ? "asc" : "desc")}
                   >
                     <ArrowUpDown className="h-3 w-3 mr-1" />
                     {sortOrder === "desc" ? "Más reciente" : "Más antiguo"}
                   </Button>
-                  <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setSelectionMode(true)}>
+                  <Button variant="outline" size="sm" className="h-10 sm:h-8 text-xs min-h-[44px] sm:min-h-0" onClick={() => setSelectionMode(true)}>
                     <CheckSquare className="h-3 w-3 mr-1" /> Seleccionar
                   </Button>
                 </>

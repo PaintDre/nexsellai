@@ -37,16 +37,26 @@ export const AppLayout = () => {
       <div className="flex flex-1 flex-col overflow-hidden max-w-full">
         {/* Mobile header */}
         {isMobile && (
-          <header className="sticky top-0 z-40 flex h-13 items-center gap-3 border-b border-border/40 bg-background/60 backdrop-blur-xl px-4">
-            <Button variant="ghost" size="icon" className="text-foreground h-9 w-9" onClick={() => setMobileOpen(true)}>
-              <Menu className="h-5 w-5" />
-            </Button>
+          <header className="sticky top-0 z-40 flex h-13 items-center justify-between border-b border-border/40 bg-background/60 backdrop-blur-xl px-3">
             <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" className="text-foreground h-9 w-9" onClick={() => setMobileOpen(true)}>
+                <Menu className="h-5 w-5" />
+              </Button>
               <div className="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden">
                 <img src="/logo-ns.png" alt="Nexsell" className="h-7 w-7 object-contain" />
               </div>
               <span className="text-base font-bold font-display tracking-tight">Nexsell</span>
             </div>
+            {profile && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground truncate max-w-[100px]">
+                  {profile.full_name || "Usuario"}
+                </span>
+                <Badge variant="secondary" className="text-[10px] uppercase font-semibold tracking-wide">
+                  {planLabels[profile.plan] || "Free"}
+                </Badge>
+              </div>
+            )}
           </header>
         )}
 

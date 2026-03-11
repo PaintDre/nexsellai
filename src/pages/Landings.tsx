@@ -164,8 +164,8 @@ const Landings = () => {
   }
 
   return (
-    <div className="p-5 md:p-8 lg:p-10 space-y-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl md:text-3xl font-bold font-display">Mis Landings</h1>
+    <div className="p-4 md:p-8 lg:p-10 space-y-6 max-w-6xl mx-auto">
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-display">Mis Landings</h1>
 
       {landings.length === 0 ? (
         <Card className="border-dashed">
@@ -219,24 +219,24 @@ const Landings = () => {
                   </div>
                   <p className="text-[11px] text-muted-foreground">{new Date(landing.created_at).toLocaleDateString("es-CL")}</p>
                   <div className="space-y-1.5">
-                    <div className="flex gap-1.5">
-                      <Button variant="outline" size="sm" asChild className="flex-1 text-xs h-8">
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <Button variant="outline" size="sm" asChild className="text-xs min-h-[44px]">
                         <Link to={`/landings/${landing.id}`}><Eye className="h-3 w-3 mr-1" /> Editor</Link>
                       </Button>
-                      <Button variant="default" size="sm" asChild className="flex-1 text-xs h-8">
+                      <Button variant="default" size="sm" asChild className="text-xs min-h-[44px]">
                         <Link to={`/landings/${landing.id}/preview`}><Maximize2 className="h-3 w-3 mr-1" /> Preview</Link>
                       </Button>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      <Button variant="secondary" size="sm" className="text-xs flex-1 h-8" onClick={() => handleDuplicate(landing)}>
-                        <Copy className="h-3 w-3 mr-1" /> Duplicar
+                    <div className="grid grid-cols-3 gap-1.5">
+                      <Button variant="secondary" size="sm" className="text-xs min-h-[44px]" onClick={() => handleDuplicate(landing)}>
+                        <Copy className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> Duplicar</span>
                       </Button>
-                      <Button variant="secondary" size="sm" className="text-xs flex-1 h-8" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
-                        {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Download className="h-3 w-3 mr-1" /> Exportar</>}
+                      <Button variant="secondary" size="sm" className="text-xs min-h-[44px]" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
+                        {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Download className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> Exportar</span></>}
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive h-8 px-2" disabled={deletingId === landing.id}>
+                          <Button variant="ghost" size="sm" className="text-xs text-destructive hover:text-destructive min-h-[44px]" disabled={deletingId === landing.id}>
                             {deletingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
                           </Button>
                         </AlertDialogTrigger>

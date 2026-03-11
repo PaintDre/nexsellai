@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, FileText, TrendingUp, Settings, Crown, Image, Banknote } from "lucide-react";
+import { Users, FileText, TrendingUp, Settings, Crown, Image, Banknote, RefreshCw } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Stats {
@@ -49,28 +49,31 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-10 space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="p-4 md:p-6 lg:p-10 space-y-6 md:space-y-8">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-display text-foreground">Panel de Administración</h1>
-          <p className="text-muted-foreground mt-1">Estadísticas y gestión de la plataforma</p>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-foreground">Panel de Administración</h1>
+          <p className="text-sm text-muted-foreground mt-1">Estadísticas y gestión de la plataforma</p>
         </div>
-        <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-          <Button asChild variant="outline" className="flex-1 sm:flex-none min-h-[44px]">
+        <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3 w-full sm:w-auto">
+          <Button asChild variant="outline" className="min-h-[44px]">
             <Link to="/admin/users"><Users className="h-4 w-4 mr-2" /> Usuarios</Link>
           </Button>
-          <Button asChild variant="outline" className="flex-1 sm:flex-none min-h-[44px]">
+          <Button asChild variant="outline" className="min-h-[44px]">
             <Link to="/admin/payments"><Banknote className="h-4 w-4 mr-2" /> Pagos</Link>
           </Button>
+          <Button asChild variant="outline" className="min-h-[44px]">
+            <Link to="/admin/subscriptions"><RefreshCw className="h-4 w-4 mr-2" /> Suscripciones</Link>
+          </Button>
           {isSuperAdmin() && (
-            <Button asChild className="flex-1 sm:flex-none min-h-[44px]">
-              <Link to="/admin/config"><Settings className="h-4 w-4 mr-2" /> Configuración</Link>
+            <Button asChild className="min-h-[44px]">
+              <Link to="/admin/config"><Settings className="h-4 w-4 mr-2" /> Config</Link>
             </Button>
           )}
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Usuarios</CardTitle>

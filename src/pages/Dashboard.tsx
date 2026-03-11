@@ -87,7 +87,7 @@ const Dashboard = () => {
   if (loading) return <DashboardSkeleton />;
 
   return (
-    <div className="p-5 md:p-8 lg:p-10 space-y-8 max-w-6xl mx-auto">
+    <div className="p-4 md:p-8 lg:p-10 space-y-6 md:space-y-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="space-y-1">
         <h1 className="text-2xl md:text-3xl font-bold font-display">
@@ -170,15 +170,15 @@ const Dashboard = () => {
       <UpgradeWarningBanner resource="banners" used={bannersUsed} limit={bannerLimit} />
 
       {/* Usage Stats */}
-      <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-muted-foreground">Landings</span>
               <FileText className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
-            <div className="text-2xl font-bold font-display">
-              {used}<span className="text-sm text-muted-foreground font-normal ml-0.5">/{limit}</span>
+            <div className="text-xl sm:text-2xl font-bold font-display">
+              {used}<span className="text-xs sm:text-sm text-muted-foreground font-normal ml-0.5">/{limit}</span>
             </div>
             <Progress value={usagePercent} className="h-1.5 mt-2" />
           </CardContent>
@@ -189,8 +189,8 @@ const Dashboard = () => {
               <span className="text-xs font-medium text-muted-foreground">Banners</span>
               <Image className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
-            <div className="text-2xl font-bold font-display">
-              {bannersUsed}<span className="text-sm text-muted-foreground font-normal ml-0.5">/{bannerLimit}</span>
+            <div className="text-xl sm:text-2xl font-bold font-display">
+              {bannersUsed}<span className="text-xs sm:text-sm text-muted-foreground font-normal ml-0.5">/{bannerLimit}</span>
             </div>
             <Progress value={bannerUsagePercent} className="h-1.5 mt-2" />
           </CardContent>
@@ -201,7 +201,7 @@ const Dashboard = () => {
               <span className="text-xs font-medium text-muted-foreground">Productos</span>
               <Package className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
-            <div className="text-2xl font-bold font-display">{products.length}</div>
+            <div className="text-xl sm:text-2xl font-bold font-display">{products.length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -210,7 +210,7 @@ const Dashboard = () => {
               <span className="text-xs font-medium text-muted-foreground">Plan</span>
               <Zap className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
-            <div className="text-2xl font-bold font-display capitalize">{profile?.plan || "free"}</div>
+            <div className="text-xl sm:text-2xl font-bold font-display capitalize">{profile?.plan || "free"}</div>
             {profile?.plan === "free" && (
               <Button variant="link" asChild className="px-0 text-primary text-xs h-auto p-0 mt-1">
                 <Link to="/pricing">Actualizar →</Link>
@@ -255,12 +255,12 @@ const Dashboard = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 flex-wrap">
                       <Badge variant={landing.published ? "default" : "secondary"} className="text-[10px]">
                         {landing.published ? "Publicada" : "Borrador"}
                       </Badge>
                       <Badge variant="outline" className="capitalize text-[10px]">{landing.theme}</Badge>
-                      <Button variant="outline" size="sm" asChild className="h-8 text-xs">
+                      <Button variant="outline" size="sm" asChild className="h-8 min-h-[44px] sm:min-h-0 text-xs">
                         <Link to={`/landings/${landing.id}/preview`}>
                           <Eye className="h-3 w-3 mr-1" /> Ver
                         </Link>
