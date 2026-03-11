@@ -16,7 +16,9 @@ import { Progress } from "@/components/ui/progress";
 import { themes, type LandingTheme } from "@/components/landing/themes";
 import LandingTemplatePicker, { landingTemplates } from "@/components/landing/LandingTemplates";
 
-import { LANDING_LIMITS } from "@/lib/constants";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { UpgradeWarningBanner } from "@/components/UpgradeWarningBanner";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 type Product = Tables<"products">;
 
