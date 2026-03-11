@@ -279,7 +279,7 @@ const Banners = () => {
             </TabsList>
 
             {/* Filters bar */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
               {selectionMode ? (
                 <>
                   <Button variant="outline" size="sm" onClick={selectAll}>
