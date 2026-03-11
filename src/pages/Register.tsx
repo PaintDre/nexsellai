@@ -20,10 +20,17 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [countryCode, setCountryCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
   const navigate = useNavigate();
+
+  // Auto-detect country from browser timezone
+  useEffect(() => {
+    const detected = detectCountryFromTimezone();
+    if (detected) setCountryCode(detected.code);
+  }, []);
 
   const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
   const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
