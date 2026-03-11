@@ -29,6 +29,7 @@ const SuperAdminConfig = lazy(() => import("./pages/SuperAdminConfig"));
 const GenerateBanner = lazy(() => import("./pages/GenerateBanner"));
 const Banners = lazy(() => import("./pages/Banners"));
 const AdminPayments = lazy(() => import("./pages/AdminPayments"));
+const AdminSubscriptions = lazy(() => import("./pages/AdminSubscriptions"));
 const AdminEmailCampaigns = lazy(() => import("./pages/AdminEmailCampaigns"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
