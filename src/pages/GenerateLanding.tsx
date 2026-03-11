@@ -214,6 +214,9 @@ const GenerateLanding = () => {
         <ArrowLeft className="h-4 w-4 mr-2" /> Volver
       </Button>
 
+      <UpgradeWarningBanner resource="landings" used={used} limit={limit} />
+      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="landings" used={used} limit={limit} />
+
       <div>
         <h1 className="text-3xl font-bold font-display tracking-tight">Generar Landing</h1>
         <p className="text-muted-foreground mt-1">Producto: <strong>{product.name}</strong></p>

@@ -59,6 +59,9 @@ const AdminDashboard = () => {
           <Button asChild variant="outline" className="flex-1 sm:flex-none min-h-[44px]">
             <Link to="/admin/users"><Users className="h-4 w-4 mr-2" /> Usuarios</Link>
           </Button>
+          <Button asChild variant="outline" className="flex-1 sm:flex-none min-h-[44px]">
+            <Link to="/admin/payments"><Banknote className="h-4 w-4 mr-2" /> Pagos</Link>
+          </Button>
           {isSuperAdmin() && (
             <Button asChild className="flex-1 sm:flex-none min-h-[44px]">
               <Link to="/admin/config"><Settings className="h-4 w-4 mr-2" /> Configuración</Link>

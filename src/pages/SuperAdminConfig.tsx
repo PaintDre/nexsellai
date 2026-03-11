@@ -119,7 +119,7 @@ const SuperAdminConfig = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><Sliders className="h-5 w-5" /> Límites de Planes</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Sliders className="h-5 w-5" /> Límites de Landings</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-3 gap-4">
@@ -144,7 +144,39 @@ const SuperAdminConfig = () => {
             })}
             disabled={saving}
           >
-            <Save className="h-4 w-4 mr-2" /> Guardar límites
+            <Save className="h-4 w-4 mr-2" /> Guardar límites de landings
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Sliders className="h-5 w-5" /> Límites de Banners</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label>Free</Label>
+              <Input type="number" value={bannerLimitFree} onChange={(e) => setBannerLimitFree(e.target.value)} />
+            </div>
+            <div>
+              <Label>Starter</Label>
+              <Input type="number" value={bannerLimitStarter} onChange={(e) => setBannerLimitStarter(e.target.value)} />
+            </div>
+            <div>
+              <Label>Pro</Label>
+              <Input type="number" value={bannerLimitPro} onChange={(e) => setBannerLimitPro(e.target.value)} />
+            </div>
+          </div>
+          <Button
+            onClick={() => saveConfig("banner_limits", {
+              free: parseInt(bannerLimitFree) || 2,
+              starter: parseInt(bannerLimitStarter) || 30,
+              pro: parseInt(bannerLimitPro) || 150,
+            })}
+            disabled={saving}
+          >
+            <Save className="h-4 w-4 mr-2" /> Guardar límites de banners
           </Button>
         </CardContent>
       </Card>

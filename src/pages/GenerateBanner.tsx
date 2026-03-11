@@ -309,6 +309,9 @@ const GenerateBanner = () => {
         </div>
       </div>
 
+      <UpgradeWarningBanner resource="banners" used={bannersUsed} limit={bannerLimit} />
+      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="banners" used={bannersUsed} limit={bannerLimit} />
+
       {hasReachedLimit ? (
         <Card className="border-dashed border-2 border-destructive/30">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
