@@ -16,8 +16,10 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, AlertTriangle, Zap, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-import { BANNER_LIMITS } from "@/lib/constants";
 import { computeBannersUsed } from "@/lib/planUsage";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { UpgradeWarningBanner } from "@/components/UpgradeWarningBanner";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 const STEPS = [
   { label: "Descripción", icon: "✍️" },
@@ -154,11 +156,13 @@ const GenerateBanner = () => {
     setFormState((prev) => ({ ...prev, [key]: value }));
   }, []);
 
+  const { banner: bannerLimits } = usePlanLimits();
   const plan = profile?.plan || "free";
-  const bannerLimit = BANNER_LIMITS[plan] || 2;
+  const bannerLimit = bannerLimits[plan] || 2;
   const bannersUsed = useMemo(() => computeBannersUsed(profile), [profile]);
   const bannersRemaining = useMemo(() => Math.max(0, bannerLimit - bannersUsed), [bannerLimit, bannersUsed]);
   const hasReachedLimit = bannersRemaining <= 0;
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const sequence = useMemo(() => getSequence(formState.bannerCount), [formState.bannerCount]);
 
   const canGoNext = useMemo(() => {
@@ -304,6 +308,9 @@ const GenerateBanner = () => {
           </p>
         </div>
       </div>
+
+      <UpgradeWarningBanner resource="banners" used={bannersUsed} limit={bannerLimit} />
+      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="banners" used={bannersUsed} limit={bannerLimit} />
 
       {hasReachedLimit ? (
         <Card className="border-dashed border-2 border-destructive/30">

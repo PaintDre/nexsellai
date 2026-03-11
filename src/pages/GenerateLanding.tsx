@@ -16,7 +16,9 @@ import { Progress } from "@/components/ui/progress";
 import { themes, type LandingTheme } from "@/components/landing/themes";
 import LandingTemplatePicker, { landingTemplates } from "@/components/landing/LandingTemplates";
 
-import { LANDING_LIMITS } from "@/lib/constants";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { UpgradeWarningBanner } from "@/components/UpgradeWarningBanner";
+import { UpgradeModal } from "@/components/UpgradeModal";
 
 type Product = Tables<"products">;
 
@@ -38,6 +40,7 @@ const GenerateLanding = () => {
   const [generationStep, setGenerationStep] = useState<"idle" | "copy" | "images" | "done">("idle");
   const [progress, setProgress] = useState(0);
   const [quickMode, setQuickMode] = useState(true);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const isPaidPlan = profile?.plan === "starter" || profile?.plan === "pro";
 
@@ -49,7 +52,8 @@ const GenerateLanding = () => {
     });
   }, [id, user]);
 
-  const limit = LANDING_LIMITS[profile?.plan || "free"];
+  const { landing: landingLimits } = usePlanLimits();
+  const limit = landingLimits[profile?.plan || "free"];
   const used = profile?.landings_used || 0;
   const canGenerate = used < limit;
 
@@ -209,6 +213,9 @@ const GenerateLanding = () => {
       <Button variant="ghost" onClick={() => navigate(-1)}>
         <ArrowLeft className="h-4 w-4 mr-2" /> Volver
       </Button>
+
+      <UpgradeWarningBanner resource="landings" used={used} limit={limit} />
+      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="landings" used={used} limit={limit} />
 
       <div>
         <h1 className="text-3xl font-bold font-display tracking-tight">Generar Landing</h1>

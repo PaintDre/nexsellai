@@ -22,8 +22,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { LANDING_LIMITS, BANNER_LIMITS } from "@/lib/constants";
 import { computeBannersUsed } from "@/lib/planUsage";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { cn } from "@/lib/utils";
 import { COUNTRIES, getCountryByCode } from "@/lib/countries";
 
@@ -95,12 +95,13 @@ const SettingsPage = () => {
     toast.success("Preferencias guardadas");
   };
 
+  const { landing: landingLimits, banner: bannerLimits } = usePlanLimits();
   const plan = profile?.plan || "free";
   const landingsUsed = profile?.landings_used || 0;
-  const limit = LANDING_LIMITS[plan] || 1;
+  const limit = landingLimits[plan] || 1;
   const usagePercent = Math.min((landingsUsed / limit) * 100, 100);
 
-  const bannerLimit = BANNER_LIMITS[plan] || 2;
+  const bannerLimit = bannerLimits[plan] || 2;
   const bannersUsed = computeBannersUsed(profile);
   const bannerUsagePercent = Math.min((bannersUsed / bannerLimit) * 100, 100);
 

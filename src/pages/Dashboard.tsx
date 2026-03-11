@@ -12,8 +12,9 @@ import {
   Package, FileText, Zap, Eye, History, Plus, Image,
   ArrowRight, Sparkles, Download, ImageIcon,
 } from "lucide-react";
-import { LANDING_LIMITS, BANNER_LIMITS } from "@/lib/constants";
 import { computeBannersUsed } from "@/lib/planUsage";
+import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { UpgradeWarningBanner } from "@/components/UpgradeWarningBanner";
 
 type Product = Tables<"products">;
 type Landing = Tables<"landings">;
@@ -73,10 +74,11 @@ const Dashboard = () => {
     load();
   }, [user]);
 
-  const limit = LANDING_LIMITS[profile?.plan || "free"];
+  const { landing: landingLimits, banner: bannerLimits } = usePlanLimits();
+  const limit = landingLimits[profile?.plan || "free"];
   const used = profile?.landings_used || 0;
   const usagePercent = Math.min((used / limit) * 100, 100);
-  const bannerLimit = BANNER_LIMITS[profile?.plan || "free"];
+  const bannerLimit = bannerLimits[profile?.plan || "free"];
   const bannersUsed = computeBannersUsed(profile);
   const bannerUsagePercent = Math.min((bannersUsed / bannerLimit) * 100, 100);
   const isNewUser = products.length === 0;
@@ -162,6 +164,10 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Upgrade warnings */}
+      <UpgradeWarningBanner resource="landings" used={used} limit={limit} />
+      <UpgradeWarningBanner resource="banners" used={bannersUsed} limit={bannerLimit} />
 
       {/* Usage Stats */}
       <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">

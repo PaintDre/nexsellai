@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, FileText, TrendingUp, Settings, Crown, Image } from "lucide-react";
+import { Users, FileText, TrendingUp, Settings, Crown, Image, Banknote } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Stats {
@@ -58,6 +58,9 @@ const AdminDashboard = () => {
         <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
           <Button asChild variant="outline" className="flex-1 sm:flex-none min-h-[44px]">
             <Link to="/admin/users"><Users className="h-4 w-4 mr-2" /> Usuarios</Link>
+          </Button>
+          <Button asChild variant="outline" className="flex-1 sm:flex-none min-h-[44px]">
+            <Link to="/admin/payments"><Banknote className="h-4 w-4 mr-2" /> Pagos</Link>
           </Button>
           {isSuperAdmin() && (
             <Button asChild className="flex-1 sm:flex-none min-h-[44px]">
