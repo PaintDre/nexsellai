@@ -20,7 +20,7 @@ import { PRODUCT_CATEGORIES } from "@/lib/constants";
 
 const faqs = [
   { q: "¿Necesito saber programar?", a: "No. Nexsell genera todo el contenido listo para usar. Solo describe tu producto y la IA hace el resto." },
-  { q: "¿En qué idioma se generan las landings?", a: "Todas las landings se generan en español optimizado para ecommerce chileno, con precios en CLP." },
+  { q: "¿En qué idioma se generan las landings?", a: "Todas las landings se generan en español optimizado para ecommerce, con precios en la moneda de tu país." },
   { q: "¿Puedo probar sin crear una cuenta?", a: "Sí. Puedes generar 1 landing demo sin registrarte. Para exportar o descargar necesitas crear una cuenta." },
   { q: "¿Cuántas landings puedo generar?", a: "Depende de tu plan: Free (1), Starter (10), Pro (100). Cada plan tiene características adicionales de persuasión." },
   { q: "¿Puedo editar la landing después?", a: "Sí. Una vez generada puedes editar los bloques de texto y ajustar el contenido a tu gusto." },
