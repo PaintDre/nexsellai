@@ -15,7 +15,7 @@ type Landing = Tables<"landings">;
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [landings, setLandings] = useState<Landing[]>([]);
   const [bannerCount, setBannerCount] = useState(0);
