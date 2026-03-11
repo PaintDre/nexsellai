@@ -210,7 +210,7 @@ const Dashboard = () => {
               <span className="text-xs font-medium text-muted-foreground">Plan</span>
               <Zap className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
-            <div className="text-2xl font-bold font-display capitalize">{profile?.plan || "free"}</div>
+            <div className="text-xl sm:text-2xl font-bold font-display capitalize">{profile?.plan || "free"}</div>
             {profile?.plan === "free" && (
               <Button variant="link" asChild className="px-0 text-primary text-xs h-auto p-0 mt-1">
                 <Link to="/pricing">Actualizar →</Link>
