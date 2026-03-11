@@ -114,4 +114,7 @@
   .glass {
     @apply bg-card/80 backdrop-blur-md;
   }
+  .glass-card {
+    @apply bg-card/70 backdrop-blur-xl border-border/40 shadow-sm;
+  }
 }

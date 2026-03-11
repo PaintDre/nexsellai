@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { LayoutDashboard, Package, FileText, CreditCard, Settings, LogOut, Shield, ShieldCheck, ImageIcon } from "lucide-react";
@@ -12,11 +13,11 @@ const planColors: Record<string, string> = {
 };
 
 interface SidebarContentProps {
-  collapsed?: boolean;
+  expanded?: boolean;
   onNavigate?: () => void;
 }
 
-export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContentProps) => {
+export const SidebarContent = ({ expanded = false, onNavigate }: SidebarContentProps) => {
   const { pathname } = useLocation();
   const { profile, signOut, role, isAdmin, isSuperAdmin } = useAuth();
 
@@ -36,15 +37,19 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
     adminItems.push({ label: "Sistema", icon: ShieldCheck, href: "/admin/config" });
   }
 
+  const collapsed = !expanded;
+
   return (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className={cn("flex items-center gap-2.5 py-6", collapsed ? "justify-center px-2" : "px-6")}>
+      <div className={cn("flex items-center gap-2.5 py-6", collapsed ? "justify-center px-2" : "px-5")}>
         <div className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0 overflow-hidden">
           <img src="/logo-ns.png" alt="Nexsell" className="h-8 w-8 object-contain" />
         </div>
-        {!collapsed && (
-          <span className="text-lg font-bold font-display tracking-tight text-sidebar-primary-foreground">Nexsell</span>
+        {expanded && (
+          <span className="text-lg font-bold font-display tracking-tight text-sidebar-primary-foreground whitespace-nowrap">
+            Nexsell
+          </span>
         )}
       </div>
 
@@ -58,7 +63,7 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
               to={item.href}
               onClick={onNavigate}
               className={cn(
-                "flex items-center gap-3 rounded-lg py-2 text-[13px] font-medium transition-all duration-200",
+                "flex items-center gap-3 rounded-lg py-2 text-[13px] font-medium transition-all duration-300 ease-out",
                 collapsed ? "justify-center px-2" : "px-3",
                 active
                   ? "bg-sidebar-accent text-sidebar-primary"
@@ -67,7 +72,7 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
               title={collapsed ? item.label : undefined}
             >
               <item.icon className={cn("h-[18px] w-[18px] shrink-0 transition-colors", active && "text-sidebar-primary")} />
-              {!collapsed && item.label}
+              {expanded && <span className="whitespace-nowrap">{item.label}</span>}
             </Link>
           );
         })}
@@ -75,7 +80,7 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
         {adminItems.length > 0 && (
           <>
             <div className={cn("my-3 border-t border-sidebar-border/50", collapsed ? "mx-1" : "mx-2")} />
-            {!collapsed && <p className="px-3 text-[10px] uppercase tracking-widest text-sidebar-foreground/40 mb-1 font-medium">Admin</p>}
+            {expanded && <p className="px-3 text-[10px] uppercase tracking-widest text-sidebar-foreground/40 mb-1 font-medium">Admin</p>}
             {adminItems.map((item) => {
               const active = pathname.startsWith(item.href);
               return (
@@ -84,7 +89,7 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
                   to={item.href}
                   onClick={onNavigate}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg py-2 text-[13px] font-medium transition-all duration-200",
+                    "flex items-center gap-3 rounded-lg py-2 text-[13px] font-medium transition-all duration-300 ease-out",
                     collapsed ? "justify-center px-2" : "px-3",
                     active
                       ? "bg-sidebar-accent text-sidebar-primary"
@@ -93,7 +98,7 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
                   title={collapsed ? item.label : undefined}
                 >
                   <item.icon className={cn("h-[18px] w-[18px] shrink-0", active && "text-sidebar-primary")} />
-                  {!collapsed && item.label}
+                  {expanded && <span className="whitespace-nowrap">{item.label}</span>}
                 </Link>
               );
             })}
@@ -103,17 +108,17 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
 
       {/* Footer */}
       <div className={cn("border-t border-sidebar-border/40 p-4 space-y-3", collapsed && "px-2")}>
-        {profile && !collapsed && (
+        {profile && expanded && (
           <div className="flex items-center gap-2">
             <div className={cn("rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide", planColors[profile.plan] || planColors.free)}>
               {profile.plan}
             </div>
-            <span className="text-xs text-sidebar-foreground/70 truncate">{profile.full_name || "Usuario"}</span>
+            <span className="text-xs text-sidebar-foreground/70 truncate whitespace-nowrap">{profile.full_name || "Usuario"}</span>
           </div>
         )}
         <div className={cn("flex", collapsed ? "flex-col items-center gap-1.5" : "gap-1.5")}>
           <ThemeToggle collapsed={collapsed} />
-          {!collapsed ? (
+          {expanded ? (
             <Button variant="ghost" size="sm" className="flex-1 justify-start gap-2 text-sidebar-foreground text-xs h-8" asChild onClick={onNavigate}>
               <Link to="/settings"><Settings className="h-3.5 w-3.5" /> Ajustes</Link>
             </Button>
@@ -131,13 +136,28 @@ export const SidebarContent = ({ collapsed = false, onNavigate }: SidebarContent
   );
 };
 
-export const AppSidebar = ({ collapsed = false }: { collapsed?: boolean }) => {
+export const AppSidebar = () => {
+  const [hovered, setHovered] = useState(false);
+
   return (
-    <aside className={cn(
-      "hidden md:flex h-screen flex-col border-r border-sidebar-border/50 bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out",
-      collapsed ? "w-[60px]" : "w-60"
-    )}>
-      <SidebarContent collapsed={collapsed} />
-    </aside>
+    <>
+      {/* Collapsed spacer — always takes up 60px in the layout flow */}
+      <div className="hidden md:block w-[60px] shrink-0" />
+
+      {/* Actual sidebar — fixed, expands on hover as overlay */}
+      <aside
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        className={cn(
+          "hidden md:flex fixed left-0 top-0 h-screen flex-col bg-sidebar text-sidebar-foreground z-50",
+          "transition-all duration-300 ease-out overflow-hidden",
+          hovered
+            ? "w-60 shadow-2xl shadow-black/20 border-r border-sidebar-border/30"
+            : "w-[60px] border-r border-sidebar-border/50"
+        )}
+      >
+        <SidebarContent expanded={hovered} />
+      </aside>
+    </>
   );
 };
