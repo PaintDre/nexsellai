@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -7,11 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { MailCheck, Mail, User, Loader2, Check, X } from "lucide-react";
+import { MailCheck, Mail, User, Loader2, Check, X, Globe } from "lucide-react";
 import AuthLayout from "@/components/auth/AuthLayout";
 import PasswordInput from "@/components/auth/PasswordInput";
 import PasswordStrengthBar from "@/components/auth/PasswordStrengthBar";
+import { COUNTRIES, detectCountryFromTimezone, getBrowserTimezone, getCountryByCode } from "@/lib/countries";
 
 const Register = () => {
   const [email, setEmail] = useState("");
