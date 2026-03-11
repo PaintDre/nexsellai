@@ -52,7 +52,8 @@ const GenerateLanding = () => {
     });
   }, [id, user]);
 
-  const limit = LANDING_LIMITS[profile?.plan || "free"];
+  const { landing: landingLimits } = usePlanLimits();
+  const limit = landingLimits[profile?.plan || "free"];
   const used = profile?.landings_used || 0;
   const canGenerate = used < limit;
 
