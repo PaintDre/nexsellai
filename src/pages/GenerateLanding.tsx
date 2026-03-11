@@ -40,6 +40,7 @@ const GenerateLanding = () => {
   const [generationStep, setGenerationStep] = useState<"idle" | "copy" | "images" | "done">("idle");
   const [progress, setProgress] = useState(0);
   const [quickMode, setQuickMode] = useState(true);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const isPaidPlan = profile?.plan === "starter" || profile?.plan === "pro";
 
