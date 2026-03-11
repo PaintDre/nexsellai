@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Save, Lock, Trash2, HelpCircle, MessageSquare, Zap, Image, Palette, Sun, Moon, Monitor } from "lucide-react";
+import { Save, Lock, Trash2, HelpCircle, MessageSquare, Zap, Image, Palette, Sun, Moon, Monitor, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   AlertDialog,
