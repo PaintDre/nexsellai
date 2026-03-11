@@ -22,6 +22,9 @@ const SuperAdminConfig = () => {
   const [limitFree, setLimitFree] = useState("1");
   const [limitStarter, setLimitStarter] = useState("10");
   const [limitPro, setLimitPro] = useState("100");
+  const [bannerLimitFree, setBannerLimitFree] = useState("2");
+  const [bannerLimitStarter, setBannerLimitStarter] = useState("30");
+  const [bannerLimitPro, setBannerLimitPro] = useState("150");
 
   const baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
 
