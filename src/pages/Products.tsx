@@ -13,7 +13,7 @@ import { formatProductPrice } from "@/lib/countries";
 type Product = Tables<"products">;
 
 const Products = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
