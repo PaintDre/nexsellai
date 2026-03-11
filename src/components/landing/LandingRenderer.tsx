@@ -41,7 +41,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
 
   const getBlock = (type: string) => blocks.find((b) => b.type === type);
   const price = product?.price ?? 0;
-  const formattedPrice = `$${price.toLocaleString("es-CL")}`;
+  const formattedPrice = `$${price.toLocaleString()}`;
   const productName = product?.name ?? "Producto";
 
   // Editing helpers

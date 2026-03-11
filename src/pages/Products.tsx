@@ -75,7 +75,7 @@ const Products = () => {
                   <h3 className="font-medium text-sm truncate">{product.name}</h3>
                   <Badge variant="secondary" className="capitalize text-[10px] shrink-0">{product.category}</Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">${product.price.toLocaleString("es-CL")}</p>
+                <p className="text-xs text-muted-foreground">{formatProductPrice(product.price, profile?.country_code)}</p>
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" asChild className="flex-1 h-9 text-xs">

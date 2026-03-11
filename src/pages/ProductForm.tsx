@@ -164,9 +164,9 @@ const ProductForm = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="price">Precio CLP *</Label>
+              <Label htmlFor="price">Precio ({currencyLabel}) *</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">{currencySymbol}</span>
                 <Input id="price" type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} className="pl-7" placeholder="19990" required />
               </div>
             </div>
