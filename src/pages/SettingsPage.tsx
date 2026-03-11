@@ -45,7 +45,12 @@ const SettingsPage = () => {
   const [savingRegion, setSavingRegion] = useState(false);
 
   useEffect(() => {
-    if (profile) setFullName(profile.full_name || "");
+    if (profile) {
+      setFullName(profile.full_name || "");
+      setRegionCountry((profile as any).country_code || "");
+      setRegionCurrency((profile as any).currency || "USD");
+      setRegionTimezone((profile as any).timezone || "");
+    }
   }, [profile]);
 
   const handleSaveProfile = async () => {
