@@ -328,7 +328,7 @@ const Banners = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 text-xs"
+                    className="h-10 sm:h-8 text-xs min-h-[44px] sm:min-h-0"
                     onClick={() => setSortOrder((o) => o === "desc" ? "asc" : "desc")}
                   >
                     <ArrowUpDown className="h-3 w-3 mr-1" />
