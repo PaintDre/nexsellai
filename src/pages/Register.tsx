@@ -80,6 +80,25 @@ const Register = () => {
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="country">País</Label>
+          <div className="relative">
+            <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+            <Select value={countryCode} onValueChange={setCountryCode}>
+              <SelectTrigger className="h-12 pl-10">
+                <SelectValue placeholder="Selecciona tu país" />
+              </SelectTrigger>
+              <SelectContent>
+                {COUNTRIES.map((c) => (
+                  <SelectItem key={c.code} value={c.code}>
+                    {c.name} ({c.currency})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
             <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
