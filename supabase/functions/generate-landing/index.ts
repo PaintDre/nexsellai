@@ -208,9 +208,11 @@ function buildGeneratorPrompt(params: PromptParams, strategy: Strategy): string 
     ? `\n## RISKY BLOCKS — USE SAFE COPY\nThe following blocks lack real user data: ${strategy.risky_blocks.join(", ")}.\nFor these blocks, use neutral trust-oriented copy. Do NOT invent specific names, dates, quantified results, or fake social proof. Use phrasing like "Nuestros clientes confirman que...", "Diseñado para quienes buscan...", etc.`
     : "";
 
-  return `You are a conversion copywriter expert specialized in ecommerce / dropshipping in Chile.
+  return `You are a conversion copywriter expert specialized in ecommerce / dropshipping.
 
-Write in Spanish (Chilean). Prices are in CLP.
+${countryInstruction}
+
+Prices are in ${currencyCode}.
 
 Return ONLY valid JSON: { "blocks": [...] }.
 
