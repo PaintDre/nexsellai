@@ -119,6 +119,8 @@ const Onboarding = () => {
           hasOffer: false,
           guarantee: "Garantía de satisfacción de 30 días",
           plan: profile.plan,
+          currency: (profile as any)?.currency || "USD",
+          country_code: (profile as any)?.country_code || null,
         },
       });
 
