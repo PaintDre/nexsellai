@@ -82,6 +82,7 @@ const App = () => (
                   <Route path="/admin/users" element={<AdminUsers />} />
                   <Route path="/admin/payments" element={<AdminPayments />} />
                   <Route path="/admin/email" element={<AdminEmailCampaigns />} />
+                  <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
                 </Route>
                 <Route element={<SuperAdminLayout />}>
                   <Route path="/admin/config" element={<SuperAdminConfig />} />
