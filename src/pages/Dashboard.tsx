@@ -74,10 +74,11 @@ const Dashboard = () => {
     load();
   }, [user]);
 
-  const limit = LANDING_LIMITS[profile?.plan || "free"];
+  const { landing: landingLimits, banner: bannerLimits } = usePlanLimits();
+  const limit = landingLimits[profile?.plan || "free"];
   const used = profile?.landings_used || 0;
   const usagePercent = Math.min((used / limit) * 100, 100);
-  const bannerLimit = BANNER_LIMITS[profile?.plan || "free"];
+  const bannerLimit = bannerLimits[profile?.plan || "free"];
   const bannersUsed = computeBannersUsed(profile);
   const bannerUsagePercent = Math.min((bannersUsed / bannerLimit) * 100, 100);
   const isNewUser = products.length === 0;
