@@ -56,28 +56,38 @@ serve(async (req) => {
     const origin = req.headers.get("origin") || "https://nexsellai.lovable.app";
     const webhookUrl = `${supabaseUrl}/functions/v1/mercadopago-webhook`;
 
+    // Build preference — enable international cards
+    const preferenceBody: Record<string, unknown> = {
+      items: [{
+        title,
+        quantity: 1,
+        unit_price: price,
+        currency_id: "CLP",
+      }],
+      back_urls: {
+        success: `${origin}/pricing?status=success`,
+        failure: `${origin}/pricing?status=failure`,
+        pending: `${origin}/pricing?status=pending`,
+      },
+      auto_return: "approved",
+      external_reference: `${userId}:${planId}:${period}`,
+      notification_url: webhookUrl,
+      // Enable all payment methods including international cards
+      payment_methods: {
+        excluded_payment_types: [],
+        installments: 1,
+      },
+      // Binary mode: approved or rejected (no pending for cards)
+      binary_mode: true,
+    };
+
     const mpRes = await fetch("https://api.mercadopago.com/checkout/preferences", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${mpToken}`,
       },
-      body: JSON.stringify({
-        items: [{
-          title,
-          quantity: 1,
-          unit_price: price,
-          currency_id: "CLP",
-        }],
-        back_urls: {
-          success: `${origin}/pricing?status=success`,
-          failure: `${origin}/pricing?status=failure`,
-          pending: `${origin}/pricing?status=pending`,
-        },
-        auto_return: "approved",
-        external_reference: `${userId}:${planId}:${period}`,
-        notification_url: webhookUrl,
-      }),
+      body: JSON.stringify(preferenceBody),
     });
 
     const mpData = await mpRes.json();
@@ -89,12 +99,15 @@ serve(async (req) => {
       });
     }
 
+    // Record pending payment with currency and provider info
     const adminSupabase = createClient(supabaseUrl, serviceKey);
     await adminSupabase.from("payments").insert({
       user_id: userId,
       plan: planId,
       amount: price,
       period,
+      currency: "CLP",
+      provider: "mercadopago",
       mp_preference_id: mpData.id,
       status: "pending",
     });

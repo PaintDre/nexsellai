@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CreditCard } from "lucide-react";
@@ -11,6 +11,8 @@ interface Payment {
   user_id: string;
   plan: string;
   amount: number;
+  currency: string;
+  provider: string;
   period: string;
   status: string;
   mp_payment_id: string | null;
@@ -50,6 +52,13 @@ const AdminPayments = () => {
     };
     fetchPayments();
   }, []);
+
+  const formatAmount = (amount: number, currency: string) => {
+    if (["USD", "EUR"].includes(currency)) {
+      return `${currency === "EUR" ? "€" : "$"}${(amount / 100).toFixed(2)}`;
+    }
+    return `$${amount.toLocaleString()} ${currency}`;
+  };
 
   if (loading) {
     return (
@@ -92,9 +101,11 @@ const AdminPayments = () => {
                       <th className="text-left py-3 px-4">Usuario</th>
                       <th className="text-left py-3 px-4">Plan</th>
                       <th className="text-right py-3 px-4">Monto</th>
+                      <th className="text-left py-3 px-4">Moneda</th>
+                      <th className="text-left py-3 px-4">Proveedor</th>
                       <th className="text-left py-3 px-4">Período</th>
                       <th className="text-left py-3 px-4">Estado</th>
-                      <th className="text-left py-3 px-4">ID MP</th>
+                      <th className="text-left py-3 px-4">ID Externo</th>
                       <th className="text-left py-3 px-4">Fecha</th>
                     </tr>
                   </thead>
@@ -108,7 +119,11 @@ const AdminPayments = () => {
                           </div>
                         </td>
                         <td className="py-3 px-4 capitalize font-medium">{p.plan}</td>
-                        <td className="py-3 px-4 text-right font-mono">${p.amount.toLocaleString()}</td>
+                        <td className="py-3 px-4 text-right font-mono">{formatAmount(p.amount, p.currency || "CLP")}</td>
+                        <td className="py-3 px-4">
+                          <Badge variant="outline" className="text-xs">{p.currency || "CLP"}</Badge>
+                        </td>
+                        <td className="py-3 px-4 capitalize text-xs">{p.provider || "mercadopago"}</td>
                         <td className="py-3 px-4 capitalize">{p.period}</td>
                         <td className="py-3 px-4">
                           <Badge className={statusColors[p.status] || "bg-muted text-muted-foreground"} variant="secondary">
@@ -141,12 +156,17 @@ const AdminPayments = () => {
                   <p className="text-xs text-muted-foreground">{p.user_email}</p>
                   <div className="flex items-center justify-between text-xs">
                     <span className="capitalize">{p.plan} · {p.period}</span>
-                    <span className="font-mono font-medium">${p.amount.toLocaleString()}</span>
+                    <span className="font-mono font-medium">{formatAmount(p.amount, p.currency || "CLP")}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(p.created_at).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" })}
-                    {p.mp_payment_id && ` · MP: ${p.mp_payment_id}`}
-                  </p>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="capitalize">{p.provider || "mercadopago"} · {p.currency || "CLP"}</span>
+                    <span>
+                      {new Date(p.created_at).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" })}
+                    </span>
+                  </div>
+                  {p.mp_payment_id && (
+                    <p className="text-xs text-muted-foreground font-mono">ID: {p.mp_payment_id}</p>
+                  )}
                 </CardContent>
               </Card>
             ))}
