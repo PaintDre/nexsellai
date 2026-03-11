@@ -87,7 +87,7 @@ const Dashboard = () => {
   if (loading) return <DashboardSkeleton />;
 
   return (
-    <div className="p-5 md:p-8 lg:p-10 space-y-8 max-w-6xl mx-auto">
+    <div className="p-4 md:p-8 lg:p-10 space-y-6 md:space-y-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="space-y-1">
         <h1 className="text-2xl md:text-3xl font-bold font-display">
