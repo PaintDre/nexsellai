@@ -334,7 +334,7 @@ const Banners = () => {
                     <ArrowUpDown className="h-3 w-3 mr-1" />
                     {sortOrder === "desc" ? "Más reciente" : "Más antiguo"}
                   </Button>
-                  <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setSelectionMode(true)}>
+                  <Button variant="outline" size="sm" className="h-10 sm:h-8 text-xs min-h-[44px] sm:min-h-0" onClick={() => setSelectionMode(true)}>
                     <CheckSquare className="h-3 w-3 mr-1" /> Seleccionar
                   </Button>
                 </>

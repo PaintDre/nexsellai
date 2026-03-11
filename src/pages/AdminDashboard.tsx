@@ -49,11 +49,11 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-10 space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="p-4 md:p-6 lg:p-10 space-y-6 md:space-y-8">
+      <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-display text-foreground">Panel de Administración</h1>
-          <p className="text-muted-foreground mt-1">Estadísticas y gestión de la plataforma</p>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-foreground">Panel de Administración</h1>
+          <p className="text-sm text-muted-foreground mt-1">Estadísticas y gestión de la plataforma</p>
         </div>
         <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3 w-full sm:w-auto">
           <Button asChild variant="outline" className="min-h-[44px]">

@@ -255,12 +255,12 @@ const Dashboard = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0 flex-wrap">
                       <Badge variant={landing.published ? "default" : "secondary"} className="text-[10px]">
                         {landing.published ? "Publicada" : "Borrador"}
                       </Badge>
                       <Badge variant="outline" className="capitalize text-[10px]">{landing.theme}</Badge>
-                      <Button variant="outline" size="sm" asChild className="h-8 text-xs">
+                      <Button variant="outline" size="sm" asChild className="h-8 min-h-[44px] sm:min-h-0 text-xs">
                         <Link to={`/landings/${landing.id}/preview`}>
                           <Eye className="h-3 w-3 mr-1" /> Ver
                         </Link>
