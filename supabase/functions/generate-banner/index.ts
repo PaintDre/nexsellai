@@ -536,6 +536,7 @@ ${sectionContext}
 ${bannerIndexInstruction}
 ${sequenceInstruction}
 ${customModeInstruction}
+${countryContext}
 ${customText ? `\nCUSTOM SLOGAN (include prominently): "${customText}"` : ""}`;
 
     // Build messages with system prompt + up to 3 product images

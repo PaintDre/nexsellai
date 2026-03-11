@@ -143,6 +143,8 @@ const GenerateBanner = () => {
     bannerGoal: "sale",
     tone: "direct",
     visualStyle: "auto",
+    currency: (profile as any)?.currency || "USD",
+    country_code: (profile as any)?.country_code || "",
   });
   const [loading, setLoading] = useState(false);
   const [generatedBanners, setGeneratedBanners] = useState<GeneratedBanner[]>([]);

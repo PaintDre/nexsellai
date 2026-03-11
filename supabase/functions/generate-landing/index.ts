@@ -134,6 +134,8 @@ function getDefaultStrategy(params: PromptParams): Strategy {
 
 function buildPlannerPrompt(params: PromptParams): string {
   const { product, mode, intensity, hasOffer, guarantee, plan } = params;
+  const currencyCode = params.currency || "CLP";
+  const countryCode = params.country_code || "";
 
   return `You are a senior marketing strategist analyzing a product to plan a high-converting landing page.
 
@@ -142,7 +144,7 @@ Analyze the following product and return a JSON strategy object.
 ## Product
 - Name: ${product.name}
 - Category: ${product.category}
-- Price: $${product.price} CLP
+- Price: $${product.price} ${currencyCode}
 - Target audience: ${product.target_audience}
 - Description: ${product.description || "N/A"}
 
@@ -152,6 +154,8 @@ Analyze the following product and return a JSON strategy object.
 - Has offer: ${hasOffer}
 - Guarantee: ${guarantee || "none"}
 - Plan: ${plan}
+- Country: ${countryCode || "not specified"}
+- Currency: ${currencyCode}
 
 ## Return this exact JSON structure:
 {
