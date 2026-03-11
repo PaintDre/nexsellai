@@ -17,3 +17,5 @@ project_id = "fizryssrfsojiavxmhrt"
     verify_jwt = false
   [functions.send-campaign-email]
     verify_jwt = false
+  [functions.check-plan-expiration]
+    verify_jwt = false
