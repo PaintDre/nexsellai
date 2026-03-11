@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Users, FileText, TrendingUp, Settings, Crown, Image, Banknote } from "lucide-react";
+import { Users, FileText, TrendingUp, Settings, Crown, Image, Banknote, RefreshCw } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Stats {
