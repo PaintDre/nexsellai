@@ -39,6 +39,11 @@ const SettingsPage = () => {
   const [defaultIntensity, setDefaultIntensity] = useState(() => localStorage.getItem("pref_intensity") || "medium");
   const [defaultMode, setDefaultMode] = useState(() => localStorage.getItem("pref_mode") || "aida");
 
+  const [regionCountry, setRegionCountry] = useState("");
+  const [regionCurrency, setRegionCurrency] = useState("USD");
+  const [regionTimezone, setRegionTimezone] = useState("");
+  const [savingRegion, setSavingRegion] = useState(false);
+
   useEffect(() => {
     if (profile) setFullName(profile.full_name || "");
   }, [profile]);
