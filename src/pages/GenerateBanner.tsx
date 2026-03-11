@@ -287,7 +287,7 @@ const GenerateBanner = () => {
   // ─── Render ─────────────────────────────────────────────────────────────
 
   const productImage = product.images?.[0];
-  const formattedPrice = product.price != null ? `$${product.price.toLocaleString("es-CL")} CLP` : "";
+  const formattedPrice = product.price != null ? `$${product.price.toLocaleString()} ${formState.currency}` : "";
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
