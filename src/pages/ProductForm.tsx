@@ -11,6 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ArrowLeft, Upload, X, Loader2 } from "lucide-react";
 import AudienceSelector from "@/components/AudienceSelector";
+import { getCountryByCode } from "@/lib/countries";
 import { PRODUCT_CATEGORIES } from "@/lib/constants";
 
 const ProductForm = () => {
