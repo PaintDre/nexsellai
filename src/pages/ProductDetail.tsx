@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Sparkles, ImageIcon, FileText, Eye, Package, ChevronRight, ArrowRight } from "lucide-react";
+import { formatProductPrice } from "@/lib/countries";
 
 type Product = Tables<"products">;
 type Landing = Tables<"landings">;
@@ -14,7 +15,7 @@ type Landing = Tables<"landings">;
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [landings, setLandings] = useState<Landing[]>([]);
   const [bannerCount, setBannerCount] = useState(0);
@@ -61,7 +62,7 @@ const ProductDetail = () => {
           <div className="flex items-start justify-between gap-4">
             <div>
               <h1 className="text-xl font-bold font-display">{product.name}</h1>
-              <p className="text-base text-muted-foreground">${product.price.toLocaleString("es-CL")}</p>
+              <p className="text-base text-muted-foreground">{formatProductPrice(product.price, profile?.country_code)}</p>
             </div>
             <Badge variant="secondary" className="capitalize text-[10px] shrink-0">{product.category}</Badge>
           </div>

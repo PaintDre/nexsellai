@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Package, Plus, Pencil, Sparkles, ImageIcon } from "lucide-react";
+import { formatProductPrice } from "@/lib/countries";
 
 type Product = Tables<"products">;
 
 const Products = () => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -74,7 +75,7 @@ const Products = () => {
                   <h3 className="font-medium text-sm truncate">{product.name}</h3>
                   <Badge variant="secondary" className="capitalize text-[10px] shrink-0">{product.category}</Badge>
                 </div>
-                <p className="text-xs text-muted-foreground">${product.price.toLocaleString("es-CL")}</p>
+                <p className="text-xs text-muted-foreground">{formatProductPrice(product.price, profile?.country_code)}</p>
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" asChild className="flex-1 h-9 text-xs">

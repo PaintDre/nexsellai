@@ -11,13 +11,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { ArrowLeft, Upload, X, Loader2 } from "lucide-react";
 import AudienceSelector from "@/components/AudienceSelector";
+import { getCountryByCode } from "@/lib/countries";
 import { PRODUCT_CATEGORIES } from "@/lib/constants";
 
 const ProductForm = () => {
   const { id } = useParams();
   const isEdit = !!id;
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+
+  const country = profile?.country_code ? getCountryByCode(profile.country_code) : null;
+  const currencySymbol = country?.currencySymbol ?? "$";
+  const currencyLabel = country?.currency ?? "CLP";
   
 
   const [name, setName] = useState("");
@@ -159,9 +164,9 @@ const ProductForm = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="price">Precio CLP *</Label>
+              <Label htmlFor="price">Precio ({currencyLabel}) *</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">{currencySymbol}</span>
                 <Input id="price" type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} className="pl-7" placeholder="19990" required />
               </div>
             </div>

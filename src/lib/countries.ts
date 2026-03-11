@@ -59,3 +59,11 @@ export function getBrowserTimezone(): string {
     return "America/New_York";
   }
 }
+
+/** Format a product price using the user's country currency settings */
+export function formatProductPrice(price: number, countryCode?: string | null): string {
+  const country = countryCode ? getCountryByCode(countryCode) : null;
+  const symbol = country?.currencySymbol ?? "$";
+  const locale = country?.locale ?? "es-CL";
+  return `${symbol}${price.toLocaleString(locale)}`;
+}
