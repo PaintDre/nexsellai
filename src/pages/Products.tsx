@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Package, Plus, Pencil, Sparkles, ImageIcon } from "lucide-react";
+import { formatProductPrice } from "@/lib/countries";
 
 type Product = Tables<"products">;
 
