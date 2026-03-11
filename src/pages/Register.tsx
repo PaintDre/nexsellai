@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -7,21 +7,30 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { MailCheck, Mail, User, Loader2, Check, X } from "lucide-react";
+import { MailCheck, Mail, User, Loader2, Check, X, Globe } from "lucide-react";
 import AuthLayout from "@/components/auth/AuthLayout";
 import PasswordInput from "@/components/auth/PasswordInput";
 import PasswordStrengthBar from "@/components/auth/PasswordStrengthBar";
+import { COUNTRIES, detectCountryFromTimezone, getBrowserTimezone, getCountryByCode } from "@/lib/countries";
 
 const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [countryCode, setCountryCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [showVerificationDialog, setShowVerificationDialog] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
   const navigate = useNavigate();
+
+  // Auto-detect country from browser timezone
+  useEffect(() => {
+    const detected = detectCountryFromTimezone();
+    if (detected) setCountryCode(detected.code);
+  }, []);
 
   const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword;
   const passwordsMismatch = confirmPassword.length > 0 && password !== confirmPassword;
@@ -35,11 +44,18 @@ const Register = () => {
     }
 
     setLoading(true);
+    const selectedCountry = getCountryByCode(countryCode);
+    const timezone = getBrowserTimezone();
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: {
+          full_name: fullName,
+          country_code: countryCode || null,
+          timezone,
+          currency: selectedCountry?.currency || "USD",
+        },
         emailRedirectTo: `${window.location.origin}/onboarding`,
       },
     });
@@ -60,6 +76,25 @@ const Register = () => {
           <div className="relative">
             <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Tu nombre" required className="h-12 pl-10 transition-all duration-200" />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="country">País</Label>
+          <div className="relative">
+            <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
+            <Select value={countryCode} onValueChange={setCountryCode}>
+              <SelectTrigger className="h-12 pl-10">
+                <SelectValue placeholder="Selecciona tu país" />
+              </SelectTrigger>
+              <SelectContent>
+                {COUNTRIES.map((c) => (
+                  <SelectItem key={c.code} value={c.code}>
+                    {c.name} ({c.currency})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

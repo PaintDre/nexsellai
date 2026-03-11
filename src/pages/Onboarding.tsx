@@ -119,6 +119,8 @@ const Onboarding = () => {
           hasOffer: false,
           guarantee: "Garantía de satisfacción de 30 días",
           plan: profile.plan,
+          currency: (profile as any)?.currency || "USD",
+          country_code: (profile as any)?.country_code || null,
         },
       });
 
@@ -257,7 +259,7 @@ const Onboarding = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="ob-price">Precio CLP *</Label>
+                <Label htmlFor="ob-price">Precio {(profile as any)?.currency || "USD"} *</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
                   <Input id="ob-price" type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} className="pl-7" placeholder="19990" required />

@@ -27,6 +27,8 @@ interface PromptParams {
   hasOffer: boolean;
   guarantee?: string;
   plan: string;
+  currency?: string;
+  country_code?: string;
 }
 
 interface Strategy {
@@ -134,6 +136,8 @@ function getDefaultStrategy(params: PromptParams): Strategy {
 
 function buildPlannerPrompt(params: PromptParams): string {
   const { product, mode, intensity, hasOffer, guarantee, plan } = params;
+  const currencyCode = params.currency || "CLP";
+  const countryCode = params.country_code || "";
 
   return `You are a senior marketing strategist analyzing a product to plan a high-converting landing page.
 
@@ -142,7 +146,7 @@ Analyze the following product and return a JSON strategy object.
 ## Product
 - Name: ${product.name}
 - Category: ${product.category}
-- Price: $${product.price} CLP
+- Price: $${product.price} ${currencyCode}
 - Target audience: ${product.target_audience}
 - Description: ${product.description || "N/A"}
 
@@ -152,6 +156,8 @@ Analyze the following product and return a JSON strategy object.
 - Has offer: ${hasOffer}
 - Guarantee: ${guarantee || "none"}
 - Plan: ${plan}
+- Country: ${countryCode || "not specified"}
+- Currency: ${currencyCode}
 
 ## Return this exact JSON structure:
 {
@@ -176,7 +182,23 @@ Return ONLY valid JSON. No markdown. No explanations.`;
 // ─── Generator Prompt (Strategy-Aware) ──────────────────────────────────────
 
 function buildGeneratorPrompt(params: PromptParams, strategy: Strategy): string {
-  const { product, hasOffer, guarantee, plan } = params;
+  const { product, hasOffer, guarantee, plan, currency, country_code } = params;
+  const currencyCode = currency || "CLP";
+
+  const countryContextMap: Record<string, string> = {
+    AR: "Write in Argentine Spanish (voseo). Cultural references for Argentina.",
+    CL: "Write in Chilean Spanish. Cultural references for Chile.",
+    CO: "Write in Colombian Spanish. Cultural references for Colombia.",
+    MX: "Write in Mexican Spanish. Cultural references for México.",
+    PE: "Write in Peruvian Spanish. Cultural references for Perú.",
+    BR: "Write in Brazilian Portuguese. Cultural references for Brasil.",
+    US: "Write in English or neutral Spanish. Cultural references for USA.",
+    ES: "Write in Castilian Spanish. Cultural references for Spain.",
+  };
+  const countryInstruction = country_code && countryContextMap[country_code]
+    ? countryContextMap[country_code]
+    : "Write in Spanish (Latin American).";
+
 
   const saasContext = product.category === "saas"
     ? `\n## SAAS PRODUCT CONTEXT\nThis is a SaaS/app product. Adapt the copy to sell software: emphasize ease of use, time savings, ROI, onboarding simplicity, and integrations. Use standard block types (hero, benefits, features, faq, cta, etc.) — do NOT use saas-prefixed block types.`
@@ -186,9 +208,11 @@ function buildGeneratorPrompt(params: PromptParams, strategy: Strategy): string 
     ? `\n## RISKY BLOCKS — USE SAFE COPY\nThe following blocks lack real user data: ${strategy.risky_blocks.join(", ")}.\nFor these blocks, use neutral trust-oriented copy. Do NOT invent specific names, dates, quantified results, or fake social proof. Use phrasing like "Nuestros clientes confirman que...", "Diseñado para quienes buscan...", etc.`
     : "";
 
-  return `You are a conversion copywriter expert specialized in ecommerce / dropshipping in Chile.
+  return `You are a conversion copywriter expert specialized in ecommerce / dropshipping.
 
-Write in Spanish (Chilean). Prices are in CLP.
+${countryInstruction}
+
+Prices are in ${currencyCode}.
 
 Return ONLY valid JSON: { "blocks": [...] }.
 
@@ -224,11 +248,11 @@ Plan: ${plan}
 ${buildPlanSections(plan)}
 
 ## Style & tone rules
-- Every landing must feel like a professional Chilean ecommerce sales page
-- Use conversational but professional Spanish (Chilean)
+- Every landing must feel like a professional ecommerce sales page for the target country
+- ${countryInstruction}
 - Include emotional triggers: fear of missing out, social validation, aspiration
 - Benefits > Features: always lead with what the customer GETS, not what the product HAS
-- Prices always in CLP format ($XX.XXX)
+- Prices always in ${currencyCode} format
 - Never mention plan names inside the landing copy
 - Maintain consistent tone across all blocks (guided by strategy above)
 - Each block should flow naturally into the next — avoid repetitive openers
@@ -254,9 +278,10 @@ ${saasContext}
 ## Product info
 - Name: ${product.name}
 - Category: ${product.category}
-- Price: $${product.price} CLP
+- Price: $${product.price} ${currencyCode}
 - Target audience: ${product.target_audience}
 - Description: ${product.description || "N/A"}
+- Country: ${country_code || "not specified"}
 
 Return ONLY valid JSON. No markdown. No explanations.`;
 }
@@ -517,7 +542,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { product, mode, intensity, hasOffer, guarantee, plan, demo } = await req.json();
+    const { product, mode, intensity, hasOffer, guarantee, plan, demo, currency, country_code } = await req.json();
 
     const openaiKey = Deno.env.get("NexsellAi");
     if (!openaiKey) {
@@ -569,6 +594,8 @@ serve(async (req) => {
       hasOffer: !!hasOffer,
       guarantee,
       plan: userPlan,
+      currency: currency || "CLP",
+      country_code: country_code || null,
     };
 
     // ── Step 1: Strategy Planner ──

@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Save, Lock, Trash2, HelpCircle, MessageSquare, Zap, Image, Palette, Sun, Moon, Monitor } from "lucide-react";
+import { Save, Lock, Trash2, HelpCircle, MessageSquare, Zap, Image, Palette, Sun, Moon, Monitor, Globe } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   AlertDialog,
@@ -25,6 +25,7 @@ import {
 import { LANDING_LIMITS, BANNER_LIMITS } from "@/lib/constants";
 import { computeBannersUsed } from "@/lib/planUsage";
 import { cn } from "@/lib/utils";
+import { COUNTRIES, getCountryByCode } from "@/lib/countries";
 
 const SettingsPage = () => {
   const { user, profile, refreshProfile, isAdmin } = useAuth();
@@ -38,8 +39,18 @@ const SettingsPage = () => {
   const [defaultIntensity, setDefaultIntensity] = useState(() => localStorage.getItem("pref_intensity") || "medium");
   const [defaultMode, setDefaultMode] = useState(() => localStorage.getItem("pref_mode") || "aida");
 
+  const [regionCountry, setRegionCountry] = useState("");
+  const [regionCurrency, setRegionCurrency] = useState("USD");
+  const [regionTimezone, setRegionTimezone] = useState("");
+  const [savingRegion, setSavingRegion] = useState(false);
+
   useEffect(() => {
-    if (profile) setFullName(profile.full_name || "");
+    if (profile) {
+      setFullName(profile.full_name || "");
+      setRegionCountry((profile as any).country_code || "");
+      setRegionCurrency((profile as any).currency || "USD");
+      setRegionTimezone((profile as any).timezone || "");
+    }
   }, [profile]);
 
   const handleSaveProfile = async () => {
@@ -190,6 +201,68 @@ const SettingsPage = () => {
               </button>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Region */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-display text-base flex items-center gap-2">
+            <Globe className="h-4 w-4 text-primary" /> Región y moneda
+          </CardTitle>
+          <CardDescription>Configuración regional para generación de contenido</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs">País</Label>
+            <Select value={regionCountry} onValueChange={(v) => {
+              setRegionCountry(v);
+              const c = getCountryByCode(v);
+              if (c) setRegionCurrency(c.currency);
+            }}>
+              <SelectTrigger><SelectValue placeholder="Selecciona tu país" /></SelectTrigger>
+              <SelectContent>
+                {COUNTRIES.map((c) => (
+                  <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Moneda</Label>
+            <Select value={regionCurrency} onValueChange={setRegionCurrency}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                {[...new Set(COUNTRIES.map(c => c.currency))].map((cur) => (
+                  <SelectItem key={cur} value={cur}>{cur}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          {regionTimezone && (
+            <div className="space-y-1.5">
+              <Label className="text-xs">Zona horaria</Label>
+              <Input value={regionTimezone} disabled className="bg-muted/50 text-xs" />
+            </div>
+          )}
+          <Button
+            onClick={async () => {
+              if (!user) return;
+              setSavingRegion(true);
+              const { error } = await supabase
+                .from("profiles")
+                .update({ country_code: regionCountry || null, currency: regionCurrency, timezone: regionTimezone } as any)
+                .eq("user_id", user.id);
+              setSavingRegion(false);
+              if (error) toast.error("Error", { description: error.message });
+              else { toast.success("Región actualizada"); await refreshProfile(); }
+            }}
+            disabled={savingRegion}
+            size="sm"
+            className="w-full sm:w-auto"
+          >
+            <Save className="h-3.5 w-3.5 mr-1.5" /> {savingRegion ? "Guardando..." : "Guardar región"}
+          </Button>
         </CardContent>
       </Card>
 

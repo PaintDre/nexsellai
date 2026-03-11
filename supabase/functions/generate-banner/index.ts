@@ -331,7 +331,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { product, templateId, outputSize, sectionType, sectionTitle, landingId, blockContent, customText, bannerIndex, sequencePosition, totalInSequence, generationMode, bannerGoal, tone, visualStyle } = await req.json();
+    const { product, templateId, outputSize, sectionType, sectionTitle, landingId, blockContent, customText, bannerIndex, sequencePosition, totalInSequence, generationMode, bannerGoal, tone, visualStyle, currency, country_code } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -405,8 +405,23 @@ serve(async (req) => {
     const templateStyle = templateStyleRaw.replaceAll("{{DIMENSIONS}}", `${width}x${height}`).replaceAll("{{FORMAT_DESC}}", formatDesc);
     const resolvedSystemPrompt = SYSTEM_PROMPT.replaceAll("{{DIMENSIONS}}", `${width}x${height}`).replaceAll("{{FORMAT_DESC}}", formatDesc);
 
-    const currencyCode = "CLP"; // Default currency
+    const currencyCode = currency || "CLP";
     const priceFormatted = formatPrice(product.price, currencyCode);
+
+    // Country context for culturally appropriate content
+    const countryContextMap: Record<string, string> = {
+      AR: "Argentina — use Argentine Spanish, voseo, local references",
+      CL: "Chile — use Chilean Spanish, local references",
+      CO: "Colombia — use Colombian Spanish, local references",
+      MX: "México — use Mexican Spanish, local references",
+      PE: "Perú — use Peruvian Spanish, local references",
+      BR: "Brasil — use Brazilian Portuguese",
+      US: "Estados Unidos — use English or neutral Spanish",
+      ES: "España — use Castilian Spanish",
+    };
+    const countryContext = country_code && countryContextMap[country_code]
+      ? `\n\nCOUNTRY CONTEXT: ${countryContextMap[country_code]}. Prices in ${currencyCode}.`
+      : `\n\nPrices in ${currencyCode}.`;
 
     // Sequence context
     let sequenceInstruction = "";
@@ -521,6 +536,7 @@ ${sectionContext}
 ${bannerIndexInstruction}
 ${sequenceInstruction}
 ${customModeInstruction}
+${countryContext}
 ${customText ? `\nCUSTOM SLOGAN (include prominently): "${customText}"` : ""}`;
 
     // Build messages with system prompt + up to 3 product images

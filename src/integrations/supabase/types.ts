@@ -323,7 +323,9 @@ export type Database = {
         Row: {
           banners_reset_at: string | null
           banners_used: number
+          country_code: string | null
           created_at: string
+          currency: string | null
           full_name: string | null
           id: string
           landings_reset_at: string | null
@@ -331,13 +333,16 @@ export type Database = {
           openai_api_key: string | null
           phone: string | null
           plan: Database["public"]["Enums"]["user_plan"]
+          timezone: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           banners_reset_at?: string | null
           banners_used?: number
+          country_code?: string | null
           created_at?: string
+          currency?: string | null
           full_name?: string | null
           id?: string
           landings_reset_at?: string | null
@@ -345,13 +350,16 @@ export type Database = {
           openai_api_key?: string | null
           phone?: string | null
           plan?: Database["public"]["Enums"]["user_plan"]
+          timezone?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           banners_reset_at?: string | null
           banners_used?: number
+          country_code?: string | null
           created_at?: string
+          currency?: string | null
           full_name?: string | null
           id?: string
           landings_reset_at?: string | null
@@ -359,6 +367,7 @@ export type Database = {
           openai_api_key?: string | null
           phone?: string | null
           plan?: Database["public"]["Enums"]["user_plan"]
+          timezone?: string | null
           updated_at?: string
           user_id?: string
         }

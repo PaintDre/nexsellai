@@ -58,6 +58,8 @@ interface FormState {
   bannerGoal: BannerGoal;
   tone: Tone;
   visualStyle: VisualStyle;
+  currency: string;
+  country_code: string;
 }
 
 const GOAL_LABELS: Record<BannerGoal, string> = { sale: "Venta", offer: "Oferta", awareness: "Awareness", benefit: "Beneficio" };
@@ -97,6 +99,8 @@ const buildBannerPayload = (
     sequencePosition: index + 1,
     totalInSequence: total,
     generationMode: form.generationMode,
+    currency: form.currency,
+    country_code: form.country_code,
   };
   if (form.generationMode === "custom") {
     return { ...base, bannerGoal: form.bannerGoal, tone: form.tone, visualStyle: form.visualStyle };
@@ -139,6 +143,8 @@ const GenerateBanner = () => {
     bannerGoal: "sale",
     tone: "direct",
     visualStyle: "auto",
+    currency: (profile as any)?.currency || "USD",
+    country_code: (profile as any)?.country_code || "",
   });
   const [loading, setLoading] = useState(false);
   const [generatedBanners, setGeneratedBanners] = useState<GeneratedBanner[]>([]);
@@ -281,7 +287,7 @@ const GenerateBanner = () => {
   // ─── Render ─────────────────────────────────────────────────────────────
 
   const productImage = product.images?.[0];
-  const formattedPrice = product.price != null ? `$${product.price.toLocaleString("es-CL")} CLP` : "";
+  const formattedPrice = product.price != null ? `$${product.price.toLocaleString()} ${formState.currency}` : "";
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
