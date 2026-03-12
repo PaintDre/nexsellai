@@ -1,14 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Mail, Plus, Send, Users, Loader2 } from "lucide-react";
+import { Mail, Plus, Send, Users, Loader2, Eye, FileText } from "lucide-react";
+import { emailTemplates, getEmailPreviewHtml, type EmailTemplate } from "@/lib/emailTemplates";
 
 interface Campaign {
   id: string;
@@ -21,21 +23,36 @@ interface Campaign {
   sent_at: string | null;
 }
 
+const EmailPreview = ({ html }: { html: string }) => {
+  const previewHtml = useMemo(() => getEmailPreviewHtml(html), [html]);
+  return (
+    <div className="border rounded-lg overflow-hidden bg-white">
+      <iframe
+        srcDoc={previewHtml}
+        className="w-full h-[500px] border-0"
+        title="Email preview"
+        sandbox="allow-same-origin"
+      />
+    </div>
+  );
+};
+
 const AdminEmailCampaigns = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [sending, setSending] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [previewCampaign, setPreviewCampaign] = useState<Campaign | null>(null);
 
   const [subject, setSubject] = useState("");
   const [bodyHtml, setBodyHtml] = useState("");
   const [audience, setAudience] = useState("all");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
 
   const fetchCampaigns = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
-
     const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api/campaigns`;
     const res = await fetch(url, {
       headers: {
@@ -52,6 +69,18 @@ const AdminEmailCampaigns = () => {
 
   useEffect(() => { fetchCampaigns(); }, []);
 
+  const handleTemplateSelect = (templateId: string) => {
+    setSelectedTemplate(templateId);
+    if (templateId === "custom") {
+      return;
+    }
+    const tpl = emailTemplates.find((t) => t.id === templateId);
+    if (tpl) {
+      setSubject(tpl.subject);
+      setBodyHtml(tpl.body_html);
+    }
+  };
+
   const handleCreate = async () => {
     if (!subject.trim() || !bodyHtml.trim()) {
       toast.error("Completa asunto y contenido");
@@ -60,7 +89,6 @@ const AdminEmailCampaigns = () => {
     setCreating(true);
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
-
     const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api/campaigns`;
     const res = await fetch(url, {
       method: "POST",
@@ -71,12 +99,12 @@ const AdminEmailCampaigns = () => {
       },
       body: JSON.stringify({ subject, body_html: bodyHtml, audience }),
     });
-
     if (res.ok) {
       toast.success("Campaña creada");
       setSubject("");
       setBodyHtml("");
       setAudience("all");
+      setSelectedTemplate("");
       setDialogOpen(false);
       fetchCampaigns();
     } else {
@@ -89,7 +117,6 @@ const AdminEmailCampaigns = () => {
     setSending(campaignId);
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return;
-
     const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api/campaigns/${campaignId}/send`;
     const res = await fetch(url, {
       method: "POST",
@@ -98,7 +125,6 @@ const AdminEmailCampaigns = () => {
         apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
       },
     });
-
     if (res.ok) {
       const data = await res.json();
       toast.success(`Campaña enviada a ${data.sent_count || 0} usuarios`);
@@ -110,10 +136,7 @@ const AdminEmailCampaigns = () => {
   };
 
   const audienceLabel: Record<string, string> = {
-    all: "Todos",
-    free: "Plan Free",
-    starter: "Plan Starter",
-    pro: "Plan Pro",
+    all: "Todos", free: "Plan Free", starter: "Plan Starter", pro: "Plan Pro",
   };
 
   const statusBadge = (status: string) => {
@@ -140,41 +163,66 @@ const AdminEmailCampaigns = () => {
           <DialogTrigger asChild>
             <Button><Plus className="h-4 w-4 mr-2" /> Nueva Campaña</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Crear Campaña</DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 py-2">
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1 block">Asunto</label>
-                <Input
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder="Ej: ¡Nuevo feature disponible!"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1 block">Audiencia</label>
-                <Select value={audience} onValueChange={setAudience}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos los usuarios</SelectItem>
-                    <SelectItem value="free">Solo Plan Free</SelectItem>
-                    <SelectItem value="starter">Solo Plan Starter</SelectItem>
-                    <SelectItem value="pro">Solo Plan Pro</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1 block">Contenido (HTML)</label>
-                <Textarea
-                  value={bodyHtml}
-                  onChange={(e) => setBodyHtml(e.target.value)}
-                  placeholder="<h1>Hola {{nombre}}</h1><p>Contenido del email...</p>"
-                  rows={8}
-                />
-              </div>
-            </div>
+            <Tabs defaultValue="edit" className="mt-2">
+              <TabsList className="w-full">
+                <TabsTrigger value="edit" className="flex-1 gap-1.5"><FileText className="h-3.5 w-3.5" /> Editar</TabsTrigger>
+                <TabsTrigger value="preview" className="flex-1 gap-1.5"><Eye className="h-3.5 w-3.5" /> Vista previa</TabsTrigger>
+              </TabsList>
+              <TabsContent value="edit" className="space-y-4 mt-4">
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1 block">Plantilla</label>
+                  <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
+                    <SelectTrigger><SelectValue placeholder="Selecciona una plantilla o escribe tu propio email" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="custom">✏️ Personalizado</SelectItem>
+                      {emailTemplates.map((t) => (
+                        <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1 block">Asunto</label>
+                  <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Ej: ¡Nuevo feature disponible!" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1 block">Audiencia</label>
+                  <Select value={audience} onValueChange={setAudience}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos los usuarios</SelectItem>
+                      <SelectItem value="free">Solo Plan Free</SelectItem>
+                      <SelectItem value="starter">Solo Plan Starter</SelectItem>
+                      <SelectItem value="pro">Solo Plan Pro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1 block">Contenido (HTML)</label>
+                  <Textarea
+                    value={bodyHtml}
+                    onChange={(e) => setBodyHtml(e.target.value)}
+                    placeholder="<h1>Hola {{nombre}}</h1><p>Contenido del email...</p>"
+                    rows={10}
+                    className="font-mono text-xs"
+                  />
+                </div>
+              </TabsContent>
+              <TabsContent value="preview" className="mt-4">
+                {bodyHtml.trim() ? (
+                  <EmailPreview html={bodyHtml} />
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+                    <Eye className="h-10 w-10 mb-3 opacity-40" />
+                    <p>Escribe contenido HTML para ver la vista previa</p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
             <DialogFooter>
               <Button onClick={handleCreate} disabled={creating}>
                 {creating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
@@ -184,6 +232,16 @@ const AdminEmailCampaigns = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Preview dialog for existing campaigns */}
+      <Dialog open={!!previewCampaign} onOpenChange={(open) => !open && setPreviewCampaign(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Vista previa: {previewCampaign?.subject}</DialogTitle>
+          </DialogHeader>
+          {previewCampaign && <EmailPreview html={previewCampaign.body_html} />}
+        </DialogContent>
+      </Dialog>
 
       {campaigns.length === 0 ? (
         <Card>
@@ -208,16 +266,17 @@ const AdminEmailCampaigns = () => {
                     <span>{new Date(c.created_at).toLocaleDateString("es-CL")}</span>
                   </div>
                 </div>
-                {c.status === "draft" && (
-                  <Button
-                    size="sm"
-                    onClick={() => handleSend(c.id)}
-                    disabled={sending === c.id}
-                  >
-                    {sending === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 mr-1" />}
-                    Enviar
+                <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" onClick={() => setPreviewCampaign(c)}>
+                    <Eye className="h-4 w-4" />
                   </Button>
-                )}
+                  {c.status === "draft" && (
+                    <Button size="sm" onClick={() => handleSend(c.id)} disabled={sending === c.id}>
+                      {sending === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 mr-1" />}
+                      Enviar
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}
