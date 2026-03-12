@@ -83,6 +83,7 @@ const App = () => (
                   <Route path="/admin/users" element={<AdminUsers />} />
                   <Route path="/admin/payments" element={<AdminPayments />} />
                   <Route path="/admin/email" element={<AdminEmailCampaigns />} />
+                  <Route path="/admin/automations" element={<AdminEmailAutomations />} />
                   <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
                 </Route>
                 <Route element={<SuperAdminLayout />}>

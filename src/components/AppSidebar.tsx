@@ -34,6 +34,7 @@ export const SidebarContent = ({ expanded = false, onNavigate }: SidebarContentP
     adminItems.push({ label: "Admin", icon: Shield, href: "/admin" });
     adminItems.push({ label: "Pagos", icon: Banknote, href: "/admin/payments" });
     adminItems.push({ label: "Email", icon: Mail, href: "/admin/email" });
+    adminItems.push({ label: "Automáticos", icon: Zap, href: "/admin/automations" });
     adminItems.push({ label: "Suscripciones", icon: RefreshCw, href: "/admin/subscriptions" });
   }
   if (isSuperAdmin()) {
