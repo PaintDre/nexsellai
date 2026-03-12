@@ -292,6 +292,43 @@ serve(async (req) => {
       return jsonResponse({ success: true, sent_count: sentCount });
     }
 
+    // GET /automations
+    if (req.method === "GET" && path === "/automations") {
+      const { data } = await supabase
+        .from("email_automations")
+        .select("*")
+        .order("created_at", { ascending: false });
+      return jsonResponse({ automations: data || [] });
+    }
+
+    // POST /automations
+    if (req.method === "POST" && path === "/automations") {
+      const { name, trigger_event, delay_hours, subject, body_html } = await req.json();
+      if (!name || !trigger_event || !subject || !body_html) return jsonResponse({ error: "Missing fields" }, 400);
+      const { data, error } = await supabase.from("email_automations").insert({
+        name, trigger_event, delay_hours: delay_hours || 24, subject, body_html,
+      }).select().single();
+      if (error) return jsonResponse({ error: error.message }, 500);
+      return jsonResponse({ automation: data });
+    }
+
+    // PATCH /automations/:id
+    if (req.method === "PATCH" && path.match(/^\/automations\/[^/]+$/)) {
+      const id = path.split("/")[2];
+      const body = await req.json();
+      const { error } = await supabase.from("email_automations").update(body).eq("id", id);
+      if (error) return jsonResponse({ error: error.message }, 500);
+      return jsonResponse({ success: true });
+    }
+
+    // DELETE /automations/:id
+    if (req.method === "DELETE" && path.match(/^\/automations\/[^/]+$/)) {
+      const id = path.split("/")[2];
+      const { error } = await supabase.from("email_automations").delete().eq("id", id);
+      if (error) return jsonResponse({ error: error.message }, 500);
+      return jsonResponse({ success: true });
+    }
+
     return jsonResponse({ error: "Not found" }, 404);
   } catch (err) {
     return jsonResponse({ error: (err as Error).message }, 500);

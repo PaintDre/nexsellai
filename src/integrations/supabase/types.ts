@@ -76,6 +76,71 @@ export type Database = {
         }
         Relationships: []
       }
+      email_automation_logs: {
+        Row: {
+          automation_id: string
+          id: string
+          sent_at: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          automation_id: string
+          id?: string
+          sent_at?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          automation_id?: string
+          id?: string
+          sent_at?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_automation_logs_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "email_automations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_automations: {
+        Row: {
+          body_html: string
+          created_at: string
+          delay_hours: number
+          enabled: boolean
+          id: string
+          name: string
+          subject: string
+          trigger_event: string
+        }
+        Insert: {
+          body_html: string
+          created_at?: string
+          delay_hours?: number
+          enabled?: boolean
+          id?: string
+          name: string
+          subject: string
+          trigger_event: string
+        }
+        Update: {
+          body_html?: string
+          created_at?: string
+          delay_hours?: number
+          enabled?: boolean
+          id?: string
+          name?: string
+          subject?: string
+          trigger_event?: string
+        }
+        Relationships: []
+      }
       email_campaigns: {
         Row: {
           audience: string

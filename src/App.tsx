@@ -31,6 +31,7 @@ const Banners = lazy(() => import("./pages/Banners"));
 const AdminPayments = lazy(() => import("./pages/AdminPayments"));
 const AdminSubscriptions = lazy(() => import("./pages/AdminSubscriptions"));
 const AdminEmailCampaigns = lazy(() => import("./pages/AdminEmailCampaigns"));
+const AdminEmailAutomations = lazy(() => import("./pages/AdminEmailAutomations"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PublicLanding = lazy(() => import("./pages/PublicLanding"));
@@ -82,6 +83,7 @@ const App = () => (
                   <Route path="/admin/users" element={<AdminUsers />} />
                   <Route path="/admin/payments" element={<AdminPayments />} />
                   <Route path="/admin/email" element={<AdminEmailCampaigns />} />
+                  <Route path="/admin/automations" element={<AdminEmailAutomations />} />
                   <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
                 </Route>
                 <Route element={<SuperAdminLayout />}>
