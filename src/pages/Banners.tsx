@@ -288,7 +288,7 @@ const Banners = () => {
                   </Button>
                   {selectedIds.size > 0 && (
                     <>
-                      <Button variant="outline" size="sm" onClick={handleBulkDownloadZip}>
+                      <Button variant="outline" size="sm" onClick={handleBulkDownload}>
                         <Download className="h-3 w-3 mr-1" /> Descargar ({selectedIds.size})
                       </Button>
                       <Button variant="destructive" size="sm" onClick={() => setBulkDeleteOpen(true)}>
