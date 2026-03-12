@@ -158,12 +158,43 @@ const Banners = () => {
     toast.success(`${ids.length} banners eliminados`);
   };
 
-  const handleBulkDownload = async () => {
+  const handleBulkDownloadZip = async () => {
     const selected = filteredBanners.filter((b) => selectedIds.has(b.id));
-    for (const banner of selected) {
-      await handleDownload(banner);
+    if (selected.length === 0) return;
+    
+    const toastId = toast.loading(`Preparando ZIP con ${selected.length} banners...`);
+    try {
+      const JSZip = (await import("jszip")).default;
+      const zip = new JSZip();
+      
+      let downloaded = 0;
+      for (const banner of selected) {
+        try {
+          const response = await fetch(banner.image_url);
+          if (!response.ok) continue;
+          const blob = await response.blob();
+          const productName = banner.products?.name?.replace(/[^a-zA-Z0-9áéíóúñÁÉÍÓÚÑ ]/g, "").replace(/\s+/g, "-") || "sin-producto";
+          const templateName = TEMPLATE_LABELS[banner.template_id] || banner.template_id;
+          const fileName = `${productName}_${templateName}_${banner.output_size}_${downloaded + 1}.png`;
+          zip.file(fileName, blob);
+          downloaded++;
+          toast.loading(`Descargando ${downloaded}/${selected.length}...`, { id: toastId });
+        } catch {
+          // skip failed downloads
+        }
+      }
+      
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `banners-nexsell-${downloaded}.zip`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(`ZIP descargado con ${downloaded} banners`, { id: toastId });
+    } catch {
+      toast.error("Error al crear el ZIP", { id: toastId });
     }
-    toast.success(`${selected.length} banners descargados`);
   };
 
   const toggleSelect = (id: string) => {
@@ -288,7 +319,7 @@ const Banners = () => {
                   </Button>
                   {selectedIds.size > 0 && (
                     <>
-                      <Button variant="outline" size="sm" onClick={handleBulkDownload}>
+                      <Button variant="outline" size="sm" onClick={handleBulkDownloadZip}>
                         <Download className="h-3 w-3 mr-1" /> Descargar ({selectedIds.size})
                       </Button>
                       <Button variant="destructive" size="sm" onClick={() => setBulkDeleteOpen(true)}>
