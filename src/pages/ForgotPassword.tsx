@@ -7,8 +7,10 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { ArrowLeft, Mail, Loader2, CheckCircle2 } from "lucide-react";
 import AuthLayout from "@/components/auth/AuthLayout";
+import { useTranslation } from "react-i18next";
 
 const ForgotPassword = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -22,27 +24,27 @@ const ForgotPassword = () => {
     });
     setLoading(false);
     if (error) {
-      toast.error("Error", { description: error.message });
+      toast.error(t("common.error"), { description: error.message });
     } else {
       setSent(true);
     }
   };
 
   return (
-    <AuthLayout title="Recuperar contraseña" subtitle="Te enviaremos un enlace para restablecer tu contraseña">
+    <AuthLayout title={t("auth.forgotPassword.title")} subtitle={t("auth.forgotPassword.subtitle")}>
       {sent ? (
         <div className="text-center space-y-5 py-4">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
             <CheckCircle2 className="h-8 w-8 text-primary" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-foreground">¡Correo enviado!</h3>
+            <h3 className="text-lg font-semibold text-foreground">{t("auth.forgotPassword.sent")}</h3>
             <p className="text-sm text-muted-foreground">
-              Si existe una cuenta con <span className="font-medium text-foreground">{email}</span>, recibirás un enlace para restablecer tu contraseña.
+              {t("auth.forgotPassword.sentDesc", { email })}
             </p>
           </div>
           <Button variant="outline" className="w-full h-12" asChild>
-            <Link to="/login"><ArrowLeft className="mr-2 h-4 w-4" />Volver a iniciar sesión</Link>
+            <Link to="/login"><ArrowLeft className="mr-2 h-4 w-4" />{t("auth.forgotPassword.backToLogin")}</Link>
           </Button>
         </div>
       ) : (
@@ -51,15 +53,15 @@ const ForgotPassword = () => {
             <Label htmlFor="email">Email</Label>
             <div className="relative">
               <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required className="h-12 pl-10 transition-all duration-200" />
+              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("auth.login.emailPlaceholder")} required className="h-12 pl-10 transition-all duration-200" />
             </div>
           </div>
           <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={loading}>
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Enviar enlace de recuperación"}
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : t("auth.forgotPassword.submit")}
           </Button>
           <div className="text-center">
             <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-              <ArrowLeft className="h-3 w-3" />Volver a iniciar sesión
+              <ArrowLeft className="h-3 w-3" />{t("auth.forgotPassword.backToLogin")}
             </Link>
           </div>
         </form>
