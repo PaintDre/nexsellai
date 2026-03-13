@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CreditCard } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 interface Payment {
   id: string;
@@ -31,12 +32,12 @@ const statusColors: Record<string, string> = {
 const AdminPayments = () => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchPayments = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return;
-
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api/payments`;
       const res = await fetch(url, {
         headers: {
@@ -76,9 +77,9 @@ const AdminPayments = () => {
         </Button>
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold font-display flex items-center gap-2">
-            <CreditCard className="h-6 w-6" /> Pagos
+            <CreditCard className="h-6 w-6" /> {t("adminPayments.title")}
           </h1>
-          <p className="text-sm text-muted-foreground">{payments.length} transacciones registradas</p>
+          <p className="text-sm text-muted-foreground">{t("adminPayments.transactionsCount", { count: payments.length })}</p>
         </div>
       </div>
 
@@ -86,27 +87,26 @@ const AdminPayments = () => {
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <CreditCard className="h-10 w-10 text-muted-foreground/30 mb-3" />
-            <p className="text-sm text-muted-foreground">No hay pagos registrados aún</p>
+            <p className="text-sm text-muted-foreground">{t("adminPayments.noPayments")}</p>
           </CardContent>
         </Card>
       ) : (
         <>
-          {/* Desktop table */}
           <Card className="hidden sm:block">
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-muted-foreground">
-                      <th className="text-left py-3 px-4">Usuario</th>
-                      <th className="text-left py-3 px-4">Plan</th>
-                      <th className="text-right py-3 px-4">Monto</th>
-                      <th className="text-left py-3 px-4">Moneda</th>
-                      <th className="text-left py-3 px-4">Proveedor</th>
-                      <th className="text-left py-3 px-4">Período</th>
-                      <th className="text-left py-3 px-4">Estado</th>
-                      <th className="text-left py-3 px-4">ID Externo</th>
-                      <th className="text-left py-3 px-4">Fecha</th>
+                      <th className="text-left py-3 px-4">{t("adminPayments.user")}</th>
+                      <th className="text-left py-3 px-4">{t("adminPayments.plan")}</th>
+                      <th className="text-right py-3 px-4">{t("adminPayments.amount")}</th>
+                      <th className="text-left py-3 px-4">{t("adminPayments.currency")}</th>
+                      <th className="text-left py-3 px-4">{t("adminPayments.provider")}</th>
+                      <th className="text-left py-3 px-4">{t("adminPayments.period")}</th>
+                      <th className="text-left py-3 px-4">{t("adminPayments.status")}</th>
+                      <th className="text-left py-3 px-4">{t("adminPayments.externalId")}</th>
+                      <th className="text-left py-3 px-4">{t("adminPayments.date")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -114,7 +114,7 @@ const AdminPayments = () => {
                       <tr key={p.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                         <td className="py-3 px-4">
                           <div>
-                            <p className="font-medium truncate max-w-[160px]">{p.user_name || "Sin nombre"}</p>
+                            <p className="font-medium truncate max-w-[160px]">{p.user_name || t("adminPayments.noName")}</p>
                             <p className="text-xs text-muted-foreground truncate max-w-[160px]">{p.user_email}</p>
                           </div>
                         </td>
@@ -132,7 +132,7 @@ const AdminPayments = () => {
                         </td>
                         <td className="py-3 px-4 font-mono text-xs text-muted-foreground">{p.mp_payment_id || "—"}</td>
                         <td className="py-3 px-4 text-muted-foreground">
-                          {new Date(p.created_at).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" })}
+                          {new Date(p.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
                         </td>
                       </tr>
                     ))}
@@ -142,13 +142,12 @@ const AdminPayments = () => {
             </CardContent>
           </Card>
 
-          {/* Mobile cards */}
           <div className="sm:hidden space-y-3">
             {payments.map((p) => (
               <Card key={p.id}>
                 <CardContent className="p-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <p className="font-medium text-sm truncate">{p.user_name || "Sin nombre"}</p>
+                    <p className="font-medium text-sm truncate">{p.user_name || t("adminPayments.noName")}</p>
                     <Badge className={statusColors[p.status] || "bg-muted text-muted-foreground"} variant="secondary">
                       {p.status}
                     </Badge>
@@ -161,7 +160,7 @@ const AdminPayments = () => {
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span className="capitalize">{p.provider || "mercadopago"} · {p.currency || "CLP"}</span>
                     <span>
-                      {new Date(p.created_at).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" })}
+                      {new Date(p.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
                     </span>
                   </div>
                   {p.mp_payment_id && (

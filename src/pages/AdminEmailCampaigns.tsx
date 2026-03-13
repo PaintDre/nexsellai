@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Mail, Plus, Send, Users, Loader2, Eye, FileText } from "lucide-react";
 import { emailTemplates, getEmailPreviewHtml, type EmailTemplate } from "@/lib/emailTemplates";
+import { useTranslation } from "react-i18next";
 
 interface Campaign {
   id: string;
@@ -27,12 +28,7 @@ const EmailPreview = ({ html }: { html: string }) => {
   const previewHtml = useMemo(() => getEmailPreviewHtml(html), [html]);
   return (
     <div className="border rounded-lg overflow-hidden bg-white">
-      <iframe
-        srcDoc={previewHtml}
-        className="w-full h-[500px] border-0"
-        title="Email preview"
-        sandbox="allow-same-origin"
-      />
+      <iframe srcDoc={previewHtml} className="w-full h-[500px] border-0" title="Email preview" sandbox="allow-same-origin" />
     </div>
   );
 };
@@ -44,11 +40,11 @@ const AdminEmailCampaigns = () => {
   const [sending, setSending] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [previewCampaign, setPreviewCampaign] = useState<Campaign | null>(null);
-
   const [subject, setSubject] = useState("");
   const [bodyHtml, setBodyHtml] = useState("");
   const [audience, setAudience] = useState("all");
   const [selectedTemplate, setSelectedTemplate] = useState("");
+  const { t } = useTranslation();
 
   const fetchCampaigns = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -71,10 +67,8 @@ const AdminEmailCampaigns = () => {
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplate(templateId);
-    if (templateId === "custom") {
-      return;
-    }
-    const tpl = emailTemplates.find((t) => t.id === templateId);
+    if (templateId === "custom") return;
+    const tpl = emailTemplates.find((tp) => tp.id === templateId);
     if (tpl) {
       setSubject(tpl.subject);
       setBodyHtml(tpl.body_html);
@@ -83,7 +77,7 @@ const AdminEmailCampaigns = () => {
 
   const handleCreate = async () => {
     if (!subject.trim() || !bodyHtml.trim()) {
-      toast.error("Completa asunto y contenido");
+      toast.error(t("adminCampaigns.fillRequired"));
       return;
     }
     setCreating(true);
@@ -100,15 +94,12 @@ const AdminEmailCampaigns = () => {
       body: JSON.stringify({ subject, body_html: bodyHtml, audience }),
     });
     if (res.ok) {
-      toast.success("Campaña creada");
-      setSubject("");
-      setBodyHtml("");
-      setAudience("all");
-      setSelectedTemplate("");
+      toast.success(t("adminCampaigns.created"));
+      setSubject(""); setBodyHtml(""); setAudience("all"); setSelectedTemplate("");
       setDialogOpen(false);
       fetchCampaigns();
     } else {
-      toast.error("Error al crear campaña");
+      toast.error(t("adminCampaigns.createError"));
     }
     setCreating(false);
   };
@@ -127,21 +118,19 @@ const AdminEmailCampaigns = () => {
     });
     if (res.ok) {
       const data = await res.json();
-      toast.success(`Campaña enviada a ${data.sent_count || 0} usuarios`);
+      toast.success(t("adminCampaigns.sentSuccess", { count: data.sent_count || 0 }));
       fetchCampaigns();
     } else {
-      toast.error("Error al enviar campaña");
+      toast.error(t("adminCampaigns.sendError"));
     }
     setSending(null);
   };
 
-  const audienceLabel: Record<string, string> = {
-    all: "Todos", free: "Plan Free", starter: "Plan Starter", pro: "Plan Pro",
-  };
+  const audienceLabel = (key: string) => t(`adminCampaigns.audienceLabels.${key}`, key);
 
   const statusBadge = (status: string) => {
-    if (status === "sent") return <Badge className="bg-emerald-500/15 text-emerald-600 border-0">Enviada</Badge>;
-    return <Badge variant="secondary">Borrador</Badge>;
+    if (status === "sent") return <Badge className="bg-emerald-500/15 text-emerald-600 border-0">{t("adminCampaigns.sent")}</Badge>;
+    return <Badge variant="secondary">{t("adminCampaigns.draft")}</Badge>;
   };
 
   if (loading) {
@@ -156,57 +145,57 @@ const AdminEmailCampaigns = () => {
     <div className="p-4 md:p-6 lg:p-10 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold font-display text-foreground">Email Marketing</h1>
-          <p className="text-muted-foreground text-sm mt-1">Crea y envía campañas de email a tus usuarios</p>
+          <h1 className="text-2xl font-bold font-display text-foreground">{t("adminCampaigns.title")}</h1>
+          <p className="text-muted-foreground text-sm mt-1">{t("adminCampaigns.subtitle")}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" /> Nueva Campaña</Button>
+            <Button><Plus className="h-4 w-4 mr-2" /> {t("adminCampaigns.newCampaign")}</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Crear Campaña</DialogTitle>
+              <DialogTitle>{t("adminCampaigns.createCampaign")}</DialogTitle>
             </DialogHeader>
             <Tabs defaultValue="edit" className="mt-2">
               <TabsList className="w-full">
-                <TabsTrigger value="edit" className="flex-1 gap-1.5"><FileText className="h-3.5 w-3.5" /> Editar</TabsTrigger>
-                <TabsTrigger value="preview" className="flex-1 gap-1.5"><Eye className="h-3.5 w-3.5" /> Vista previa</TabsTrigger>
+                <TabsTrigger value="edit" className="flex-1 gap-1.5"><FileText className="h-3.5 w-3.5" /> {t("adminCampaigns.editTab")}</TabsTrigger>
+                <TabsTrigger value="preview" className="flex-1 gap-1.5"><Eye className="h-3.5 w-3.5" /> {t("adminCampaigns.previewTab")}</TabsTrigger>
               </TabsList>
               <TabsContent value="edit" className="space-y-4 mt-4">
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-1 block">Plantilla</label>
+                  <label className="text-sm font-medium text-foreground mb-1 block">{t("adminCampaigns.template")}</label>
                   <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
-                    <SelectTrigger><SelectValue placeholder="Selecciona una plantilla o escribe tu propio email" /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={t("adminCampaigns.templatePlaceholder")} /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="custom">✏️ Personalizado</SelectItem>
-                      {emailTemplates.map((t) => (
-                        <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                      <SelectItem value="custom">{t("adminCampaigns.custom")}</SelectItem>
+                      {emailTemplates.map((tp) => (
+                        <SelectItem key={tp.id} value={tp.id}>{tp.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-1 block">Asunto</label>
-                  <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Ej: ¡Nuevo feature disponible!" />
+                  <label className="text-sm font-medium text-foreground mb-1 block">{t("adminCampaigns.subject")}</label>
+                  <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder={t("adminCampaigns.subjectPlaceholder")} />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-1 block">Audiencia</label>
+                  <label className="text-sm font-medium text-foreground mb-1 block">{t("adminCampaigns.audience")}</label>
                   <Select value={audience} onValueChange={setAudience}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Todos los usuarios</SelectItem>
-                      <SelectItem value="free">Solo Plan Free</SelectItem>
-                      <SelectItem value="starter">Solo Plan Starter</SelectItem>
-                      <SelectItem value="pro">Solo Plan Pro</SelectItem>
+                      <SelectItem value="all">{t("adminCampaigns.allUsers")}</SelectItem>
+                      <SelectItem value="free">{t("adminCampaigns.freeOnly")}</SelectItem>
+                      <SelectItem value="starter">{t("adminCampaigns.starterOnly")}</SelectItem>
+                      <SelectItem value="pro">{t("adminCampaigns.proOnly")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-foreground mb-1 block">Contenido (HTML)</label>
+                  <label className="text-sm font-medium text-foreground mb-1 block">{t("adminCampaigns.contentHTML")}</label>
                   <Textarea
                     value={bodyHtml}
                     onChange={(e) => setBodyHtml(e.target.value)}
-                    placeholder="<h1>Hola {{nombre}}</h1><p>Contenido del email...</p>"
+                    placeholder={t("adminCampaigns.contentPlaceholder")}
                     rows={10}
                     className="font-mono text-xs"
                   />
@@ -218,7 +207,7 @@ const AdminEmailCampaigns = () => {
                 ) : (
                   <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
                     <Eye className="h-10 w-10 mb-3 opacity-40" />
-                    <p>Escribe contenido HTML para ver la vista previa</p>
+                    <p>{t("adminCampaigns.writeContent")}</p>
                   </div>
                 )}
               </TabsContent>
@@ -226,18 +215,17 @@ const AdminEmailCampaigns = () => {
             <DialogFooter>
               <Button onClick={handleCreate} disabled={creating}>
                 {creating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-                Crear
+                {t("common.create")}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Preview dialog for existing campaigns */}
       <Dialog open={!!previewCampaign} onOpenChange={(open) => !open && setPreviewCampaign(null)}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Vista previa: {previewCampaign?.subject}</DialogTitle>
+            <DialogTitle>{t("adminCampaigns.preview", { subject: previewCampaign?.subject })}</DialogTitle>
           </DialogHeader>
           {previewCampaign && <EmailPreview html={previewCampaign.body_html} />}
         </DialogContent>
@@ -247,7 +235,7 @@ const AdminEmailCampaigns = () => {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
             <Mail className="h-12 w-12 text-muted-foreground/40 mb-4" />
-            <p className="text-muted-foreground">No hay campañas aún. Crea tu primera campaña de email.</p>
+            <p className="text-muted-foreground">{t("adminCampaigns.noCampaigns")}</p>
           </CardContent>
         </Card>
       ) : (
@@ -261,9 +249,9 @@ const AdminEmailCampaigns = () => {
                     {statusBadge(c.status)}
                   </div>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {audienceLabel[c.audience] || c.audience}</span>
-                    {c.sent_count > 0 && <span>{c.sent_count} enviados</span>}
-                    <span>{new Date(c.created_at).toLocaleDateString("es-CL")}</span>
+                    <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {audienceLabel(c.audience)}</span>
+                    {c.sent_count > 0 && <span>{t("adminCampaigns.sentCount", { count: c.sent_count })}</span>}
+                    <span>{new Date(c.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -273,7 +261,7 @@ const AdminEmailCampaigns = () => {
                   {c.status === "draft" && (
                     <Button size="sm" onClick={() => handleSend(c.id)} disabled={sending === c.id}>
                       {sending === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4 mr-1" />}
-                      Enviar
+                      {t("adminCampaigns.send")}
                     </Button>
                   )}
                 </div>
