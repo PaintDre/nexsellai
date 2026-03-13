@@ -88,6 +88,14 @@
         "expiry": "O link expira em 24 horas. Se não recebeu o email, pode solicitar um novo na página de login."
       }
     },
+    "layout": {
+      "heroTitle": "Crie landings que\nvendem para seus produtos",
+      "heroSubtitle": "A plataforma de dropshipping que gera páginas de vendas profissionais com inteligência artificial.",
+      "feature1": "Landings geradas com IA em minutos",
+      "feature2": "Banners profissionais para seus produtos",
+      "feature3": "Exporte, publique e venda sem limites",
+      "copyright": "© {{year}} Nexsell. Todos os direitos reservados."
+    },
     "forgotPassword": {
       "title": "Recuperar senha",
       "subtitle": "Enviaremos um link para redefinir sua senha",
