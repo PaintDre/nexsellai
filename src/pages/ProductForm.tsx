@@ -13,8 +13,10 @@ import { ArrowLeft, Upload, X, Loader2 } from "lucide-react";
 import AudienceSelector from "@/components/AudienceSelector";
 import { getCountryByCode } from "@/lib/countries";
 import { PRODUCT_CATEGORIES } from "@/lib/constants";
+import { useTranslation } from "react-i18next";
 
 const ProductForm = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const isEdit = !!id;
   const navigate = useNavigate();
@@ -23,7 +25,6 @@ const ProductForm = () => {
   const country = profile?.country_code ? getCountryByCode(profile.country_code) : null;
   const currencySymbol = country?.currencySymbol ?? "$";
   const currencyLabel = country?.currency ?? "CLP";
-  
 
   const [name, setName] = useState("");
   const [category, setCategory] = useState<string>("home");
@@ -53,7 +54,6 @@ const ProductForm = () => {
     if (!e.target.files || !user || images.length >= 4) return;
     const files = Array.from(e.target.files).slice(0, 4 - images.length);
     setUploading(true);
-
     const uploaded: string[] = [];
     for (const file of files) {
       const ext = file.name.split(".").pop();
@@ -76,57 +76,46 @@ const ProductForm = () => {
     e.preventDefault();
     if (!user) return;
     if (images.length === 0) {
-      toast.error("Se requiere al menos 1 imagen");
+      toast.error(t("products.imageRequired"));
       return;
     }
     if (selectedAudiences.length === 0) {
-      toast.error("Selecciona al menos 1 público objetivo");
+      toast.error(t("products.audienceRequired"));
       return;
     }
     setSaving(true);
-
     const productData = {
-      name,
-      category: category as any,
-      price: parseInt(price),
+      name, category: category as any, price: parseInt(price),
       target_audience: selectedAudiences.join(", "),
-      description: description || null,
-      images,
-      user_id: user.id,
+      description: description || null, images, user_id: user.id,
     };
-
     let productId = id;
-
     if (isEdit) {
       const { error } = await supabase.from("products").update(productData).eq("id", id);
-      if (error) { toast.error("Error al actualizar", { description: error.message }); setSaving(false); return; }
+      if (error) { toast.error(t("products.updateError"), { description: error.message }); setSaving(false); return; }
     } else {
       const { data: newProduct, error } = await supabase.from("products").insert(productData).select("id").single();
-      if (error) { toast.error("Error al crear", { description: error.message }); setSaving(false); return; }
+      if (error) { toast.error(t("products.createError"), { description: error.message }); setSaving(false); return; }
       productId = newProduct.id;
     }
-
-    toast.success(isEdit ? "Producto actualizado" : "Producto creado");
-    navigate(isEdit ? `/products/${productId}` : `/products/${productId}`);
+    toast.success(isEdit ? t("products.updated") : t("products.created"));
+    navigate(`/products/${productId}`);
     setSaving(false);
   };
 
   return (
     <div className="p-4 md:p-6 lg:p-8 w-full max-w-2xl mx-auto">
       <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
-        <ArrowLeft className="h-4 w-4 mr-2" /> Volver
+        <ArrowLeft className="h-4 w-4 mr-2" /> {t("common.back")}
       </Button>
-
       <h1 className="text-3xl font-bold font-display tracking-tight mb-6">
-        {isEdit ? "Editar Producto" : "Nuevo Producto"}
+        {isEdit ? t("products.editProduct") : t("products.newProduct")}
       </h1>
-
       <Card>
         <form onSubmit={handleSubmit}>
           <CardContent className="p-4 sm:p-6 space-y-6">
-            {/* Images */}
             <div className="space-y-2">
-              <Label>Imágenes (1-4) *</Label>
+              <Label>{t("products.images")} *</Label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {images.map((img, i) => (
                   <div key={i} className="relative aspect-square rounded-lg overflow-hidden border bg-muted">
@@ -139,20 +128,18 @@ const ProductForm = () => {
                 {images.length < 4 && (
                   <label className="aspect-square rounded-lg border-2 border-dashed border-input flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors">
                     {uploading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : <Upload className="h-6 w-6 text-muted-foreground" />}
-                    <span className="text-xs text-muted-foreground mt-1">Subir</span>
+                    <span className="text-xs text-muted-foreground mt-1">{t("common.upload")}</span>
                     <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} disabled={uploading} />
                   </label>
                 )}
               </div>
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="name">Nombre del producto *</Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Masajeador Cervical Pro" required />
+              <Label htmlFor="name">{t("products.productName")} *</Label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("products.productNamePlaceholder")} required />
             </div>
-
             <div className="space-y-2">
-              <Label>Categoría *</Label>
+              <Label>{t("products.category")} *</Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -162,24 +149,20 @@ const ProductForm = () => {
                 </SelectContent>
               </Select>
             </div>
-
             <div className="space-y-2">
-              <Label htmlFor="price">Precio ({currencyLabel}) *</Label>
+              <Label htmlFor="price">{t("products.price")} ({currencyLabel}) *</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">{currencySymbol}</span>
                 <Input id="price" type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} className="pl-7" placeholder="19990" required />
               </div>
             </div>
-
             <AudienceSelector selected={selectedAudiences} onChange={setSelectedAudiences} />
-
             <div className="space-y-2">
-              <Label htmlFor="desc">Descripción (opcional)</Label>
-              <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalles adicionales del producto..." rows={3} />
+              <Label htmlFor="desc">{t("products.descriptionLabel")}</Label>
+              <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("products.descriptionPlaceholder")} rows={3} />
             </div>
-
             <Button type="submit" className="w-full min-h-[44px]" disabled={saving}>
-              {saving ? "Guardando..." : isEdit ? "Guardar cambios" : "Crear producto"}
+              {saving ? t("common.saving") : isEdit ? t("products.saveChanges") : t("products.createProduct")}
             </Button>
           </CardContent>
         </form>

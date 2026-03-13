@@ -9,10 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Package, Plus, Pencil, Sparkles, ImageIcon } from "lucide-react";
 import { formatProductPrice } from "@/lib/countries";
+import { useTranslation } from "react-i18next";
 
 type Product = Tables<"products">;
 
 const Products = () => {
+  const { t } = useTranslation();
   const { user, profile } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,9 +29,9 @@ const Products = () => {
   return (
     <div className="p-5 md:p-8 lg:p-10 space-y-6 max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold font-display">Productos</h1>
+        <h1 className="text-2xl md:text-3xl font-bold font-display">{t("products.title")}</h1>
         <Button asChild size="sm">
-          <Link to="/products/new"><Plus className="h-3.5 w-3.5 mr-1.5" /> Nuevo</Link>
+          <Link to="/products/new"><Plus className="h-3.5 w-3.5 mr-1.5" /> {t("products.new")}</Link>
         </Button>
       </div>
 
@@ -53,8 +55,8 @@ const Products = () => {
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Package className="h-10 w-10 text-muted-foreground/30 mb-4" />
-            <p className="text-sm text-muted-foreground mb-4">Aún no tienes productos</p>
-            <Button asChild size="sm"><Link to="/products/new"><Plus className="h-3.5 w-3.5 mr-1.5" /> Crear producto</Link></Button>
+            <p className="text-sm text-muted-foreground mb-4">{t("products.empty")}</p>
+            <Button asChild size="sm"><Link to="/products/new"><Plus className="h-3.5 w-3.5 mr-1.5" /> {t("products.createProduct")}</Link></Button>
           </CardContent>
         </Card>
       ) : (
@@ -79,14 +81,14 @@ const Products = () => {
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" asChild className="flex-1 h-9 text-xs">
-                      <Link to={`/products/${product.id}/edit`}><Pencil className="h-3 w-3 mr-1" /> Editar</Link>
+                      <Link to={`/products/${product.id}/edit`}><Pencil className="h-3 w-3 mr-1" /> {t("common.edit")}</Link>
                     </Button>
                     <Button size="sm" asChild className="flex-1 h-9 text-xs">
                       <Link to={`/products/${product.id}/generate`}><Sparkles className="h-3 w-3 mr-1" /> Landing</Link>
                     </Button>
                   </div>
                   <Button variant="secondary" size="sm" asChild className="w-full h-9 text-xs">
-                    <Link to={`/products/${product.id}/banner`}><ImageIcon className="h-3 w-3 mr-1" /> Generar Banner</Link>
+                    <Link to={`/products/${product.id}/banner`}><ImageIcon className="h-3 w-3 mr-1" /> {t("products.generateBanners")}</Link>
                   </Button>
                 </div>
               </CardContent>

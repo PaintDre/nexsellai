@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Zap } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface Props {
   open: boolean;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export const UpgradeModal = ({ open, onOpenChange, resource, used, limit }: Props) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -22,18 +24,17 @@ export const UpgradeModal = ({ open, onOpenChange, resource, used, limit }: Prop
             <Zap className="h-7 w-7 text-primary" />
           </div>
           <DialogTitle className="text-lg font-bold font-display">
-            Has alcanzado tu límite
+            {t("upgrade.limitReached")}
           </DialogTitle>
           <p className="text-sm text-muted-foreground">
-            Usaste <strong>{used}</strong> de <strong>{limit}</strong> {resource} disponibles en tu plan actual.
-            Actualiza para seguir creando sin interrupciones.
+            {t("upgrade.limitDesc", { used, limit, resource })}
           </p>
           <div className="flex gap-2 w-full">
             <Button variant="outline" className="flex-1" onClick={() => onOpenChange(false)}>
-              Cerrar
+              {t("common.close")}
             </Button>
             <Button className="flex-1" onClick={() => { onOpenChange(false); navigate("/pricing"); }}>
-              Ver planes
+              {t("upgrade.viewPlans")}
             </Button>
           </div>
         </div>
