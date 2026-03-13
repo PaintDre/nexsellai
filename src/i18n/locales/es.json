@@ -103,7 +103,52 @@
       "sent": "¡Correo enviado!",
       "sentDesc": "Si existe una cuenta con {{email}}, recibirás un enlace para restablecer tu contraseña.",
       "backToLogin": "Volver a iniciar sesión"
+    },
+    "resetPassword": {
+      "title": "Nueva contraseña",
+      "subtitle": "Ingresa tu nueva contraseña para tu cuenta",
+      "newPassword": "Nueva contraseña",
+      "placeholder": "Mínimo 6 caracteres",
+      "confirmPassword": "Confirmar contraseña",
+      "confirmPlaceholder": "Repite tu contraseña",
+      "mismatch": "Las contraseñas no coinciden",
+      "minLength": "La contraseña debe tener al menos 6 caracteres",
+      "submit": "Guardar nueva contraseña",
+      "success": "¡Contraseña actualizada!",
+      "successDesc": "Ya puedes iniciar sesión con tu nueva contraseña",
+      "verifying": "Verificando enlace de recuperación..."
     }
+  },
+  "versionHistory": {
+    "title": "Historial de versiones",
+    "button": "Historial",
+    "empty": "No hay versiones guardadas aún. Se crearán automáticamente al editar y guardar.",
+    "version": "Versión",
+    "latest": "Más reciente",
+    "restore": "Restaurar"
+  },
+  "landingPreview": {
+    "noData": "No hay landing generada para mostrar.",
+    "backToGenerator": "Volver al generador",
+    "backAndEdit": "Volver y editar",
+    "demoBadge": "Vista previa — Demo",
+    "exportGate": "Para exportar o descargar esta landing, crea una cuenta.",
+    "createAndExport": "Crear cuenta y exportar"
+  },
+  "breadcrumb": {
+    "dashboard": "Dashboard",
+    "products": "Productos",
+    "landings": "Landings",
+    "banners": "Banners",
+    "pricing": "Planes",
+    "settings": "Ajustes",
+    "admin": "Admin",
+    "new": "Nuevo",
+    "edit": "Editar",
+    "generate": "Generar Landing",
+    "banner": "Generar Banner",
+    "preview": "Vista previa",
+    "config": "Configuración"
   },
   "sidebar": {
     "dashboard": "Dashboard",

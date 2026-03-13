@@ -1,23 +1,14 @@
 import { useLocation, Link } from "react-router-dom";
 import { ChevronRight, Home } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
-const routeMap: Record<string, string> = {
-  dashboard: "Dashboard",
-  products: "Productos",
-  landings: "Landings",
-  banners: "Banners",
-  pricing: "Planes",
-  settings: "Ajustes",
-  admin: "Admin",
-  new: "Nuevo",
-  edit: "Editar",
-  generate: "Generar Landing",
-  banner: "Generar Banner",
-  preview: "Vista previa",
-  config: "Configuración",
-};
+const ROUTE_KEYS = [
+  "dashboard", "products", "landings", "banners", "pricing",
+  "settings", "admin", "new", "edit", "generate", "banner", "preview", "config",
+];
 
 export const PageBreadcrumb = () => {
+  const { t } = useTranslation();
   const { pathname } = useLocation();
   const segments = pathname.split("/").filter(Boolean);
 
@@ -30,11 +21,12 @@ export const PageBreadcrumb = () => {
     const seg = segments[i];
     currentPath += `/${seg}`;
 
-    // Skip UUID segments as standalone crumbs but keep their path
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}/.test(seg);
     if (isUuid) continue;
 
-    const label = routeMap[seg] || seg.charAt(0).toUpperCase() + seg.slice(1);
+    const label = ROUTE_KEYS.includes(seg)
+      ? t(`breadcrumb.${seg}`)
+      : seg.charAt(0).toUpperCase() + seg.slice(1);
     crumbs.push({ label, path: currentPath });
   }
 
@@ -58,4 +50,3 @@ export const PageBreadcrumb = () => {
     </nav>
   );
 };
-

@@ -10,6 +10,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useTranslation } from "react-i18next";
 
 interface Version {
   id: string;
@@ -29,6 +30,7 @@ interface VersionHistoryProps {
 }
 
 const VersionHistory = ({ landingId, userId, onRestore }: VersionHistoryProps) => {
+  const { t } = useTranslation();
   const [versions, setVersions] = useState<Version[]>([]);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -65,13 +67,13 @@ const VersionHistory = ({ landingId, userId, onRestore }: VersionHistoryProps) =
       <SheetTrigger asChild>
         <Button variant="outline" size="sm">
           <History className="h-4 w-4 mr-1" />
-          <span className="hidden sm:inline">Historial</span>
+          <span className="hidden sm:inline">{t("versionHistory.button")}</span>
         </Button>
       </SheetTrigger>
       <SheetContent className="w-[380px] sm:w-[440px]">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
-            <History className="h-5 w-5" /> Historial de versiones
+            <History className="h-5 w-5" /> {t("versionHistory.title")}
           </SheetTitle>
         </SheetHeader>
         <div className="mt-6 space-y-3 max-h-[calc(100vh-120px)] overflow-y-auto pr-1">
@@ -81,7 +83,7 @@ const VersionHistory = ({ landingId, userId, onRestore }: VersionHistoryProps) =
             </div>
           ) : versions.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-12">
-              No hay versiones guardadas aún. Se crearán automáticamente al editar y guardar.
+              {t("versionHistory.empty")}
             </p>
           ) : (
             versions.map((v, i) => (
@@ -92,16 +94,16 @@ const VersionHistory = ({ landingId, userId, onRestore }: VersionHistoryProps) =
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">
-                      Versión {v.version_number}
+                      {t("versionHistory.version")} {v.version_number}
                     </span>
                     {i === 0 && (
                       <Badge variant="secondary" className="text-[10px]">
-                        Más reciente
+                        {t("versionHistory.latest")}
                       </Badge>
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(v.created_at).toLocaleDateString("es-CL", {
+                    {new Date(v.created_at).toLocaleDateString(undefined, {
                       day: "numeric",
                       month: "short",
                       year: "numeric",
@@ -123,7 +125,7 @@ const VersionHistory = ({ landingId, userId, onRestore }: VersionHistoryProps) =
                   {restoring === v.id ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
                   ) : (
-                    <><RotateCcw className="h-3 w-3 mr-1" /> Restaurar</>
+                    <><RotateCcw className="h-3 w-3 mr-1" /> {t("versionHistory.restore")}</>
                   )}
                 </Button>
               </div>
