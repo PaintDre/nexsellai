@@ -58,6 +58,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     setProfile(data);
+    // Set UI language from profile preference
+    if (data) {
+      setLanguageFromProfile((data as any).language);
+    }
   };
 
   const fetchRole = async (userId: string) => {
