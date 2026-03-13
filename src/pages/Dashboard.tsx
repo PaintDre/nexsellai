@@ -15,6 +15,7 @@ import {
 import { computeBannersUsed } from "@/lib/planUsage";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { UpgradeWarningBanner } from "@/components/UpgradeWarningBanner";
+import { useTranslation } from "react-i18next";
 
 type Product = Tables<"products">;
 type Landing = Tables<"landings">;
@@ -26,20 +27,21 @@ interface RecentVersion {
   landing_name: string;
 }
 
-const getGreeting = () => {
-  const h = new Date().getHours();
-  if (h < 12) return "Buenos días";
-  if (h < 19) return "Buenas tardes";
-  return "Buenas noches";
-};
-
 const Dashboard = () => {
+  const { t } = useTranslation();
   const { user, profile } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [landings, setLandings] = useState<Landing[]>([]);
   const [versionsCount, setVersionsCount] = useState(0);
   const [recentVersions, setRecentVersions] = useState<RecentVersion[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return t("dashboard.greeting.morning");
+    if (h < 19) return t("dashboard.greeting.afternoon");
+    return t("dashboard.greeting.evening");
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -66,7 +68,7 @@ const Dashboard = () => {
         const nameMap = new Map((landingsData || []).map(l => [l.id, l.name]));
         setRecentVersions(versions.map(v => ({
           id: v.id, created_at: v.created_at, version_number: v.version_number,
-          landing_name: nameMap.get(v.landing_id) || "Landing eliminada",
+          landing_name: nameMap.get(v.landing_id) || t("dashboard.deletedLanding"),
         })));
       }
       setLoading(false);
@@ -91,10 +93,10 @@ const Dashboard = () => {
       {/* Header */}
       <div className="space-y-1">
         <h1 className="text-2xl md:text-3xl font-bold font-display">
-          {getGreeting()}, {profile?.full_name?.split(" ")[0] || "usuario"}
+          {getGreeting()}, {profile?.full_name?.split(" ")[0] || t("common.user")}
         </h1>
         <p className="text-sm text-muted-foreground">
-          {products.length} producto{products.length !== 1 ? "s" : ""} · {landings.length} landing{landings.length !== 1 ? "s" : ""}
+          {t("dashboard.productCount", { count: products.length })} · {t("dashboard.landingCount", { count: landings.length })}
         </p>
       </div>
 
@@ -103,21 +105,21 @@ const Dashboard = () => {
         <QuickActionCard
           to="/products/new"
           icon={Plus}
-          title="Nuevo Producto"
-          description="Agrega un producto para generar contenido"
+          title={t("dashboard.quickActions.newProduct")}
+          description={t("dashboard.quickActions.newProductDesc")}
           variant="primary"
         />
         <QuickActionCard
           to="/landings"
           icon={FileText}
-          title="Mis Landings"
-          description={`${landings.length} landing${landings.length !== 1 ? "s" : ""} generada${landings.length !== 1 ? "s" : ""}`}
+          title={t("dashboard.quickActions.myLandings")}
+          description={t("dashboard.quickActions.landingsCount", { count: landings.length })}
         />
         <QuickActionCard
           to="/banners"
           icon={ImageIcon}
-          title="Mis Banners"
-          description="Banners generados para ads"
+          title={t("dashboard.quickActions.myBanners")}
+          description={t("dashboard.quickActions.bannersDesc")}
         />
       </div>
 
@@ -125,12 +127,12 @@ const Dashboard = () => {
       {isNewUser && (
         <Card className="border-primary/15 bg-accent/30">
           <CardContent className="p-6">
-            <h2 className="text-base font-semibold font-display mb-4">Comienza en 3 pasos</h2>
+            <h2 className="text-base font-semibold font-display mb-4">{t("dashboard.onboarding.title")}</h2>
             <div className="grid gap-3 sm:grid-cols-3">
               {[
-                { step: 1, title: "Crea un producto", desc: "Agrega nombre, precio e imágenes", icon: Package, active: true },
-                { step: 2, title: "Genera una landing", desc: "La IA crea tu página de venta", icon: Sparkles, active: false },
-                { step: 3, title: "Exporta y vende", desc: "Descarga o publica tu landing", icon: Download, active: false },
+                { step: 1, title: t("dashboard.onboarding.step1Title"), desc: t("dashboard.onboarding.step1Desc"), icon: Package, active: true },
+                { step: 2, title: t("dashboard.onboarding.step2Title"), desc: t("dashboard.onboarding.step2Desc"), icon: Sparkles, active: false },
+                { step: 3, title: t("dashboard.onboarding.step3Title"), desc: t("dashboard.onboarding.step3Desc"), icon: Download, active: false },
               ].map(s => (
                 <div key={s.step} className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${s.active ? "bg-primary/8" : "bg-muted/40"}`}>
                   <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${s.active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
@@ -144,7 +146,7 @@ const Dashboard = () => {
               ))}
             </div>
             <Button asChild size="sm" className="mt-4">
-              <Link to="/products/new"><Plus className="h-3.5 w-3.5 mr-1.5" /> Crear mi primer producto</Link>
+              <Link to="/products/new"><Plus className="h-3.5 w-3.5 mr-1.5" /> {t("dashboard.onboarding.createFirst")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -155,11 +157,11 @@ const Dashboard = () => {
           <CardContent className="flex flex-col sm:flex-row items-center gap-4 p-5">
             <Sparkles className="h-7 w-7 text-primary shrink-0" />
             <div className="flex-1 text-center sm:text-left">
-              <h3 className="font-semibold text-sm">¡Genera tu primera landing!</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">Selecciona un producto y la IA creará una página de venta profesional.</p>
+              <h3 className="font-semibold text-sm">{t("dashboard.noLandings.title")}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("dashboard.noLandings.description")}</p>
             </div>
             <Button asChild size="sm">
-              <Link to="/products">Ver productos <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
+              <Link to="/products">{t("dashboard.noLandings.viewProducts")} <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
             </Button>
           </CardContent>
         </Card>
@@ -174,7 +176,7 @@ const Dashboard = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-muted-foreground">Landings</span>
+              <span className="text-xs font-medium text-muted-foreground">{t("dashboard.stats.landings")}</span>
               <FileText className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
             <div className="text-xl sm:text-2xl font-bold font-display">
@@ -186,7 +188,7 @@ const Dashboard = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-muted-foreground">Banners</span>
+              <span className="text-xs font-medium text-muted-foreground">{t("dashboard.stats.banners")}</span>
               <Image className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
             <div className="text-xl sm:text-2xl font-bold font-display">
@@ -198,7 +200,7 @@ const Dashboard = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-muted-foreground">Productos</span>
+              <span className="text-xs font-medium text-muted-foreground">{t("dashboard.stats.products")}</span>
               <Package className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
             <div className="text-xl sm:text-2xl font-bold font-display">{products.length}</div>
@@ -207,13 +209,13 @@ const Dashboard = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-muted-foreground">Plan</span>
+              <span className="text-xs font-medium text-muted-foreground">{t("dashboard.stats.plan")}</span>
               <Zap className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
             <div className="text-xl sm:text-2xl font-bold font-display capitalize">{profile?.plan || "free"}</div>
             {profile?.plan === "free" && (
               <Button variant="link" asChild className="px-0 text-primary text-xs h-auto p-0 mt-1">
-                <Link to="/pricing">Actualizar →</Link>
+                <Link to="/pricing">{t("dashboard.stats.upgrade")}</Link>
               </Button>
             )}
           </CardContent>
@@ -224,10 +226,10 @@ const Dashboard = () => {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold font-display">Landings Recientes</h2>
+            <h2 className="text-base font-semibold font-display">{t("dashboard.recentLandings")}</h2>
             {landings.length > 0 && (
               <Button variant="ghost" size="sm" asChild className="text-xs h-8">
-                <Link to="/landings">Ver todas <ArrowRight className="h-3 w-3 ml-1" /></Link>
+                <Link to="/landings">{t("dashboard.viewAll")} <ArrowRight className="h-3 w-3 ml-1" /></Link>
               </Button>
             )}
           </div>
@@ -235,8 +237,8 @@ const Dashboard = () => {
             <Card className="border-dashed">
               <CardContent className="flex flex-col items-center justify-center py-10">
                 <FileText className="h-10 w-10 text-muted-foreground/30 mb-3" />
-                <p className="text-sm text-muted-foreground">No tienes landings aún</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Crea tu primer producto para empezar</p>
+                <p className="text-sm text-muted-foreground">{t("dashboard.noLandingsYet")}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{t("dashboard.noLandingsHint")}</p>
               </CardContent>
             </Card>
           ) : (
@@ -251,18 +253,18 @@ const Dashboard = () => {
                       <div className="min-w-0">
                         <h3 className="font-medium text-sm truncate">{landing.name}</h3>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(landing.created_at).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" })}
+                          {new Date(landing.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 flex-wrap">
                       <Badge variant={landing.published ? "default" : "secondary"} className="text-[10px]">
-                        {landing.published ? "Publicada" : "Borrador"}
+                        {landing.published ? t("dashboard.published") : t("dashboard.draft")}
                       </Badge>
                       <Badge variant="outline" className="capitalize text-[10px]">{landing.theme}</Badge>
                       <Button variant="outline" size="sm" asChild className="h-8 min-h-[44px] sm:min-h-0 text-xs">
                         <Link to={`/landings/${landing.id}/preview`}>
-                          <Eye className="h-3 w-3 mr-1" /> Ver
+                          <Eye className="h-3 w-3 mr-1" /> {t("common.view")}
                         </Link>
                       </Button>
                     </div>
@@ -275,7 +277,7 @@ const Dashboard = () => {
 
         {recentVersions.length > 0 && (
           <div>
-            <h2 className="text-base font-semibold font-display mb-3">Actividad</h2>
+            <h2 className="text-base font-semibold font-display mb-3">{t("dashboard.activity")}</h2>
             <div className="space-y-2">
               {recentVersions.map((v) => (
                 <Card key={v.id}>
@@ -286,7 +288,7 @@ const Dashboard = () => {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium truncate">{v.landing_name}</p>
                       <p className="text-[11px] text-muted-foreground">
-                        v{v.version_number} · {new Date(v.created_at).toLocaleDateString("es-CL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        v{v.version_number} · {new Date(v.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
                       </p>
                     </div>
                   </CardContent>

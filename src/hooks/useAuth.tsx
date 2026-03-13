@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from "react
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Tables } from "@/integrations/supabase/types";
+import { setLanguageFromProfile } from "@/i18n";
 
 type Profile = Tables<"profiles">;
 type AppRole = "user" | "admin" | "super_admin";
@@ -57,6 +58,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     }
     setProfile(data);
+    // Set UI language from profile preference
+    if (data) {
+      setLanguageFromProfile((data as any).language);
+    }
   };
 
   const fetchRole = async (userId: string) => {

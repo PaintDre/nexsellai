@@ -5,6 +5,7 @@ import { LayoutDashboard, Package, FileText, CreditCard, Settings, LogOut, Shiel
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { useTranslation } from "react-i18next";
 
 const planColors: Record<string, string> = {
   free: "bg-muted text-muted-foreground",
@@ -20,25 +21,26 @@ interface SidebarContentProps {
 export const SidebarContent = ({ expanded = false, onNavigate }: SidebarContentProps) => {
   const { pathname } = useLocation();
   const { profile, signOut, role, isAdmin, isSuperAdmin } = useAuth();
+  const { t } = useTranslation();
 
   const navItems = [
-    { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-    { label: "Productos", icon: Package, href: "/products" },
-    { label: "Landings", icon: FileText, href: "/landings" },
-    { label: "Banners", icon: ImageIcon, href: "/banners" },
-    { label: "Planes", icon: CreditCard, href: "/pricing" },
+    { label: t("sidebar.dashboard"), icon: LayoutDashboard, href: "/dashboard" },
+    { label: t("sidebar.products"), icon: Package, href: "/products" },
+    { label: t("sidebar.landings"), icon: FileText, href: "/landings" },
+    { label: t("sidebar.banners"), icon: ImageIcon, href: "/banners" },
+    { label: t("sidebar.plans"), icon: CreditCard, href: "/pricing" },
   ];
 
   const adminItems: typeof navItems = [];
   if (isAdmin()) {
-    adminItems.push({ label: "Admin", icon: Shield, href: "/admin" });
-    adminItems.push({ label: "Pagos", icon: Banknote, href: "/admin/payments" });
-    adminItems.push({ label: "Email", icon: Mail, href: "/admin/email" });
-    adminItems.push({ label: "Automáticos", icon: Zap, href: "/admin/automations" });
-    adminItems.push({ label: "Suscripciones", icon: RefreshCw, href: "/admin/subscriptions" });
+    adminItems.push({ label: t("sidebar.admin"), icon: Shield, href: "/admin" });
+    adminItems.push({ label: t("sidebar.payments"), icon: Banknote, href: "/admin/payments" });
+    adminItems.push({ label: t("sidebar.email"), icon: Mail, href: "/admin/email" });
+    adminItems.push({ label: t("sidebar.automations"), icon: Zap, href: "/admin/automations" });
+    adminItems.push({ label: t("sidebar.subscriptions"), icon: RefreshCw, href: "/admin/subscriptions" });
   }
   if (isSuperAdmin()) {
-    adminItems.push({ label: "Sistema", icon: ShieldCheck, href: "/admin/config" });
+    adminItems.push({ label: t("sidebar.system"), icon: ShieldCheck, href: "/admin/config" });
   }
 
   const collapsed = !expanded;
@@ -117,7 +119,7 @@ export const SidebarContent = ({ expanded = false, onNavigate }: SidebarContentP
             <div className={cn("rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide", planColors[profile.plan] || planColors.free)}>
               {profile.plan}
             </div>
-            <span className="text-xs text-sidebar-foreground/70 truncate whitespace-nowrap">{profile.full_name || "Usuario"}</span>
+            <span className="text-xs text-sidebar-foreground/70 truncate whitespace-nowrap">{profile.full_name || t("sidebar.user")}</span>
           </div>
         )}
         {/* Social links */}
@@ -133,11 +135,11 @@ export const SidebarContent = ({ expanded = false, onNavigate }: SidebarContentP
           <ThemeToggle collapsed={collapsed} />
           {expanded ? (
             <Button variant="ghost" size="sm" className="flex-1 justify-start gap-2 text-sidebar-foreground text-xs h-8" asChild onClick={onNavigate}>
-              <Link to="/settings"><Settings className="h-3.5 w-3.5" /> Ajustes</Link>
+              <Link to="/settings"><Settings className="h-3.5 w-3.5" /> {t("sidebar.settings")}</Link>
             </Button>
           ) : (
             <Button variant="ghost" size="icon" className="text-sidebar-foreground h-8 w-8" asChild onClick={onNavigate}>
-              <Link to="/settings" title="Ajustes"><Settings className="h-3.5 w-3.5" /></Link>
+              <Link to="/settings" title={t("sidebar.settings")}><Settings className="h-3.5 w-3.5" /></Link>
             </Button>
           )}
           <Button variant="ghost" size="icon" className="text-sidebar-foreground hover:text-destructive shrink-0 h-8 w-8" onClick={signOut}>

@@ -1,0 +1,240 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "loading": "Loading...",
+    "search": "Search",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "yes": "Yes",
+    "no": "No",
+    "or": "or",
+    "view": "View",
+    "close": "Close",
+    "confirm": "Confirm",
+    "user": "user"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "subtitle": "Enter your credentials to access your account",
+      "email": "Email",
+      "emailPlaceholder": "you@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "forgotPassword": "Forgot your password?",
+      "rememberEmail": "Remember my email",
+      "submit": "Sign In",
+      "orContinueWith": "or continue with",
+      "noAccount": "Don't have an account?",
+      "registerFree": "Sign up for free",
+      "errorTitle": "Login error",
+      "googleError": "Google error"
+    },
+    "register": {
+      "title": "Create your free account",
+      "subtitle": "Start generating professional landing pages in minutes",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Your name",
+      "country": "Country",
+      "countryPlaceholder": "Select your country",
+      "email": "Email",
+      "emailPlaceholder": "you@email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Minimum 6 characters",
+      "confirmPassword": "Confirm password",
+      "confirmPasswordPlaceholder": "Repeat your password",
+      "passwordsMismatch": "Passwords don't match",
+      "passwordsMismatchDesc": "Make sure both passwords are the same.",
+      "submit": "Create free account",
+      "orContinueWith": "or continue with",
+      "hasAccount": "Already have an account?",
+      "signIn": "Sign in",
+      "errorTitle": "Registration error",
+      "googleError": "Google error",
+      "verification": {
+        "title": "Check your email!",
+        "sentTo": "We've sent a verification link to",
+        "checkSpam": "Click the link in the email to activate your account. If you can't find it, check your <1>spam</1> or <3>junk</3> folder.",
+        "understood": "Got it, go to sign in",
+        "expiry": "The link expires in 24 hours. If you didn't receive the email, you can request a new one from the sign-in page."
+      }
+    }
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "landings": "Landings",
+    "banners": "Banners",
+    "plans": "Plans",
+    "settings": "Settings",
+    "admin": "Admin",
+    "payments": "Payments",
+    "email": "Email",
+    "automations": "Automations",
+    "subscriptions": "Subscriptions",
+    "system": "System",
+    "user": "User"
+  },
+  "dashboard": {
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "stats": {
+      "products": "Products",
+      "landings": "Landings",
+      "banners": "Banners",
+      "plan": "Plan",
+      "upgrade": "Upgrade →"
+    },
+    "quickActions": {
+      "newProduct": "New Product",
+      "newProductDesc": "Add a product to generate content",
+      "myLandings": "My Landings",
+      "landingsCount_one": "{{count}} landing generated",
+      "landingsCount_other": "{{count}} landings generated",
+      "myBanners": "My Banners",
+      "bannersDesc": "Banners generated for ads"
+    },
+    "onboarding": {
+      "title": "Get started in 3 steps",
+      "step1Title": "Create a product",
+      "step1Desc": "Add name, price and images",
+      "step2Title": "Generate a landing",
+      "step2Desc": "AI creates your sales page",
+      "step3Title": "Export and sell",
+      "step3Desc": "Download or publish your landing",
+      "createFirst": "Create my first product"
+    },
+    "noLandings": {
+      "title": "Generate your first landing!",
+      "description": "Select a product and AI will create a professional sales page.",
+      "viewProducts": "View products"
+    },
+    "recentLandings": "Recent Landings",
+    "viewAll": "View all",
+    "noLandingsYet": "You don't have any landings yet",
+    "noLandingsHint": "Create your first product to get started",
+    "published": "Published",
+    "draft": "Draft",
+    "activity": "Activity",
+    "deletedLanding": "Deleted landing",
+    "productCount_one": "{{count}} product",
+    "productCount_other": "{{count}} products",
+    "landingCount_one": "{{count}} landing",
+    "landingCount_other": "{{count}} landings"
+  },
+  "settings": {
+    "title": "Settings",
+    "account": {
+      "title": "Account",
+      "subtitle": "Your personal information",
+      "email": "Email",
+      "name": "Name",
+      "saveName": "Save name",
+      "saving": "Saving...",
+      "profileUpdated": "Profile updated",
+      "changePassword": "Change password",
+      "newPassword": "New password",
+      "change": "Change",
+      "changing": "Changing...",
+      "passwordUpdated": "Password updated",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "deleteAccount": "Delete account",
+      "deleteAccountTitle": "Delete your account?",
+      "deleteAccountDesc": "This action is irreversible. All your data, products and landings will be permanently deleted.",
+      "deleteAccountContact": "Contact support to delete your account",
+      "deleteAccountContactDesc": "For security, account deletion requires manual verification."
+    },
+    "appearance": {
+      "title": "Appearance",
+      "subtitle": "Customize the interface theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "title": "Language",
+      "subtitle": "Interface language",
+      "label": "Interface language",
+      "saved": "Language updated"
+    },
+    "region": {
+      "title": "Region and currency",
+      "subtitle": "Regional settings for content generation",
+      "country": "Country",
+      "countryPlaceholder": "Select your country",
+      "currency": "Currency",
+      "timezone": "Timezone",
+      "save": "Save region",
+      "saving": "Saving...",
+      "updated": "Region updated"
+    },
+    "plan": {
+      "title": "Plan and usage",
+      "subtitle": "Your current plan and usage",
+      "currentPlan": "Current plan",
+      "landingsUsed": "Landings used",
+      "bannersUsed": "Banners used",
+      "upgrade": "Upgrade plan"
+    },
+    "preferences": {
+      "title": "Generator preferences",
+      "subtitle": "Default values when creating new landings",
+      "intensity": "Default intensity",
+      "intensitySoft": "Soft",
+      "intensityMedium": "Medium",
+      "intensityHard": "Intense",
+      "framework": "Default framework",
+      "save": "Save preferences",
+      "saved": "Preferences saved"
+    },
+    "help": {
+      "title": "Help and support",
+      "report": "Report an issue"
+    }
+  },
+  "pricing": {
+    "title": "Plans and Pricing",
+    "subtitle": "Choose the plan that best fits your sales volume",
+    "monthly": "Monthly",
+    "annual": "Annual",
+    "free": "Free",
+    "perMonth": "month",
+    "perYear": "year",
+    "currentPlan": "Current plan",
+    "subscribe": "Subscribe",
+    "processing": "Processing...",
+    "mostPopular": "Most popular",
+    "loginRequired": "You must sign in to subscribe.",
+    "paymentSuccess": "Payment successful! Your plan will be updated shortly.",
+    "paymentFailure": "Payment could not be completed. Please try again.",
+    "paymentPending": "Your payment is pending confirmation.",
+    "paymentError": "Error starting payment. Please try again.",
+    "currencyNote": "Prices are shown in {{currency}} as reference. Charges are processed in CLP (Chilean pesos) at the current exchange rate.",
+    "plans": {
+      "free": {
+        "name": "Free",
+        "description": "Explore Nexsell at no cost",
+        "features": ["1 total landing", "2 banners / month", "1 sales hook", "Landing preview", "Basic HTML export"],
+        "excluded": ["No AI images", "No advanced editing"]
+      },
+      "starter": {
+        "name": "Starter",
+        "description": "Ideal for launching and testing products",
+        "features": ["10 landings / month", "30 banners / month", "3 hooks per product", "AI images in landings", "Objections and urgency", "Editable FAQs", "HTML + CSS export"]
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "For sellers scaling with ads",
+        "features": ["100 landings / month", "150 banners / month", "Unlimited psychological angles", "AI images in landings", "Ad-optimized hooks", "CTA variants", "Bundles and comparisons", "Checkout microcopy", "Full ZIP export"]
+      }
+    }
+  }
+}
