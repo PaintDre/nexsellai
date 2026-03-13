@@ -30,6 +30,7 @@ import { bannerSizes } from "@/components/banner/templates";
 import VersionHistory from "@/components/landing/VersionHistory";
 import ExportPreviewDialog from "@/components/landing/ExportPreviewDialog";
 import ResizablePreview from "@/components/landing/ResizablePreview";
+import { useTranslation } from "react-i18next";
 
 type Landing = Tables<"landings">;
 type Product = Tables<"products">;
@@ -45,6 +46,7 @@ const LandingView = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+  const { t } = useTranslation();
   
   const [landing, setLanding] = useState<Landing | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
@@ -82,7 +84,7 @@ const LandingView = () => {
       setLoading(true);
       const { data: l, error: le } = await supabase
         .from("landings").select("*").eq("id", id).eq("user_id", user.id).single();
-      if (le || !l) { setError("No se encontró la landing."); setLoading(false); return; }
+      if (le || !l) { setError(t("landingView.notFound")); setLoading(false); return; }
       setLanding(l);
       setTheme(((l as any).theme || "clean") as LandingTheme);
       const { data: p } = await supabase
@@ -118,7 +120,6 @@ const LandingView = () => {
       const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       const recent = rows.filter((r: any) => new Date(r.viewed_at) >= sevenDaysAgo);
 
-      // Build daily chart data
       const dailyMap: Record<string, number> = {};
       for (let i = 6; i >= 0; i--) {
         const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
@@ -144,19 +145,17 @@ const LandingView = () => {
     try {
       const isPublished = (landing as any).published;
       if (isPublished) {
-        // Unpublish
         await (supabase.from("landings").update({ published: false, published_at: null } as any).eq("id", landing.id).eq("user_id", user.id) as any);
         setLanding({ ...landing, published: false, published_at: null } as any);
-        toast.success("Landing despublicada");
+        toast.success(t("landingView.unpublished"));
       } else {
-        // Publish
         const slug = (landing as any).slug || slugify(landing.name);
         await (supabase.from("landings").update({ published: true, slug, published_at: new Date().toISOString() } as any).eq("id", landing.id).eq("user_id", user.id) as any);
         setLanding({ ...landing, published: true, slug, published_at: new Date().toISOString() } as any);
-        toast.success("¡Landing publicada!");
+        toast.success(t("landingView.published"));
       }
     } catch (err: any) {
-      toast.error("Error", { description: err.message });
+      toast.error(t("common.error"), { description: err.message });
     } finally {
       setPublishing(false);
     }
@@ -169,7 +168,7 @@ const LandingView = () => {
   const handleCopyPublicUrl = () => {
     if (publicUrl) {
       navigator.clipboard.writeText(publicUrl);
-      toast.success("URL copiada al portapapeles");
+      toast.success(t("landingView.urlCopied"));
     }
   };
 
@@ -209,16 +208,12 @@ const LandingView = () => {
     if (!landing || !user) return;
     setSaving(true);
     try {
-      // Save version snapshot of previous blocks before updating
       const prevBlocks = landing.blocks;
       const { data: versionCount } = await supabase
         .from("landing_versions")
         .select("id", { count: "exact", head: true })
         .eq("landing_id", landing.id);
 
-      const nextVersion = (versionCount as any)?.length ? (versionCount as any).length + 1 : 1;
-
-      // Count existing versions to determine version_number
       const { count } = await supabase
         .from("landing_versions")
         .select("*", { count: "exact", head: true })
@@ -232,7 +227,6 @@ const LandingView = () => {
         version_number: (count || 0) + 1,
       } as any);
 
-      // Clean up old versions (keep max 20)
       if ((count || 0) >= 20) {
         const { data: oldest } = await supabase
           .from("landing_versions")
@@ -245,7 +239,6 @@ const LandingView = () => {
         }
       }
 
-      // Now update the landing
       const { error: updateError } = await supabase
         .from("landings")
         .update({ blocks: editedBlocks as any, updated_at: new Date().toISOString() })
@@ -256,9 +249,9 @@ const LandingView = () => {
       setLanding({ ...landing, blocks: editedBlocks as any });
       setEditMode(false);
       setHasChanges(false);
-      toast.success("¡Cambios guardados!");
+      toast.success(t("landingView.changesSaved"));
     } catch (err: any) {
-      toast.error("Error al guardar", { description: err.message });
+      toast.error(t("landingView.saveError"), { description: err.message });
     } finally {
       setSaving(false);
     }
@@ -272,7 +265,7 @@ const LandingView = () => {
         .insert({
           user_id: user.id,
           product_id: landing.product_id,
-          name: `${landing.name} (copia)`,
+          name: `${landing.name} (${t("landingView.copy")})`,
           blocks: landing.blocks,
           mode: landing.mode,
           intensity: landing.intensity,
@@ -283,17 +276,16 @@ const LandingView = () => {
         .select("id")
         .single();
       if (insertError) throw insertError;
-      toast.success("Landing duplicada");
+      toast.success(t("landingView.duplicated"));
       navigate(`/landings/${data.id}`);
     } catch (err: any) {
-      toast.error("Error al duplicar", { description: err.message });
+      toast.error(t("landingView.duplicateError"), { description: err.message });
     }
   };
 
   const handleRestoreVersion = async (blocks: any[], versionTheme: string) => {
     if (!landing || !user) return;
     try {
-      // Save current state as a version before restoring
       const { count } = await supabase
         .from("landing_versions")
         .select("*", { count: "exact", head: true })
@@ -305,10 +297,9 @@ const LandingView = () => {
         blocks: landing.blocks,
         theme: (landing as any).theme || "clean",
         version_number: (count || 0) + 1,
-        label: "Pre-restauración",
+        label: t("landingView.preRestore"),
       } as any);
 
-      // Update landing with restored version
       const { error: updateError } = await supabase
         .from("landings")
         .update({ blocks: blocks as any, theme: versionTheme, updated_at: new Date().toISOString() })
@@ -318,9 +309,9 @@ const LandingView = () => {
 
       setLanding({ ...landing, blocks: blocks as any, theme: versionTheme as any });
       setTheme(versionTheme as LandingTheme);
-      toast.success("Versión restaurada");
+      toast.success(t("landingView.versionRestored"));
     } catch (err: any) {
-      toast.error("Error al restaurar", { description: err.message });
+      toast.error(t("landingView.restoreError"), { description: err.message });
     }
   };
 
@@ -343,9 +334,9 @@ const LandingView = () => {
         landing.blocks as any[], product, landing.name, theme, productImage
       );
       downloadBlob(blob, `${landing.name.replace(/\s+/g, "-").toLowerCase()}.html`);
-      toast.success("HTML exportado correctamente");
+      toast.success(t("landingView.htmlExported"));
     } catch {
-      toast.error("Error al exportar");
+      toast.error(t("landingView.exportError"));
     } finally {
       setExporting(false);
     }
@@ -359,9 +350,9 @@ const LandingView = () => {
         landing.blocks as any[], product, landing.name, theme, allImageUrls
       );
       downloadBlob(blob, `${landing.name.replace(/\s+/g, "-").toLowerCase()}.zip`);
-      toast.success("ZIP exportado con imágenes");
+      toast.success(t("landingView.zipExported"));
     } catch {
-      toast.error("Error al exportar ZIP");
+      toast.error(t("landingView.zipError"));
     } finally {
       setExporting(false);
     }
@@ -407,10 +398,10 @@ const LandingView = () => {
         .from("landings").select("*").eq("id", landing.id).single();
       if (updatedLanding) setLanding(updatedLanding);
 
-      toast.success("¡Imagen generada!", { description: `Imagen agregada a la sección "${selectedSectionTitle}"` });
+      toast.success(t("landingView.imageGenerated"), { description: t("landingView.imageAddedTo", { section: selectedSectionTitle }) });
       setShowImageDialog(false);
     } catch (err: any) {
-      toast.error("Error al generar imagen", { description: err.message });
+      toast.error(t("landingView.imageError"), { description: err.message });
     } finally {
       setGeneratingImage(false);
     }
@@ -427,9 +418,9 @@ const LandingView = () => {
   if (error || !landing) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-muted-foreground">{error || "Landing no encontrada"}</p>
+        <p className="text-muted-foreground">{error || t("landingView.landingNotFound")}</p>
         <Button variant="outline" asChild>
-          <Link to="/landings"><ArrowLeft className="h-4 w-4 mr-2" /> Volver a mis landings</Link>
+          <Link to="/landings"><ArrowLeft className="h-4 w-4 mr-2" /> {t("landingView.backToLandings")}</Link>
         </Button>
       </div>
     );
@@ -445,21 +436,21 @@ const LandingView = () => {
       <div className="bg-muted/80 backdrop-blur-sm border-b sticky top-0 z-50">
         <div className="container mx-auto flex items-center justify-between h-12 px-4">
           <Button variant="ghost" size="sm" asChild>
-            <Link to="/landings"><ArrowLeft className="h-4 w-4 mr-2" /> Mis landings</Link>
+            <Link to="/landings"><ArrowLeft className="h-4 w-4 mr-2" /> {t("landingView.myLandings")}</Link>
           </Button>
           <div className="flex items-center gap-2">
             {/* Edit mode controls */}
             {editMode ? (
               <>
                 <Badge variant="default" className="text-xs bg-primary/90">
-                  <Pencil className="h-3 w-3 mr-1" /> Modo edición
+                  <Pencil className="h-3 w-3 mr-1" /> {t("landingView.editMode")}
                 </Badge>
                 <Button variant="outline" size="sm" onClick={handleCancelEdit}>
-                  <X className="h-4 w-4 mr-1" /> Cancelar
+                  <X className="h-4 w-4 mr-1" /> {t("common.cancel")}
                 </Button>
                 <Button size="sm" onClick={handleSave} disabled={saving || !hasChanges}>
                   {saving ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Save className="h-4 w-4 mr-1" />}
-                  Guardar
+                  {t("common.save")}
                 </Button>
               </>
             ) : (
@@ -490,7 +481,7 @@ const LandingView = () => {
 
                 <Button variant="outline" size="sm" onClick={handleEnterEditMode}>
                   <Pencil className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">Editar</span>
+                  <span className="hidden sm:inline">{t("common.edit")}</span>
                 </Button>
                 
                 {isPaidPlan && (
@@ -498,7 +489,7 @@ const LandingView = () => {
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm">
                         <ImagePlus className="h-4 w-4 mr-1" />
-                        <span className="hidden sm:inline">Imágenes IA</span>
+                        <span className="hidden sm:inline">{t("landingView.aiImages")}</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
@@ -520,35 +511,35 @@ const LandingView = () => {
 
                 <Button variant="outline" size="sm" onClick={handleDuplicate}>
                   <Copy className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">Duplicar</span>
+                  <span className="hidden sm:inline">{t("common.duplicate")}</span>
                 </Button>
 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
                       <Trash2 className="h-4 w-4 mr-1" />
-                      <span className="hidden sm:inline">Eliminar</span>
+                      <span className="hidden sm:inline">{t("common.delete")}</span>
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>¿Eliminar landing?</AlertDialogTitle>
+                      <AlertDialogTitle>{t("landingView.deleteLanding")}</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Esta acción no se puede deshacer. Se eliminarán también las versiones guardadas de "{landing.name}".
+                        {t("landingView.deleteDesc", { name: landing.name })}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
                       <AlertDialogAction onClick={async () => {
                         try {
                           const { error } = await supabase.from("landings").delete().eq("id", landing.id).eq("user_id", user!.id);
                           if (error) throw error;
-                          toast.success("Landing eliminada");
+                          toast.success(t("landingView.deleted"));
                           navigate("/landings");
                         } catch (err: any) {
-                          toast.error("Error al eliminar", { description: err.message });
+                          toast.error(t("landingView.deleteError"), { description: err.message });
                         }
-                      }}>Eliminar</AlertDialogAction>
+                      }}>{t("common.delete")}</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -561,12 +552,12 @@ const LandingView = () => {
 
                 <Button variant="outline" size="sm" asChild>
                   <Link to={`/landings/${landing.id}/preview`}>
-                    <Maximize2 className="h-4 w-4 mr-1" /> Vista completa
+                    <Maximize2 className="h-4 w-4 mr-1" /> {t("landingView.fullView")}
                   </Link>
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => setShowExportPreview(true)} disabled={exporting}>
                   <Download className="h-4 w-4 mr-1" />
-                  Exportar
+                  {t("common.export")}
                 </Button>
 
                 {/* Publish button */}
@@ -578,7 +569,7 @@ const LandingView = () => {
                 >
                   {publishing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> :
                     (landing as any).published ? <Globe className="h-4 w-4 mr-1" /> : <GlobeLock className="h-4 w-4 mr-1" />}
-                  <span className="hidden sm:inline">{(landing as any).published ? "Publicada" : "Publicar"}</span>
+                  <span className="hidden sm:inline">{(landing as any).published ? t("landingView.publishedLabel") : t("landingView.publish")}</span>
                 </Button>
 
                 {/* Share & public URL */}
@@ -587,15 +578,15 @@ const LandingView = () => {
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm">
                         <Share2 className="h-4 w-4 mr-1" />
-                        <span className="hidden sm:inline">Compartir</span>
+                        <span className="hidden sm:inline">{t("landingView.share")}</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={handleCopyPublicUrl}>
-                        <Copy className="h-4 w-4 mr-2" /> Copiar URL
+                        <Copy className="h-4 w-4 mr-2" /> {t("landingView.copyUrl")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => window.open(publicUrl, "_blank")}>
-                        <ExternalLink className="h-4 w-4 mr-2" /> Abrir en nueva pestaña
+                        <ExternalLink className="h-4 w-4 mr-2" /> {t("landingView.openNewTab")}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleShare("facebook")}>Facebook</DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleShare("twitter")}>X (Twitter)</DropdownMenuItem>
@@ -635,11 +626,11 @@ const LandingView = () => {
               <div className="flex gap-6 items-end">
                 <div>
                   <p className="text-2xl font-bold text-foreground">{viewsData.total}</p>
-                  <p className="text-xs text-muted-foreground">Visitas totales</p>
+                  <p className="text-xs text-muted-foreground">{t("landingView.totalViews")}</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{viewsData.last7}</p>
-                  <p className="text-xs text-muted-foreground">Últimos 7 días</p>
+                  <p className="text-xs text-muted-foreground">{t("landingView.last7Days")}</p>
                 </div>
                 <div className="flex-1 flex items-end gap-1 h-12">
                   {viewsData.daily.map((d) => (
@@ -676,17 +667,17 @@ const LandingView = () => {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5" />
-              Generar imagen para: {selectedSectionTitle}
+              {t("landingView.generateImageFor", { section: selectedSectionTitle })}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-6">
             <div>
-              <p className="text-sm font-medium mb-3">Elige una plantilla visual</p>
+              <p className="text-sm font-medium mb-3">{t("landingView.chooseTemplate")}</p>
               <TemplateGallery selectedId={templateId} onSelect={(id) => setTemplateId(id)} />
             </div>
 
             <div>
-              <p className="text-sm font-medium mb-2">Tamaño de salida</p>
+              <p className="text-sm font-medium mb-2">{t("landingView.outputSize")}</p>
               <Select value={outputSize} onValueChange={setOutputSize}>
                 <SelectTrigger>
                   <SelectValue />
@@ -708,9 +699,9 @@ const LandingView = () => {
               size="lg"
             >
               {generatingImage ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generando imagen...</>
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("landingView.generatingImage")}</>
               ) : (
-                <><Sparkles className="h-4 w-4 mr-2" /> Generar Imagen con IA</>
+                <><Sparkles className="h-4 w-4 mr-2" /> {t("landingView.generateImageAI")}</>
               )}
             </Button>
           </div>
