@@ -88,6 +88,14 @@
         "expiry": "The link expires in 24 hours. If you didn't receive the email, you can request a new one from the sign-in page."
       }
     },
+    "layout": {
+      "heroTitle": "Create landings that\nsell for your products",
+      "heroSubtitle": "The dropshipping platform that generates professional sales pages with artificial intelligence.",
+      "feature1": "AI-generated landings in minutes",
+      "feature2": "Professional banners for your products",
+      "feature3": "Export, publish and sell without limits",
+      "copyright": "© {{year}} Nexsell. All rights reserved."
+    },
     "forgotPassword": {
       "title": "Recover password",
       "subtitle": "We'll send you a link to reset your password",

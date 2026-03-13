@@ -1,4 +1,5 @@
 import { Sparkles, Zap, Shield } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -6,13 +7,12 @@ interface AuthLayoutProps {
   subtitle?: string;
 }
 
-const features = [
-  { icon: Sparkles, label: "Landings generadas con IA en minutos" },
-  { icon: Zap, label: "Banners profesionales para tus productos" },
-  { icon: Shield, label: "Exporta, publica y vende sin límites" },
-];
+const featureIcons = [Sparkles, Zap, Shield];
+const featureKeys = ["auth.layout.feature1", "auth.layout.feature2", "auth.layout.feature3"];
 
 const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
+  const { t } = useTranslation();
+
   return (
     <div className="flex min-h-screen">
       {/* Branding panel */}
@@ -25,27 +25,30 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
             <span className="text-xl font-bold font-display tracking-tight">Nexsell</span>
           </div>
 
-          <h2 className="text-3xl lg:text-[2.5rem] font-bold font-display leading-[1.15] mb-4">
-            Crea landings que<br />venden para tus productos
+          <h2 className="text-3xl lg:text-[2.5rem] font-bold font-display leading-[1.15] mb-4 whitespace-pre-line">
+            {t("auth.layout.heroTitle")}
           </h2>
           <p className="text-sidebar-foreground text-sm lg:text-base mb-12 leading-relaxed max-w-md">
-            La plataforma de dropshippers que genera páginas de venta profesionales con inteligencia artificial.
+            {t("auth.layout.heroSubtitle")}
           </p>
 
           <div className="space-y-4">
-            {features.map((f) => (
-              <div key={f.label} className="flex items-center gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent">
-                  <f.icon className="h-4 w-4 text-sidebar-primary" />
+            {featureKeys.map((key, i) => {
+              const Icon = featureIcons[i];
+              return (
+                <div key={key} className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-accent">
+                    <Icon className="h-4 w-4 text-sidebar-primary" />
+                  </div>
+                  <span className="text-sm text-sidebar-foreground">{t(key)}</span>
                 </div>
-                <span className="text-sm text-sidebar-foreground">{f.label}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         <p className="text-[11px] text-sidebar-foreground/40 mt-8">
-          © {new Date().getFullYear()} Nexsell. Todos los derechos reservados.
+          {t("auth.layout.copyright", { year: new Date().getFullYear() })}
         </p>
       </div>
 
