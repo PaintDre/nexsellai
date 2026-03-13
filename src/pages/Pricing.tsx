@@ -10,56 +10,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Check, Loader2, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { getPricingForCountry, formatPrice, PRICING_BY_CURRENCY } from "@/lib/pricing";
+import { getPricingForCountry, formatPrice } from "@/lib/pricing";
 import { COUNTRIES } from "@/lib/countries";
+import { useTranslation } from "react-i18next";
 
 type BillingPeriod = "monthly" | "annual";
 
-const planFeatures = {
-  free: {
-    name: "Free",
-    description: "Explora Nexsell sin costo",
-    features: [
-      "1 landing total",
-      "2 banners / mes",
-      "1 hook de venta",
-      "Preview de landing",
-      "Exportar HTML básico",
-    ],
-    excluded: ["Sin imágenes IA", "Sin edición avanzada"],
-  },
-  starter: {
-    name: "Starter",
-    description: "Ideal para lanzar y testear productos",
-    features: [
-      "10 landings / mes",
-      "30 banners / mes",
-      "3 hooks por producto",
-      "Imágenes IA en landings",
-      "Objeciones y urgencia",
-      "FAQs editables",
-      "Exportar HTML + CSS",
-    ],
-    popular: true,
-  },
-  pro: {
-    name: "Pro",
-    description: "Para vendedores que escalan con ads",
-    features: [
-      "100 landings / mes",
-      "150 banners / mes",
-      "Ángulos psicológicos ilimitados",
-      "Imágenes IA en landings",
-      "Hooks optimizados para ads",
-      "Variantes de CTA",
-      "Bundles y comparativas",
-      "Microcopys de checkout",
-      "Exportar ZIP completo",
-    ],
-  },
-};
-
 const Pricing = () => {
+  const { t } = useTranslation();
   const { profile, session } = useAuth();
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("monthly");
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
@@ -75,19 +33,39 @@ const Pricing = () => {
   useEffect(() => {
     const status = searchParams.get("status");
     if (status === "success") {
-      toast.success("¡Pago exitoso! Tu plan se actualizará en unos momentos.");
+      toast.success(t("pricing.paymentSuccess"));
     } else if (status === "failure") {
-      toast.error("El pago no pudo completarse. Intenta nuevamente.");
+      toast.error(t("pricing.paymentFailure"));
     } else if (status === "pending") {
-      toast.info("Tu pago está pendiente de confirmación.");
+      toast.info(t("pricing.paymentPending"));
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   const pricing = getPricingForCountry(selectedCountry);
 
+  const planFeatures = {
+    free: {
+      name: t("pricing.plans.free.name"),
+      description: t("pricing.plans.free.description"),
+      features: t("pricing.plans.free.features", { returnObjects: true }) as string[],
+      excluded: t("pricing.plans.free.excluded", { returnObjects: true }) as string[],
+    },
+    starter: {
+      name: t("pricing.plans.starter.name"),
+      description: t("pricing.plans.starter.description"),
+      features: t("pricing.plans.starter.features", { returnObjects: true }) as string[],
+      popular: true,
+    },
+    pro: {
+      name: t("pricing.plans.pro.name"),
+      description: t("pricing.plans.pro.description"),
+      features: t("pricing.plans.pro.features", { returnObjects: true }) as string[],
+    },
+  };
+
   const handleSubscribe = async (planId: string) => {
     if (!session) {
-      toast.error("Debes iniciar sesión para suscribirte.");
+      toast.error(t("pricing.loginRequired"));
       return;
     }
     setLoadingPlan(planId);
@@ -99,11 +77,11 @@ const Pricing = () => {
       if (data?.url) {
         window.location.href = data.url;
       } else {
-        throw new Error("No se recibió URL de checkout");
+        throw new Error("No checkout URL received");
       }
     } catch (err: any) {
       console.error(err);
-      toast.error("Error al iniciar el pago. Intenta nuevamente.");
+      toast.error(t("pricing.paymentError"));
     } finally {
       setLoadingPlan(null);
     }
@@ -132,15 +110,15 @@ const Pricing = () => {
   return (
     <div className="p-5 md:p-8 lg:p-10 space-y-8">
       <div className="text-center max-w-xl mx-auto space-y-3">
-        <h1 className="text-2xl md:text-3xl font-bold font-display">Planes y Precios</h1>
-        <p className="text-sm text-muted-foreground">Elige el plan que mejor se adapte a tu volumen de ventas</p>
+        <h1 className="text-2xl md:text-3xl font-bold font-display">{t("pricing.title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("pricing.subtitle")}</p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
           <Tabs value={billingPeriod} onValueChange={(v) => setBillingPeriod(v as BillingPeriod)}>
             <TabsList className="h-9">
-              <TabsTrigger value="monthly" className="text-xs">Mensual</TabsTrigger>
+              <TabsTrigger value="monthly" className="text-xs">{t("pricing.monthly")}</TabsTrigger>
               <TabsTrigger value="annual" className="text-xs gap-1.5">
-                Anual <Badge variant="secondary" className="text-[10px] bg-accent text-accent-foreground">-17%</Badge>
+                {t("pricing.annual")} <Badge variant="secondary" className="text-[10px] bg-accent text-accent-foreground">-17%</Badge>
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -175,7 +153,7 @@ const Pricing = () => {
             )}>
               {"popular" in meta && meta.popular && (
                 <div className="absolute -top-2.5 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary text-primary-foreground text-[10px] px-2.5">Más popular</Badge>
+                  <Badge className="bg-primary text-primary-foreground text-[10px] px-2.5">{t("pricing.mostPopular")}</Badge>
                 </div>
               )}
               <CardHeader className="text-center pb-2">
@@ -183,14 +161,14 @@ const Pricing = () => {
                 <CardDescription className="text-xs">{meta.description}</CardDescription>
                 <div className="mt-3">
                   {!isPaid ? (
-                    <span className="text-3xl font-bold font-display">Gratis</span>
+                    <span className="text-3xl font-bold font-display">{t("pricing.free")}</span>
                   ) : (
                     <div>
                       <span className="text-3xl font-bold font-display">
                         {pricing.currencySymbol}{formatPrice(getPlanPrice(planId), pricing.currency, pricing.locale)}
                       </span>
                       <span className="text-xs text-muted-foreground ml-1">
-                        {pricing.currency}/{billingPeriod === "annual" ? "año" : "mes"}
+                        {pricing.currency}/{billingPeriod === "annual" ? t("pricing.perYear") : t("pricing.perMonth")}
                       </span>
                       {!isUSD && (
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -199,7 +177,7 @@ const Pricing = () => {
                       )}
                       {billingPeriod === "annual" && (
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          {pricing.currencySymbol}{formatPrice(getMonthlyEquiv(planId)!, pricing.currency, pricing.locale)}/mes
+                          {pricing.currencySymbol}{formatPrice(getMonthlyEquiv(planId)!, pricing.currency, pricing.locale)}/{t("pricing.perMonth")}
                         </p>
                       )}
                     </div>
@@ -214,7 +192,7 @@ const Pricing = () => {
                       {f}
                     </li>
                   ))}
-                  {"excluded" in meta && meta.excluded?.map((f) => (
+                  {"excluded" in meta && (meta as any).excluded?.map((f: string) => (
                     <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground line-through">
                       {f}
                     </li>
@@ -228,13 +206,13 @@ const Pricing = () => {
                   onClick={() => handleSubscribe(planId)}
                 >
                   {isLoading ? (
-                    <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> Procesando...</>
+                    <><Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> {t("pricing.processing")}</>
                   ) : isCurrent ? (
-                    "Plan actual"
+                    t("pricing.currentPlan")
                   ) : !isPaid ? (
-                    "Plan actual"
+                    t("pricing.currentPlan")
                   ) : (
-                    "Suscribirse"
+                    t("pricing.subscribe")
                   )}
                 </Button>
               </CardContent>
@@ -245,7 +223,7 @@ const Pricing = () => {
 
       {pricing.currency !== "CLP" && (
         <p className="text-center text-[11px] text-muted-foreground max-w-md mx-auto">
-          Los precios se muestran en {pricing.currency} como referencia. El cobro se procesa en CLP (pesos chilenos) al tipo de cambio vigente.
+          {t("pricing.currencyNote", { currency: pricing.currency })}
         </p>
       )}
     </div>

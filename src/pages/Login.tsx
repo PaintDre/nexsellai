@@ -11,10 +11,12 @@ import { toast } from "sonner";
 import { Mail, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/auth/AuthLayout";
 import PasswordInput from "@/components/auth/PasswordInput";
+import { useTranslation } from "react-i18next";
 
 const REMEMBER_KEY = "nexsell_remembered_email";
 
 const Login = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(false);
@@ -35,7 +37,7 @@ const Login = () => {
     const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast.error("Error al iniciar sesión", { description: error.message });
+      toast.error(t("auth.login.errorTitle"), { description: error.message });
     } else {
       if (remember) {
         localStorage.setItem(REMEMBER_KEY, email);
@@ -61,10 +63,10 @@ const Login = () => {
   };
 
   return (
-    <AuthLayout title="Bienvenido de vuelta" subtitle="Ingresa tus credenciales para acceder a tu cuenta">
+    <AuthLayout title={t("auth.login.title")} subtitle={t("auth.login.subtitle")}>
       <form onSubmit={handleLogin} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("auth.login.email")}</Label>
           <div className="relative">
             <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
@@ -72,7 +74,7 @@ const Login = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
+              placeholder={t("auth.login.emailPlaceholder")}
               required
               className="h-12 pl-10 transition-all duration-200"
             />
@@ -81,32 +83,32 @@ const Login = () => {
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password">Contraseña</Label>
+            <Label htmlFor="password">{t("auth.login.password")}</Label>
             <Link to="/forgot-password" className="text-xs text-primary hover:underline">
-              ¿Olvidaste tu contraseña?
+              {t("auth.login.forgotPassword")}
             </Link>
           </div>
           <PasswordInput
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
+            placeholder={t("auth.login.passwordPlaceholder")}
             required
           />
         </div>
 
         <div className="flex items-center gap-2">
           <Checkbox id="remember" checked={remember} onCheckedChange={(checked) => setRemember(checked === true)} />
-          <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">Recordar mi email</Label>
+          <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">{t("auth.login.rememberEmail")}</Label>
         </div>
 
         <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={loading}>
-          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Entrar"}
+          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : t("auth.login.submit")}
         </Button>
 
         <div className="flex items-center gap-3">
           <Separator className="flex-1" />
-          <span className="text-xs text-muted-foreground">o continúa con</span>
+          <span className="text-xs text-muted-foreground">{t("auth.login.orContinueWith")}</span>
           <Separator className="flex-1" />
         </div>
 
@@ -119,7 +121,7 @@ const Login = () => {
               redirect_uri: window.location.origin,
             });
             if (error) {
-              toast.error("Error con Google", { description: String(error) });
+              toast.error(t("auth.login.googleError"), { description: String(error) });
             }
           }}
         >
@@ -133,8 +135,8 @@ const Login = () => {
         </Button>
 
         <p className="text-sm text-muted-foreground text-center">
-          ¿No tienes cuenta?{" "}
-          <Link to="/register" className="text-primary hover:underline font-medium">Regístrate gratis</Link>
+          {t("auth.login.noAccount")}{" "}
+          <Link to="/register" className="text-primary hover:underline font-medium">{t("auth.login.registerFree")}</Link>
         </p>
       </form>
     </AuthLayout>

@@ -14,8 +14,10 @@ import AuthLayout from "@/components/auth/AuthLayout";
 import PasswordInput from "@/components/auth/PasswordInput";
 import PasswordStrengthBar from "@/components/auth/PasswordStrengthBar";
 import { COUNTRIES, detectCountryFromTimezone, getBrowserTimezone, getCountryByCode } from "@/lib/countries";
+import { useTranslation } from "react-i18next";
 
 const Register = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -26,7 +28,6 @@ const Register = () => {
   const [registeredEmail, setRegisteredEmail] = useState("");
   const navigate = useNavigate();
 
-  // Auto-detect country from browser timezone
   useEffect(() => {
     const detected = detectCountryFromTimezone();
     if (detected) setCountryCode(detected.code);
@@ -39,7 +40,7 @@ const Register = () => {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast.error("Las contraseñas no coinciden", { description: "Verifica que ambas contraseñas sean iguales." });
+      toast.error(t("auth.register.passwordsMismatch"), { description: t("auth.register.passwordsMismatchDesc") });
       return;
     }
 
@@ -61,7 +62,7 @@ const Register = () => {
     });
     setLoading(false);
     if (error) {
-      toast.error("Error al registrarse", { description: error.message });
+      toast.error(t("auth.register.errorTitle"), { description: error.message });
     } else {
       setRegisteredEmail(email);
       setShowVerificationDialog(true);
@@ -69,23 +70,23 @@ const Register = () => {
   };
 
   return (
-    <AuthLayout title="Crea tu cuenta gratis" subtitle="Empieza a generar landings profesionales en minutos">
+    <AuthLayout title={t("auth.register.title")} subtitle={t("auth.register.subtitle")}>
       <form onSubmit={handleRegister} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="name">Nombre completo</Label>
+          <Label htmlFor="name">{t("auth.register.fullName")}</Label>
           <div className="relative">
             <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Tu nombre" required className="h-12 pl-10 transition-all duration-200" />
+            <Input id="name" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder={t("auth.register.fullNamePlaceholder")} required className="h-12 pl-10 transition-all duration-200" />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="country">País</Label>
+          <Label htmlFor="country">{t("auth.register.country")}</Label>
           <div className="relative">
             <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-10" />
             <Select value={countryCode} onValueChange={setCountryCode}>
               <SelectTrigger className="h-12 pl-10">
-                <SelectValue placeholder="Selecciona tu país" />
+                <SelectValue placeholder={t("auth.register.countryPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {COUNTRIES.map((c) => (
@@ -99,27 +100,27 @@ const Register = () => {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t("auth.register.email")}</Label>
           <div className="relative">
             <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required className="h-12 pl-10 transition-all duration-200" />
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("auth.register.emailPlaceholder")} required className="h-12 pl-10 transition-all duration-200" />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">Contraseña</Label>
-          <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" minLength={6} required />
+          <Label htmlFor="password">{t("auth.register.password")}</Label>
+          <PasswordInput id="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t("auth.register.passwordPlaceholder")} minLength={6} required />
           <PasswordStrengthBar password={password} />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="confirmPassword">Confirmar contraseña</Label>
+          <Label htmlFor="confirmPassword">{t("auth.register.confirmPassword")}</Label>
           <div className="relative">
             <PasswordInput
               id="confirmPassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Repite tu contraseña"
+              placeholder={t("auth.register.confirmPasswordPlaceholder")}
               minLength={6}
               required
             />
@@ -130,17 +131,17 @@ const Register = () => {
             )}
           </div>
           {passwordsMismatch && (
-            <p className="text-xs text-destructive">Las contraseñas no coinciden</p>
+            <p className="text-xs text-destructive">{t("auth.register.passwordsMismatch")}</p>
           )}
         </div>
 
         <Button type="submit" className="w-full h-12 text-base font-semibold" disabled={loading}>
-          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Crear cuenta gratis"}
+          {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : t("auth.register.submit")}
         </Button>
 
         <div className="flex items-center gap-3">
           <Separator className="flex-1" />
-          <span className="text-xs text-muted-foreground">o continúa con</span>
+          <span className="text-xs text-muted-foreground">{t("auth.register.orContinueWith")}</span>
           <Separator className="flex-1" />
         </div>
 
@@ -153,7 +154,7 @@ const Register = () => {
               redirect_uri: window.location.origin,
             });
             if (error) {
-              toast.error("Error con Google", { description: String(error) });
+              toast.error(t("auth.register.googleError"), { description: String(error) });
             }
           }}
         >
@@ -167,8 +168,8 @@ const Register = () => {
         </Button>
 
         <p className="text-sm text-muted-foreground text-center">
-          ¿Ya tienes cuenta?{" "}
-          <Link to="/login" className="text-primary hover:underline font-medium">Inicia sesión</Link>
+          {t("auth.register.hasAccount")}{" "}
+          <Link to="/login" className="text-primary hover:underline font-medium">{t("auth.register.signIn")}</Link>
         </p>
       </form>
 
@@ -183,24 +184,24 @@ const Register = () => {
               <MailCheck className="h-10 w-10 text-primary" />
             </div>
             <DialogTitle className="text-2xl font-bold font-display">
-              ¡Revisa tu correo electrónico!
+              {t("auth.register.verification.title")}
             </DialogTitle>
             <DialogDescription className="text-base space-y-3">
               <p>
-                Hemos enviado un enlace de verificación a{" "}
+                {t("auth.register.verification.sentTo")}{" "}
                 <span className="font-semibold text-foreground">{registeredEmail}</span>
               </p>
               <p>
-                Haz clic en el enlace del correo para activar tu cuenta. Si no lo encuentras, revisa tu carpeta de <span className="font-medium">spam</span> o <span className="font-medium">correo no deseado</span>.
+                {t("auth.register.verification.checkSpam")}
               </p>
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-3 pt-4 pb-2">
             <Button size="lg" className="w-full text-base" onClick={() => navigate("/login")}>
-              Entendido, ir a iniciar sesión
+              {t("auth.register.verification.understood")}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              El enlace expira en 24 horas. Si no recibiste el correo, podrás solicitar uno nuevo desde la página de inicio de sesión.
+              {t("auth.register.verification.expiry")}
             </p>
           </div>
         </DialogContent>
