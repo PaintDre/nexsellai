@@ -12,20 +12,15 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
 import { Upload, X, Loader2, Sparkles, Rocket, ArrowRight } from "lucide-react";
 import { PRODUCT_CATEGORIES } from "@/lib/constants";
-
-const loadingMessages = [
-  "Analizando tu producto...",
-  "Creando textos de venta...",
-  "Diseñando la estructura...",
-  "Optimizando para conversión...",
-  "Generando tu landing...",
-];
+import { useTranslation } from "react-i18next";
 
 const Onboarding = () => {
+  const { t } = useTranslation();
   const [step, setStep] = useState(1);
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  
+
+  const loadingMessages = t("onboarding.loadingMessages", { returnObjects: true }) as string[];
 
   // Product form state
   const [name, setName] = useState("");
@@ -47,7 +42,7 @@ const Onboarding = () => {
       setMessageIndex((prev) => (prev + 1) % loadingMessages.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, [generating]);
+  }, [generating, loadingMessages.length]);
 
   // Animate progress
   useEffect(() => {
@@ -70,7 +65,7 @@ const Onboarding = () => {
       const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(path);
       setImages([urlData.publicUrl]);
     } else {
-      toast.error("Error al subir imagen", { description: error.message });
+      toast.error(t("onboarding.uploadError"), { description: error.message });
     }
     setUploading(false);
   };
@@ -79,11 +74,11 @@ const Onboarding = () => {
     if (!user || !profile) return;
 
     if (!name.trim() || !price) {
-      toast.error("Completa los campos obligatorios");
+      toast.error(t("onboarding.requiredFields"));
       return;
     }
     if (images.length === 0) {
-      toast.error("Sube al menos 1 imagen de tu producto");
+      toast.error(t("onboarding.imageRequired"));
       return;
     }
 
@@ -92,7 +87,6 @@ const Onboarding = () => {
     setProgress(5);
 
     try {
-      // 1. Create product
       const { data: product, error: productError } = await supabase
         .from("products")
         .insert({
@@ -110,7 +104,6 @@ const Onboarding = () => {
       if (productError) throw productError;
       setProgress(25);
 
-      // 2. Generate landing
       const { data: landingData, error: genError } = await supabase.functions.invoke("generate-landing", {
         body: {
           product,
@@ -127,7 +120,6 @@ const Onboarding = () => {
       if (genError) throw genError;
       setProgress(70);
 
-      // 3. Save landing
       const { error: insertError } = await supabase.from("landings").insert({
         user_id: user.id,
         product_id: product.id,
@@ -142,7 +134,6 @@ const Onboarding = () => {
 
       if (insertError) throw insertError;
 
-      // 4. Increment landings_used
       await supabase
         .from("profiles")
         .update({ landings_used: (profile.landings_used || 0) + 1 })
@@ -150,10 +141,10 @@ const Onboarding = () => {
 
       setProgress(100);
 
-      toast.success("¡Tu primera landing está lista!");
+      toast.success(t("onboarding.firstLandingReady"));
       setTimeout(() => navigate("/dashboard"), 1200);
     } catch (err: any) {
-      toast.error("Error al generar", { description: err.message });
+      toast.error(t("onboarding.generateError"), { description: err.message });
       setStep(2);
       setGenerating(false);
       setProgress(0);
@@ -192,24 +183,24 @@ const Onboarding = () => {
               </div>
               <div className="space-y-2">
                 <h1 className="text-2xl font-bold font-display tracking-tight">
-                  ¡Bienvenido a Nexsell!
+                  {t("onboarding.welcome")}
                 </h1>
                 <p className="text-muted-foreground max-w-sm">
-                  Con Nexsell puedes crear páginas de venta profesionales para tus productos de dropshipping en minutos, usando inteligencia artificial.
+                  {t("onboarding.welcomeDesc")}
                 </p>
               </div>
               <div className="space-y-2 text-left w-full max-w-xs">
                 <div className="flex items-start gap-3">
                   <Rocket className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                  <p className="text-sm text-muted-foreground">Sube tu producto y genera una landing al instante</p>
+                  <p className="text-sm text-muted-foreground">{t("onboarding.feature1")}</p>
                 </div>
                 <div className="flex items-start gap-3">
                   <Sparkles className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                  <p className="text-sm text-muted-foreground">Textos persuasivos creados por IA para maximizar ventas</p>
+                  <p className="text-sm text-muted-foreground">{t("onboarding.feature2")}</p>
                 </div>
               </div>
               <Button size="lg" className="w-full max-w-xs min-h-[44px]" onClick={() => setStep(2)}>
-                Comenzar <ArrowRight className="h-4 w-4 ml-2" />
+                {t("onboarding.start")} <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </CardContent>
           </Card>
@@ -220,13 +211,13 @@ const Onboarding = () => {
           <Card>
             <CardContent className="space-y-5 py-6 px-5">
               <div className="text-center space-y-1">
-                <h2 className="text-xl font-bold font-display">Agrega tu primer producto</h2>
-                <p className="text-sm text-muted-foreground">Con esta info generaremos tu primera landing de venta</p>
+                <h2 className="text-xl font-bold font-display">{t("onboarding.addProduct")}</h2>
+                <p className="text-sm text-muted-foreground">{t("onboarding.addProductDesc")}</p>
               </div>
 
               {/* Image upload */}
               <div className="space-y-2">
-                <Label>Imagen del producto *</Label>
+                <Label>{t("onboarding.productImage")} *</Label>
                 {images.length > 0 ? (
                   <div className="relative aspect-video rounded-lg overflow-hidden border bg-muted w-full max-w-[200px]">
                     <img src={images[0]} alt="" className="h-full w-full object-cover" />
@@ -245,7 +236,7 @@ const Onboarding = () => {
                     ) : (
                       <>
                         <Upload className="h-6 w-6 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground mt-1">Subir imagen</span>
+                        <span className="text-sm text-muted-foreground mt-1">{t("onboarding.uploadImage")}</span>
                       </>
                     )}
                     <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
@@ -254,12 +245,12 @@ const Onboarding = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="ob-name">Nombre del producto *</Label>
-                <Input id="ob-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Masajeador Cervical Pro" required />
+                <Label htmlFor="ob-name">{t("onboarding.productName")} *</Label>
+                <Input id="ob-name" value={name} onChange={(e) => setName(e.target.value)} placeholder={t("onboarding.productNamePlaceholder")} required />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="ob-price">Precio {(profile as any)?.currency || "USD"} *</Label>
+                <Label htmlFor="ob-price">{t("onboarding.price")} {(profile as any)?.currency || "USD"} *</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">$</span>
                   <Input id="ob-price" type="number" min={1} value={price} onChange={(e) => setPrice(e.target.value)} className="pl-7" placeholder="19990" required />
@@ -267,7 +258,7 @@ const Onboarding = () => {
               </div>
 
               <div className="space-y-2">
-                <Label>Categoría *</Label>
+                <Label>{t("onboarding.category")} *</Label>
                 <Select value={category} onValueChange={setCategory}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -279,8 +270,8 @@ const Onboarding = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="ob-desc">Descripción <span className="text-muted-foreground font-normal">(opcional)</span></Label>
-                <Textarea id="ob-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Detalles del producto..." rows={3} />
+                <Label htmlFor="ob-desc">{t("onboarding.description")} <span className="text-muted-foreground font-normal">({t("common.optional")})</span></Label>
+                <Textarea id="ob-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("onboarding.descriptionPlaceholder")} rows={3} />
               </div>
 
               <Button
@@ -290,7 +281,7 @@ const Onboarding = () => {
                 disabled={generating}
               >
                 <Sparkles className="h-4 w-4 mr-2" />
-                Crear producto y generar landing
+                {t("onboarding.createAndGenerate")}
               </Button>
             </CardContent>
           </Card>
@@ -305,10 +296,10 @@ const Onboarding = () => {
               </div>
               <div className="space-y-2">
                 <h2 className="text-xl font-bold font-display">
-                  {progress >= 100 ? "¡Listo!" : "Generando tu landing..."}
+                  {progress >= 100 ? t("onboarding.done") : t("onboarding.generatingLanding")}
                 </h2>
                 <p className="text-muted-foreground text-sm min-h-[20px] transition-opacity">
-                  {progress >= 100 ? "Redirigiendo al dashboard..." : loadingMessages[messageIndex]}
+                  {progress >= 100 ? t("onboarding.redirecting") : loadingMessages[messageIndex]}
                 </p>
               </div>
               <div className="w-full max-w-xs space-y-2">
