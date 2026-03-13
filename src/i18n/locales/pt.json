@@ -103,7 +103,52 @@
       "sent": "Email enviado!",
       "sentDesc": "Se existe uma conta com {{email}}, você receberá um link para redefinir sua senha.",
       "backToLogin": "Voltar para login"
+    },
+    "resetPassword": {
+      "title": "Nova senha",
+      "subtitle": "Insira sua nova senha para sua conta",
+      "newPassword": "Nova senha",
+      "placeholder": "Mínimo 6 caracteres",
+      "confirmPassword": "Confirmar senha",
+      "confirmPlaceholder": "Repita sua senha",
+      "mismatch": "As senhas não coincidem",
+      "minLength": "A senha deve ter pelo menos 6 caracteres",
+      "submit": "Salvar nova senha",
+      "success": "Senha atualizada!",
+      "successDesc": "Você já pode fazer login com sua nova senha",
+      "verifying": "Verificando link de recuperação..."
     }
+  },
+  "versionHistory": {
+    "title": "Histórico de versões",
+    "button": "Histórico",
+    "empty": "Nenhuma versão salva ainda. Serão criadas automaticamente ao editar e salvar.",
+    "version": "Versão",
+    "latest": "Mais recente",
+    "restore": "Restaurar"
+  },
+  "landingPreview": {
+    "noData": "Nenhuma landing gerada para exibir.",
+    "backToGenerator": "Voltar ao gerador",
+    "backAndEdit": "Voltar e editar",
+    "demoBadge": "Preview — Demo",
+    "exportGate": "Para exportar ou baixar esta landing, crie uma conta.",
+    "createAndExport": "Criar conta e exportar"
+  },
+  "breadcrumb": {
+    "dashboard": "Dashboard",
+    "products": "Produtos",
+    "landings": "Landings",
+    "banners": "Banners",
+    "pricing": "Planos",
+    "settings": "Configurações",
+    "admin": "Admin",
+    "new": "Novo",
+    "edit": "Editar",
+    "generate": "Gerar Landing",
+    "banner": "Gerar Banner",
+    "preview": "Preview",
+    "config": "Configuração"
   },
   "sidebar": {
     "dashboard": "Dashboard",

@@ -103,7 +103,52 @@
       "sent": "Email sent!",
       "sentDesc": "If an account exists with {{email}}, you'll receive a link to reset your password.",
       "backToLogin": "Back to sign in"
+    },
+    "resetPassword": {
+      "title": "New password",
+      "subtitle": "Enter your new password for your account",
+      "newPassword": "New password",
+      "placeholder": "Minimum 6 characters",
+      "confirmPassword": "Confirm password",
+      "confirmPlaceholder": "Repeat your password",
+      "mismatch": "Passwords don't match",
+      "minLength": "Password must be at least 6 characters",
+      "submit": "Save new password",
+      "success": "Password updated!",
+      "successDesc": "You can now sign in with your new password",
+      "verifying": "Verifying recovery link..."
     }
+  },
+  "versionHistory": {
+    "title": "Version history",
+    "button": "History",
+    "empty": "No saved versions yet. They will be created automatically when you edit and save.",
+    "version": "Version",
+    "latest": "Latest",
+    "restore": "Restore"
+  },
+  "landingPreview": {
+    "noData": "No generated landing to display.",
+    "backToGenerator": "Back to generator",
+    "backAndEdit": "Back and edit",
+    "demoBadge": "Preview — Demo",
+    "exportGate": "To export or download this landing, create an account.",
+    "createAndExport": "Create account and export"
+  },
+  "breadcrumb": {
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "landings": "Landings",
+    "banners": "Banners",
+    "pricing": "Plans",
+    "settings": "Settings",
+    "admin": "Admin",
+    "new": "New",
+    "edit": "Edit",
+    "generate": "Generate Landing",
+    "banner": "Generate Banner",
+    "preview": "Preview",
+    "config": "Configuration"
   },
   "sidebar": {
     "dashboard": "Dashboard",

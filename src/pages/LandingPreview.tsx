@@ -6,6 +6,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import LandingRenderer from "@/components/landing/LandingRenderer";
 import { themes, type LandingTheme } from "@/components/landing/themes";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 interface PreviewData {
   blocks: any[];
@@ -20,6 +21,7 @@ interface PreviewData {
 }
 
 const LandingPreview = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [data, setData] = useState<PreviewData | null>(null);
   const [theme, setTheme] = useState<LandingTheme>("clean");
@@ -32,9 +34,9 @@ const LandingPreview = () => {
   if (!data) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
-        <p className="text-muted-foreground">No hay landing generada para mostrar.</p>
+        <p className="text-muted-foreground">{t("landingPreview.noData")}</p>
         <Button variant="outline" onClick={() => navigate("/#demo")}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Volver al generador
+          <ArrowLeft className="h-4 w-4 mr-2" /> {t("landingPreview.backToGenerator")}
         </Button>
       </div>
     );
@@ -42,11 +44,10 @@ const LandingPreview = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top bar */}
       <div className="bg-muted/80 backdrop-blur-sm border-b sticky top-0 z-50">
         <div className="container mx-auto flex items-center justify-between h-12 px-4">
           <Button variant="ghost" size="sm" onClick={() => navigate("/#demo")}>
-            <ArrowLeft className="h-4 w-4 mr-2" /> Volver y editar
+            <ArrowLeft className="h-4 w-4 mr-2" /> {t("landingPreview.backAndEdit")}
           </Button>
           <div className="flex items-center gap-3">
             <Select value={theme} onValueChange={(v) => setTheme(v as LandingTheme)}>
@@ -59,7 +60,7 @@ const LandingPreview = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Badge variant="secondary" className="text-xs">Vista previa — Demo</Badge>
+            <Badge variant="secondary" className="text-xs">{t("landingPreview.demoBadge")}</Badge>
           </div>
         </div>
       </div>
@@ -71,15 +72,12 @@ const LandingPreview = () => {
         theme={theme}
       />
 
-      {/* Demo export gate */}
       <section className="py-12 bg-muted/50 border-t">
         <div className="container mx-auto px-4 max-w-xl text-center space-y-4">
-          <p className="text-muted-foreground">
-            Para exportar o descargar esta landing, crea una cuenta.
-          </p>
+          <p className="text-muted-foreground">{t("landingPreview.exportGate")}</p>
           <Button size="lg" asChild>
             <Link to="/register">
-              <ArrowRight className="h-4 w-4 mr-2" /> Crear cuenta y exportar
+              <ArrowRight className="h-4 w-4 mr-2" /> {t("landingPreview.createAndExport")}
             </Link>
           </Button>
         </div>
