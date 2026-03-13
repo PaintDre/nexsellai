@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Users, Ban, ArrowLeft, Save, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface UserRow {
   user_id: string;
@@ -29,10 +30,9 @@ const AdminUsers = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<PendingChanges>({});
-  
   const { isSuperAdmin } = useAuth();
-
   const isMobile = useIsMobile();
+  const { t } = useTranslation();
 
   const baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
 
@@ -52,7 +52,7 @@ const AdminUsers = () => {
       const data = await res.json();
       setUsers(data.users || []);
     } else {
-      toast.error("Error al cargar usuarios");
+      toast.error(t("adminUsers.loadError"));
     }
     setLoading(false);
   };
@@ -65,7 +65,6 @@ const AdminUsers = () => {
     setPendingChanges((prev) => {
       const existing = prev[userId] || {};
       const updated = { ...existing, plan };
-      // If same as original, remove that key
       if (updated.plan === originalPlan) delete updated.plan;
       if (!updated.plan && !updated.role) {
         const { [userId]: _, ...rest } = prev;
@@ -97,8 +96,7 @@ const AdminUsers = () => {
       if (changes.plan) {
         try {
           const res = await fetch(`${baseUrl}/users/${userId}/plan`, {
-            method: "PATCH",
-            headers,
+            method: "PATCH", headers,
             body: JSON.stringify({ plan: changes.plan }),
           });
           if (!res.ok) {
@@ -106,14 +104,13 @@ const AdminUsers = () => {
             errors.push(body.error || `Error updating plan for ${userId}`);
           }
         } catch (e) {
-          errors.push(`Network error updating plan: ${(e as Error).message}`);
+          errors.push(`Network error: ${(e as Error).message}`);
         }
       }
       if (changes.role) {
         try {
           const res = await fetch(`${baseUrl}/users/${userId}/role`, {
-            method: "PATCH",
-            headers,
+            method: "PATCH", headers,
             body: JSON.stringify({ role: changes.role }),
           });
           if (!res.ok) {
@@ -121,15 +118,15 @@ const AdminUsers = () => {
             errors.push(body.error || `Error updating role for ${userId}`);
           }
         } catch (e) {
-          errors.push(`Network error updating role: ${(e as Error).message}`);
+          errors.push(`Network error: ${(e as Error).message}`);
         }
       }
     }
 
     if (errors.length > 0) {
-      toast.error("Error al guardar", { description: errors.join("; ") });
+      toast.error(t("adminUsers.saveError"), { description: errors.join("; ") });
     } else {
-      toast.success("Cambios guardados correctamente");
+      toast.success(t("adminUsers.saved"));
     }
 
     setPendingChanges({});
@@ -139,15 +136,12 @@ const AdminUsers = () => {
 
   const deactivateUser = async (userId: string) => {
     const headers = await getHeaders();
-    const res = await fetch(`${baseUrl}/users/${userId}/deactivate`, {
-      method: "PATCH",
-      headers,
-    });
+    const res = await fetch(`${baseUrl}/users/${userId}/deactivate`, { method: "PATCH", headers });
     if (res.ok) {
-      toast.success("Usuario desactivado");
+      toast.success(t("adminUsers.deactivated"));
       fetchUsers();
     } else {
-      toast.error("Error al desactivar");
+      toast.error(t("adminUsers.deactivateError"));
     }
   };
 
@@ -167,33 +161,28 @@ const AdminUsers = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button asChild variant="outline" size="sm">
-            <Link to="/admin"><ArrowLeft className="h-4 w-4 mr-1" /> Volver</Link>
+            <Link to="/admin"><ArrowLeft className="h-4 w-4 mr-1" /> {t("common.back")}</Link>
           </Button>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold font-display text-foreground flex items-center gap-2">
-              <Users className="h-6 w-6 sm:h-7 sm:w-7" /> Gestión de Usuarios
+              <Users className="h-6 w-6 sm:h-7 sm:w-7" /> {t("adminUsers.title")}
             </h1>
-            <p className="text-muted-foreground mt-1">{users.length} usuarios registrados</p>
+            <p className="text-muted-foreground mt-1">{t("adminUsers.registeredUsers", { count: users.length })}</p>
           </div>
         </div>
-        <Button
-          onClick={saveAllChanges}
-          disabled={!hasPendingChanges || saving}
-          className="gap-2 w-full sm:w-auto"
-        >
+        <Button onClick={saveAllChanges} disabled={!hasPendingChanges || saving} className="gap-2 w-full sm:w-auto">
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          Guardar cambios
+          {t("adminUsers.saveChanges")}
         </Button>
       </div>
 
       {hasPendingChanges && (
         <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-2 text-sm text-primary">
-          Tienes cambios sin guardar en {Object.keys(pendingChanges).length} usuario(s).
+          {t("adminUsers.unsavedChanges", { count: Object.keys(pendingChanges).length })}
         </div>
       )}
 
       {isMobile ? (
-        /* Mobile: Card-based layout */
         <div className="space-y-3">
           {users.map((u) => {
             const hasChange = !!pendingChanges[u.user_id];
@@ -211,7 +200,7 @@ const AdminUsers = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Plan</p>
+                      <p className="text-xs text-muted-foreground">{t("adminUsers.plan")}</p>
                       <Select value={getDisplayPlan(u)} onValueChange={(v) => setLocalPlan(u.user_id, v, u.plan)}>
                         <SelectTrigger className="min-h-[44px]"><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -222,9 +211,9 @@ const AdminUsers = () => {
                       </Select>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Rol</p>
+                      <p className="text-xs text-muted-foreground">{t("adminUsers.role")}</p>
                       {isSuperAdmin() ? (
-                         <Select value={getDisplayRole(u)} onValueChange={(v) => setLocalRole(u.user_id, v, u.roles[0] || "user")}>
+                        <Select value={getDisplayRole(u)} onValueChange={(v) => setLocalRole(u.user_id, v, u.roles[0] || "user")}>
                           <SelectTrigger className="min-h-[44px]"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="user">User</SelectItem>
@@ -243,19 +232,17 @@ const AdminUsers = () => {
           })}
         </div>
       ) : (
-        /* Desktop: Table layout */
         <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="text-left p-3">Nombre</th>
-                    <th className="text-left p-3">Email</th>
-                    <th className="text-left p-3">Plan</th>
-                    <th className="text-left p-3">Rol</th>
-                    
-                    <th className="text-right p-3">Acciones</th>
+                    <th className="text-left p-3">{t("adminUsers.name")}</th>
+                    <th className="text-left p-3">{t("adminUsers.email")}</th>
+                    <th className="text-left p-3">{t("adminUsers.plan")}</th>
+                    <th className="text-left p-3">{t("adminUsers.role")}</th>
+                    <th className="text-right p-3">{t("adminUsers.actions")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -289,7 +276,6 @@ const AdminUsers = () => {
                             <Badge variant="secondary" className="capitalize">{u.roles[0] || "user"}</Badge>
                           )}
                         </td>
-                        
                         <td className="p-3 text-right">
                           <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => deactivateUser(u.user_id)}>
                             <Ban className="h-4 w-4" />

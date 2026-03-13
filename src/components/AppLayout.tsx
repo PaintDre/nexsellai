@@ -9,6 +9,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { PageBreadcrumb } from "./PageBreadcrumb";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 const planLabels: Record<string, string> = { free: "Free", starter: "Starter", pro: "Pro" };
 
@@ -16,6 +17,7 @@ export const AppLayout = () => {
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { profile } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <div className="flex h-screen w-full overflow-hidden overflow-x-hidden">
@@ -27,7 +29,7 @@ export const AppLayout = () => {
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent side="left" className="w-60 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border">
             <VisuallyHidden>
-              <SheetTitle>Menú de navegación</SheetTitle>
+              <SheetTitle>{t("appLayout.navMenu")}</SheetTitle>
             </VisuallyHidden>
             <SidebarContent expanded onNavigate={() => setMobileOpen(false)} />
           </SheetContent>
@@ -50,7 +52,7 @@ export const AppLayout = () => {
             {profile && (
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-                  {profile.full_name || "Usuario"}
+                  {profile.full_name || t("appLayout.user")}
                 </span>
                 <Badge variant="secondary" className="text-[10px] uppercase font-semibold tracking-wide">
                   {planLabels[profile.plan] || "Free"}
@@ -67,7 +69,7 @@ export const AppLayout = () => {
             {profile && (
               <div className="flex items-center gap-2.5">
                 <span className="text-xs text-muted-foreground truncate max-w-[150px]">
-                  {profile.full_name || "Usuario"}
+                  {profile.full_name || t("appLayout.user")}
                 </span>
                 <Badge variant="secondary" className="text-[10px] uppercase font-semibold tracking-wide">
                   {planLabels[profile.plan] || "Free"}
