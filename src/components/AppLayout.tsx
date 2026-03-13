@@ -17,6 +17,7 @@ export const AppLayout = () => {
   const isMobile = useIsMobile();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { profile } = useAuth();
+  const { t } = useTranslation();
 
   return (
     <div className="flex h-screen w-full overflow-hidden overflow-x-hidden">
