@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { type LandingTheme } from "./themes";
 
 interface SocialProofProps {
@@ -5,7 +6,7 @@ interface SocialProofProps {
 }
 
 const SocialProof = ({ theme }: SocialProofProps) => {
-  // Generate a deterministic "random" number for social proof
+  const { t } = useTranslation();
   const viewCount = 147;
 
   const textColor = theme === "bold" ? "text-gray-400" : "text-muted-foreground";
@@ -14,7 +15,7 @@ const SocialProof = ({ theme }: SocialProofProps) => {
   return (
     <div className={`flex items-center gap-2 text-sm ${textColor}`}>
       <span className={`inline-block h-2 w-2 rounded-full ${dotColor} animate-pulse`} />
-      <span>🔥 <strong>{viewCount}</strong> personas vieron este producto hoy</span>
+      <span dangerouslySetInnerHTML={{ __html: t("socialProof.viewedToday", { count: viewCount }) }} />
     </div>
   );
 };

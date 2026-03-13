@@ -11,6 +11,7 @@ import { Download, FileCode, FileArchive, Loader2, Clipboard, Check } from "luci
 import { useToast } from "@/hooks/use-toast";
 import { generateLandingHTML, exportLandingAsHTML, exportLandingAsZip } from "@/lib/exportLanding";
 import type { LandingTheme } from "@/components/landing/themes";
+import { useTranslation } from "react-i18next";
 
 interface ExportPreviewDialogProps {
   open: boolean;
@@ -33,6 +34,7 @@ const ExportPreviewDialog = ({
   productImage,
   allImageUrls,
 }: ExportPreviewDialogProps) => {
+  const { t } = useTranslation();
   const { toast } = useToast();
   const [exporting, setExporting] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -62,7 +64,7 @@ const ExportPreviewDialog = ({
   const handleExportHTML = () => {
     const blob = exportLandingAsHTML(blocks, product, landingName, theme, productImage);
     downloadBlob(blob, `${landingName.replace(/\s+/g, "-").toLowerCase()}.html`);
-    toast({ title: "HTML exportado" });
+    toast({ title: t("exportDialog.htmlExported") });
     onOpenChange(false);
   };
 
@@ -71,10 +73,10 @@ const ExportPreviewDialog = ({
     try {
       const blob = await exportLandingAsZip(blocks, product, landingName, theme, allImageUrls);
       downloadBlob(blob, `${landingName.replace(/\s+/g, "-").toLowerCase()}.zip`);
-      toast({ title: "ZIP exportado con imágenes" });
+      toast({ title: t("exportDialog.zipExported") });
       onOpenChange(false);
     } catch {
-      toast({ title: "Error al exportar ZIP", variant: "destructive" });
+      toast({ title: t("exportDialog.zipError"), variant: "destructive" });
     } finally {
       setExporting(false);
     }
@@ -83,7 +85,7 @@ const ExportPreviewDialog = ({
   const handleCopyHTML = async () => {
     await navigator.clipboard.writeText(htmlContent);
     setCopied(true);
-    toast({ title: "HTML copiado al portapapeles" });
+    toast({ title: t("exportDialog.htmlCopied") });
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -91,7 +93,7 @@ const ExportPreviewDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Vista previa de exportación</DialogTitle>
+          <DialogTitle>{t("exportDialog.title")}</DialogTitle>
         </DialogHeader>
         <div className="flex-1 min-h-0 rounded-lg border overflow-hidden bg-white">
           {blobUrl && (
@@ -106,14 +108,14 @@ const ExportPreviewDialog = ({
         <DialogFooter className="flex-wrap gap-2 sm:gap-2">
           <Button variant="outline" size="sm" onClick={handleCopyHTML}>
             {copied ? <Check className="h-4 w-4 mr-1" /> : <Clipboard className="h-4 w-4 mr-1" />}
-            {copied ? "Copiado" : "Copiar HTML"}
+            {copied ? t("exportDialog.copied") : t("exportDialog.copyHTML")}
           </Button>
           <Button variant="outline" size="sm" onClick={handleExportHTML}>
-            <FileCode className="h-4 w-4 mr-1" /> Solo HTML
+            <FileCode className="h-4 w-4 mr-1" /> {t("exportDialog.htmlOnly")}
           </Button>
           <Button size="sm" onClick={handleExportZip} disabled={exporting}>
             {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileArchive className="h-4 w-4 mr-1" />}
-            ZIP con imágenes
+            {t("exportDialog.zipWithImages")}
           </Button>
         </DialogFooter>
       </DialogContent>

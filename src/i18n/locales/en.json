@@ -165,6 +165,26 @@
     "system": "System",
     "user": "User"
   },
+  "exportDialog": {
+    "title": "Export preview",
+    "copyHTML": "Copy HTML",
+    "copied": "Copied",
+    "htmlOnly": "HTML only",
+    "zipWithImages": "ZIP with images",
+    "htmlExported": "HTML exported",
+    "zipExported": "ZIP exported with images",
+    "zipError": "Error exporting ZIP",
+    "htmlCopied": "HTML copied to clipboard"
+  },
+  "socialProof": {
+    "viewedToday": "🔥 <strong>{{count}}</strong> people viewed this product today"
+  },
+  "trustBadges": {
+    "secureShipping": "Secure shipping",
+    "buyerProtection": "Buyer protection",
+    "securePayment": "100% secure payment",
+    "cardsAccepted": "Cards accepted"
+  },
   "products": {
     "title": "Products",
     "new": "New",
