@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Users, FileText, TrendingUp, Settings, Crown, Image, Banknote, RefreshCw } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "react-i18next";
 
 interface Stats {
   totalUsers: number;
@@ -16,6 +17,7 @@ interface Stats {
 }
 
 const AdminDashboard = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const { isSuperAdmin } = useAuth();
@@ -52,18 +54,18 @@ const AdminDashboard = () => {
     <div className="p-4 md:p-6 lg:p-10 space-y-6 md:space-y-8">
       <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-foreground">Panel de Administración</h1>
-          <p className="text-sm text-muted-foreground mt-1">Estadísticas y gestión de la plataforma</p>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-foreground">{t("admin.title")}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t("admin.subtitle")}</p>
         </div>
         <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3 w-full sm:w-auto">
           <Button asChild variant="outline" className="min-h-[44px]">
-            <Link to="/admin/users"><Users className="h-4 w-4 mr-2" /> Usuarios</Link>
+            <Link to="/admin/users"><Users className="h-4 w-4 mr-2" /> {t("admin.users")}</Link>
           </Button>
           <Button asChild variant="outline" className="min-h-[44px]">
-            <Link to="/admin/payments"><Banknote className="h-4 w-4 mr-2" /> Pagos</Link>
+            <Link to="/admin/payments"><Banknote className="h-4 w-4 mr-2" /> {t("sidebar.payments")}</Link>
           </Button>
           <Button asChild variant="outline" className="min-h-[44px]">
-            <Link to="/admin/subscriptions"><RefreshCw className="h-4 w-4 mr-2" /> Suscripciones</Link>
+            <Link to="/admin/subscriptions"><RefreshCw className="h-4 w-4 mr-2" /> {t("sidebar.subscriptions")}</Link>
           </Button>
           {isSuperAdmin() && (
             <Button asChild className="min-h-[44px]">
@@ -76,7 +78,7 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Usuarios</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("admin.totalUsers")}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -85,7 +87,7 @@ const AdminDashboard = () => {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Landings Generadas</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("admin.landingsGenerated")}</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -94,7 +96,7 @@ const AdminDashboard = () => {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Banners Generados</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("admin.totalBanners")}</CardTitle>
             <Image className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -103,7 +105,7 @@ const AdminDashboard = () => {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Distribución por Plan</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">{t("admin.planDistribution")}</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -120,7 +122,7 @@ const AdminDashboard = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-2xl">
-              <Crown className="h-5 w-5 text-primary" /> Usuarios más activos
+              <Crown className="h-5 w-5 text-primary" /> {t("admin.topUsers")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -129,8 +131,8 @@ const AdminDashboard = () => {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-muted-foreground">
-                     <th className="text-left py-2 pr-4">Nombre</th>
-                     <th className="text-left py-2 pr-4">Plan</th>
+                     <th className="text-left py-2 pr-4">{t("settings.account.name")}</th>
+                     <th className="text-left py-2 pr-4">{t("settings.plan.currentPlan")}</th>
                      <th className="text-right py-2 pr-4">Landings</th>
                      <th className="text-right py-2">Banners</th>
                    </tr>
@@ -138,7 +140,7 @@ const AdminDashboard = () => {
                  <tbody>
                    {stats.topUsers.map((u) => (
                      <tr key={u.user_id} className="border-b last:border-0">
-                       <td className="py-2 pr-4">{u.full_name || "Sin nombre"}</td>
+                       <td className="py-2 pr-4">{u.full_name || t("admin.noName")}</td>
                        <td className="py-2 pr-4 capitalize">{u.plan}</td>
                        <td className="py-2 text-right pr-4 font-medium">{u.landings_used}</td>
                        <td className="py-2 text-right font-medium">{u.banners_used}</td>
@@ -152,7 +154,7 @@ const AdminDashboard = () => {
               {stats.topUsers.map((u) => (
                 <div key={u.user_id} className="rounded-lg border p-3 space-y-1">
                   <div className="flex items-center justify-between">
-                    <p className="font-medium text-sm truncate">{u.full_name || "Sin nombre"}</p>
+                    <p className="font-medium text-sm truncate">{u.full_name || t("admin.noName")}</p>
                     <Badge variant="secondary" className="capitalize text-xs">{u.plan}</Badge>
                   </div>
                   <div className="flex gap-4 text-xs text-muted-foreground">

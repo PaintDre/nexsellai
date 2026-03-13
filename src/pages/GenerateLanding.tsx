@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { themes, type LandingTheme } from "@/components/landing/themes";
 import LandingTemplatePicker, { landingTemplates } from "@/components/landing/LandingTemplates";
+import { useTranslation } from "react-i18next";
 
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { UpgradeWarningBanner } from "@/components/UpgradeWarningBanner";
@@ -23,6 +24,7 @@ import { UpgradeModal } from "@/components/UpgradeModal";
 type Product = Tables<"products">;
 
 const GenerateLanding = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
@@ -92,7 +94,7 @@ const GenerateLanding = () => {
     if (!user || !product || !profile) return;
 
     if (!canGenerate) {
-      toast.error("Límite alcanzado", { description: "Actualiza tu plan para generar más landings." });
+      toast.error(t("generateLanding.limitReached"), { description: t("generateLanding.limitDesc") });
       return;
     }
 
@@ -101,7 +103,6 @@ const GenerateLanding = () => {
     setProgress(10);
 
     try {
-      // Step 1: Generate copy
       setProgress(20);
       const selectedTemplate = landingTemplates.find(t => t.id === templateId);
       const { data, error } = await supabase.functions.invoke("generate-landing", {
@@ -121,7 +122,6 @@ const GenerateLanding = () => {
       if (error) throw error;
       setProgress(50);
 
-      // Step 2: Insert landing
       const { data: insertedLanding, error: insertError } = await supabase.from("landings").insert({
         user_id: user.id,
         product_id: product.id,
@@ -137,12 +137,10 @@ const GenerateLanding = () => {
       if (insertError) throw insertError;
       setProgress(60);
 
-      // Step 3: Auto-generate banners if enabled and paid plan
       if (autoImages && isPaidPlan && insertedLanding) {
         setGenerationStep("images");
         setProgress(65);
 
-        // Get product images
         const allImageUrls: string[] = [];
         if (product.images && product.images.length > 0) {
           for (const imgPath of product.images) {
@@ -155,7 +153,6 @@ const GenerateLanding = () => {
           }
         }
 
-        // Generate banners for hero, benefits and offer/cta sections
         const blocks = data.blocks as any[];
         const heroBlock = blocks.find((b: any) => b.type === "hero");
         const benefitsBlock = blocks.find((b: any) => b.type === "benefits");
@@ -178,20 +175,18 @@ const GenerateLanding = () => {
         setProgress(90);
       }
 
-      // Step 4: Increment landings_used
       await supabase.from("profiles").update({ landings_used: used + 1 }).eq("user_id", user.id);
 
       setProgress(100);
       setGenerationStep("done");
 
-      toast.success("¡Landing generada!");
+      toast.success(t("generateLanding.generated"));
 
-      // Navigate after a brief moment to show completion
       setTimeout(() => {
         navigate(`/landings/${insertedLanding?.id || ""}`);
       }, 800);
     } catch (err: any) {
-      toast.error("Error al generar", { description: err.message });
+      toast.error(t("generateLanding.generateError"), { description: err.message });
       setGenerationStep("idle");
       setProgress(0);
     } finally {
@@ -203,23 +198,23 @@ const GenerateLanding = () => {
 
   const stepLabels: Record<string, string> = {
     idle: "",
-    copy: "Paso 1/2 — Generando copy con IA...",
-    images: "Paso 2/2 — Generando imágenes con IA (Hero + Beneficios + Oferta)...",
-    done: "¡Listo! Redirigiendo...",
+    copy: t("generateLanding.stepCopy"),
+    images: t("generateLanding.stepImages"),
+    done: t("generateLanding.stepDone"),
   };
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-2xl mx-auto space-y-6">
       <Button variant="ghost" onClick={() => navigate(-1)}>
-        <ArrowLeft className="h-4 w-4 mr-2" /> Volver
+        <ArrowLeft className="h-4 w-4 mr-2" /> {t("common.back")}
       </Button>
 
       <UpgradeWarningBanner resource="landings" used={used} limit={limit} />
       <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="landings" used={used} limit={limit} />
 
       <div>
-        <h1 className="text-3xl font-bold font-display tracking-tight">Generar Landing</h1>
-        <p className="text-muted-foreground mt-1">Producto: <strong>{product.name}</strong></p>
+        <h1 className="text-3xl font-bold font-display tracking-tight">{t("generateLanding.title")}</h1>
+        <p className="text-muted-foreground mt-1">{t("generateLanding.product")}: <strong>{product.name}</strong></p>
       </div>
 
       {/* Quick vs Custom Mode Tabs */}
@@ -228,13 +223,13 @@ const GenerateLanding = () => {
           onClick={() => setQuickMode(true)}
           className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${quickMode ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
         >
-          ⚡ Rápido
+          ⚡ {t("generateLanding.quick")}
         </button>
         <button
           onClick={() => setQuickMode(false)}
           className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${!quickMode ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
         >
-          🎛️ Personalizado
+          🎛️ {t("generateLanding.custom")}
         </button>
       </div>
 
@@ -243,13 +238,13 @@ const GenerateLanding = () => {
           <CardContent className="p-6 space-y-4">
             <div className="text-center space-y-2">
               <Sparkles className="h-8 w-8 text-primary mx-auto" />
-              <h3 className="font-semibold font-display text-lg">Generación rápida</h3>
+              <h3 className="font-semibold font-display text-lg">{t("generateLanding.quickTitle")}</h3>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                Usaremos la configuración recomendada: plantilla completa, intensidad media, tema clean.
+                {t("generateLanding.quickDesc")}
               </p>
             </div>
             <div className="flex items-center gap-2 justify-center text-sm text-muted-foreground">
-              <span>Landings usadas:</span>
+              <span>{t("generateLanding.landingsUsed")}:</span>
               <Badge variant={canGenerate ? "secondary" : "destructive"}>{used} / {limit}</Badge>
             </div>
             {generationStep !== "idle" && (
@@ -262,43 +257,43 @@ const GenerateLanding = () => {
               </div>
             )}
             <Button onClick={handleGenerate} disabled={generating || !canGenerate} className="w-full min-h-[44px]" size="lg">
-              {generating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generando...</> : <><Sparkles className="h-4 w-4 mr-2" /> Generar Landing</>}
+              {generating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("common.generating")}</> : <><Sparkles className="h-4 w-4 mr-2" /> {t("generateLanding.generateButton")}</>}
             </Button>
           </CardContent>
         </Card>
       ) : (
       <Card>
         <CardHeader>
-          <CardTitle className="font-display">Configuración</CardTitle>
+          <CardTitle className="font-display">{t("generateLanding.config")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label>Plantilla de landing</Label>
+            <Label>{t("generateLanding.template")}</Label>
             <LandingTemplatePicker selected={templateId} onSelect={setTemplateId} />
           </div>
 
           <div className="space-y-2">
-            <Label>Intensidad comercial</Label>
+            <Label>{t("generateLanding.intensity")}</Label>
             <Select value={intensity} onValueChange={setIntensity}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="soft">Soft — Tono informativo</SelectItem>
-                <SelectItem value="medium">Medium — Persuasivo equilibrado</SelectItem>
-                <SelectItem value="hard">Hard — Máxima urgencia</SelectItem>
+                <SelectItem value="soft">{t("generateLanding.softDesc")}</SelectItem>
+                <SelectItem value="medium">{t("generateLanding.mediumDesc")}</SelectItem>
+                <SelectItem value="hard">{t("generateLanding.hardDesc")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
             <div className="min-w-0">
-              <Label>Activar oferta</Label>
-              <p className="text-sm text-muted-foreground">Agrega precio tachado y descuento</p>
+              <Label>{t("generateLanding.enableOffer")}</Label>
+              <p className="text-sm text-muted-foreground">{t("generateLanding.offerDesc")}</p>
             </div>
             <Switch checked={hasOffer} onCheckedChange={setHasOffer} className="shrink-0" />
           </div>
 
           <div className="space-y-2">
-            <Label>Tema visual</Label>
+            <Label>{t("generateLanding.visualTheme")}</Label>
             <Select value={theme} onValueChange={(v) => setTheme(v as LandingTheme)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -307,7 +302,7 @@ const GenerateLanding = () => {
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground">Puedes cambiar el tema después en la vista previa</p>
+            <p className="text-xs text-muted-foreground">{t("generateLanding.themeHint")}</p>
           </div>
 
           {/* Auto-generate images toggle */}
@@ -315,11 +310,11 @@ const GenerateLanding = () => {
             <div className="flex items-start gap-3 min-w-0">
               <ImagePlus className="h-5 w-5 text-primary mt-0.5 shrink-0" />
               <div className="min-w-0">
-                <Label>Incluir imágenes IA</Label>
+                <Label>{t("generateLanding.aiImages")}</Label>
                 <p className="text-sm text-muted-foreground">
                   {isPaidPlan
-                    ? "Genera banners automáticos para Hero y Oferta"
-                    : "Disponible en plan Starter o superior"
+                    ? t("generateLanding.aiImagesDesc")
+                    : t("generateLanding.aiImagesLocked")
                   }
                 </p>
               </div>
@@ -333,12 +328,12 @@ const GenerateLanding = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="guarantee">Garantía</Label>
+            <Label htmlFor="guarantee">{t("generateLanding.guarantee")}</Label>
             <Input id="guarantee" value={guarantee} onChange={(e) => setGuarantee(e.target.value)} />
           </div>
 
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>Landings usadas:</span>
+            <span>{t("generateLanding.landingsUsed")}:</span>
             <Badge variant={canGenerate ? "secondary" : "destructive"}>
               {used} / {limit}
             </Badge>
@@ -358,7 +353,7 @@ const GenerateLanding = () => {
               <Progress value={progress} className="h-2" />
               {generationStep === "images" && (
                 <p className="text-xs text-muted-foreground">
-                  Generando banners con IA para las secciones principales...
+                  {t("generateLanding.imagesHint")}
                 </p>
               )}
             </div>
@@ -366,9 +361,9 @@ const GenerateLanding = () => {
 
           <Button onClick={handleGenerate} disabled={generating || !canGenerate} className="w-full min-h-[44px]" size="lg">
             {generating ? (
-              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Generando...</>
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("common.generating")}</>
             ) : (
-              <><Sparkles className="h-4 w-4 mr-2" /> Generar Landing{autoImages && isPaidPlan ? " + Imágenes" : ""}</>
+              <><Sparkles className="h-4 w-4 mr-2" /> {autoImages && isPaidPlan ? t("generateLanding.generateWithImages") : t("generateLanding.generateButton")}</>
             )}
           </Button>
         </CardContent>

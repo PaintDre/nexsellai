@@ -8,11 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Sparkles, ImageIcon, FileText, Eye, Package, ChevronRight, ArrowRight } from "lucide-react";
 import { formatProductPrice } from "@/lib/countries";
+import { useTranslation } from "react-i18next";
 
 type Product = Tables<"products">;
 type Landing = Tables<"landings">;
 
 const ProductDetail = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
@@ -42,7 +44,7 @@ const ProductDetail = () => {
     <div className="p-5 md:p-8 lg:p-10 max-w-4xl mx-auto space-y-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Link to="/products" className="hover:text-foreground transition-colors">Productos</Link>
+        <Link to="/products" className="hover:text-foreground transition-colors">{t("products.title")}</Link>
         <ChevronRight className="h-3 w-3" />
         <span className="text-foreground font-medium truncate">{product.name}</span>
       </nav>
@@ -70,7 +72,7 @@ const ProductDetail = () => {
             <p className="text-sm text-muted-foreground leading-relaxed">{product.description}</p>
           )}
           <p className="text-xs text-muted-foreground">
-            Audiencia: {product.target_audience}
+            {t("products.audience")}: {product.target_audience}
           </p>
         </div>
       </div>
@@ -80,22 +82,22 @@ const ProductDetail = () => {
         <Button size="lg" asChild className="h-auto py-3.5 flex-col gap-0.5">
           <Link to={`/products/${id}/generate`}>
             <Sparkles className="h-4 w-4" />
-            <span className="font-semibold text-sm">Generar Landing</span>
-            <span className="text-[10px] opacity-70">Crea una página de venta</span>
+            <span className="font-semibold text-sm">{t("products.generateLanding")}</span>
+            <span className="text-[10px] opacity-70">{t("products.generateLandingDesc")}</span>
           </Link>
         </Button>
         <Button size="lg" variant="secondary" asChild className="h-auto py-3.5 flex-col gap-0.5">
           <Link to={`/products/${id}/banner`}>
             <ImageIcon className="h-4 w-4" />
-            <span className="font-semibold text-sm">Generar Banners</span>
-            <span className="text-[10px] opacity-70">Crea banners para ads</span>
+            <span className="font-semibold text-sm">{t("products.generateBanners")}</span>
+            <span className="text-[10px] opacity-70">{t("products.generateBannersDesc")}</span>
           </Link>
         </Button>
         <Button size="lg" variant="outline" asChild className="h-auto py-3.5 flex-col gap-0.5">
           <Link to={`/products/${id}/edit`}>
             <Pencil className="h-4 w-4" />
-            <span className="font-semibold text-sm">Editar Producto</span>
-            <span className="text-[10px] opacity-70">Modifica los datos</span>
+            <span className="font-semibold text-sm">{t("products.editProductAction")}</span>
+            <span className="text-[10px] opacity-70">{t("products.editProductDesc")}</span>
           </Link>
         </Button>
       </div>
@@ -107,7 +109,7 @@ const ProductDetail = () => {
             <FileText className="h-4 w-4 text-primary" />
             <div>
               <p className="text-xl font-bold font-display">{landings.length}</p>
-              <p className="text-[11px] text-muted-foreground">Landings generadas</p>
+              <p className="text-[11px] text-muted-foreground">{t("products.landingsGenerated")}</p>
             </div>
           </CardContent>
         </Card>
@@ -116,7 +118,7 @@ const ProductDetail = () => {
             <ImageIcon className="h-4 w-4 text-primary" />
             <div>
               <p className="text-xl font-bold font-display">{bannerCount}</p>
-              <p className="text-[11px] text-muted-foreground">Banners generados</p>
+              <p className="text-[11px] text-muted-foreground">{t("products.bannersGenerated")}</p>
             </div>
           </CardContent>
         </Card>
@@ -128,11 +130,11 @@ const ProductDetail = () => {
           <CardContent className="flex flex-col sm:flex-row items-center gap-4 p-5">
             <Sparkles className="h-7 w-7 text-primary shrink-0" />
             <div className="flex-1 text-center sm:text-left">
-              <h3 className="font-semibold text-sm">¡Genera tu primera landing!</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">La IA creará una página de venta profesional para este producto.</p>
+              <h3 className="font-semibold text-sm">{t("products.generateFirst")}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("products.generateFirstDesc")}</p>
             </div>
             <Button asChild size="sm">
-              <Link to={`/products/${id}/generate`}>Generar ahora <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
+              <Link to={`/products/${id}/generate`}>{t("products.generateNow")} <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
             </Button>
           </CardContent>
         </Card>
@@ -141,7 +143,7 @@ const ProductDetail = () => {
       {/* Landings List */}
       {landings.length > 0 && (
         <div>
-          <h2 className="text-base font-semibold font-display mb-3">Landings de este producto</h2>
+          <h2 className="text-base font-semibold font-display mb-3">{t("products.productLandings")}</h2>
           <div className="space-y-2">
             {landings.map((landing) => (
               <Card key={landing.id} className="hover:shadow-md transition-all duration-200">
@@ -159,7 +161,7 @@ const ProductDetail = () => {
                     <Badge variant="secondary" className="capitalize text-[10px]">{landing.theme}</Badge>
                     <Button variant="outline" size="sm" asChild className="h-8 text-xs">
                       <Link to={`/landings/${landing.id}/preview`}>
-                        <Eye className="h-3 w-3 mr-1" /> Ver
+                        <Eye className="h-3 w-3 mr-1" /> {t("common.view")}
                       </Link>
                     </Button>
                   </div>

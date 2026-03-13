@@ -15,26 +15,12 @@ import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, AlertTriangle, Zap, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "react-i18next";
 
 import { computeBannersUsed } from "@/lib/planUsage";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { UpgradeWarningBanner } from "@/components/UpgradeWarningBanner";
 import { UpgradeModal } from "@/components/UpgradeModal";
-
-const STEPS = [
-  { label: "Descripción", icon: "✍️" },
-  { label: "Cantidad", icon: "📊" },
-  { label: "Generar", icon: "🚀" },
-];
-
-const SEQUENCES: Record<number, string[]> = {
-  2: ["hook-visual", "oferta"],
-  3: ["hook-visual", "beneficio", "oferta"],
-  5: ["hook-visual", "problema", "solucion", "beneficio", "oferta"],
-  7: ["hook-visual", "problema", "solucion", "beneficio", "prueba-social", "oferta", "cta"],
-};
-
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 type Product = Tables<"products">;
 
@@ -64,18 +50,18 @@ interface FormState {
   country_code: string;
 }
 
-const GOAL_LABELS: Record<BannerGoal, string> = { sale: "Venta", offer: "Oferta", awareness: "Awareness", benefit: "Beneficio" };
-const TONE_LABELS: Record<Tone, string> = { premium: "Premium", direct: "Directo", minimal: "Minimalista", bold: "Llamativo" };
-const VISUAL_LABELS: Record<VisualStyle, string> = { auto: "Automático", clean: "Limpio", premium: "Premium", ecommerce: "Ecommerce", bold: "Llamativo" };
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+const SEQUENCES: Record<number, string[]> = {
+  2: ["hook-visual", "oferta"],
+  3: ["hook-visual", "beneficio", "oferta"],
+  5: ["hook-visual", "problema", "solucion", "beneficio", "oferta"],
+  7: ["hook-visual", "problema", "solucion", "beneficio", "prueba-social", "oferta", "cta"],
+};
 
 const getTemplateName = (id: string): string =>
   bannerTemplates.find((t) => t.id === id)?.name || id;
 
 const getSequence = (count: number): string[] =>
   SEQUENCES[count] || SEQUENCES[3];
-
 
 const buildBannerPayload = (
   product: Product,
@@ -110,7 +96,7 @@ const buildBannerPayload = (
   return base;
 };
 
-const downloadBanner = async (banner: GeneratedBanner, productName: string, outputSize: string) => {
+const downloadBanner = async (banner: GeneratedBanner, productName: string, outputSize: string, t: any) => {
   try {
     const response = await fetch(banner.imageUrl);
     if (!response.ok) throw new Error("Fetch failed");
@@ -122,16 +108,21 @@ const downloadBanner = async (banner: GeneratedBanner, productName: string, outp
     a.click();
     URL.revokeObjectURL(url);
   } catch {
-    toast.error("Error al descargar", { description: "No se pudo descargar el banner. Intenta de nuevo." });
+    toast.error(t("generateBanner.downloadError"), { description: t("generateBanner.downloadErrorDesc") });
   }
 };
 
-// ─── Component ───────────────────────────────────────────────────────────────
-
 const GenerateBanner = () => {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
+
+  const STEPS = [
+    { label: t("generateBanner.steps.description"), icon: "✍️" },
+    { label: t("generateBanner.steps.quantity"), icon: "📊" },
+    { label: t("generateBanner.steps.generate"), icon: "🚀" },
+  ];
 
   const [product, setProduct] = useState<Product | null>(null);
   const [productError, setProductError] = useState(false);
@@ -171,8 +162,6 @@ const GenerateBanner = () => {
     return true;
   }, [step, formState.description.length, formState.bannerCount]);
 
-  // ─── Product loading ────────────────────────────────────────────────────
-
   useEffect(() => {
     if (!user || !id) return;
     setProductError(false);
@@ -194,8 +183,6 @@ const GenerateBanner = () => {
       });
   }, [user, id, updateForm]);
 
-  // ─── Generation ─────────────────────────────────────────────────────────
-
   const handleGenerate = useCallback(async () => {
     if (!product || hasReachedLimit) return;
     setLoading(true);
@@ -206,13 +193,7 @@ const GenerateBanner = () => {
         sequence.map((templateId, i) =>
           (async (): Promise<GeneratedBanner> => {
             const { data, error } = await supabase.functions.invoke("generate-banner", {
-              body: buildBannerPayload(
-                product,
-                formState,
-                templateId,
-                i,
-                sequence.length,
-              ),
+              body: buildBannerPayload(product, formState, templateId, i, sequence.length),
             });
             if (error) throw error;
             if (data?.error) throw new Error(data.error);
@@ -237,44 +218,42 @@ const GenerateBanner = () => {
       if (fulfilled.length > 0) {
         setGeneratedBanners(fulfilled);
         if (failedCount > 0) {
-          toast.warning(`${fulfilled.length} banners generados`, {
-            description: `${failedCount} banner(s) fallaron. Puedes regenerar la secuencia.`,
+          toast.warning(t("generateBanner.partialSuccess", { count: fulfilled.length }), {
+            description: t("generateBanner.partialFailed", { count: failedCount }),
           });
         } else {
-          toast.success(`¡${fulfilled.length} banners generados!`, {
-            description: "Tu secuencia de venta está lista.",
+          toast.success(t("generateBanner.allSuccess", { count: fulfilled.length }), {
+            description: t("generateBanner.allSuccessDesc"),
           });
         }
       } else {
-        toast.error("Error", { description: "No se pudo generar ningún banner. Intenta de nuevo." });
+        toast.error(t("common.error"), { description: t("generateBanner.generateError") });
       }
     } catch (err: any) {
-      toast.error("Error", { description: err.message || "No se pudo generar los banners" });
+      toast.error(t("common.error"), { description: err.message || t("generateBanner.generateError") });
     } finally {
       setLoading(false);
     }
-  }, [product, hasReachedLimit, sequence, formState]);
+  }, [product, hasReachedLimit, sequence, formState, t]);
 
   const handleDownload = useCallback(
-    (banner: GeneratedBanner) => downloadBanner(banner, product?.name || "", formState.outputSize),
-    [product?.name, formState.outputSize]
+    (banner: GeneratedBanner) => downloadBanner(banner, product?.name || "", formState.outputSize, t),
+    [product?.name, formState.outputSize, t]
   );
 
   const handleDownloadAll = useCallback(async () => {
     for (const banner of generatedBanners) {
-      await downloadBanner(banner, product?.name || "", formState.outputSize);
+      await downloadBanner(banner, product?.name || "", formState.outputSize, t);
     }
-  }, [generatedBanners, product?.name, formState.outputSize]);
-
-  // ─── Error / Loading states ─────────────────────────────────────────────
+  }, [generatedBanners, product?.name, formState.outputSize, t]);
 
   if (productError) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">
         <AlertTriangle className="h-10 w-10 text-destructive" />
-        <p className="text-muted-foreground font-medium">Producto no encontrado o sin acceso.</p>
+        <p className="text-muted-foreground font-medium">{t("generateBanner.productNotFound")}</p>
         <Button variant="outline" onClick={() => navigate(-1)}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Volver
+          <ArrowLeft className="h-4 w-4 mr-2" /> {t("common.back")}
         </Button>
       </div>
     );
@@ -288,8 +267,6 @@ const GenerateBanner = () => {
     );
   }
 
-  // ─── Render ─────────────────────────────────────────────────────────────
-
   const productImage = product.images?.[0];
   const formattedPrice = product.price != null ? `$${product.price.toLocaleString()} ${formState.currency}` : "";
 
@@ -301,7 +278,7 @@ const GenerateBanner = () => {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold font-display tracking-tight">Generar Banners</h1>
+          <h1 className="text-2xl font-bold font-display tracking-tight">{t("generateBanner.title")}</h1>
           <p className="text-sm text-muted-foreground">
             {product.name}
             {formattedPrice && ` — ${formattedPrice}`}
@@ -316,15 +293,15 @@ const GenerateBanner = () => {
         <Card className="border-dashed border-2 border-destructive/30">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <Lock className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Has alcanzado el límite de banners de tu plan</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("generateBanner.limitTitle")}</h3>
             <p className="text-muted-foreground mb-2 max-w-md">
-              Has usado {bannersUsed} de {bannerLimit} banners este mes.
+              {t("generateBanner.limitUsed", { used: bannersUsed, limit: bannerLimit })}
             </p>
             <p className="text-muted-foreground mb-6 max-w-md">
-              Actualiza tu plan para seguir generando banners.
+              {t("generateBanner.limitUpgrade")}
             </p>
             <Button asChild>
-              <Link to="/pricing">Actualizar plan</Link>
+              <Link to="/pricing">{t("generateBanner.upgradePlan")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -367,9 +344,9 @@ const GenerateBanner = () => {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <Zap className="h-4 w-4 text-primary" />
-                    <span className="font-semibold text-sm">Automático</span>
+                    <span className="font-semibold text-sm">{t("generateBanner.auto")}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Rápido y simple — la IA decide el mejor enfoque para tu producto.</p>
+                  <p className="text-xs text-muted-foreground">{t("generateBanner.autoDesc")}</p>
                 </button>
                 <button
                   onClick={() => updateForm("generationMode", "custom")}
@@ -382,18 +359,18 @@ const GenerateBanner = () => {
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <SlidersHorizontal className="h-4 w-4 text-primary" />
-                    <span className="font-semibold text-sm">Personalizado</span>
+                    <span className="font-semibold text-sm">{t("generateBanner.customMode")}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground">Más control — define el objetivo, tono y estilo visual del banner.</p>
+                  <p className="text-xs text-muted-foreground">{t("generateBanner.customDesc")}</p>
                 </button>
               </div>
               <p className="text-xs text-muted-foreground text-center">
-                Incluso en modo automático, la IA analiza tu producto y crea una secuencia de banners optimizada para ventas.
+                {t("generateBanner.autoHint")}
               </p>
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Describe tu producto</CardTitle>
+                  <CardTitle className="text-lg">{t("generateBanner.describeProduct")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex flex-col sm:flex-row gap-4">
@@ -404,13 +381,13 @@ const GenerateBanner = () => {
                     )}
                     <div className="flex-1 space-y-3">
                       <Label htmlFor="description" className="text-sm text-muted-foreground">
-                        Describe los beneficios y características de tu producto (mín. 120 caracteres)
+                        {t("generateBanner.describeHint")}
                       </Label>
                       <Textarea
                         id="description"
                         value={formState.description}
                         onChange={(e) => updateForm("description", e.target.value)}
-                        placeholder="Describe los beneficios, características principales y por qué tu producto es especial. La IA analizará tu imagen y creará el diseño perfecto..."
+                        placeholder={t("generateBanner.describePlaceholder")}
                         rows={5}
                         maxLength={400}
                       />
@@ -420,8 +397,8 @@ const GenerateBanner = () => {
                           formState.description.length < 120 ? "text-destructive" : "text-green-600"
                         )}>
                           {formState.description.length < 120
-                            ? `Faltan ${120 - formState.description.length} caracteres (mínimo 120)`
-                            : "✓ Descripción suficiente"}
+                            ? t("generateBanner.charsMissing", { count: 120 - formState.description.length })
+                            : t("generateBanner.charsOk")}
                         </span>
                         <span className="text-muted-foreground">{formState.description.length}/400</span>
                       </div>
@@ -430,17 +407,17 @@ const GenerateBanner = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="customText" className="text-sm text-muted-foreground">
-                      Slogan o texto personalizado (opcional)
+                      {t("generateBanner.sloganLabel")}
                     </Label>
                     <Input
                       id="customText"
                       value={formState.customText}
                       onChange={(e) => updateForm("customText", e.target.value)}
-                      placeholder="Ej: ¡Transforma tu hogar!, La mejor calidad al mejor precio..."
+                      placeholder={t("generateBanner.sloganPlaceholder")}
                       maxLength={80}
                     />
                     <p className="text-xs text-muted-foreground">
-                      Si lo incluyes, aparecerá de forma prominente en tus banners.
+                      {t("generateBanner.sloganHint")}
                     </p>
                   </div>
 
@@ -448,38 +425,38 @@ const GenerateBanner = () => {
                   {formState.generationMode === "custom" && (
                     <div className="border border-border rounded-lg p-4 space-y-4 bg-muted/30">
                       <p className="text-sm font-medium flex items-center gap-2">
-                        <SlidersHorizontal className="h-4 w-4 text-primary" /> Configuración avanzada
+                        <SlidersHorizontal className="h-4 w-4 text-primary" /> {t("generateBanner.advancedConfig")}
                       </p>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="space-y-1.5">
-                          <Label className="text-xs text-muted-foreground">Objetivo</Label>
+                          <Label className="text-xs text-muted-foreground">{t("generateBanner.goal")}</Label>
                           <Select value={formState.bannerGoal} onValueChange={(v) => updateForm("bannerGoal", v as BannerGoal)}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
-                              {(Object.entries(GOAL_LABELS) as [BannerGoal, string][]).map(([k, v]) => (
-                                <SelectItem key={k} value={k}>{v}</SelectItem>
+                              {(["sale", "offer", "awareness", "benefit"] as BannerGoal[]).map((k) => (
+                                <SelectItem key={k} value={k}>{t(`generateBanner.goalLabels.${k}`)}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-1.5">
-                          <Label className="text-xs text-muted-foreground">Tono</Label>
+                          <Label className="text-xs text-muted-foreground">{t("generateBanner.tone")}</Label>
                           <Select value={formState.tone} onValueChange={(v) => updateForm("tone", v as Tone)}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
-                              {(Object.entries(TONE_LABELS) as [Tone, string][]).map(([k, v]) => (
-                                <SelectItem key={k} value={k}>{v}</SelectItem>
+                              {(["premium", "direct", "minimal", "bold"] as Tone[]).map((k) => (
+                                <SelectItem key={k} value={k}>{t(`generateBanner.toneLabels.${k}`)}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
                         <div className="space-y-1.5">
-                          <Label className="text-xs text-muted-foreground">Estilo visual</Label>
+                          <Label className="text-xs text-muted-foreground">{t("generateBanner.visualStyle")}</Label>
                           <Select value={formState.visualStyle} onValueChange={(v) => updateForm("visualStyle", v as VisualStyle)}>
                             <SelectTrigger><SelectValue /></SelectTrigger>
                             <SelectContent>
-                              {(Object.entries(VISUAL_LABELS) as [VisualStyle, string][]).map(([k, v]) => (
-                                <SelectItem key={k} value={k}>{v}</SelectItem>
+                              {(["auto", "clean", "premium", "ecommerce", "bold"] as VisualStyle[]).map((k) => (
+                                <SelectItem key={k} value={k}>{t(`generateBanner.visualLabels.${k}`)}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -491,11 +468,10 @@ const GenerateBanner = () => {
                   {formState.generationMode === "auto" && (
                     <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-1">
                       <p className="text-sm font-medium text-primary flex items-center gap-2">
-                        <Sparkles className="h-4 w-4" /> Diseño profesional automático
+                        <Sparkles className="h-4 w-4" /> {t("generateBanner.autoDesign")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Nuestra IA analiza la imagen de tu producto para extraer colores, estilo y composición.
-                        Genera banners de nivel agencia con tipografía profesional, colores armónicos y composición perfecta.
+                        {t("generateBanner.autoDesignDesc")}
                       </p>
                     </div>
                   )}
@@ -509,11 +485,11 @@ const GenerateBanner = () => {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">¿Cuántos banners quieres generar?</CardTitle>
+                  <CardTitle className="text-lg">{t("generateBanner.howMany")}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Se generará una secuencia de venta automática — cada banner con un ángulo de marketing único.
+                    {t("generateBanner.sequenceDesc")}
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {bannerQuantityOptions.map((opt) => (
@@ -534,7 +510,7 @@ const GenerateBanner = () => {
                   </div>
 
                   <div className="bg-muted/50 rounded-lg p-3 space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">Secuencia de venta que se generará:</p>
+                    <p className="text-xs font-medium text-muted-foreground">{t("generateBanner.sequenceLabel")}</p>
                     <div className="flex flex-wrap gap-2">
                       {sequence.map((tid, i) => {
                         const tpl = bannerTemplates.find((t) => t.id === tid);
@@ -552,7 +528,7 @@ const GenerateBanner = () => {
 
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base">Tamaño de salida</CardTitle>
+                  <CardTitle className="text-base">{t("generateBanner.outputSize")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Select value={formState.outputSize} onValueChange={(v) => updateForm("outputSize", v)}>
@@ -582,30 +558,30 @@ const GenerateBanner = () => {
                     formState.generationMode === "custom" ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-3"
                   )}>
                     <div>
-                      <p className="text-xs text-muted-foreground">Modo</p>
-                      <p className="font-semibold text-sm">{formState.generationMode === "auto" ? "Automático" : "Personalizado"}</p>
+                      <p className="text-xs text-muted-foreground">{t("generateBanner.mode")}</p>
+                      <p className="font-semibold text-sm">{formState.generationMode === "auto" ? t("generateBanner.auto") : t("generateBanner.customMode")}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Secuencia</p>
-                      <p className="font-semibold text-sm">{sequence.length} etapas</p>
+                      <p className="text-xs text-muted-foreground">{t("generateBanner.sequence")}</p>
+                      <p className="font-semibold text-sm">{sequence.length} {t("generateBanner.stages")}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-muted-foreground">Tamaño</p>
+                      <p className="text-xs text-muted-foreground">{t("generateBanner.size")}</p>
                       <p className="font-semibold text-sm">{formState.outputSize}</p>
                     </div>
                     {formState.generationMode === "custom" && (
                       <>
                         <div>
-                          <p className="text-xs text-muted-foreground">Objetivo</p>
-                          <p className="font-semibold text-sm">{GOAL_LABELS[formState.bannerGoal]}</p>
+                          <p className="text-xs text-muted-foreground">{t("generateBanner.goal")}</p>
+                          <p className="font-semibold text-sm">{t(`generateBanner.goalLabels.${formState.bannerGoal}`)}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Tono</p>
-                          <p className="font-semibold text-sm">{TONE_LABELS[formState.tone]}</p>
+                          <p className="text-xs text-muted-foreground">{t("generateBanner.tone")}</p>
+                          <p className="font-semibold text-sm">{t(`generateBanner.toneLabels.${formState.tone}`)}</p>
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">Estilo visual</p>
-                          <p className="font-semibold text-sm">{VISUAL_LABELS[formState.visualStyle]}</p>
+                          <p className="text-xs text-muted-foreground">{t("generateBanner.visualStyle")}</p>
+                          <p className="font-semibold text-sm">{t(`generateBanner.visualLabels.${formState.visualStyle}`)}</p>
                         </div>
                       </>
                     )}
@@ -625,12 +601,12 @@ const GenerateBanner = () => {
 
               <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Banners usados este mes</span>
+                  <span className="text-muted-foreground">{t("generateBanner.bannersUsedMonth")}</span>
                   <span className="font-semibold">{bannersUsed} / {bannerLimit}</span>
                 </div>
                 <Progress value={(bannersUsed / bannerLimit) * 100} className="h-2" />
                 <p className="text-xs text-muted-foreground">
-                  {bannersRemaining} banners restantes · Plan {plan}
+                  {t("generateBanner.bannersRemaining", { count: bannersRemaining, plan })}
                 </p>
               </div>
 
@@ -644,17 +620,17 @@ const GenerateBanner = () => {
                   {loading ? (
                     <>
                       <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                      Analizando tu producto y creando tu secuencia de banners...
+                      {t("generateBanner.analyzingProduct")}
                     </>
                   ) : sequence.length > bannersRemaining ? (
                     <>
                       <Lock className="h-5 w-5 mr-2" />
-                      No tienes suficientes banners ({bannersRemaining} restantes)
+                      {t("generateBanner.notEnough", { count: bannersRemaining })}
                     </>
                   ) : (
                     <>
                       <Sparkles className="h-5 w-5 mr-2" />
-                      Generar Secuencia de Venta ({sequence.length} banners)
+                      {t("generateBanner.generateSequence", { count: sequence.length })}
                     </>
                   )}
                 </Button>
@@ -664,10 +640,10 @@ const GenerateBanner = () => {
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold">
-                      Secuencia de Venta — {generatedBanners.length} Banners
+                      {t("generateBanner.salesSequence", { count: generatedBanners.length })}
                     </h3>
                     <Button onClick={handleDownloadAll} size="sm">
-                      <Download className="h-4 w-4 mr-2" /> Descargar Todos
+                      <Download className="h-4 w-4 mr-2" /> {t("common.downloadAll")}
                     </Button>
                   </div>
 
@@ -692,7 +668,7 @@ const GenerateBanner = () => {
                           </div>
                           <div className="flex justify-end">
                             <Button variant="outline" size="sm" onClick={() => handleDownload(banner)}>
-                              <Download className="h-3 w-3 mr-1" /> Descargar
+                              <Download className="h-3 w-3 mr-1" /> {t("common.download")}
                             </Button>
                           </div>
                         </div>
@@ -707,7 +683,7 @@ const GenerateBanner = () => {
                     className="w-full"
                   >
                     {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-                    Regenerar Secuencia
+                    {t("generateBanner.regenerateSequence")}
                   </Button>
                 </div>
               )}
@@ -723,7 +699,7 @@ const GenerateBanner = () => {
                 disabled={step === 0}
                 className="min-h-[44px]"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" /> Anterior
+                <ArrowLeft className="h-4 w-4 mr-2" /> {t("common.previous")}
               </Button>
               {step < 2 && (
                 <Button
@@ -731,7 +707,7 @@ const GenerateBanner = () => {
                   disabled={!canGoNext}
                   className="min-h-[44px]"
                 >
-                  Siguiente <ArrowRight className="h-4 w-4 ml-2" />
+                  {t("common.next")} <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               )}
             </div>
@@ -742,7 +718,7 @@ const GenerateBanner = () => {
       {/* Preview Modal */}
       <Dialog open={!!previewBanner} onOpenChange={(open) => !open && setPreviewBanner(null)}>
         <DialogContent className="max-w-3xl p-0 overflow-hidden" aria-describedby={undefined}>
-          <DialogTitle className="sr-only">Vista previa del banner</DialogTitle>
+          <DialogTitle className="sr-only">{t("generateBanner.bannerPreview")}</DialogTitle>
           {previewBanner && (
             <div className="flex flex-col">
               <div className="bg-muted flex items-center justify-center max-h-[70vh] overflow-auto">
@@ -757,7 +733,7 @@ const GenerateBanner = () => {
                   {previewBanner.sequencePosition}/{previewBanner.totalInSequence} — {previewBanner.templateName}
                 </p>
                 <Button size="sm" onClick={() => handleDownload(previewBanner)}>
-                  <Download className="h-4 w-4 mr-2" /> Descargar
+                  <Download className="h-4 w-4 mr-2" /> {t("common.download")}
                 </Button>
               </div>
             </div>

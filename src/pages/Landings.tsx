@@ -10,6 +10,7 @@ import { FileText, Eye, Download, Loader2, Maximize2, Copy, Trash2 } from "lucid
 import { toast } from "sonner";
 import { generateLandingHTML } from "@/lib/exportLanding";
 import { type LandingTheme } from "@/components/landing/themes";
+import { useTranslation } from "react-i18next";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +31,7 @@ interface LandingWithProduct extends Landing {
 }
 
 const Landings = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [landings, setLandings] = useState<LandingWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,9 +53,9 @@ const Landings = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success("Landing exportada correctamente");
+      toast.success(t("landings.exported"));
     } catch {
-      toast.error("Error al exportar");
+      toast.error(t("landings.exportError"));
     } finally {
       setExportingId(null);
     }
@@ -70,13 +72,13 @@ const Landings = () => {
         .eq("user_id", user.id);
       if (error) throw error;
       setLandings(prev => prev.filter(l => l.id !== landingId));
-      toast.success("Landing eliminada");
+      toast.success(t("landings.deleted"));
     } catch (err: any) {
-      toast.error("Error al eliminar", { description: err.message });
+      toast.error(t("landings.deleteError"), { description: err.message });
     } finally {
       setDeletingId(null);
     }
-  }, [user]);
+  }, [user, t]);
 
   const handleDuplicate = useCallback(async (landing: LandingWithProduct) => {
     if (!user) return;
@@ -86,7 +88,7 @@ const Landings = () => {
         .insert({
           user_id: user.id,
           product_id: landing.product_id,
-          name: `${landing.name} (copia)`,
+          name: `${landing.name} (${t("landings.copy")})`,
           blocks: landing.blocks,
           mode: landing.mode,
           intensity: landing.intensity,
@@ -95,7 +97,7 @@ const Landings = () => {
           guarantee: landing.guarantee,
         });
       if (insertError) throw insertError;
-      toast.success("Landing duplicada");
+      toast.success(t("landings.duplicated"));
       const { data: landingsData } = await supabase
         .from("landings")
         .select("*")
@@ -108,9 +110,9 @@ const Landings = () => {
         setLandings(landingsData.map(l => ({ ...l, product: productMap.get(l.product_id) || null })));
       }
     } catch (err: any) {
-      toast.error("Error al duplicar", { description: err.message });
+      toast.error(t("landings.duplicateError"), { description: err.message });
     }
-  }, [user]);
+  }, [user, t]);
 
   useEffect(() => {
     if (!user) return;
@@ -165,14 +167,14 @@ const Landings = () => {
 
   return (
     <div className="p-4 md:p-8 lg:p-10 space-y-6 max-w-6xl mx-auto">
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-display">Mis Landings</h1>
+      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-display">{t("landings.title")}</h1>
 
       {landings.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <FileText className="h-10 w-10 text-muted-foreground/30 mb-4" />
-            <p className="text-sm text-muted-foreground mb-4">No tienes landings generadas aún</p>
-            <Button asChild size="sm"><Link to="/products">Ver productos para generar</Link></Button>
+            <p className="text-sm text-muted-foreground mb-4">{t("landings.empty")}</p>
+            <Button asChild size="sm"><Link to="/products">{t("landings.viewProducts")}</Link></Button>
           </CardContent>
         </Card>
       ) : (
@@ -195,7 +197,7 @@ const Landings = () => {
                     )}
                     <div className="absolute inset-0 bg-gradient-to-r from-card/95 via-card/70 to-transparent p-4 flex flex-col justify-end">
                       <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                        {landing.product?.name || "Producto"}
+                        {landing.product?.name || t("common.product")}
                       </p>
                       <h3 className="text-sm font-semibold text-foreground leading-tight line-clamp-2 mt-0.5">
                         {hero?.title || landing.name}
@@ -221,18 +223,18 @@ const Landings = () => {
                   <div className="space-y-1.5">
                     <div className="grid grid-cols-2 gap-1.5">
                       <Button variant="outline" size="sm" asChild className="text-xs min-h-[44px]">
-                        <Link to={`/landings/${landing.id}`}><Eye className="h-3 w-3 mr-1" /> Editor</Link>
+                        <Link to={`/landings/${landing.id}`}><Eye className="h-3 w-3 mr-1" /> {t("common.editor")}</Link>
                       </Button>
                       <Button variant="default" size="sm" asChild className="text-xs min-h-[44px]">
-                        <Link to={`/landings/${landing.id}/preview`}><Maximize2 className="h-3 w-3 mr-1" /> Preview</Link>
+                        <Link to={`/landings/${landing.id}/preview`}><Maximize2 className="h-3 w-3 mr-1" /> {t("common.preview")}</Link>
                       </Button>
                     </div>
                     <div className="grid grid-cols-3 gap-1.5">
                       <Button variant="secondary" size="sm" className="text-xs min-h-[44px]" onClick={() => handleDuplicate(landing)}>
-                        <Copy className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> Duplicar</span>
+                        <Copy className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> {t("common.duplicate")}</span>
                       </Button>
                       <Button variant="secondary" size="sm" className="text-xs min-h-[44px]" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
-                        {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Download className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> Exportar</span></>}
+                        {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Download className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> {t("common.export")}</span></>}
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -242,14 +244,14 @@ const Landings = () => {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>¿Eliminar landing?</AlertDialogTitle>
+                            <AlertDialogTitle>{t("landings.deleteLanding")}</AlertDialogTitle>
                             <AlertDialogDescription>
-                              Esta acción no se puede deshacer. Se eliminarán también las versiones guardadas de "{landing.name}".
+                              {t("landings.deleteDesc", { name: landing.name })}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(landing.id)}>Eliminar</AlertDialogAction>
+                            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => handleDelete(landing.id)}>{t("common.delete")}</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>

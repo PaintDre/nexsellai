@@ -18,6 +18,7 @@ import {
   Plus, Filter, ArrowUpDown, CheckSquare, X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 interface BannerWithProduct {
   id: string;
@@ -46,32 +47,27 @@ const TEMPLATE_LABELS: Record<string, string> = {
 };
 
 const Banners = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
-  
   const navigate = useNavigate();
 
   const [banners, setBanners] = useState<BannerWithProduct[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Filters
   const [filterTemplate, setFilterTemplate] = useState<string>("all");
   const [filterSize, setFilterSize] = useState<string>("all");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
 
-  // Selection
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
 
-  // Preview
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
-  // Dialogs
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [productSelectorOpen, setProductSelectorOpen] = useState(false);
 
-  // Fetch data
   const fetchData = async () => {
     if (!user) return;
     setLoading(true);
@@ -94,11 +90,9 @@ const Banners = () => {
 
   useEffect(() => { fetchData(); }, [user, sortOrder]);
 
-  // Derived: unique templates & sizes for filters
   const uniqueTemplates = useMemo(() => [...new Set(banners.map((b) => b.template_id))], [banners]);
   const uniqueSizes = useMemo(() => [...new Set(banners.map((b) => b.output_size))], [banners]);
 
-  // Filtered banners
   const filteredBanners = useMemo(() => {
     return banners.filter((b) => {
       if (filterTemplate !== "all" && b.template_id !== filterTemplate) return false;
@@ -107,20 +101,18 @@ const Banners = () => {
     });
   }, [banners, filterTemplate, filterSize]);
 
-  // Grouped by product
   const groupedByProduct = useMemo(() => {
     const groups: Record<string, { productName: string; banners: BannerWithProduct[] }> = {};
     filteredBanners.forEach((b) => {
       const key = b.product_id || "sin-producto";
       if (!groups[key]) {
-        groups[key] = { productName: b.products?.name || "Sin producto", banners: [] };
+        groups[key] = { productName: b.products?.name || t("common.noProduct"), banners: [] };
       }
       groups[key].banners.push(b);
     });
     return Object.entries(groups);
-  }, [filteredBanners]);
+  }, [filteredBanners, t]);
 
-  // Actions
   const handleDownload = async (banner: BannerWithProduct) => {
     try {
       const response = await fetch(banner.image_url);
@@ -133,7 +125,7 @@ const Banners = () => {
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      toast.error("Error al descargar", { description: "No se pudo descargar el banner. Intenta de nuevo." });
+      toast.error(t("generateBanner.downloadError"), { description: t("generateBanner.downloadErrorDesc") });
     }
   };
 
@@ -146,7 +138,7 @@ const Banners = () => {
       if (newBanners.length === 0) setPreviewIndex(null);
       else if (previewIndex >= newBanners.length) setPreviewIndex(newBanners.length - 1);
     }
-    toast.success("Banner eliminado");
+    toast.success(t("banners.deleted"));
   };
 
   const handleBulkDelete = async () => {
@@ -155,7 +147,7 @@ const Banners = () => {
     setBanners((prev) => prev.filter((b) => !selectedIds.has(b.id)));
     setSelectedIds(new Set());
     setSelectionMode(false);
-    toast.success(`${ids.length} banners eliminados`);
+    toast.success(t("banners.bulkDeleted", { count: ids.length }));
   };
 
   const handleBulkDownload = async () => {
@@ -163,7 +155,7 @@ const Banners = () => {
     for (const banner of selected) {
       await handleDownload(banner);
     }
-    toast.success(`${selected.length} banners descargados`);
+    toast.success(t("banners.bulkDownloaded", { count: selected.length }));
   };
 
   const toggleSelect = (id: string) => {
@@ -190,7 +182,6 @@ const Banners = () => {
 
   const previewBanner = previewIndex !== null ? filteredBanners[previewIndex] : null;
 
-  // Banner card component
   const BannerCard = ({ banner, idx }: { banner: BannerWithProduct; idx: number }) => (
     <Card className="group overflow-hidden hover:shadow-md transition-shadow relative">
       {selectionMode && (
@@ -231,10 +222,10 @@ const Banners = () => {
         </p>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="flex-1 min-h-[44px]" onClick={() => setPreviewIndex(idx)}>
-            <Eye className="h-3 w-3 mr-1" /> Ver
+            <Eye className="h-3 w-3 mr-1" /> {t("common.view")}
           </Button>
           <Button variant="outline" size="sm" className="flex-1 min-h-[44px]" onClick={() => handleDownload(banner)}>
-            <Download className="h-3 w-3 mr-1" /> Bajar
+            <Download className="h-3 w-3 mr-1" /> {t("common.download")}
           </Button>
           <Button variant="ghost" size="icon" className="text-destructive shrink-0 min-h-[44px]" onClick={() => setDeleteTarget(banner.id)}>
             <Trash2 className="h-4 w-4" />
@@ -249,13 +240,13 @@ const Banners = () => {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-xl sm:text-3xl font-bold font-display tracking-tight">Banners</h1>
+          <h1 className="text-xl sm:text-3xl font-bold font-display tracking-tight">{t("banners.title")}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {banners.length} banner{banners.length !== 1 ? "s" : ""} generado{banners.length !== 1 ? "s" : ""}
+            {t("banners.count", { count: banners.length })}
           </p>
         </div>
         <Button onClick={() => setProductSelectorOpen(true)} className="gap-2 w-full sm:w-auto min-h-[44px]">
-          <Plus className="h-4 w-4" /> Generar Banners
+          <Plus className="h-4 w-4" /> {t("banners.generateBanners")}
         </Button>
       </div>
 
@@ -263,10 +254,10 @@ const Banners = () => {
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <ImageIcon className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground font-medium">Aún no has generado banners</p>
-            <p className="text-sm text-muted-foreground mt-1">Selecciona un producto y genera tu primer banner con IA</p>
+            <p className="text-muted-foreground font-medium">{t("banners.empty")}</p>
+            <p className="text-sm text-muted-foreground mt-1">{t("banners.emptyDesc")}</p>
             <Button className="mt-4 gap-2" onClick={() => setProductSelectorOpen(true)}>
-              <Plus className="h-4 w-4" /> Generar mi primer banner
+              <Plus className="h-4 w-4" /> {t("banners.generateFirst")}
             </Button>
           </CardContent>
         </Card>
@@ -274,30 +265,29 @@ const Banners = () => {
         <Tabs defaultValue="todos" className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <TabsList>
-              <TabsTrigger value="todos">Todos</TabsTrigger>
-              <TabsTrigger value="por-producto">Por Producto</TabsTrigger>
+              <TabsTrigger value="todos">{t("banners.all")}</TabsTrigger>
+              <TabsTrigger value="por-producto">{t("banners.byProduct")}</TabsTrigger>
             </TabsList>
 
-            {/* Filters bar */}
             <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2">
               {selectionMode ? (
                 <>
                   <Button variant="outline" size="sm" onClick={selectAll}>
                     <CheckSquare className="h-3 w-3 mr-1" />
-                    {selectedIds.size === filteredBanners.length ? "Deseleccionar" : "Seleccionar todo"}
+                    {selectedIds.size === filteredBanners.length ? t("common.deselect") : t("common.selectAll")}
                   </Button>
                   {selectedIds.size > 0 && (
                     <>
                       <Button variant="outline" size="sm" onClick={handleBulkDownload}>
-                        <Download className="h-3 w-3 mr-1" /> Descargar ({selectedIds.size})
+                        <Download className="h-3 w-3 mr-1" /> {t("common.download")} ({selectedIds.size})
                       </Button>
                       <Button variant="destructive" size="sm" onClick={() => setBulkDeleteOpen(true)}>
-                        <Trash2 className="h-3 w-3 mr-1" /> Eliminar ({selectedIds.size})
+                        <Trash2 className="h-3 w-3 mr-1" /> {t("common.delete")} ({selectedIds.size})
                       </Button>
                     </>
                   )}
                   <Button variant="ghost" size="sm" onClick={() => { setSelectionMode(false); setSelectedIds(new Set()); }}>
-                    <X className="h-3 w-3 mr-1" /> Cancelar
+                    <X className="h-3 w-3 mr-1" /> {t("common.cancel")}
                   </Button>
                 </>
               ) : (
@@ -305,21 +295,21 @@ const Banners = () => {
                   <Select value={filterTemplate} onValueChange={setFilterTemplate}>
                     <SelectTrigger className="w-full sm:w-[150px] h-10 sm:h-8 text-xs">
                       <Filter className="h-3 w-3 mr-1" />
-                      <SelectValue placeholder="Plantilla" />
+                      <SelectValue placeholder={t("banners.allTemplates")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Todas las plantillas</SelectItem>
-                      {uniqueTemplates.map((t) => (
-                        <SelectItem key={t} value={t}>{TEMPLATE_LABELS[t] || t}</SelectItem>
+                      <SelectItem value="all">{t("banners.allTemplates")}</SelectItem>
+                      {uniqueTemplates.map((tmpl) => (
+                        <SelectItem key={tmpl} value={tmpl}>{TEMPLATE_LABELS[tmpl] || tmpl}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                   <Select value={filterSize} onValueChange={setFilterSize}>
                     <SelectTrigger className="w-full sm:w-[130px] h-10 sm:h-8 text-xs">
-                      <SelectValue placeholder="Tamaño" />
+                      <SelectValue placeholder={t("banners.allSizes")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Todos los tamaños</SelectItem>
+                      <SelectItem value="all">{t("banners.allSizes")}</SelectItem>
                       {uniqueSizes.map((s) => (
                         <SelectItem key={s} value={s}>{s}</SelectItem>
                       ))}
@@ -332,20 +322,19 @@ const Banners = () => {
                     onClick={() => setSortOrder((o) => o === "desc" ? "asc" : "desc")}
                   >
                     <ArrowUpDown className="h-3 w-3 mr-1" />
-                    {sortOrder === "desc" ? "Más reciente" : "Más antiguo"}
+                    {sortOrder === "desc" ? t("banners.newest") : t("banners.oldest")}
                   </Button>
                   <Button variant="outline" size="sm" className="h-10 sm:h-8 text-xs min-h-[44px] sm:min-h-0" onClick={() => setSelectionMode(true)}>
-                    <CheckSquare className="h-3 w-3 mr-1" /> Seleccionar
+                    <CheckSquare className="h-3 w-3 mr-1" /> {t("common.select")}
                   </Button>
                 </>
               )}
             </div>
           </div>
 
-          {/* All view */}
           <TabsContent value="todos">
             {filteredBanners.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">No hay banners con estos filtros</p>
+              <p className="text-sm text-muted-foreground text-center py-8">{t("banners.noFiltered")}</p>
             ) : (
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredBanners.map((banner, idx) => (
@@ -355,10 +344,9 @@ const Banners = () => {
             )}
           </TabsContent>
 
-          {/* By product view */}
           <TabsContent value="por-producto">
             {groupedByProduct.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">No hay banners con estos filtros</p>
+              <p className="text-sm text-muted-foreground text-center py-8">{t("banners.noFiltered")}</p>
             ) : (
               <div className="space-y-8">
                 {groupedByProduct.map(([key, group]) => (
@@ -408,15 +396,15 @@ const Banners = () => {
                     {TEMPLATE_LABELS[previewBanner.template_id] || previewBanner.template_id.replace("-", " ")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {previewBanner.output_size} · {new Date(previewBanner.created_at).toLocaleDateString("es-CL")} · {previewIndex! + 1} de {filteredBanners.length}
+                    {previewBanner.output_size} · {new Date(previewBanner.created_at).toLocaleDateString("es-CL")} · {previewIndex! + 1} {t("banners.of")} {filteredBanners.length}
                   </p>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="destructive" size="sm" onClick={() => setDeleteTarget(previewBanner.id)}>
-                    <Trash2 className="h-4 w-4 mr-1" /> Eliminar
+                    <Trash2 className="h-4 w-4 mr-1" /> {t("common.delete")}
                   </Button>
                   <Button size="sm" onClick={() => handleDownload(previewBanner)}>
-                    <Download className="h-4 w-4 mr-1" /> Descargar
+                    <Download className="h-4 w-4 mr-1" /> {t("common.download")}
                   </Button>
                 </div>
               </div>
@@ -429,13 +417,13 @@ const Banners = () => {
       <AlertDialog open={deleteTarget !== null} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar este banner?</AlertDialogTitle>
-            <AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription>
+            <AlertDialogTitle>{t("banners.deleteBanner")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("banners.deleteAction")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={() => { if (deleteTarget) handleDelete(deleteTarget); setDeleteTarget(null); }}>
-              Eliminar
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -445,13 +433,13 @@ const Banners = () => {
       <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar {selectedIds.size} banners?</AlertDialogTitle>
-            <AlertDialogDescription>Esta acción no se puede deshacer.</AlertDialogDescription>
+            <AlertDialogTitle>{t("banners.bulkDelete", { count: selectedIds.size })}</AlertDialogTitle>
+            <AlertDialogDescription>{t("banners.deleteAction")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={() => { handleBulkDelete(); setBulkDeleteOpen(false); }}>
-              Eliminar todos
+              {t("banners.deleteAll")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -461,13 +449,13 @@ const Banners = () => {
       <Dialog open={productSelectorOpen} onOpenChange={setProductSelectorOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Selecciona un producto</DialogTitle>
+            <DialogTitle>{t("banners.selectProduct")}</DialogTitle>
           </DialogHeader>
           {products.length === 0 ? (
             <div className="text-center py-6">
-              <p className="text-muted-foreground text-sm">No tienes productos aún</p>
+              <p className="text-muted-foreground text-sm">{t("banners.noProducts")}</p>
               <Button className="mt-3" onClick={() => { setProductSelectorOpen(false); navigate("/products/new"); }}>
-                Crear producto
+                {t("products.createProduct")}
               </Button>
             </div>
           ) : (
