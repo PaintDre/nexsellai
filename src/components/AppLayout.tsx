@@ -9,6 +9,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { PageBreadcrumb } from "./PageBreadcrumb";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 
 const planLabels: Record<string, string> = { free: "Free", starter: "Starter", pro: "Pro" };
 
