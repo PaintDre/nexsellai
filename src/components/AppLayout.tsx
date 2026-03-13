@@ -52,7 +52,7 @@ export const AppLayout = () => {
             {profile && (
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-                  {profile.full_name || "Usuario"}
+                  {profile.full_name || t("appLayout.user")}
                 </span>
                 <Badge variant="secondary" className="text-[10px] uppercase font-semibold tracking-wide">
                   {planLabels[profile.plan] || "Free"}
