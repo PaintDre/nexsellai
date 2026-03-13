@@ -29,7 +29,7 @@ export const AppLayout = () => {
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent side="left" className="w-60 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border">
             <VisuallyHidden>
-              <SheetTitle>Menú de navegación</SheetTitle>
+              <SheetTitle>{t("appLayout.navMenu")}</SheetTitle>
             </VisuallyHidden>
             <SidebarContent expanded onNavigate={() => setMobileOpen(false)} />
           </SheetContent>
