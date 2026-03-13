@@ -472,6 +472,7 @@ export type Database = {
           id: string
           landings_reset_at: string | null
           landings_used: number
+          language: string | null
           openai_api_key: string | null
           phone: string | null
           plan: Database["public"]["Enums"]["user_plan"]
@@ -490,6 +491,7 @@ export type Database = {
           id?: string
           landings_reset_at?: string | null
           landings_used?: number
+          language?: string | null
           openai_api_key?: string | null
           phone?: string | null
           plan?: Database["public"]["Enums"]["user_plan"]
@@ -508,6 +510,7 @@ export type Database = {
           id?: string
           landings_reset_at?: string | null
           landings_used?: number
+          language?: string | null
           openai_api_key?: string | null
           phone?: string | null
           plan?: Database["public"]["Enums"]["user_plan"]
