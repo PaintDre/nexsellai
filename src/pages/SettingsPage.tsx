@@ -27,6 +27,7 @@ import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { cn } from "@/lib/utils";
 import { COUNTRIES, getCountryByCode } from "@/lib/countries";
 import { useTranslation } from "react-i18next";
+import AdminBannersGallery from "@/components/settings/AdminBannersGallery";
 
 const LANGUAGE_OPTIONS = [
   { value: "es", label: "Español" },
@@ -381,6 +382,8 @@ const SettingsPage = () => {
         </CardContent>
       </Card>
       )}
+
+      {isAdmin() && <AdminBannersGallery />}
 
       {/* Help */}
       <Card>
