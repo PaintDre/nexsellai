@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Download, Image, Search, User, X } from "lucide-react";
+import { Download, Image, Search, User, X, ChevronDown, ChevronRight } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useTranslation } from "react-i18next";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface BannerWithUser {
   id: string;
@@ -16,20 +16,18 @@ interface BannerWithUser {
   created_at: string;
   user_id: string;
   user_name: string | null;
-  user_email?: string;
 }
+
+const PAGE_SIZE = 6;
 
 const AdminBannersGallery = () => {
   const { t } = useTranslation();
   const [banners, setBanners] = useState<BannerWithUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filterUser, setFilterUser] = useState("all");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  const uniqueUsers = Array.from(
-    new Map(banners.map(b => [b.user_id, { id: b.user_id, name: b.user_name || b.user_id.slice(0, 8) }])).values()
-  );
+  const [expandedUsers, setExpandedUsers] = useState<Set<string>>(new Set());
+  const [visibleCount, setVisibleCount] = useState<Record<string, number>>({});
 
   useEffect(() => {
     const fetchBanners = async () => {
@@ -39,10 +37,7 @@ const AdminBannersGallery = () => {
         .select("*")
         .order("created_at", { ascending: false });
 
-      if (error || !allBanners) {
-        setLoading(false);
-        return;
-      }
+      if (error || !allBanners) { setLoading(false); return; }
 
       const userIds = [...new Set(allBanners.map(b => b.user_id))];
       const { data: profiles } = await supabase
@@ -52,30 +47,58 @@ const AdminBannersGallery = () => {
 
       const nameMap = new Map((profiles || []).map(p => [p.user_id, p.full_name]));
 
-      const enriched: BannerWithUser[] = allBanners.map(b => ({
+      setBanners(allBanners.map(b => ({
         ...b,
         user_name: nameMap.get(b.user_id) || null,
-      }));
-
-      setBanners(enriched);
+      })));
       setLoading(false);
     };
-
     fetchBanners();
   }, []);
 
-  const filtered = banners.filter(b => {
-    if (filterUser !== "all" && b.user_id !== filterUser) return false;
-    if (search) {
+  // Group by user
+  const grouped = useMemo(() => {
+    const filtered = banners.filter(b => {
+      if (!search) return true;
       const q = search.toLowerCase();
       return (
         b.template_id.toLowerCase().includes(q) ||
         b.output_size.toLowerCase().includes(q) ||
         (b.user_name || "").toLowerCase().includes(q)
       );
+    });
+
+    const map = new Map<string, { name: string; banners: BannerWithUser[] }>();
+    for (const b of filtered) {
+      const existing = map.get(b.user_id);
+      if (existing) {
+        existing.banners.push(b);
+      } else {
+        map.set(b.user_id, {
+          name: b.user_name || b.user_id.slice(0, 8),
+          banners: [b],
+        });
+      }
     }
-    return true;
-  });
+    return Array.from(map.entries()).sort((a, b) => b[1].banners.length - a[1].banners.length);
+  }, [banners, search]);
+
+  const totalFiltered = grouped.reduce((sum, [, g]) => sum + g.banners.length, 0);
+
+  const toggleUser = (userId: string) => {
+    setExpandedUsers(prev => {
+      const next = new Set(prev);
+      if (next.has(userId)) next.delete(userId);
+      else next.add(userId);
+      return next;
+    });
+  };
+
+  const getVisible = (userId: string) => visibleCount[userId] || PAGE_SIZE;
+
+  const showMore = (userId: string) => {
+    setVisibleCount(prev => ({ ...prev, [userId]: (prev[userId] || PAGE_SIZE) + PAGE_SIZE }));
+  };
 
   const handleDownload = async (url: string, id: string) => {
     try {
@@ -100,82 +123,105 @@ const AdminBannersGallery = () => {
             {t("settings.adminBanners.title", "Todos los banners")}
           </CardTitle>
           <CardDescription>
-            {t("settings.adminBanners.subtitle", "Banners creados por todos los usuarios de la plataforma")}
+            {t("settings.adminBanners.subtitle", "Banners agrupados por usuario")}
+            {!loading && (
+              <span className="ml-1 text-foreground font-medium">
+                · {totalFiltered} banners · {grouped.length} {t("settings.adminBanners.users", "usuarios")}
+              </span>
+            )}
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-              <Input
-                placeholder={t("settings.adminBanners.searchPlaceholder", "Buscar por plantilla, tamaño...")}
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="pl-8 h-9 text-xs"
-              />
-            </div>
-            <Select value={filterUser} onValueChange={setFilterUser}>
-              <SelectTrigger className="w-full sm:w-48 h-9 text-xs">
-                <User className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
-                <SelectValue placeholder={t("settings.adminBanners.allUsers", "Todos los usuarios")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t("settings.adminBanners.allUsers", "Todos los usuarios")}</SelectItem>
-                {uniqueUsers.map(u => (
-                  <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <CardContent className="space-y-3">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder={t("settings.adminBanners.searchPlaceholder", "Buscar por nombre, plantilla, tamaño...")}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-8 h-9 text-xs"
+            />
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            {t("settings.adminBanners.count", "{{count}} banners", { count: filtered.length })}
-          </p>
-
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="aspect-square rounded-lg bg-muted animate-pulse" />
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-12 rounded-lg bg-muted animate-pulse" />
               ))}
             </div>
-          ) : filtered.length === 0 ? (
+          ) : grouped.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-8">
               {t("settings.adminBanners.empty", "No se encontraron banners")}
             </p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {filtered.map(banner => (
-                <div
-                  key={banner.id}
-                  className="group relative rounded-lg overflow-hidden border bg-muted/30 hover:border-primary/50 transition-colors"
-                >
-                  <img
-                    src={banner.image_url}
-                    alt={`Banner ${banner.template_id}`}
-                    className="w-full aspect-square object-cover cursor-pointer"
-                    onClick={() => setPreviewUrl(banner.image_url)}
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
-                    <p className="text-white text-[10px] font-medium truncate">
-                      {banner.user_name || "Sin nombre"}
-                    </p>
-                    <p className="text-white/70 text-[9px]">
-                      {banner.output_size} · {banner.template_id}
-                    </p>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="mt-1.5 h-7 text-[10px] w-full"
-                      onClick={() => handleDownload(banner.image_url, banner.id)}
-                    >
-                      <Download className="h-3 w-3 mr-1" />
-                      {t("common.download")}
-                    </Button>
-                  </div>
-                </div>
-              ))}
+            <div className="space-y-2">
+              {grouped.map(([userId, group]) => {
+                const isOpen = expandedUsers.has(userId);
+                const visible = getVisible(userId);
+                const visibleBanners = group.banners.slice(0, visible);
+                const hasMore = group.banners.length > visible;
+
+                return (
+                  <Collapsible key={userId} open={isOpen} onOpenChange={() => toggleUser(userId)}>
+                    <CollapsibleTrigger asChild>
+                      <button className="flex items-center justify-between w-full rounded-lg border bg-muted/30 hover:bg-muted/60 px-3 py-2.5 transition-colors text-left">
+                        <div className="flex items-center gap-2">
+                          {isOpen ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+                          <User className="h-3.5 w-3.5 text-primary" />
+                          <span className="text-sm font-medium">{group.name}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+                          {group.banners.length} banners
+                        </span>
+                      </button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="pt-2 pb-1 px-1">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {visibleBanners.map(banner => (
+                            <div
+                              key={banner.id}
+                              className="group relative rounded-lg overflow-hidden border bg-muted/30 hover:border-primary/50 transition-colors"
+                            >
+                              <img
+                                src={banner.image_url}
+                                alt={`Banner ${banner.template_id}`}
+                                className="w-full aspect-square object-cover cursor-pointer"
+                                onClick={() => setPreviewUrl(banner.image_url)}
+                                loading="lazy"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
+                                <p className="text-white/70 text-[9px]">
+                                  {banner.output_size} · {banner.template_id}
+                                </p>
+                                <Button
+                                  size="sm"
+                                  variant="secondary"
+                                  className="mt-1 h-7 text-[10px] w-full"
+                                  onClick={() => handleDownload(banner.image_url, banner.id)}
+                                >
+                                  <Download className="h-3 w-3 mr-1" />
+                                  {t("common.download")}
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        {hasMore && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full mt-2 text-xs text-muted-foreground"
+                            onClick={() => showMore(userId)}
+                          >
+                            {t("settings.adminBanners.showMore", "Ver más")} ({group.banners.length - visible} {t("settings.adminBanners.remaining", "restantes")})
+                          </Button>
+                        )}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                );
+              })}
             </div>
           )}
         </CardContent>
@@ -197,10 +243,7 @@ const AdminBannersGallery = () => {
               <>
                 <img src={previewUrl} alt="Banner preview" className="w-full rounded-lg" />
                 <div className="p-2 flex justify-end">
-                  <Button
-                    size="sm"
-                    onClick={() => handleDownload(previewUrl, "preview")}
-                  >
+                  <Button size="sm" onClick={() => handleDownload(previewUrl, "preview")}>
                     <Download className="h-3.5 w-3.5 mr-1.5" />
                     {t("common.download")}
                   </Button>
