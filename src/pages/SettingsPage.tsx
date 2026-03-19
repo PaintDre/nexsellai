@@ -383,6 +383,8 @@ const SettingsPage = () => {
       </Card>
       )}
 
+      {isAdmin() && <AdminBannersGallery />}
+
       {/* Help */}
       <Card>
         <CardHeader>
