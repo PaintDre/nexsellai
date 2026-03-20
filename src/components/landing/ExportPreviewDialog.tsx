@@ -127,9 +127,9 @@ const ExportPreviewDialog = ({
             {copied ? <Check className="h-4 w-4 mr-1" /> : <Clipboard className="h-4 w-4 mr-1" />}
             {copied ? t("exportDialog.copied") : t("exportDialog.copyHTML")}
           </Button>
-          <Button variant="outline" size="sm" onClick={handleCopyShopify} className="border-green-300 text-green-700 hover:bg-green-50">
-            {shopifyCopied ? <Check className="h-4 w-4 mr-1" /> : <Store className="h-4 w-4 mr-1" />}
-            {shopifyCopied ? t("exportDialog.copied") : t("exportDialog.copyShopify")}
+          <Button variant="outline" size="sm" onClick={handleCopyShopify} disabled={exportingShopify} className="border-green-300 text-green-700 hover:bg-green-50">
+            {exportingShopify ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : shopifyCopied ? <Check className="h-4 w-4 mr-1" /> : <Store className="h-4 w-4 mr-1" />}
+            {exportingShopify ? t("common.loading") : shopifyCopied ? t("exportDialog.copied") : t("exportDialog.copyShopify")}
           </Button>
           <Button variant="outline" size="sm" onClick={handleExportHTML}>
             <FileCode className="h-4 w-4 mr-1" /> {t("exportDialog.htmlOnly")}
