@@ -174,7 +174,9 @@
     "htmlExported": "HTML exportado",
     "zipExported": "ZIP exportado con imágenes",
     "zipError": "Error al exportar ZIP",
-    "htmlCopied": "HTML copiado al portapapeles"
+    "htmlCopied": "HTML copiado al portapapeles",
+    "copyShopify": "Copiar para Shopify",
+    "shopifyCopied": "Copiado — Pega esto en una sección 'Custom Liquid' en Shopify"
   },
   "socialProof": {
     "viewedToday": "🔥 <strong>{{count}}</strong> personas vieron este producto hoy"

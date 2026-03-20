@@ -7,9 +7,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, FileCode, FileArchive, Loader2, Clipboard, Check } from "lucide-react";
+import { Download, FileCode, FileArchive, Loader2, Clipboard, Check, Store } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { generateLandingHTML, exportLandingAsHTML, exportLandingAsZip } from "@/lib/exportLanding";
+import { generateLandingHTML, exportLandingAsHTML, exportLandingAsZip, generateShopifyHTML } from "@/lib/exportLanding";
 import type { LandingTheme } from "@/components/landing/themes";
 import { useTranslation } from "react-i18next";
 
@@ -38,6 +38,7 @@ const ExportPreviewDialog = ({
   const { toast } = useToast();
   const [exporting, setExporting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shopifyCopied, setShopifyCopied] = useState(false);
 
   const htmlContent = useMemo(() => {
     if (!open) return "";
@@ -89,6 +90,14 @@ const ExportPreviewDialog = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleCopyShopify = async () => {
+    const shopifyHTML = generateShopifyHTML(blocks, product, landingName, theme, productImage);
+    await navigator.clipboard.writeText(shopifyHTML);
+    setShopifyCopied(true);
+    toast({ title: t("exportDialog.shopifyCopied") });
+    setTimeout(() => setShopifyCopied(false), 2000);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
@@ -109,6 +118,10 @@ const ExportPreviewDialog = ({
           <Button variant="outline" size="sm" onClick={handleCopyHTML}>
             {copied ? <Check className="h-4 w-4 mr-1" /> : <Clipboard className="h-4 w-4 mr-1" />}
             {copied ? t("exportDialog.copied") : t("exportDialog.copyHTML")}
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleCopyShopify} className="border-green-300 text-green-700 hover:bg-green-50">
+            {shopifyCopied ? <Check className="h-4 w-4 mr-1" /> : <Store className="h-4 w-4 mr-1" />}
+            {shopifyCopied ? t("exportDialog.copied") : t("exportDialog.copyShopify")}
           </Button>
           <Button variant="outline" size="sm" onClick={handleExportHTML}>
             <FileCode className="h-4 w-4 mr-1" /> {t("exportDialog.htmlOnly")}
