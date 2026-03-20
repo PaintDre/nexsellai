@@ -92,11 +92,18 @@ const ExportPreviewDialog = ({
   };
 
   const handleCopyShopify = async () => {
-    const shopifyHTML = generateShopifyHTML(blocks, product, landingName, theme, productImage);
-    await navigator.clipboard.writeText(shopifyHTML);
-    setShopifyCopied(true);
-    toast({ title: t("exportDialog.shopifyCopied") });
-    setTimeout(() => setShopifyCopied(false), 2000);
+    setExportingShopify(true);
+    try {
+      const shopifyHTML = await generateShopifyHTML(blocks, product, landingName, theme, productImage, allImageUrls);
+      await navigator.clipboard.writeText(shopifyHTML);
+      setShopifyCopied(true);
+      toast({ title: t("exportDialog.shopifyCopied"), description: t("exportDialog.shopifyInstructions") });
+      setTimeout(() => setShopifyCopied(false), 2000);
+    } catch {
+      toast({ title: t("exportDialog.zipError"), variant: "destructive" });
+    } finally {
+      setExportingShopify(false);
+    }
   };
 
   return (
