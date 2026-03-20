@@ -1,29 +1,27 @@
 
 
-## Plan: Improve Shopify Export
+## Plan: Fix Shopify Export — Embed Images as Base64
 
 ### Problem
-The current export generates a full HTML page with `<html>`, `<head>`, `<body>` tags. When users paste this into Shopify's "Custom Liquid" or "Custom HTML" section, it breaks because Shopify already provides the page wrapper, causing style conflicts and broken layouts.
+When "Copy for Shopify" is used, image URLs point to backend storage. These URLs break when pasted into Shopify due to CORS/access restrictions, resulting in broken images as shown in the screenshot.
 
 ### Solution
-Add a dedicated "Copy for Shopify" button that generates a self-contained HTML fragment (no `<!DOCTYPE>`, no `<head>`, no `<body>`) wrapped in a single `<div>` with scoped inline styles + a `<style>` block. Include clear instructions for the user.
+Make the Shopify export **async** — fetch all images and convert them to **base64 data URIs** that are embedded directly in the HTML. Also improve UX with a loading state and clearer instructions.
 
 ### Changes
 
-**1. `src/lib/exportLanding.ts`** — New function `generateShopifyHTML()`
-- Generates only the content sections (no full page wrapper)
-- Wraps everything in a scoped `<div class="nexsell-landing">` with a `<style>` block using that class as namespace to avoid Shopify theme conflicts
-- Includes Google Fonts import via `<style>` instead of `<link>` in `<head>`
-- Responsive media queries included inline in the style block
-- Same section rendering logic but outputting a fragment, not a full document
+**1. `src/lib/exportLanding.ts`** — Make `generateShopifyHTML` async with embedded images
+- Convert `generateShopifyHTML` to `async` function
+- Before generating HTML, fetch each image URL (hero + section `image_url` fields) using `fetchImageAsBlob` (already exists)
+- Convert blobs to base64 data URIs using `FileReader`/`URL.createObjectURL`
+- Replace image URLs in blocks with their base64 equivalents before generating HTML
+- The resulting HTML fragment will have all images self-contained
 
-**2. `src/components/landing/ExportPreviewDialog.tsx`** — Add Shopify export option
-- Add a new "Copy for Shopify" button with a Shopify icon (store icon)
-- When clicked, generates the Shopify-optimized fragment, copies to clipboard
-- Show a brief instruction toast: "Paste this in a Custom Liquid section in Shopify"
-- Reorder buttons: Copy HTML | Copy for Shopify | Download HTML | Download ZIP
+**2. `src/components/landing/ExportPreviewDialog.tsx`** — Async Shopify copy with loading state
+- Make `handleCopyShopify` async with a loading spinner (like ZIP export already does)
+- Pass `allImageUrls` to the Shopify export function so it can embed the hero image too
+- Add a brief instruction step or improved toast explaining where to paste in Shopify (e.g., "Copied! Paste in Shopify: Online Store → Pages → Custom Liquid section")
 
-**3. `src/i18n/locales/[es|en|pt].json`** — Add translation keys
-- `exportDialog.copyShopify`: "Copiar para Shopify" / "Copy for Shopify" / "Copiar para Shopify"
-- `exportDialog.shopifyCopied`: toast message with paste instructions
+**3. `src/i18n/locales/[es|en|pt].json`** — Update toast messages
+- Improve `shopifyCopied` message with clearer paste instructions
 
