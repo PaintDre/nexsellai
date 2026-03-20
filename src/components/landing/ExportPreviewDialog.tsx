@@ -37,6 +37,7 @@ const ExportPreviewDialog = ({
   const { t } = useTranslation();
   const { toast } = useToast();
   const [exporting, setExporting] = useState(false);
+  const [exportingShopify, setExportingShopify] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shopifyCopied, setShopifyCopied] = useState(false);
 
