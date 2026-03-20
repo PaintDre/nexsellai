@@ -38,6 +38,7 @@ const ExportPreviewDialog = ({
   const { toast } = useToast();
   const [exporting, setExporting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [shopifyCopied, setShopifyCopied] = useState(false);
 
   const htmlContent = useMemo(() => {
     if (!open) return "";
