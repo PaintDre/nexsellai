@@ -176,7 +176,8 @@
     "zipError": "Erro ao exportar ZIP",
     "htmlCopied": "HTML copiado para a área de transferência",
     "copyShopify": "Copiar para Shopify",
-    "shopifyCopied": "Copiado — Cole isso em uma seção 'Custom Liquid' no Shopify"
+    "shopifyCopied": "✅ HTML copiado com imagens embutidas",
+    "shopifyInstructions": "Vá para Shopify → Loja Online → Páginas → Adicione a seção 'Custom Liquid' e cole o código"
   },
   "socialProof": {
     "viewedToday": "🔥 <strong>{{count}}</strong> pessoas viram este produto hoje"
