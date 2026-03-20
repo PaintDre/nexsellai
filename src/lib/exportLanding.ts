@@ -520,4 +520,3 @@ export async function generateShopifyHTML(
 ${bodyContent}
 </div>`;
 }
-}
