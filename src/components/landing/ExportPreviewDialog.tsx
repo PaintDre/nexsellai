@@ -7,9 +7,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, FileCode, FileArchive, Loader2, Clipboard, Check } from "lucide-react";
+import { Download, FileCode, FileArchive, Loader2, Clipboard, Check, Store } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { generateLandingHTML, exportLandingAsHTML, exportLandingAsZip } from "@/lib/exportLanding";
+import { generateLandingHTML, exportLandingAsHTML, exportLandingAsZip, generateShopifyHTML } from "@/lib/exportLanding";
 import type { LandingTheme } from "@/components/landing/themes";
 import { useTranslation } from "react-i18next";
 
