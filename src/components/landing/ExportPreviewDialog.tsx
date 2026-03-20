@@ -90,6 +90,14 @@ const ExportPreviewDialog = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleCopyShopify = async () => {
+    const shopifyHTML = generateShopifyHTML(blocks, product, landingName, theme, productImage);
+    await navigator.clipboard.writeText(shopifyHTML);
+    setShopifyCopied(true);
+    toast({ title: t("exportDialog.shopifyCopied") });
+    setTimeout(() => setShopifyCopied(false), 2000);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
