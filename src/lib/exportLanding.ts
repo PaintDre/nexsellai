@@ -441,3 +441,47 @@ export function exportLandingAsHTML(
   const html = generateLandingHTML(blocks, product, landingName, theme, imageUrl);
   return new Blob([html], { type: "text/html" });
 }
+
+/**
+ * Generate a Shopify-compatible HTML fragment (no <!DOCTYPE>, <html>, <head>, <body>).
+ * Wrapped in a scoped <div class="nexsell-landing"> with a <style> block
+ * to avoid conflicts with Shopify themes.
+ */
+export function generateShopifyHTML(
+  blocks: Block[],
+  product: { name: string; price: number } | null,
+  landingName: string,
+  theme: LandingTheme = "clean",
+  imageUrl?: string | null
+): string {
+  // Generate the full HTML and extract just the body content + create scoped styles
+  const fullHTML = generateLandingHTML(blocks, product, landingName, theme, imageUrl);
+
+  // Extract sections between <body> and </body>
+  const bodyMatch = fullHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  const bodyContent = bodyMatch ? bodyMatch[1].trim() : "";
+
+  const t = themeCSS[theme];
+
+  return `<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+.nexsell-landing, .nexsell-landing * { margin: 0; padding: 0; box-sizing: border-box; }
+.nexsell-landing { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.nexsell-landing img { max-width: 100%; height: auto; }
+.nexsell-landing a { text-decoration: none; }
+.nexsell-landing details summary { list-style: none; }
+.nexsell-landing details summary::-webkit-details-marker { display: none; }
+@media (max-width: 640px) {
+  .nexsell-landing h1 { font-size: 32px !important; }
+  .nexsell-landing h2 { font-size: 26px !important; }
+  .nexsell-landing section { padding: 48px 16px !important; }
+}
+@media (max-width: 768px) {
+  .nexsell-landing div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  .nexsell-landing div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
+}
+</style>
+<div class="nexsell-landing">
+${bodyContent}
+</div>`;
+}

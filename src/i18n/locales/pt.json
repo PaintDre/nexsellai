@@ -174,7 +174,9 @@
     "htmlExported": "HTML exportado",
     "zipExported": "ZIP exportado com imagens",
     "zipError": "Erro ao exportar ZIP",
-    "htmlCopied": "HTML copiado para a área de transferência"
+    "htmlCopied": "HTML copiado para a área de transferência",
+    "copyShopify": "Copiar para Shopify",
+    "shopifyCopied": "Copiado — Cole isso em uma seção 'Custom Liquid' no Shopify"
   },
   "socialProof": {
     "viewedToday": "🔥 <strong>{{count}}</strong> pessoas viram este produto hoje"
