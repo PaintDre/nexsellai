@@ -37,6 +37,7 @@ const ExportPreviewDialog = ({
   const { t } = useTranslation();
   const { toast } = useToast();
   const [exporting, setExporting] = useState(false);
+  const [exportingShopify, setExportingShopify] = useState(false);
   const [copied, setCopied] = useState(false);
   const [shopifyCopied, setShopifyCopied] = useState(false);
 
@@ -91,11 +92,18 @@ const ExportPreviewDialog = ({
   };
 
   const handleCopyShopify = async () => {
-    const shopifyHTML = generateShopifyHTML(blocks, product, landingName, theme, productImage);
-    await navigator.clipboard.writeText(shopifyHTML);
-    setShopifyCopied(true);
-    toast({ title: t("exportDialog.shopifyCopied") });
-    setTimeout(() => setShopifyCopied(false), 2000);
+    setExportingShopify(true);
+    try {
+      const shopifyHTML = await generateShopifyHTML(blocks, product, landingName, theme, productImage, allImageUrls);
+      await navigator.clipboard.writeText(shopifyHTML);
+      setShopifyCopied(true);
+      toast({ title: t("exportDialog.shopifyCopied"), description: t("exportDialog.shopifyInstructions") });
+      setTimeout(() => setShopifyCopied(false), 2000);
+    } catch {
+      toast({ title: t("exportDialog.zipError"), variant: "destructive" });
+    } finally {
+      setExportingShopify(false);
+    }
   };
 
   return (
@@ -119,9 +127,9 @@ const ExportPreviewDialog = ({
             {copied ? <Check className="h-4 w-4 mr-1" /> : <Clipboard className="h-4 w-4 mr-1" />}
             {copied ? t("exportDialog.copied") : t("exportDialog.copyHTML")}
           </Button>
-          <Button variant="outline" size="sm" onClick={handleCopyShopify} className="border-green-300 text-green-700 hover:bg-green-50">
-            {shopifyCopied ? <Check className="h-4 w-4 mr-1" /> : <Store className="h-4 w-4 mr-1" />}
-            {shopifyCopied ? t("exportDialog.copied") : t("exportDialog.copyShopify")}
+          <Button variant="outline" size="sm" onClick={handleCopyShopify} disabled={exportingShopify} className="border-green-300 text-green-700 hover:bg-green-50">
+            {exportingShopify ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : shopifyCopied ? <Check className="h-4 w-4 mr-1" /> : <Store className="h-4 w-4 mr-1" />}
+            {exportingShopify ? t("common.loading") : shopifyCopied ? t("exportDialog.copied") : t("exportDialog.copyShopify")}
           </Button>
           <Button variant="outline" size="sm" onClick={handleExportHTML}>
             <FileCode className="h-4 w-4 mr-1" /> {t("exportDialog.htmlOnly")}

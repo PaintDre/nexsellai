@@ -367,6 +367,18 @@ async function fetchImageAsBlob(url: string): Promise<{ blob: Blob; extension: s
 }
 
 /**
+ * Convert a Blob to a base64 data URI string
+ */
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+/**
  * Export landing as a ZIP file containing:
  * - index.html (with local image references)
  * - images/ folder with product images
@@ -444,24 +456,47 @@ export function exportLandingAsHTML(
 
 /**
  * Generate a Shopify-compatible HTML fragment (no <!DOCTYPE>, <html>, <head>, <body>).
+ * All images are embedded as base64 data URIs so they work without external URLs.
  * Wrapped in a scoped <div class="nexsell-landing"> with a <style> block
  * to avoid conflicts with Shopify themes.
  */
-export function generateShopifyHTML(
+export async function generateShopifyHTML(
   blocks: Block[],
   product: { name: string; price: number } | null,
   landingName: string,
   theme: LandingTheme = "clean",
-  imageUrl?: string | null
-): string {
-  // Generate the full HTML and extract just the body content + create scoped styles
-  const fullHTML = generateLandingHTML(blocks, product, landingName, theme, imageUrl);
+  imageUrl?: string | null,
+  allImageUrls: string[] = []
+): Promise<string> {
+  // Convert hero/product image to base64
+  let heroBase64: string | null = null;
+  const heroSrc = imageUrl || (allImageUrls.length > 0 ? allImageUrls[0] : null);
+  if (heroSrc) {
+    const result = await fetchImageAsBlob(heroSrc);
+    if (result) {
+      heroBase64 = await blobToBase64(result.blob);
+    }
+  }
+
+  // Convert section banner images to base64
+  const blocksWithBase64 = await Promise.all(
+    blocks.map(async (block) => {
+      if (!block.image_url) return block;
+      const result = await fetchImageAsBlob(block.image_url);
+      if (result) {
+        const base64 = await blobToBase64(result.blob);
+        return { ...block, image_url: base64 };
+      }
+      return block;
+    })
+  );
+
+  // Generate the full HTML with base64 images
+  const fullHTML = generateLandingHTML(blocksWithBase64, product, landingName, theme, heroBase64);
 
   // Extract sections between <body> and </body>
   const bodyMatch = fullHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   const bodyContent = bodyMatch ? bodyMatch[1].trim() : "";
-
-  const t = themeCSS[theme];
 
   return `<style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
