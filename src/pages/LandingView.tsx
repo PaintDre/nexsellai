@@ -440,6 +440,7 @@ const LandingView = () => {
               </>
             ) : (
               <>
+                {/* Theme selector */}
                 <Select value={theme} onValueChange={async (v) => {
                   const newTheme = v as LandingTheme;
                   setTheme(newTheme);
@@ -448,7 +449,7 @@ const LandingView = () => {
                     setLanding({ ...landing, theme: v } as any);
                   }
                 }}>
-                  <SelectTrigger className="h-8 w-[140px] text-xs">
+                  <SelectTrigger className="h-8 w-[130px] text-xs">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -462,60 +463,97 @@ const LandingView = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                <Badge variant="secondary" className="text-xs hidden sm:inline-flex">{landing.name}</Badge>
 
+                <div className="h-5 w-px bg-border hidden sm:block" />
+
+                {/* Primary: Edit */}
                 <Button variant="outline" size="sm" onClick={handleEnterEditMode}>
-                  <Pencil className="h-4 w-4 mr-1" />
+                  <Pencil className="h-4 w-4 sm:mr-1" />
                   <span className="hidden sm:inline">{t("common.edit")}</span>
                 </Button>
-                
-                {isPaidPlan && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <ImagePlus className="h-4 w-4 mr-1" />
-                        <span className="hidden sm:inline">{t("landingView.aiImages")}</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {imageableSections.map((block) => (
-                        <DropdownMenuItem
-                          key={block.type}
-                          onClick={() => openImageGenerator(block.type, block.title || block.type)}
-                        >
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          {block.title || block.type}
-                          {block.image_url && (
-                            <Badge variant="secondary" className="ml-2 text-[10px]">✓</Badge>
-                          )}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
 
-                <Button variant="outline" size="sm" onClick={handleDuplicate}>
-                  <Copy className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">{t("common.duplicate")}</span>
+                {/* Primary: Export */}
+                <Button variant="outline" size="sm" onClick={() => setShowExportPreview(true)} disabled={exporting}>
+                  <Store className="h-4 w-4 sm:mr-1" />
+                  <span className="hidden sm:inline">{t("common.export")}</span>
                 </Button>
 
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      <span className="hidden sm:inline">{t("common.delete")}</span>
+                {/* Primary: Publish */}
+                <Button
+                  variant={(landing as any).published ? "default" : "outline"}
+                  size="sm"
+                  onClick={handleTogglePublish}
+                  disabled={publishing}
+                >
+                  {publishing ? <Loader2 className="h-4 w-4 sm:mr-1 animate-spin" /> :
+                    (landing as any).published ? <Globe className="h-4 w-4 sm:mr-1" /> : <GlobeLock className="h-4 w-4 sm:mr-1" />}
+                  <span className="hidden sm:inline">{(landing as any).published ? t("landingView.publishedLabel") : t("landingView.publish")}</span>
+                </Button>
+
+                <div className="h-5 w-px bg-border hidden sm:block" />
+
+                {/* Secondary actions dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <MoreVertical className="h-4 w-4" />
                     </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>{t("landingView.deleteLanding")}</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        {t("landingView.deleteDesc", { name: landing.name })}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
-                      <AlertDialogAction onClick={async () => {
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-52">
+                    <DropdownMenuItem asChild>
+                      <Link to={`/landings/${landing.id}/preview`} className="flex items-center">
+                        <Maximize2 className="h-4 w-4 mr-2" /> {t("landingView.fullView")}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDuplicate}>
+                      <Copy className="h-4 w-4 mr-2" /> {t("common.duplicate")}
+                    </DropdownMenuItem>
+
+                    {isPaidPlan && imageableSections.length > 0 && (
+                      <>
+                        <DropdownMenuSeparator />
+                        {imageableSections.map((block) => (
+                          <DropdownMenuItem
+                            key={block.type}
+                            onClick={() => openImageGenerator(block.type, block.title || block.type)}
+                          >
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            {t("landingView.aiImages")}: {block.title || block.type}
+                            {block.image_url && <Badge variant="secondary" className="ml-auto text-[10px]">✓</Badge>}
+                          </DropdownMenuItem>
+                        ))}
+                      </>
+                    )}
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem onClick={handleExportShopify}>
+                      <Download className="h-4 w-4 mr-2" /> {t("exportDialog.downloadLiquid")}
+                    </DropdownMenuItem>
+
+                    {(landing as any).published && publicUrl && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={handleCopyPublicUrl}>
+                          <Copy className="h-4 w-4 mr-2" /> {t("landingView.copyUrl")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => window.open(publicUrl, "_blank")}>
+                          <ExternalLink className="h-4 w-4 mr-2" /> {t("landingView.openNewTab")}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleShare("whatsapp")}>
+                          <Share2 className="h-4 w-4 mr-2" /> WhatsApp
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleShare("facebook")}>
+                          <Share2 className="h-4 w-4 mr-2" /> Facebook
+                        </DropdownMenuItem>
+                      </>
+                    )}
+
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive"
+                      onClick={async () => {
+                        if (!confirm(t("landingView.deleteDesc", { name: landing.name }))) return;
                         try {
                           const { error } = await supabase.from("landings").delete().eq("id", landing.id).eq("user_id", user!.id);
                           if (error) throw error;
@@ -524,62 +562,18 @@ const LandingView = () => {
                         } catch (err: any) {
                           toast.error(t("landingView.deleteError"), { description: err.message });
                         }
-                      }}>{t("common.delete")}</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" /> {t("common.delete")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 <VersionHistory
                   landingId={landing.id}
                   userId={user!.id}
                   onRestore={handleRestoreVersion}
                 />
-
-                <Button variant="outline" size="sm" asChild>
-                  <Link to={`/landings/${landing.id}/preview`}>
-                    <Maximize2 className="h-4 w-4 mr-1" /> {t("landingView.fullView")}
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => setShowExportPreview(true)} disabled={exporting}>
-                  <Download className="h-4 w-4 mr-1" />
-                  {t("common.export")}
-                </Button>
-
-                {/* Publish button */}
-                <Button
-                  variant={(landing as any).published ? "default" : "outline"}
-                  size="sm"
-                  onClick={handleTogglePublish}
-                  disabled={publishing}
-                >
-                  {publishing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> :
-                    (landing as any).published ? <Globe className="h-4 w-4 mr-1" /> : <GlobeLock className="h-4 w-4 mr-1" />}
-                  <span className="hidden sm:inline">{(landing as any).published ? t("landingView.publishedLabel") : t("landingView.publish")}</span>
-                </Button>
-
-                {/* Share & public URL */}
-                {(landing as any).published && publicUrl && (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <Share2 className="h-4 w-4 mr-1" />
-                        <span className="hidden sm:inline">{t("landingView.share")}</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={handleCopyPublicUrl}>
-                        <Copy className="h-4 w-4 mr-2" /> {t("landingView.copyUrl")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => window.open(publicUrl, "_blank")}>
-                        <ExternalLink className="h-4 w-4 mr-2" /> {t("landingView.openNewTab")}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleShare("facebook")}>Facebook</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleShare("twitter")}>X (Twitter)</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleShare("linkedin")}>LinkedIn</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleShare("whatsapp")}>WhatsApp</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
               </>
             )}
           </div>
