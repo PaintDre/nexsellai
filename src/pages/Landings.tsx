@@ -6,11 +6,11 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Eye, Download, Loader2, Maximize2, Copy, Trash2, Store } from "lucide-react";
+import { FileText, Eye, Loader2, Maximize2, Copy, Trash2, Store } from "lucide-react";
 import { toast } from "sonner";
-import { exportShopifyZip } from "@/lib/exportShopify";
 import { type LandingTheme } from "@/components/landing/themes";
 import { useTranslation } from "react-i18next";
+import ExportPreviewDialog from "@/components/landing/ExportPreviewDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,8 +35,9 @@ const Landings = () => {
   const { user } = useAuth();
   const [landings, setLandings] = useState<LandingWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
-  const [exportingId, setExportingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [selectedLanding, setSelectedLanding] = useState<LandingWithProduct | null>(null);
 
   const getProductImageUrls = useCallback((product?: Product | null): string[] => {
     if (!product?.images?.length) return [];
@@ -47,29 +48,9 @@ const Landings = () => {
     }).filter(Boolean);
   }, []);
 
-  const handleExport = async (landing: LandingWithProduct) => {
-    setExportingId(landing.id);
-    try {
-      const product = landing.product;
-      const theme = ((landing as any).theme || "clean") as LandingTheme;
-      const imageUrls = getProductImageUrls(product);
-      const blob = await exportShopifyZip(
-        landing.blocks as any[], product || null, theme, imageUrls[0] || null, imageUrls
-      );
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${landing.name.replace(/\s+/g, "-").toLowerCase()}-shopify.zip`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      toast.success(t("exportDialog.liquidDownloaded"));
-    } catch {
-      toast.error(t("landings.exportError"));
-    } finally {
-      setExportingId(null);
-    }
+  const handleOpenExport = (landing: LandingWithProduct) => {
+    setSelectedLanding(landing);
+    setExportDialogOpen(true);
   };
 
   const handleDelete = useCallback(async (landingId: string) => {
@@ -244,8 +225,8 @@ const Landings = () => {
                       <Button variant="secondary" size="sm" className="text-xs min-h-[44px]" onClick={() => handleDuplicate(landing)}>
                         <Copy className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> {t("common.duplicate")}</span>
                       </Button>
-                      <Button variant="secondary" size="sm" className="text-xs min-h-[44px]" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
-                        {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Store className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> Shopify</span></>}
+                      <Button variant="secondary" size="sm" className="text-xs min-h-[44px]" onClick={() => handleOpenExport(landing)}>
+                        <Store className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> Shopify</span>
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -273,6 +254,19 @@ const Landings = () => {
             );
           })}
         </div>
+      )}
+
+      {selectedLanding && (
+        <ExportPreviewDialog
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
+          blocks={selectedLanding.blocks as any[]}
+          product={selectedLanding.product ? { name: selectedLanding.product.name, price: selectedLanding.product.price } : null}
+          landingName={selectedLanding.name}
+          theme={((selectedLanding as any).theme || "clean") as LandingTheme}
+          productImage={getProductImageUrls(selectedLanding.product)[0] || null}
+          allImageUrls={getProductImageUrls(selectedLanding.product)}
+        />
       )}
     </div>
   );
