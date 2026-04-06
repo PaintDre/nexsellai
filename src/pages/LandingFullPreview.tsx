@@ -6,7 +6,7 @@ import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { ArrowLeft, Download, Loader2, Palette } from "lucide-react";
-import { exportLandingAsHTML } from "@/lib/exportLanding";
+import { exportShopifyZip } from "@/lib/exportShopify";
 import LandingRenderer from "@/components/landing/LandingRenderer";
 import { themes, type LandingTheme } from "@/components/landing/themes";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -56,22 +56,22 @@ const LandingFullPreview = () => {
     load();
   }, [id, user]);
 
-  const handleExportHTML = async () => {
+  const handleExportShopify = async () => {
     if (!landing) return;
     setExporting(true);
     try {
-      const blob = exportLandingAsHTML(
-        landing.blocks as any[], product, landing.name, theme, productImage
+      const blob = await exportShopifyZip(
+        landing.blocks as any[], product, landing.name, theme, productImage, product?.images || []
       );
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${landing.name.replace(/\s+/g, "-").toLowerCase()}.html`;
+      a.download = `${landing.name.replace(/\s+/g, "-").toLowerCase()}-shopify.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success("HTML exportado correctamente");
+      toast.success("Plantilla Shopify exportada correctamente");
     } catch {
       toast.error("Error al exportar");
     } finally {
