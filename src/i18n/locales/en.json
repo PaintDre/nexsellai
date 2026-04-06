@@ -173,11 +173,33 @@
     "zipWithImages": "ZIP with images",
     "htmlExported": "HTML exported",
     "zipExported": "ZIP exported with images",
-    "zipError": "Error exporting ZIP",
+    "zipError": "Export error",
     "htmlCopied": "HTML copied to clipboard",
     "copyShopify": "Copy for Shopify",
-    "shopifyCopied": "✅ HTML copied with embedded images",
-    "shopifyInstructions": "Go to Shopify → Online Store → Pages → Add 'Custom Liquid' section and paste the code"
+    "shopifyCopied": "✅ Shopify HTML copied",
+    "shopifyInstructions": "Paste in Shopify → Online Store → Pages → 'Custom Liquid' section"
+  },
+  "shopify": {
+    "connectTitle": "Connect Shopify store",
+    "connectDescription": "Connect your store to export landings directly as Shopify pages.",
+    "storeDomain": "Store domain",
+    "accessToken": "Admin API access token",
+    "howToGetToken": "How to get the token?",
+    "step1": "Go to Shopify Admin → Settings → Apps",
+    "step2": "Click 'Develop apps' → 'Create an app'",
+    "step3": "In 'Admin API scopes', enable 'write_content'",
+    "step4": "Install the app and copy the access token",
+    "learnMore": "Learn more",
+    "testConnection": "Test connection",
+    "testSuccess": "Connection successful",
+    "testFailed": "Connection failed",
+    "saveConnection": "Save connection",
+    "connected": "Shopify store connected",
+    "exportToShopify": "Export to Shopify",
+    "connectAndExport": "Connect Shopify & export",
+    "exportSuccess": "✅ Page created on Shopify",
+    "exportError": "Error exporting to Shopify",
+    "viewPage": "View page"
   },
   "socialProof": {
     "viewedToday": "🔥 <strong>{{count}}</strong> people viewed this product today"

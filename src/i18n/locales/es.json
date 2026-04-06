@@ -173,11 +173,33 @@
     "zipWithImages": "ZIP con imágenes",
     "htmlExported": "HTML exportado",
     "zipExported": "ZIP exportado con imágenes",
-    "zipError": "Error al exportar ZIP",
+    "zipError": "Error al exportar",
     "htmlCopied": "HTML copiado al portapapeles",
     "copyShopify": "Copiar para Shopify",
-    "shopifyCopied": "✅ HTML copiado con imágenes incluidas",
-    "shopifyInstructions": "Ve a Shopify → Tienda Online → Páginas → Añadir sección 'Custom Liquid' y pega el código"
+    "shopifyCopied": "✅ HTML Shopify copiado",
+    "shopifyInstructions": "Pega en Shopify → Tienda Online → Páginas → Sección 'Custom Liquid'"
+  },
+  "shopify": {
+    "connectTitle": "Conectar tienda Shopify",
+    "connectDescription": "Conecta tu tienda para exportar landings directamente como páginas de Shopify.",
+    "storeDomain": "Dominio de la tienda",
+    "accessToken": "Token de acceso de Admin API",
+    "howToGetToken": "¿Cómo obtener el token?",
+    "step1": "Ve a Shopify Admin → Configuración → Apps",
+    "step2": "Haz clic en 'Desarrollar apps' → 'Crear una app'",
+    "step3": "En 'Scopes de Admin API', activa 'write_content'",
+    "step4": "Instala la app y copia el token de acceso",
+    "learnMore": "Más información",
+    "testConnection": "Probar conexión",
+    "testSuccess": "Conexión exitosa",
+    "testFailed": "Error de conexión",
+    "saveConnection": "Guardar conexión",
+    "connected": "Tienda Shopify conectada",
+    "exportToShopify": "Exportar a Shopify",
+    "connectAndExport": "Conectar Shopify y exportar",
+    "exportSuccess": "✅ Página creada en Shopify",
+    "exportError": "Error al exportar a Shopify",
+    "viewPage": "Ver página"
   },
   "socialProof": {
     "viewedToday": "🔥 <strong>{{count}}</strong> personas vieron este producto hoy"

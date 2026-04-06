@@ -351,6 +351,24 @@ ${sections.join("\n")}
 }
 
 /**
+ * Ensure an image URL is an absolute public Supabase storage URL.
+ * If it's already absolute, return as-is. If it looks like a relative storage path, build the full URL.
+ */
+function normalizeImageUrl(url: string): string {
+  if (!url) return url;
+  // Already absolute
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  // Blob or data URI — can't fix these
+  if (url.startsWith("blob:") || url.startsWith("data:")) return url;
+  // Relative path — assume product-images bucket
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+  if (supabaseUrl) {
+    return `${supabaseUrl}/storage/v1/object/public/product-images/${url.replace(/^\/+/, "")}`;
+  }
+  return url;
+}
+
+/**
  * Fetch an image URL as a Blob
  */
 async function fetchImageAsBlob(url: string): Promise<{ blob: Blob; extension: string } | null> {
@@ -364,18 +382,6 @@ async function fetchImageAsBlob(url: string): Promise<{ blob: Blob; extension: s
   } catch {
     return null;
   }
-}
-
-/**
- * Convert a Blob to a base64 data URI string
- */
-function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
 }
 
 /**
@@ -407,7 +413,7 @@ export async function exportLandingAsZip(
   }
 
   // Download and add section banner images to ZIP
-  const blocksWithLocalImages = blocks.map((block, idx) => {
+  const blocksWithLocalImages = blocks.map((block) => {
     if (!block.image_url) return block;
     return { ...block, _originalImageUrl: block.image_url };
   });
@@ -456,47 +462,36 @@ export function exportLandingAsHTML(
 
 /**
  * Generate a Shopify-compatible HTML fragment (no <!DOCTYPE>, <html>, <head>, <body>).
- * All images are embedded as base64 data URIs so they work without external URLs.
+ * All image URLs are normalized to absolute public Supabase storage URLs so they work
+ * anywhere without CORS issues. No base64 conversion needed since the bucket is public.
  * Wrapped in a scoped <div class="nexsell-landing"> with a <style> block
  * to avoid conflicts with Shopify themes.
  */
-export async function generateShopifyHTML(
+export function generateShopifyHTML(
   blocks: Block[],
   product: { name: string; price: number } | null,
   landingName: string,
   theme: LandingTheme = "clean",
   imageUrl?: string | null,
   allImageUrls: string[] = []
-): Promise<string> {
-  // Convert hero/product image to base64
-  let heroBase64: string | null = null;
-  const heroSrc = imageUrl || (allImageUrls.length > 0 ? allImageUrls[0] : null);
-  if (heroSrc) {
-    const result = await fetchImageAsBlob(heroSrc);
-    if (result) {
-      heroBase64 = await blobToBase64(result.blob);
-    }
-  }
+): string {
+  // Normalize hero/product image URL
+  const heroSrc = normalizeImageUrl(imageUrl || (allImageUrls.length > 0 ? allImageUrls[0] : "") || "");
 
-  // Convert section banner images to base64
-  const blocksWithBase64 = await Promise.all(
-    blocks.map(async (block) => {
-      if (!block.image_url) return block;
-      const result = await fetchImageAsBlob(block.image_url);
-      if (result) {
-        const base64 = await blobToBase64(result.blob);
-        return { ...block, image_url: base64 };
-      }
-      return block;
-    })
-  );
+  // Normalize all block image URLs
+  const normalizedBlocks = blocks.map((block) => {
+    if (!block.image_url) return block;
+    return { ...block, image_url: normalizeImageUrl(block.image_url) };
+  });
 
-  // Generate the full HTML with base64 images
-  const fullHTML = generateLandingHTML(blocksWithBase64, product, landingName, theme, heroBase64);
+  // Generate the full HTML with normalized URLs
+  const fullHTML = generateLandingHTML(normalizedBlocks, product, landingName, theme, heroSrc || null);
 
   // Extract sections between <body> and </body>
   const bodyMatch = fullHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   const bodyContent = bodyMatch ? bodyMatch[1].trim() : "";
+
+  const t = themeCSS[theme];
 
   return `<style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
