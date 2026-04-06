@@ -7,9 +7,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, FileCode, FileArchive, Loader2, Clipboard, Check, Store, ExternalLink } from "lucide-react";
+import { Download, Loader2, Store, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { generateLandingHTML, exportLandingAsHTML, exportLandingAsZip, generateShopifyHTML } from "@/lib/exportLanding";
+import { generateLandingHTML } from "@/lib/exportLanding";
+import { exportShopifyZip } from "@/lib/exportShopify";
 import type { LandingTheme } from "@/components/landing/themes";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -40,19 +41,17 @@ const ExportPreviewDialog = ({
   const { t } = useTranslation();
   const { toast } = useToast();
   const { user } = useAuth();
-  const [exporting, setExporting] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [shopifyConnected, setShopifyConnected] = useState(false);
   const [shopifyExporting, setShopifyExporting] = useState(false);
   const [showConnectDialog, setShowConnectDialog] = useState(false);
-  const [shopifyCopied, setShopifyCopied] = useState(false);
+  const [liquidExporting, setLiquidExporting] = useState(false);
 
   // Check if user has a Shopify connection
   useEffect(() => {
     if (!open || !user) return;
     const checkConnection = async () => {
       const { data } = await supabase
-        .from("shopify_connections" as any)
+        .from("shopify_connections")
         .select("id")
         .eq("user_id", user.id)
         .maybeSingle();
@@ -61,6 +60,7 @@ const ExportPreviewDialog = ({
     checkConnection();
   }, [open, user]);
 
+  // Preview HTML (only for iframe, NOT for export)
   const htmlContent = useMemo(() => {
     if (!open) return "";
     return generateLandingHTML(blocks, product, landingName, theme, productImage);
@@ -83,43 +83,20 @@ const ExportPreviewDialog = ({
     URL.revokeObjectURL(url);
   };
 
-  const handleExportHTML = () => {
-    const blob = exportLandingAsHTML(blocks, product, landingName, theme, productImage);
-    downloadBlob(blob, `${landingName.replace(/\s+/g, "-").toLowerCase()}.html`);
-    toast({ title: t("exportDialog.htmlExported") });
-    onOpenChange(false);
-  };
-
-  const handleExportZip = async () => {
-    setExporting(true);
+  const handleDownloadLiquid = async () => {
+    setLiquidExporting(true);
     try {
-      const blob = await exportLandingAsZip(blocks, product, landingName, theme, allImageUrls);
-      downloadBlob(blob, `${landingName.replace(/\s+/g, "-").toLowerCase()}.zip`);
-      toast({ title: t("exportDialog.zipExported") });
-      onOpenChange(false);
+      const blob = await exportShopifyZip(blocks, product, theme, productImage, allImageUrls);
+      downloadBlob(blob, `${landingName.replace(/\s+/g, "-").toLowerCase()}-shopify.zip`);
+      toast({
+        title: t("exportDialog.liquidDownloaded"),
+        description: t("exportDialog.liquidInstructions"),
+      });
     } catch {
-      toast({ title: t("exportDialog.zipError"), variant: "destructive" });
+      toast({ title: t("common.error"), variant: "destructive" });
     } finally {
-      setExporting(false);
+      setLiquidExporting(false);
     }
-  };
-
-  const handleCopyHTML = async () => {
-    await navigator.clipboard.writeText(htmlContent);
-    setCopied(true);
-    toast({ title: t("exportDialog.htmlCopied") });
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleCopyShopify = () => {
-    const shopifyHTML = generateShopifyHTML(blocks, product, landingName, theme, productImage, allImageUrls);
-    navigator.clipboard.writeText(shopifyHTML);
-    setShopifyCopied(true);
-    toast({
-      title: t("exportDialog.shopifyCopied"),
-      description: t("exportDialog.shopifyInstructions"),
-    });
-    setTimeout(() => setShopifyCopied(false), 2000);
   };
 
   const handleExportToShopify = async () => {
@@ -129,7 +106,28 @@ const ExportPreviewDialog = ({
     }
     setShopifyExporting(true);
     try {
-      const shopifyHTML = generateShopifyHTML(blocks, product, landingName, theme, productImage, allImageUrls);
+      // For direct Shopify export, we use the edge function which creates a page
+      // with normalized image URLs
+      const { normalizeImageUrl } = await import("@/lib/exportLanding");
+      const heroSrc = normalizeImageUrl(productImage || (allImageUrls.length > 0 ? allImageUrls[0] : "") || "");
+      const normalizedBlocks = blocks.map((block: any) => {
+        if (!block.image_url) return block;
+        return { ...block, image_url: normalizeImageUrl(block.image_url) };
+      });
+      const fullHTML = generateLandingHTML(normalizedBlocks, product, landingName, theme, heroSrc || null);
+      const bodyMatch = fullHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+      const bodyContent = bodyMatch ? bodyMatch[1].trim() : "";
+
+      const shopifyHTML = `<div class="nexsell-landing">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+.nexsell-landing, .nexsell-landing * { margin: 0; padding: 0; box-sizing: border-box; }
+.nexsell-landing { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; line-height: 1.6; }
+.nexsell-landing img { max-width: 100%; height: auto; }
+</style>
+${bodyContent}
+</div>`;
+
       const { data, error } = await supabase.functions.invoke("shopify-export", {
         body: {
           action: "create-page",
@@ -192,28 +190,21 @@ const ExportPreviewDialog = ({
                   ? t("shopify.exportToShopify")
                   : t("shopify.connectAndExport")}
               </Button>
+            </div>
+            {/* Secondary: Download Liquid Template */}
+            <div className="flex flex-wrap gap-2 w-full">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleCopyShopify}
-                className="border-[#96bf48]/40 text-[#5e8e22] hover:bg-[#96bf48]/10"
+                onClick={handleDownloadLiquid}
+                disabled={liquidExporting}
               >
-                {shopifyCopied ? <Check className="h-4 w-4 mr-1" /> : <Clipboard className="h-4 w-4 mr-1" />}
-                {shopifyCopied ? t("exportDialog.copied") : t("exportDialog.copyShopify")}
-              </Button>
-            </div>
-            {/* Secondary: Standard exports */}
-            <div className="flex flex-wrap gap-2 w-full">
-              <Button variant="outline" size="sm" onClick={handleCopyHTML}>
-                {copied ? <Check className="h-4 w-4 mr-1" /> : <Clipboard className="h-4 w-4 mr-1" />}
-                {copied ? t("exportDialog.copied") : t("exportDialog.copyHTML")}
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleExportHTML}>
-                <FileCode className="h-4 w-4 mr-1" /> {t("exportDialog.htmlOnly")}
-              </Button>
-              <Button size="sm" variant="outline" onClick={handleExportZip} disabled={exporting}>
-                {exporting ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <FileArchive className="h-4 w-4 mr-1" />}
-                {t("exportDialog.zipWithImages")}
+                {liquidExporting ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 mr-1" />
+                )}
+                {t("exportDialog.downloadLiquid")}
               </Button>
             </div>
           </DialogFooter>
