@@ -1,5 +1,4 @@
 import type { LandingTheme } from "@/components/landing/themes";
-import JSZip from "jszip";
 
 interface Block {
   type: string;
@@ -80,6 +79,24 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
   },
 };
 
+/**
+ * Ensure an image URL is an absolute public Supabase storage URL.
+ */
+export function normalizeImageUrl(url: string): string {
+  if (!url) return url;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("blob:") || url.startsWith("data:")) return url;
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+  if (supabaseUrl) {
+    return `${supabaseUrl}/storage/v1/object/public/product-images/${url.replace(/^\/+/, "")}`;
+  }
+  return url;
+}
+
+/**
+ * Generate a full HTML page for preview rendering only (iframe in ExportPreviewDialog).
+ * NOT used for export — only for visual preview.
+ */
 export function generateLandingHTML(
   blocks: Block[],
   product: { name: string; price: number } | null,
@@ -120,7 +137,6 @@ export function generateLandingHTML(
 
   const sections: string[] = [];
 
-  // Helper to render section banner image
   const sectionBannerHTML = (block: Block) => {
     if (!block.image_url) return "";
     return `<div style="width:100%;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1);margin-bottom:32px;"><img src="${block.image_url}" alt="${block.title || block.type}" style="width:100%;height:auto;display:block;" /></div>`;
@@ -348,170 +364,4 @@ export function generateLandingHTML(
 ${sections.join("\n")}
 </body>
 </html>`;
-}
-
-/**
- * Ensure an image URL is an absolute public Supabase storage URL.
- * If it's already absolute, return as-is. If it looks like a relative storage path, build the full URL.
- */
-function normalizeImageUrl(url: string): string {
-  if (!url) return url;
-  // Already absolute
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  // Blob or data URI — can't fix these
-  if (url.startsWith("blob:") || url.startsWith("data:")) return url;
-  // Relative path — assume product-images bucket
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
-  if (supabaseUrl) {
-    return `${supabaseUrl}/storage/v1/object/public/product-images/${url.replace(/^\/+/, "")}`;
-  }
-  return url;
-}
-
-/**
- * Fetch an image URL as a Blob
- */
-async function fetchImageAsBlob(url: string): Promise<{ blob: Blob; extension: string } | null> {
-  try {
-    const response = await fetch(url);
-    if (!response.ok) return null;
-    const blob = await response.blob();
-    const contentType = response.headers.get("content-type") || "image/jpeg";
-    const ext = contentType.includes("png") ? "png" : contentType.includes("webp") ? "webp" : "jpg";
-    return { blob, extension: ext };
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Export landing as a ZIP file containing:
- * - index.html (with local image references)
- * - images/ folder with product images
- */
-export async function exportLandingAsZip(
-  blocks: Block[],
-  product: { name: string; price: number } | null,
-  landingName: string,
-  theme: LandingTheme = "clean",
-  imageUrls: string[] = []
-): Promise<Blob> {
-  const zip = new JSZip();
-  const imgFolder = zip.folder("images")!;
-  
-  let heroImagePath: string | null = null;
-
-  // Download and add product images to ZIP
-  for (let i = 0; i < imageUrls.length; i++) {
-    const url = imageUrls[i];
-    const result = await fetchImageAsBlob(url);
-    if (result) {
-      const filename = `product-${i + 1}.${result.extension}`;
-      imgFolder.file(filename, result.blob);
-      if (i === 0) heroImagePath = `images/${filename}`;
-    }
-  }
-
-  // Download and add section banner images to ZIP
-  const blocksWithLocalImages = blocks.map((block) => {
-    if (!block.image_url) return block;
-    return { ...block, _originalImageUrl: block.image_url };
-  });
-
-  for (let i = 0; i < blocksWithLocalImages.length; i++) {
-    const block = blocksWithLocalImages[i] as any;
-    if (block._originalImageUrl) {
-      const result = await fetchImageAsBlob(block._originalImageUrl);
-      if (result) {
-        const filename = `section-${block.type}-${i}.${result.extension}`;
-        imgFolder.file(filename, result.blob);
-        blocksWithLocalImages[i] = { ...block, image_url: `images/${filename}` };
-      }
-      delete (blocksWithLocalImages[i] as any)._originalImageUrl;
-    }
-  }
-
-  // Generate HTML with local image paths
-  const html = generateLandingHTML(
-    blocksWithLocalImages,
-    product,
-    landingName,
-    theme,
-    null,
-    heroImagePath
-  );
-  
-  zip.file("index.html", html);
-
-  return zip.generateAsync({ type: "blob" });
-}
-
-/**
- * Export only the HTML file (no images bundled, uses absolute URLs)
- */
-export function exportLandingAsHTML(
-  blocks: Block[],
-  product: { name: string; price: number } | null,
-  landingName: string,
-  theme: LandingTheme = "clean",
-  imageUrl?: string | null
-): Blob {
-  const html = generateLandingHTML(blocks, product, landingName, theme, imageUrl);
-  return new Blob([html], { type: "text/html" });
-}
-
-/**
- * Generate a Shopify-compatible HTML fragment (no <!DOCTYPE>, <html>, <head>, <body>).
- * All image URLs are normalized to absolute public Supabase storage URLs so they work
- * anywhere without CORS issues. No base64 conversion needed since the bucket is public.
- * Wrapped in a scoped <div class="nexsell-landing"> with a <style> block
- * to avoid conflicts with Shopify themes.
- */
-export function generateShopifyHTML(
-  blocks: Block[],
-  product: { name: string; price: number } | null,
-  landingName: string,
-  theme: LandingTheme = "clean",
-  imageUrl?: string | null,
-  allImageUrls: string[] = []
-): string {
-  // Normalize hero/product image URL
-  const heroSrc = normalizeImageUrl(imageUrl || (allImageUrls.length > 0 ? allImageUrls[0] : "") || "");
-
-  // Normalize all block image URLs
-  const normalizedBlocks = blocks.map((block) => {
-    if (!block.image_url) return block;
-    return { ...block, image_url: normalizeImageUrl(block.image_url) };
-  });
-
-  // Generate the full HTML with normalized URLs
-  const fullHTML = generateLandingHTML(normalizedBlocks, product, landingName, theme, heroSrc || null);
-
-  // Extract sections between <body> and </body>
-  const bodyMatch = fullHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-  const bodyContent = bodyMatch ? bodyMatch[1].trim() : "";
-
-  const t = themeCSS[theme];
-
-  return `<style>
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
-.nexsell-landing, .nexsell-landing * { margin: 0; padding: 0; box-sizing: border-box; }
-.nexsell-landing { font-family: 'Inter', system-ui, sans-serif; color: #1e293b; line-height: 1.6; -webkit-font-smoothing: antialiased; }
-.nexsell-landing img { max-width: 100%; height: auto; }
-.nexsell-landing a { text-decoration: none; }
-.nexsell-landing details summary { list-style: none; }
-.nexsell-landing details summary::-webkit-details-marker { display: none; }
-@media (max-width: 640px) {
-  .nexsell-landing h1 { font-size: 32px !important; }
-  .nexsell-landing h2 { font-size: 26px !important; }
-  .nexsell-landing section { padding: 48px 16px !important; }
-}
-@media (max-width: 768px) {
-  .nexsell-landing div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
-  .nexsell-landing div[style*="grid-template-columns: 1fr 1fr"] { grid-template-columns: 1fr !important; }
-}
-</style>
-<div class="nexsell-landing">
-${bodyContent}
-</div>`;
 }

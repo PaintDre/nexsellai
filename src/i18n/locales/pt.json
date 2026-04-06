@@ -166,18 +166,11 @@
     "user": "Usuário"
   },
   "exportDialog": {
-    "title": "Preview de exportação",
-    "copyHTML": "Copiar HTML",
+    "title": "Exportar para Shopify",
     "copied": "Copiado",
-    "htmlOnly": "Apenas HTML",
-    "zipWithImages": "ZIP com imagens",
-    "htmlExported": "HTML exportado",
-    "zipExported": "ZIP exportado com imagens",
-    "zipError": "Erro ao exportar",
-    "htmlCopied": "HTML copiado para a área de transferência",
-    "copyShopify": "Copiar para Shopify",
-    "shopifyCopied": "✅ HTML Shopify copiado",
-    "shopifyInstructions": "Cole no Shopify → Loja Online → Páginas → Seção 'Custom Liquid'"
+    "downloadLiquid": "Baixar template Liquid",
+    "liquidDownloaded": "✅ Template Shopify baixado",
+    "liquidInstructions": "Envie os arquivos para seu tema: sections/nexsell-landing.liquid e templates/page.nexsell.json"
   },
   "shopify": {
     "connectTitle": "Conectar loja Shopify",
