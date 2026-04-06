@@ -1,88 +1,53 @@
 
 
-## Plan: Shopify-Native Liquid Export System
+## Plan: Polish Landing Ecosystem — UI, Editor, Export
 
-### Overview
-Replace the HTML export system with a Shopify-native Liquid template export. The landing will export as a proper Shopify section (`.liquid` file) with a JSON template, downloadable as a ZIP. The preview renderer remains untouched.
+### Problems Identified
 
-### What Gets Removed
-- `exportLandingAsHTML()` function and its usage
-- `generateLandingHTML()` — the full-page HTML generator (keep only theme color definitions used by preview iframe in the export dialog)
-- "Copy HTML", "Download HTML", "Download ZIP" buttons from `ExportPreviewDialog`
-- `exportLandingAsZip()` function (replaced by new Shopify ZIP)
+1. **Landings list page (`Landings.tsx`)** still exports raw HTML (line 41-61) — downloads `.html` file instead of Shopify Liquid ZIP
+2. **LandingFullPreview** has hardcoded Spanish strings (lines 37, 74, 76, 95)
+3. **LandingView top bar** is overcrowded with too many buttons crammed into one horizontal strip — poor UX on smaller screens
+4. **ExportPreviewDialog** still generates HTML for the iframe preview and uses an old HTML-based approach for the "Export to Shopify" button (lines 111-135) — generates full HTML, extracts body, wraps in div — instead of using the Liquid-based export
+5. **Editor toolbar** (BlockToolbar) is minimal and could look more polished
 
-### What Gets Added/Changed
+### Changes
 
-**1. `src/lib/exportShopify.ts`** — New file, Shopify Liquid generator
+**1. `src/pages/Landings.tsx`** — Replace HTML export with Shopify ZIP
+- Change `handleExport` to use `exportShopifyZip` instead of `generateLandingHTML`
+- Download as `.zip` instead of `.html`
+- Update the export button icon/label
 
-Core function: `generateShopifyLiquid(blocks, theme)` that outputs a complete Liquid section file:
-- Each block type (hero, benefits, features, testimonials, objections, faq, offer, urgency, cta, guarantee, comparison, bundles, microcopy) maps to a Liquid section with inline scoped CSS
-- Uses Shopify dynamic objects: `{{ section.settings.hero_title }}`, `{{ section.settings.cta_label }}`, `{{ product.price | money }}`, etc.
-- Includes working Add-to-Cart form: `<form action="/cart/add" method="post">` with `{{ product.variants.first.id }}`
-- Includes a `{% schema %}` block at the bottom with editable settings (hero_title, subtitle, cta_label, benefits list, urgency_text, image, etc.) so merchants can edit inside Shopify Theme Editor
-- Images use `{{ section.settings.hero_image | image_url: width: 800 }}` for Shopify-hosted images OR fall back to absolute Supabase public URLs as defaults in schema
-- All CSS scoped under `.nexsell-landing` class with Google Fonts import
-- Responsive media queries included
+**2. `src/pages/LandingFullPreview.tsx`** — Fix hardcoded strings + improve toolbar
+- Replace hardcoded Spanish with `useTranslation()` (already imported via `toast`)
+- Add `useTranslation` import and use `t()` for all strings
+- Make the floating toolbar more polished: add "Export to Shopify" label next to the download icon
 
-Helper function: `generateShopifyTemplate()` — returns JSON for `templates/page.nexsell.json`:
-```json
-{
-  "sections": {
-    "nexsell-landing": {
-      "type": "nexsell-landing",
-      "settings": {}
-    }
-  },
-  "order": ["nexsell-landing"]
-}
-```
+**3. `src/pages/LandingView.tsx`** — Reorganize the top toolbar
+- Group actions into logical clusters with separators:
+  - Left: Back button + landing name
+  - Center: Theme selector + device preview controls
+  - Right: Action buttons grouped in a dropdown menu (Edit, AI Images, Duplicate, Delete, Version History, Export, Publish, Share)
+- Use a `DropdownMenu` for secondary actions to reduce clutter
+- Keep primary actions (Edit, Export, Publish) as visible buttons
 
-Helper function: `generateShopifyCSS(theme)` — optional extracted CSS for `assets/nexsell.css`
+**4. `src/components/landing/ExportPreviewDialog.tsx`** — Fix "Export to Shopify" to use Liquid
+- The "Export to Shopify" button currently sends raw HTML to the edge function — update it to send the Liquid-generated Shopify HTML fragment (from `generateShopifyLiquid`) or better yet, generate a clean HTML fragment from the same export engine
+- Remove the old `generateLandingHTML` → body extraction → manual wrapping approach
+- Use `generateShopifyLiquid` output stripped of `{% schema %}` for the Shopify page creation (since Shopify Pages API accepts HTML, not Liquid)
+- Actually, for direct Shopify API page creation, we need clean HTML (not Liquid tags) — so keep using `generateLandingHTML` but ensure images use `normalizeImageUrl` from `exportLanding.ts`
+- Fix the actual problem: the HTML sent to Shopify must have all images as absolute public URLs
 
-Export function: `exportShopifyZip(blocks, product, theme, allImageUrls)` — creates ZIP with:
-- `sections/nexsell-landing.liquid`
-- `templates/page.nexsell.json`
-- `assets/nexsell.css` (optional)
-- `README.md` with installation instructions
+**5. `src/components/landing/LandingRenderer.tsx`** — Minor polish
+- Ensure the editor mode has visible section boundaries with a subtle dashed border
+- Add section labels visible in edit mode
 
-The schema settings will pre-populate with actual content from blocks (e.g., the hero title the user wrote becomes the default value), so the landing works immediately after upload.
+**6. `src/components/landing/ResizablePreview.tsx`** — Minor polish
+- Add width label for preset sizes (e.g., "375px" next to Mobile)
 
-**2. `src/lib/exportLanding.ts`** — Simplified
-- Keep `normalizeImageUrl()` (used by Shopify export)
-- Keep `generateLandingHTML()` ONLY for the preview iframe inside ExportPreviewDialog (it still needs to render a preview)
-- Remove `exportLandingAsHTML()`, `exportLandingAsZip()`, `generateShopifyHTML()`
+### Technical Details
 
-**3. `src/components/landing/ExportPreviewDialog.tsx`** — Redesigned UI
-- Remove "Copy HTML", "Download HTML", "Download ZIP" buttons
-- Two export options only:
-  - **Primary**: "Export to Shopify" (green button) — uses the existing edge function + `ShopifyConnectDialog` flow to create a page directly (uses Liquid-compatible HTML fragment via edge function)
-  - **Secondary**: "Download Liquid Template" — downloads the Shopify ZIP package with `.liquid` + `.json` files
-- Keep iframe preview (still uses `generateLandingHTML` internally for visual preview only)
-- Keep Shopify connection check + `ShopifyConnectDialog`
-
-**4. `supabase/functions/shopify-export/index.ts`** — Update `create-page` action
-- When creating a page, generate the HTML with normalized image URLs (absolute public Supabase URLs) and include Add-to-Cart form
-- No structural changes needed; the edge function already creates pages via Shopify Admin API
-
-**5. `src/i18n/locales/[es|en|pt].json`** — Update translation keys
-- Remove HTML export keys
-- Add: `exportDialog.downloadLiquid`, `exportDialog.liquidDownloaded`, `exportDialog.liquidInstructions`
-- Update dialog title to reflect Shopify-native focus
-
-### Image Handling
-- All images in Liquid use `normalizeImageUrl()` to produce absolute Supabase public URLs as default values in schema settings
-- Schema includes `image_picker` type settings so merchants can replace with Shopify-hosted images via Theme Editor
-- No blob URLs, no base64, no temporary URLs
-
-### Backward Compatibility
-- `LandingRenderer.tsx` is NOT modified — preview continues working exactly as before
-- Block structure in database remains the same
-- The Liquid generator reads the same `blocks[]` array and maps each block type to Liquid output
-- Old landings with any block structure still render in preview and export correctly
-
-### Technical Reference (PageFly/GemPages/Zipoli inspired)
-- Like PageFly: sections are self-contained with schema settings editable in Theme Editor
-- Like GemPages: single section file approach (not multi-section) for simplicity
-- Add-to-Cart form follows Shopify's standard pattern used by all page builders
-- Schema uses Shopify's standard setting types: `text`, `richtext`, `image_picker`, `url`, `checkbox`
+- The key export bug is in `Landings.tsx` which still downloads `.html` — this is why the user sees HTML downloads
+- `ExportPreviewDialog` correctly has the Shopify ZIP download button, but the direct "Export to Shopify" still uses HTML body extraction which loses styles
+- For the Shopify API page creation, we need a self-contained HTML fragment (not Liquid) with inline styles and absolute image URLs — the current `generateLandingHTML` approach is correct for this, just needs proper image normalization applied consistently
+- The `normalizeImageUrl` function in `exportLanding.ts` correctly handles relative paths → absolute Supabase URLs
 
