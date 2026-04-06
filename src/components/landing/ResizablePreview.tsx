@@ -172,6 +172,9 @@ const ResizablePreview = ({ children, editable = false }: ResizablePreviewProps)
           >
             <preset.icon className="h-3.5 w-3.5 mr-1" />
             {preset.label}
+            {preset.width > 0 && (
+              <span className="text-[10px] text-muted-foreground ml-1 opacity-70">{preset.width}px</span>
+            )}
           </Button>
         ))}
         {previewWidth > 0 && previewWidth !== 375 && previewWidth !== 768 && (
