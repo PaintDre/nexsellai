@@ -326,33 +326,17 @@ const LandingView = () => {
     URL.revokeObjectURL(url);
   };
 
-  const handleExportHTML = async () => {
+  const handleExportShopify = async () => {
     if (!landing) return;
     setExporting(true);
     try {
-      const blob = exportLandingAsHTML(
-        landing.blocks as any[], product, landing.name, theme, productImage
+      const blob = await exportShopifyZip(
+        landing.blocks as any[], product, theme, productImage, allImageUrls
       );
-      downloadBlob(blob, `${landing.name.replace(/\s+/g, "-").toLowerCase()}.html`);
-      toast.success(t("landingView.htmlExported"));
+      downloadBlob(blob, `${landing.name.replace(/\s+/g, "-").toLowerCase()}-shopify.zip`);
+      toast.success(t("exportDialog.liquidDownloaded"));
     } catch {
-      toast.error(t("landingView.exportError"));
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const handleExportZip = async () => {
-    if (!landing) return;
-    setExporting(true);
-    try {
-      const blob = await exportLandingAsZip(
-        landing.blocks as any[], product, landing.name, theme, allImageUrls
-      );
-      downloadBlob(blob, `${landing.name.replace(/\s+/g, "-").toLowerCase()}.zip`);
-      toast.success(t("landingView.zipExported"));
-    } catch {
-      toast.error(t("landingView.zipError"));
+      toast.error(t("common.error"));
     } finally {
       setExporting(false);
     }
