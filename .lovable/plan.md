@@ -1,85 +1,88 @@
 
 
-## Plan: Professional Shopify Export with Reliable Images
+## Plan: Shopify-Native Liquid Export System
 
-### Problem
-Images break when exported to Shopify because the base64 approach produces HTML too large for Shopify's Custom Liquid sections, and fetching images client-side can fail due to CORS. Meanwhile, the product images in Supabase storage are in a **public bucket** — their URLs should work directly in Shopify without any conversion.
+### Overview
+Replace the HTML export system with a Shopify-native Liquid template export. The landing will export as a proper Shopify section (`.liquid` file) with a JSON template, downloadable as a ZIP. The preview renderer remains untouched.
 
-### Root Cause
-The code tries to convert images to base64 (heavy, fragile) instead of simply ensuring all image references use their full public Supabase storage URLs, which are already accessible from anywhere.
+### What Gets Removed
+- `exportLandingAsHTML()` function and its usage
+- `generateLandingHTML()` — the full-page HTML generator (keep only theme color definitions used by preview iframe in the export dialog)
+- "Copy HTML", "Download HTML", "Download ZIP" buttons from `ExportPreviewDialog`
+- `exportLandingAsZip()` function (replaced by new Shopify ZIP)
 
-### Solution
-Two-tier approach:
-1. **Fix image URLs** — Ensure all exported HTML uses absolute public Supabase storage URLs (no blob/relative/preview URLs)
-2. **Add Shopify store connection** — Create a "Direct Export to Shopify" flow via Shopify Admin API to automatically create a page on the user's store
+### What Gets Added/Changed
 
----
+**1. `src/lib/exportShopify.ts`** — New file, Shopify Liquid generator
 
-### Changes
+Core function: `generateShopifyLiquid(blocks, theme)` that outputs a complete Liquid section file:
+- Each block type (hero, benefits, features, testimonials, objections, faq, offer, urgency, cta, guarantee, comparison, bundles, microcopy) maps to a Liquid section with inline scoped CSS
+- Uses Shopify dynamic objects: `{{ section.settings.hero_title }}`, `{{ section.settings.cta_label }}`, `{{ product.price | money }}`, etc.
+- Includes working Add-to-Cart form: `<form action="/cart/add" method="post">` with `{{ product.variants.first.id }}`
+- Includes a `{% schema %}` block at the bottom with editable settings (hero_title, subtitle, cta_label, benefits list, urgency_text, image, etc.) so merchants can edit inside Shopify Theme Editor
+- Images use `{{ section.settings.hero_image | image_url: width: 800 }}` for Shopify-hosted images OR fall back to absolute Supabase public URLs as defaults in schema
+- All CSS scoped under `.nexsell-landing` class with Google Fonts import
+- Responsive media queries included
 
-**1. `src/lib/exportLanding.ts`** — Fix `generateShopifyHTML`
-- Remove the base64 conversion logic (too heavy, unreliable)
-- Instead, ensure all image URLs are absolute public Supabase URLs by normalizing them through a helper
-- For `product-images` bucket items stored as relative paths, construct the full public URL: `https://{project_id}.supabase.co/storage/v1/object/public/product-images/{path}`
-- Keep the scoped `.nexsell-landing` wrapper and CSS
-- Add a new export: `generateShopifyReadyHTML()` that returns the fragment with guaranteed public URLs
-
-**2. `supabase/functions/shopify-export/index.ts`** — New edge function
-- Accepts: Shopify store domain, access token, page title, HTML body
-- Calls Shopify Admin API `POST /admin/api/2024-01/pages.json` to create a page
-- Returns the created page URL
-- Handles errors (invalid token, permission denied, etc.)
-
-**3. `src/components/landing/ExportPreviewDialog.tsx`** — Redesigned export UI
-- Replace the 4 small buttons with a cleaner layout:
-  - **Primary action**: "Export to Shopify" button (green, prominent)
-    - If no Shopify store connected → show connection modal
-    - If connected → call edge function to create page, show success with link
-  - **Secondary actions**: "Download HTML" and "Download ZIP" 
-  - **Tertiary**: "Copy HTML" for manual paste
-- Add a Shopify connection state (store domain + token stored in `profiles` or a new `shopify_connections` table)
-- Loading states during export
-
-**4. New: `src/components/landing/ShopifyConnectDialog.tsx`**
-- Simple dialog asking for:
-  - Shopify store URL (e.g., `mystore.myshopify.com`)
-  - Admin API access token (with instructions on how to create one in Shopify admin → Settings → Apps → Develop apps)
-- Saves credentials to database for future exports
-- "Test connection" button to verify the token works
-
-**5. Database migration** — New `shopify_connections` table
-```sql
-CREATE TABLE shopify_connections (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  store_domain text NOT NULL,
-  access_token text NOT NULL,
-  created_at timestamptz DEFAULT now(),
-  UNIQUE(user_id)
-);
-ALTER TABLE shopify_connections ENABLE ROW LEVEL SECURITY;
--- Users can only manage their own connection
+Helper function: `generateShopifyTemplate()` — returns JSON for `templates/page.nexsell.json`:
+```json
+{
+  "sections": {
+    "nexsell-landing": {
+      "type": "nexsell-landing",
+      "settings": {}
+    }
+  },
+  "order": ["nexsell-landing"]
+}
 ```
 
-**6. `src/i18n/locales/[es|en|pt].json`** — New translation keys
-- Shopify connect dialog labels, export success/error messages, instructions
+Helper function: `generateShopifyCSS(theme)` — optional extracted CSS for `assets/nexsell.css`
 
-### User Flow
+Export function: `exportShopifyZip(blocks, product, theme, allImageUrls)` — creates ZIP with:
+- `sections/nexsell-landing.liquid`
+- `templates/page.nexsell.json`
+- `assets/nexsell.css` (optional)
+- `README.md` with installation instructions
 
-1. User clicks "Export to Shopify" in the export dialog
-2. First time → Shopify connect dialog appears with instructions to create an API token
-3. User enters store domain + token → saved to database
-4. System normalizes all image URLs to public Supabase URLs
-5. Edge function calls Shopify Admin API to create a page with the landing HTML
-6. Success toast with link to the new Shopify page
-7. Subsequent exports skip step 2-3 (already connected)
+The schema settings will pre-populate with actual content from blocks (e.g., the hero title the user wrote becomes the default value), so the landing works immediately after upload.
 
-Fallback: "Download Shopify-ready HTML" button downloads the HTML fragment with public image URLs for manual paste.
+**2. `src/lib/exportLanding.ts`** — Simplified
+- Keep `normalizeImageUrl()` (used by Shopify export)
+- Keep `generateLandingHTML()` ONLY for the preview iframe inside ExportPreviewDialog (it still needs to render a preview)
+- Remove `exportLandingAsHTML()`, `exportLandingAsZip()`, `generateShopifyHTML()`
 
-### Technical Details
+**3. `src/components/landing/ExportPreviewDialog.tsx`** — Redesigned UI
+- Remove "Copy HTML", "Download HTML", "Download ZIP" buttons
+- Two export options only:
+  - **Primary**: "Export to Shopify" (green button) — uses the existing edge function + `ShopifyConnectDialog` flow to create a page directly (uses Liquid-compatible HTML fragment via edge function)
+  - **Secondary**: "Download Liquid Template" — downloads the Shopify ZIP package with `.liquid` + `.json` files
+- Keep iframe preview (still uses `generateLandingHTML` internally for visual preview only)
+- Keep Shopify connection check + `ShopifyConnectDialog`
 
-- Images work because `product-images` bucket is public — URLs like `https://fizryssrfsojiavxmhrt.supabase.co/storage/v1/object/public/product-images/...` are accessible globally
-- No base64 needed, keeping HTML lightweight and within Shopify's size limits
-- Shopify Admin API access token is stored encrypted in the database, accessed only via edge function
-- Edge function validates user auth before using stored credentials
+**4. `supabase/functions/shopify-export/index.ts`** — Update `create-page` action
+- When creating a page, generate the HTML with normalized image URLs (absolute public Supabase URLs) and include Add-to-Cart form
+- No structural changes needed; the edge function already creates pages via Shopify Admin API
+
+**5. `src/i18n/locales/[es|en|pt].json`** — Update translation keys
+- Remove HTML export keys
+- Add: `exportDialog.downloadLiquid`, `exportDialog.liquidDownloaded`, `exportDialog.liquidInstructions`
+- Update dialog title to reflect Shopify-native focus
+
+### Image Handling
+- All images in Liquid use `normalizeImageUrl()` to produce absolute Supabase public URLs as default values in schema settings
+- Schema includes `image_picker` type settings so merchants can replace with Shopify-hosted images via Theme Editor
+- No blob URLs, no base64, no temporary URLs
+
+### Backward Compatibility
+- `LandingRenderer.tsx` is NOT modified — preview continues working exactly as before
+- Block structure in database remains the same
+- The Liquid generator reads the same `blocks[]` array and maps each block type to Liquid output
+- Old landings with any block structure still render in preview and export correctly
+
+### Technical Reference (PageFly/GemPages/Zipoli inspired)
+- Like PageFly: sections are self-contained with schema settings editable in Theme Editor
+- Like GemPages: single section file approach (not multi-section) for simplicity
+- Add-to-Cart form follows Shopify's standard pattern used by all page builders
+- Schema uses Shopify's standard setting types: `text`, `richtext`, `image_picker`, `url`, `checkbox`
 
