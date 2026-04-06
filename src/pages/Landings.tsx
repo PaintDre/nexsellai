@@ -225,8 +225,8 @@ const Landings = () => {
                       <Button variant="secondary" size="sm" className="text-xs min-h-[44px]" onClick={() => handleDuplicate(landing)}>
                         <Copy className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> {t("common.duplicate")}</span>
                       </Button>
-                      <Button variant="secondary" size="sm" className="text-xs min-h-[44px]" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
-                        {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Store className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> Shopify</span></>}
+                      <Button variant="secondary" size="sm" className="text-xs min-h-[44px]" onClick={() => handleOpenExport(landing)}>
+                        <Store className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> Shopify</span>
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
@@ -254,6 +254,19 @@ const Landings = () => {
             );
           })}
         </div>
+      )}
+
+      {selectedLanding && (
+        <ExportPreviewDialog
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
+          blocks={selectedLanding.blocks as any[]}
+          product={selectedLanding.product ? { name: selectedLanding.product.name, price: selectedLanding.product.price } : null}
+          landingName={selectedLanding.name}
+          theme={((selectedLanding as any).theme || "clean") as LandingTheme}
+          productImage={getProductImageUrls(selectedLanding.product)[0] || null}
+          allImageUrls={getProductImageUrls(selectedLanding.product)}
+        />
       )}
     </div>
   );
