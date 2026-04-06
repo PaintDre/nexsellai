@@ -61,7 +61,7 @@ const LandingFullPreview = () => {
     setExporting(true);
     try {
       const blob = await exportShopifyZip(
-        landing.blocks as any[], product, landing.name, theme, productImage, product?.images || []
+        landing.blocks as any[], product, theme, productImage, product?.images || []
       );
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -127,7 +127,7 @@ const LandingFullPreview = () => {
 
           <div className="h-5 w-px bg-border" />
 
-          <Button variant="ghost" size="sm" className="rounded-full text-xs" onClick={handleExportHTML} disabled={exporting}>
+          <Button variant="ghost" size="sm" className="rounded-full text-xs" onClick={handleExportShopify} disabled={exporting}>
             {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
           </Button>
 
