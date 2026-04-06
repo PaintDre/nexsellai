@@ -1,53 +1,33 @@
 
 
-## Plan: Polish Landing Ecosystem — UI, Editor, Export
+## Plan: Unify Shopify Export — Replace ZIP Download with Export Dialog on Landings List
 
-### Problems Identified
+### Problem
+There are **two different export flows** in the app:
 
-1. **Landings list page (`Landings.tsx`)** still exports raw HTML (line 41-61) — downloads `.html` file instead of Shopify Liquid ZIP
-2. **LandingFullPreview** has hardcoded Spanish strings (lines 37, 74, 76, 95)
-3. **LandingView top bar** is overcrowded with too many buttons crammed into one horizontal strip — poor UX on smaller screens
-4. **ExportPreviewDialog** still generates HTML for the iframe preview and uses an old HTML-based approach for the "Export to Shopify" button (lines 111-135) — generates full HTML, extracts body, wraps in div — instead of using the Liquid-based export
-5. **Editor toolbar** (BlockToolbar) is minimal and could look more polished
+1. **`/landings` list page** → The "Shopify" button calls `handleExport()` which directly downloads a `.zip` file (lines 50-73 in `Landings.tsx`). No dialog, no Shopify connection option.
+
+2. **Inside the preview/editor** (`ExportPreviewDialog`) → Opens a dialog where the user can connect their Shopify store and export directly, OR download the Liquid ZIP as a fallback.
+
+These should be unified. The list page button should open the same `ExportPreviewDialog` instead of silently downloading a ZIP.
 
 ### Changes
 
-**1. `src/pages/Landings.tsx`** — Replace HTML export with Shopify ZIP
-- Change `handleExport` to use `exportShopifyZip` instead of `generateLandingHTML`
-- Download as `.zip` instead of `.html`
-- Update the export button icon/label
+**1. `src/pages/Landings.tsx`**
+- Remove the `handleExport` function that downloads a ZIP directly
+- Add state for the export dialog: `exportDialogOpen`, `selectedLanding`
+- When the "Shopify" button is clicked, set the selected landing and open `ExportPreviewDialog`
+- Pass the landing's blocks, product, theme, and image URLs to the dialog
+- Import `ExportPreviewDialog`
 
-**2. `src/pages/LandingFullPreview.tsx`** — Fix hardcoded strings + improve toolbar
-- Replace hardcoded Spanish with `useTranslation()` (already imported via `toast`)
-- Add `useTranslation` import and use `t()` for all strings
-- Make the floating toolbar more polished: add "Export to Shopify" label next to the download icon
+This way, clicking "Shopify" on the list page opens the same professional dialog where users can:
+- Connect their Shopify store
+- Export directly to Shopify
+- Or download the Liquid ZIP as a fallback
 
-**3. `src/pages/LandingView.tsx`** — Reorganize the top toolbar
-- Group actions into logical clusters with separators:
-  - Left: Back button + landing name
-  - Center: Theme selector + device preview controls
-  - Right: Action buttons grouped in a dropdown menu (Edit, AI Images, Duplicate, Delete, Version History, Export, Publish, Share)
-- Use a `DropdownMenu` for secondary actions to reduce clutter
-- Keep primary actions (Edit, Export, Publish) as visible buttons
-
-**4. `src/components/landing/ExportPreviewDialog.tsx`** — Fix "Export to Shopify" to use Liquid
-- The "Export to Shopify" button currently sends raw HTML to the edge function — update it to send the Liquid-generated Shopify HTML fragment (from `generateShopifyLiquid`) or better yet, generate a clean HTML fragment from the same export engine
-- Remove the old `generateLandingHTML` → body extraction → manual wrapping approach
-- Use `generateShopifyLiquid` output stripped of `{% schema %}` for the Shopify page creation (since Shopify Pages API accepts HTML, not Liquid)
-- Actually, for direct Shopify API page creation, we need clean HTML (not Liquid tags) — so keep using `generateLandingHTML` but ensure images use `normalizeImageUrl` from `exportLanding.ts`
-- Fix the actual problem: the HTML sent to Shopify must have all images as absolute public URLs
-
-**5. `src/components/landing/LandingRenderer.tsx`** — Minor polish
-- Ensure the editor mode has visible section boundaries with a subtle dashed border
-- Add section labels visible in edit mode
-
-**6. `src/components/landing/ResizablePreview.tsx`** — Minor polish
-- Add width label for preset sizes (e.g., "375px" next to Mobile)
+One unified flow everywhere.
 
 ### Technical Details
-
-- The key export bug is in `Landings.tsx` which still downloads `.html` — this is why the user sees HTML downloads
-- `ExportPreviewDialog` correctly has the Shopify ZIP download button, but the direct "Export to Shopify" still uses HTML body extraction which loses styles
-- For the Shopify API page creation, we need a self-contained HTML fragment (not Liquid) with inline styles and absolute image URLs — the current `generateLandingHTML` approach is correct for this, just needs proper image normalization applied consistently
-- The `normalizeImageUrl` function in `exportLanding.ts` correctly handles relative paths → absolute Supabase URLs
+- `ExportPreviewDialog` already accepts `blocks`, `product`, `landingName`, `theme`, `productImage`, and `allImageUrls` as props — the list page has all this data available
+- No new components needed — just reuse the existing dialog
 
