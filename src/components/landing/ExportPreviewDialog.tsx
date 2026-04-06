@@ -7,9 +7,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, Store, ExternalLink } from "lucide-react";
+import { Download, Loader2, Store } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { generateLandingHTML } from "@/lib/exportLanding";
+import { generateLandingHTML, normalizeImageUrl } from "@/lib/exportLanding";
 import { exportShopifyZip } from "@/lib/exportShopify";
 import type { LandingTheme } from "@/components/landing/themes";
 import { useTranslation } from "react-i18next";
@@ -46,7 +46,6 @@ const ExportPreviewDialog = ({
   const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [liquidExporting, setLiquidExporting] = useState(false);
 
-  // Check if user has a Shopify connection
   useEffect(() => {
     if (!open || !user) return;
     const checkConnection = async () => {
@@ -60,7 +59,6 @@ const ExportPreviewDialog = ({
     checkConnection();
   }, [open, user]);
 
-  // Preview HTML (only for iframe, NOT for export)
   const htmlContent = useMemo(() => {
     if (!open) return "";
     return generateLandingHTML(blocks, product, landingName, theme, productImage);
@@ -106,14 +104,13 @@ const ExportPreviewDialog = ({
     }
     setShopifyExporting(true);
     try {
-      // For direct Shopify export, we use the edge function which creates a page
-      // with normalized image URLs
-      const { normalizeImageUrl } = await import("@/lib/exportLanding");
+      // Normalize all image URLs to absolute public Supabase URLs
       const heroSrc = normalizeImageUrl(productImage || (allImageUrls.length > 0 ? allImageUrls[0] : "") || "");
       const normalizedBlocks = blocks.map((block: any) => {
         if (!block.image_url) return block;
         return { ...block, image_url: normalizeImageUrl(block.image_url) };
       });
+
       const fullHTML = generateLandingHTML(normalizedBlocks, product, landingName, theme, heroSrc || null);
       const bodyMatch = fullHTML.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
       const bodyContent = bodyMatch ? bodyMatch[1].trim() : "";
@@ -160,7 +157,10 @@ ${bodyContent}
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>{t("exportDialog.title")}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Store className="h-5 w-5" />
+              {t("exportDialog.title")}
+            </DialogTitle>
           </DialogHeader>
           <div className="flex-1 min-h-0 rounded-lg border overflow-hidden bg-white">
             {blobUrl && (
@@ -172,41 +172,35 @@ ${bodyContent}
               />
             )}
           </div>
-          <DialogFooter className="flex-col gap-3 sm:flex-col">
-            {/* Primary: Export to Shopify */}
-            <div className="flex flex-wrap gap-2 w-full">
-              <Button
-                size="sm"
-                onClick={handleExportToShopify}
-                disabled={shopifyExporting}
-                className="bg-[#96bf48] hover:bg-[#7ea63d] text-white flex-1 sm:flex-none"
-              >
-                {shopifyExporting ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                ) : (
-                  <Store className="h-4 w-4 mr-1" />
-                )}
-                {shopifyConnected
-                  ? t("shopify.exportToShopify")
-                  : t("shopify.connectAndExport")}
-              </Button>
-            </div>
-            {/* Secondary: Download Liquid Template */}
-            <div className="flex flex-wrap gap-2 w-full">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownloadLiquid}
-                disabled={liquidExporting}
-              >
-                {liquidExporting ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4 mr-1" />
-                )}
-                {t("exportDialog.downloadLiquid")}
-              </Button>
-            </div>
+          <DialogFooter className="flex-row gap-2 sm:justify-between">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleDownloadLiquid}
+              disabled={liquidExporting}
+            >
+              {liquidExporting ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <Download className="h-4 w-4 mr-1" />
+              )}
+              {t("exportDialog.downloadLiquid")}
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleExportToShopify}
+              disabled={shopifyExporting}
+              className="bg-[#96bf48] hover:bg-[#7ea63d] text-white"
+            >
+              {shopifyExporting ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <Store className="h-4 w-4 mr-1" />
+              )}
+              {shopifyConnected
+                ? t("shopify.exportToShopify")
+                : t("shopify.connectAndExport")}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

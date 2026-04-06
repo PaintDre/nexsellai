@@ -163,7 +163,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
       return <Section className={className} delay={delay}>{children}</Section>;
     }
     return (
-      <Section className={`${className} relative group`} delay={delay}>
+      <Section className={`${className} relative group ring-1 ring-dashed ring-primary/20 hover:ring-primary/40 transition-all`} delay={delay}>
         <BlockToolbar
           blockType={blockType}
           blockTitle={blockTitle}

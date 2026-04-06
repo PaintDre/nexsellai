@@ -5,11 +5,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { ArrowLeft, Download, Loader2, Palette } from "lucide-react";
+import { ArrowLeft, Download, Loader2, Palette, Store } from "lucide-react";
 import { exportShopifyZip } from "@/lib/exportShopify";
 import LandingRenderer from "@/components/landing/LandingRenderer";
 import { themes, type LandingTheme } from "@/components/landing/themes";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTranslation } from "react-i18next";
 
 type Landing = Tables<"landings">;
 type Product = Tables<"products">;
@@ -18,6 +19,7 @@ const LandingFullPreview = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
   
   const [landing, setLanding] = useState<Landing | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
@@ -26,6 +28,7 @@ const LandingFullPreview = () => {
   const [exporting, setExporting] = useState(false);
   const [theme, setTheme] = useState<LandingTheme>("clean");
   const [productImage, setProductImage] = useState<string | null>(null);
+  const [allImageUrls, setAllImageUrls] = useState<string[]>([]);
   const [toolbarVisible, setToolbarVisible] = useState(true);
 
   useEffect(() => {
@@ -34,7 +37,7 @@ const LandingFullPreview = () => {
       setLoading(true);
       const { data: l, error: le } = await supabase
         .from("landings").select("*").eq("id", id).eq("user_id", user.id).single();
-      if (le || !l) { setError("No se encontró la landing."); setLoading(false); return; }
+      if (le || !l) { setError(t("landingView.notFound")); setLoading(false); return; }
       setLanding(l);
       setTheme(((l as any).theme || "clean") as LandingTheme);
 
@@ -43,13 +46,17 @@ const LandingFullPreview = () => {
       setProduct(p);
 
       if (p && p.images && p.images.length > 0) {
-        const img = p.images[0];
-        if (img.startsWith("http")) {
-          setProductImage(img);
-        } else {
-          const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(img);
-          if (urlData?.publicUrl) setProductImage(urlData.publicUrl);
+        const urls: string[] = [];
+        for (const imgPath of p.images) {
+          if (imgPath.startsWith("http")) {
+            urls.push(imgPath);
+          } else {
+            const { data: urlData } = supabase.storage.from("product-images").getPublicUrl(imgPath);
+            if (urlData?.publicUrl) urls.push(urlData.publicUrl);
+          }
         }
+        setAllImageUrls(urls);
+        if (urls.length > 0) setProductImage(urls[0]);
       }
       setLoading(false);
     };
@@ -61,7 +68,7 @@ const LandingFullPreview = () => {
     setExporting(true);
     try {
       const blob = await exportShopifyZip(
-        landing.blocks as any[], product, theme, productImage, product?.images || []
+        landing.blocks as any[], product, theme, productImage, allImageUrls
       );
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -71,9 +78,9 @@ const LandingFullPreview = () => {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success("Plantilla Shopify exportada correctamente");
+      toast.success(t("exportDialog.liquidDownloaded"));
     } catch {
-      toast.error("Error al exportar");
+      toast.error(t("common.error"));
     } finally {
       setExporting(false);
     }
@@ -90,9 +97,9 @@ const LandingFullPreview = () => {
   if (error || !landing) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background">
-        <p className="text-muted-foreground">{error || "Landing no encontrada"}</p>
+        <p className="text-muted-foreground">{error || t("landingView.landingNotFound")}</p>
         <Button variant="outline" asChild>
-          <Link to="/landings"><ArrowLeft className="h-4 w-4 mr-2" /> Volver</Link>
+          <Link to="/landings"><ArrowLeft className="h-4 w-4 mr-2" /> {t("landingView.backToLandings")}</Link>
         </Button>
       </div>
     );
@@ -127,8 +134,9 @@ const LandingFullPreview = () => {
 
           <div className="h-5 w-px bg-border" />
 
-          <Button variant="ghost" size="sm" className="rounded-full text-xs" onClick={handleExportShopify} disabled={exporting}>
-            {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+          <Button variant="ghost" size="sm" className="rounded-full text-xs gap-1.5" onClick={handleExportShopify} disabled={exporting}>
+            {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Store className="h-3.5 w-3.5" />}
+            <span className="hidden sm:inline">Shopify</span>
           </Button>
 
           <button

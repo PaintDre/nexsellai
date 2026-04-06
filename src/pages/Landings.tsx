@@ -6,9 +6,9 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Eye, Download, Loader2, Maximize2, Copy, Trash2 } from "lucide-react";
+import { FileText, Eye, Download, Loader2, Maximize2, Copy, Trash2, Store } from "lucide-react";
 import { toast } from "sonner";
-import { generateLandingHTML } from "@/lib/exportLanding";
+import { exportShopifyZip } from "@/lib/exportShopify";
 import { type LandingTheme } from "@/components/landing/themes";
 import { useTranslation } from "react-i18next";
 import {
@@ -38,22 +38,33 @@ const Landings = () => {
   const [exportingId, setExportingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const getProductImageUrls = useCallback((product?: Product | null): string[] => {
+    if (!product?.images?.length) return [];
+    return product.images.map(img => {
+      if (img.startsWith("http")) return img;
+      const { data } = supabase.storage.from("product-images").getPublicUrl(img);
+      return data?.publicUrl || "";
+    }).filter(Boolean);
+  }, []);
+
   const handleExport = async (landing: LandingWithProduct) => {
     setExportingId(landing.id);
     try {
       const product = landing.product;
       const theme = ((landing as any).theme || "clean") as LandingTheme;
-      const html = generateLandingHTML(landing.blocks as any[], product ? { name: product.name, price: product.price } : null, landing.name, theme);
-      const blob = new Blob([html], { type: "text/html" });
+      const imageUrls = getProductImageUrls(product);
+      const blob = await exportShopifyZip(
+        landing.blocks as any[], product || null, theme, imageUrls[0] || null, imageUrls
+      );
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `${landing.name.replace(/\s+/g, "-").toLowerCase()}.html`;
+      a.download = `${landing.name.replace(/\s+/g, "-").toLowerCase()}-shopify.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success(t("landings.exported"));
+      toast.success(t("exportDialog.liquidDownloaded"));
     } catch {
       toast.error(t("landings.exportError"));
     } finally {
@@ -234,7 +245,7 @@ const Landings = () => {
                         <Copy className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> {t("common.duplicate")}</span>
                       </Button>
                       <Button variant="secondary" size="sm" className="text-xs min-h-[44px]" onClick={() => handleExport(landing)} disabled={exportingId === landing.id}>
-                        {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Download className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> {t("common.export")}</span></>}
+                        {exportingId === landing.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <><Store className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline"> Shopify</span></>}
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
