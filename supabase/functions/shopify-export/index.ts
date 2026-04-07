@@ -12,7 +12,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Validate auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(
@@ -38,43 +37,52 @@ Deno.serve(async (req) => {
     }
 
     const userId = claimsData.claims.sub;
+    const body = await req.json();
+    const { action } = body;
 
-    const { action, pageTitle, pageHtml, storeDomain, accessToken } = await req.json();
-
-    if (action === "test-connection") {
-      // Test the Shopify connection
-      const domain = storeDomain || "";
-      const token = accessToken || "";
-      
-      if (!domain || !token) {
+    if (action === "oauth-start") {
+      const { storeDomain } = body;
+      if (!storeDomain) {
         return new Response(
-          JSON.stringify({ error: "Missing store domain or access token" }),
+          JSON.stringify({ error: "Missing store domain" }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      const shopifyRes = await fetch(
-        `https://${domain}/admin/api/2024-01/shop.json`,
-        { headers: { "X-Shopify-Access-Token": token, "Content-Type": "application/json" } }
+      const apiKey = Deno.env.get("SHOPIFY_API_KEY");
+      if (!apiKey) {
+        return new Response(
+          JSON.stringify({ error: "Shopify app not configured" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const serviceClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
       );
 
-      if (!shopifyRes.ok) {
-        const errorText = await shopifyRes.text();
-        return new Response(
-          JSON.stringify({ error: "Invalid credentials", details: errorText }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+      // Generate nonce
+      const nonce = crypto.randomUUID();
 
-      const shopData = await shopifyRes.json();
+      // Save state
+      await serviceClient.from("shopify_oauth_states").insert({
+        user_id: userId,
+        nonce,
+        store_domain: storeDomain,
+      });
+
+      const scopes = "write_content,write_themes,read_products";
+      const redirectUri = `${Deno.env.get("SUPABASE_URL")}/functions/v1/shopify-oauth-callback`;
+      const authUrl = `https://${storeDomain}/admin/oauth/authorize?client_id=${apiKey}&scope=${scopes}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${nonce}`;
+
       return new Response(
-        JSON.stringify({ success: true, shopName: shopData.shop?.name }),
+        JSON.stringify({ authUrl }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     if (action === "create-page") {
-      // Get user's stored Shopify connection
       const serviceClient = createClient(
         Deno.env.get("SUPABASE_URL")!,
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -93,6 +101,7 @@ Deno.serve(async (req) => {
         );
       }
 
+      const { pageTitle, pageHtml } = body;
       if (!pageTitle || !pageHtml) {
         return new Response(
           JSON.stringify({ error: "Missing page title or HTML" }),
@@ -131,6 +140,25 @@ Deno.serve(async (req) => {
 
       return new Response(
         JSON.stringify({ success: true, pageUrl, pageId: pageData.page?.id }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (action === "disconnect") {
+      const { error } = await supabase
+        .from("shopify_connections")
+        .delete()
+        .eq("user_id", userId);
+
+      if (error) {
+        return new Response(
+          JSON.stringify({ error: error.message }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ success: true }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

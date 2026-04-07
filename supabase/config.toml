@@ -23,3 +23,5 @@ project_id = "fizryssrfsojiavxmhrt"
     verify_jwt = false
   [functions.shopify-export]
     verify_jwt = false
+  [functions.shopify-oauth-callback]
+    verify_jwt = false
