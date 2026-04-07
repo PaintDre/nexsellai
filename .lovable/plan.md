@@ -1,33 +1,80 @@
 
 
-## Plan: Unify Shopify Export — Replace ZIP Download with Export Dialog on Landings List
+## Plan: Shopify OAuth Connection Flow
 
-### Problem
-There are **two different export flows** in the app:
+### Overview
+Replace the manual API token input with a proper Shopify OAuth authorization flow. Users enter only their store domain, get redirected to Shopify for approval, and the token is saved automatically.
 
-1. **`/landings` list page** → The "Shopify" button calls `handleExport()` which directly downloads a `.zip` file (lines 50-73 in `Landings.tsx`). No dialog, no Shopify connection option.
+### Prerequisites (User Action Required)
+Before implementation, you need a **Shopify App** registered in the Shopify Partners dashboard. This app provides:
+- `SHOPIFY_API_KEY` (client ID)
+- `SHOPIFY_API_SECRET` (client secret)
 
-2. **Inside the preview/editor** (`ExportPreviewDialog`) → Opens a dialog where the user can connect their Shopify store and export directly, OR download the Liquid ZIP as a fallback.
-
-These should be unified. The list page button should open the same `ExportPreviewDialog` instead of silently downloading a ZIP.
+These will be stored as backend secrets. The app's redirect URI must point to:
+`https://fizryssrfsojiavxmhrt.supabase.co/functions/v1/shopify-oauth-callback`
 
 ### Changes
 
-**1. `src/pages/Landings.tsx`**
-- Remove the `handleExport` function that downloads a ZIP directly
-- Add state for the export dialog: `exportDialogOpen`, `selectedLanding`
-- When the "Shopify" button is clicked, set the selected landing and open `ExportPreviewDialog`
-- Pass the landing's blocks, product, theme, and image URLs to the dialog
-- Import `ExportPreviewDialog`
+**1. New edge function: `supabase/functions/shopify-oauth-callback/index.ts`**
+- Handles Shopify's redirect after user approves
+- Receives `code`, `shop`, `state` query params
+- Validates `state` (contains user ID + nonce, stored temporarily)
+- Exchanges `code` for permanent access token via `POST https://{shop}/admin/oauth/access_token`
+- Upserts token into `shopify_connections` table using service role
+- Redirects browser back to `/landings?shopify=connected`
 
-This way, clicking "Shopify" on the list page opens the same professional dialog where users can:
-- Connect their Shopify store
-- Export directly to Shopify
-- Or download the Liquid ZIP as a fallback
+**2. Update edge function: `supabase/functions/shopify-export/index.ts`**
+- Add `action: "oauth-start"` — generates the Shopify OAuth authorize URL with scopes (`write_content,write_themes,read_products`), state param (user ID + nonce), and redirect URI
+- Returns the URL for the frontend to redirect to
+- Remove `action: "test-connection"` (no longer needed with OAuth)
 
-One unified flow everywhere.
+**3. Database migration: add `shop_name` column + state storage**
+- Add `shop_name text` column to `shopify_connections`
+- Create `shopify_oauth_states` table (id, user_id, nonce, store_domain, created_at) with TTL cleanup — used to validate the OAuth callback
 
-### Technical Details
-- `ExportPreviewDialog` already accepts `blocks`, `product`, `landingName`, `theme`, `productImage`, and `allImageUrls` as props — the list page has all this data available
-- No new components needed — just reuse the existing dialog
+**4. Rewrite `src/components/landing/ShopifyConnectDialog.tsx`**
+- Remove access token input field entirely
+- Remove test connection button
+- Keep only store domain input
+- "Connect Shopify" button calls the edge function to get the OAuth URL, then redirects
+- Show connected state: "Connected to mystore.myshopify.com" with disconnect option
+
+**5. Update `src/components/landing/ExportPreviewDialog.tsx`**
+- Check connection now also fetches `store_domain` to display it
+- Show "Connected to {domain}" badge when connected
+
+**6. Add route handler for OAuth return**
+- In `src/pages/Landings.tsx` (or a dedicated callback page), detect `?shopify=connected` query param and show success toast
+
+**7. Add secrets**
+- `SHOPIFY_API_KEY` and `SHOPIFY_API_SECRET` — will prompt you to add these
+
+### OAuth Flow Diagram
+```text
+User                    Nexsell                 Shopify
+  |                        |                       |
+  |-- enters domain ------>|                       |
+  |                        |-- save state -------->|
+  |                        |-- return auth URL --->|
+  |<-- redirect to Shopify OAuth --------------->|
+  |                        |                       |
+  |-- approves scopes --->|                       |
+  |                        |<-- callback + code ---|
+  |                        |-- exchange code ----->|
+  |                        |<-- access token ------|
+  |                        |-- save to DB -------->|
+  |<-- redirect to /landings?shopify=connected ----|
+```
+
+### Security
+- Tokens never touch the frontend — exchanged and stored server-side only
+- State parameter prevents CSRF attacks
+- OAuth states expire after 10 minutes
+- Access tokens stored in `shopify_connections` accessible only by the owning user (RLS)
+
+### i18n Updates
+- `shopify.connectWithOAuth`: "Connect with Shopify"
+- `shopify.enterDomain`: "Enter your store URL"
+- `shopify.connectedTo`: "Connected to {{domain}}"
+- `shopify.oauthSuccess`: "Shopify connected successfully"
 
