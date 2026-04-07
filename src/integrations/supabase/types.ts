@@ -526,6 +526,7 @@ export type Database = {
           access_token: string
           created_at: string | null
           id: string
+          shop_name: string | null
           store_domain: string
           user_id: string
         }
@@ -533,6 +534,7 @@ export type Database = {
           access_token: string
           created_at?: string | null
           id?: string
+          shop_name?: string | null
           store_domain: string
           user_id: string
         }
@@ -540,6 +542,31 @@ export type Database = {
           access_token?: string
           created_at?: string | null
           id?: string
+          shop_name?: string | null
+          store_domain?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shopify_oauth_states: {
+        Row: {
+          created_at: string
+          id: string
+          nonce: string
+          store_domain: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nonce: string
+          store_domain: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nonce?: string
           store_domain?: string
           user_id?: string
         }
