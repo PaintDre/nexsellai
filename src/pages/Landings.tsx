@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
@@ -33,11 +33,21 @@ interface LandingWithProduct extends Landing {
 const Landings = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [landings, setLandings] = useState<LandingWithProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [selectedLanding, setSelectedLanding] = useState<LandingWithProduct | null>(null);
+
+  // Handle OAuth callback
+  useEffect(() => {
+    if (searchParams.get("shopify") === "connected") {
+      toast.success(t("shopify.oauthSuccess"));
+      searchParams.delete("shopify");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams]);
 
   const getProductImageUrls = useCallback((product?: Product | null): string[] => {
     if (!product?.images?.length) return [];
