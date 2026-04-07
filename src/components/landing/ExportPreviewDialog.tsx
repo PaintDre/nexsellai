@@ -42,20 +42,24 @@ const ExportPreviewDialog = ({
   const { toast } = useToast();
   const { user } = useAuth();
   const [shopifyConnected, setShopifyConnected] = useState(false);
+  const [shopifyDomain, setShopifyDomain] = useState<string | null>(null);
   const [shopifyExporting, setShopifyExporting] = useState(false);
   const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [liquidExporting, setLiquidExporting] = useState(false);
 
+  const checkConnection = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from("shopify_connections")
+      .select("id, store_domain, shop_name")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    setShopifyConnected(!!data);
+    setShopifyDomain(data ? ((data as any).shop_name || (data as any).store_domain) : null);
+  };
+
   useEffect(() => {
     if (!open || !user) return;
-    const checkConnection = async () => {
-      const { data } = await supabase
-        .from("shopify_connections")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      setShopifyConnected(!!data);
-    };
     checkConnection();
   }, [open, user]);
 
@@ -202,6 +206,11 @@ ${bodyContent}
                 : t("shopify.connectAndExport")}
             </Button>
           </DialogFooter>
+          {shopifyConnected && shopifyDomain && (
+            <p className="text-xs text-muted-foreground text-center -mt-1">
+              {t("shopify.connectedTo", { domain: shopifyDomain })}
+            </p>
+          )}
         </DialogContent>
       </Dialog>
 
@@ -209,7 +218,7 @@ ${bodyContent}
         open={showConnectDialog}
         onOpenChange={setShowConnectDialog}
         onConnected={() => {
-          setShopifyConnected(true);
+          checkConnection();
           setShowConnectDialog(false);
         }}
       />
