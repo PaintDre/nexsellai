@@ -58,10 +58,7 @@ const AdminDropiCatalog = () => {
         category: r.category || r.categoria || null,
       })).filter((p) => p.name);
 
-      const res = await supabase.functions.invoke("admin-api", {
-        body: {},
-        headers: { "Content-Type": "application/json" },
-      });
+      // Call admin-api to replace catalog
 
       // Use direct admin-api call
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api/dropi-catalog`;
