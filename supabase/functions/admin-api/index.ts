@@ -329,6 +329,31 @@ serve(async (req) => {
       return jsonResponse({ success: true });
     }
 
+    // POST /dropi-catalog
+    if (req.method === "POST" && path === "/dropi-catalog") {
+      const { products } = await req.json();
+      if (!Array.isArray(products) || !products.length) {
+        return jsonResponse({ error: "No products provided" }, 400);
+      }
+
+      // Delete existing and replace
+      await supabase.from("dropi_products").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+
+      const rows = products.map((p: any) => ({
+        name: p.name,
+        image_main: p.image_main || null,
+        image_2: p.image_2 || null,
+        image_3: p.image_3 || null,
+        video_url: p.video_url || null,
+        category: p.category || null,
+      }));
+
+      const { error } = await supabase.from("dropi_products").insert(rows);
+      if (error) return jsonResponse({ error: error.message }, 500);
+
+      return jsonResponse({ success: true, count: rows.length });
+    }
+
     return jsonResponse({ error: "Not found" }, 404);
   } catch (err) {
     return jsonResponse({ error: (err as Error).message }, 500);

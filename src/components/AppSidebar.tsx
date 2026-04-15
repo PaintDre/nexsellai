@@ -28,6 +28,7 @@ export const SidebarContent = ({ expanded = false, onNavigate }: SidebarContentP
     { label: t("sidebar.products"), icon: Package, href: "/products" },
     { label: t("sidebar.landings"), icon: FileText, href: "/landings" },
     { label: t("sidebar.banners"), icon: ImageIcon, href: "/banners" },
+    { label: "DROPI", icon: Package, href: "/dropi" },
     { label: t("sidebar.plans"), icon: CreditCard, href: "/pricing" },
   ];
 
@@ -37,6 +38,7 @@ export const SidebarContent = ({ expanded = false, onNavigate }: SidebarContentP
     adminItems.push({ label: t("sidebar.payments"), icon: Banknote, href: "/admin/payments" });
     adminItems.push({ label: t("sidebar.email"), icon: Mail, href: "/admin/email" });
     adminItems.push({ label: t("sidebar.automations"), icon: Zap, href: "/admin/automations" });
+    adminItems.push({ label: "DROPI Catalog", icon: Package, href: "/admin/dropi" });
     adminItems.push({ label: t("sidebar.subscriptions"), icon: RefreshCw, href: "/admin/subscriptions" });
   }
   if (isSuperAdmin()) {

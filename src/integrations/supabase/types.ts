@@ -76,6 +76,71 @@ export type Database = {
         }
         Relationships: []
       }
+      dropi_ad_generations: {
+        Row: {
+          created_at: string
+          dropi_product_id: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dropi_product_id?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dropi_product_id?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dropi_ad_generations_dropi_product_id_fkey"
+            columns: ["dropi_product_id"]
+            isOneToOne: false
+            referencedRelation: "dropi_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dropi_products: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          image_2: string | null
+          image_3: string | null
+          image_main: string | null
+          name: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          image_2?: string | null
+          image_3?: string | null
+          image_main?: string | null
+          name: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          image_2?: string | null
+          image_3?: string | null
+          image_main?: string | null
+          name?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       email_automation_logs: {
         Row: {
           automation_id: string
