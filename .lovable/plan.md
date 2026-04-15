@@ -1,80 +1,93 @@
 
 
-## Plan: Shopify OAuth Connection Flow
+## Plan: DROPI — Private Product Media Catalog Module
 
 ### Overview
-Replace the manual API token input with a proper Shopify OAuth authorization flow. Users enter only their store domain, get redirected to Shopify for approval, and the token is saved automatically.
+Build a new internal module called "DROPI" within Nexsell. It provides a private product media catalog where authenticated users browse products (with images/videos), download assets, and generate ad images for Facebook/Instagram. Products are imported by admins via Excel upload.
 
-### Prerequisites (User Action Required)
-Before implementation, you need a **Shopify App** registered in the Shopify Partners dashboard. This app provides:
-- `SHOPIFY_API_KEY` (client ID)
-- `SHOPIFY_API_SECRET` (client secret)
+### Database Changes (Migration)
 
-These will be stored as backend secrets. The app's redirect URI must point to:
-`https://fizryssrfsojiavxmhrt.supabase.co/functions/v1/shopify-oauth-callback`
+**1. `dropi_products` table**
+- `id uuid PK`, `name text`, `image_main text`, `image_2 text`, `image_3 text`, `video_url text`, `category text`, `created_at timestamptz`, `updated_at timestamptz`
+- RLS: authenticated users can SELECT; admins can ALL
 
-### Changes
+**2. `dropi_ad_generations` table** (tracks free trial usage)
+- `id uuid PK`, `user_id uuid NOT NULL`, `dropi_product_id uuid REFERENCES dropi_products`, `created_at timestamptz`
+- RLS: users can SELECT/INSERT own rows; admins can SELECT all
 
-**1. New edge function: `supabase/functions/shopify-oauth-callback/index.ts`**
-- Handles Shopify's redirect after user approves
-- Receives `code`, `shop`, `state` query params
-- Validates `state` (contains user ID + nonce, stored temporarily)
-- Exchanges `code` for permanent access token via `POST https://{shop}/admin/oauth/access_token`
-- Upserts token into `shopify_connections` table using service role
-- Redirects browser back to `/landings?shopify=connected`
+**3. Storage bucket**: `dropi-ads` (public) for generated ad images
 
-**2. Update edge function: `supabase/functions/shopify-export/index.ts`**
-- Add `action: "oauth-start"` — generates the Shopify OAuth authorize URL with scopes (`write_content,write_themes,read_products`), state param (user ID + nonce), and redirect URI
-- Returns the URL for the frontend to redirect to
-- Remove `action: "test-connection"` (no longer needed with OAuth)
+### Edge Function
 
-**3. Database migration: add `shop_name` column + state storage**
-- Add `shop_name text` column to `shopify_connections`
-- Create `shopify_oauth_states` table (id, user_id, nonce, store_domain, created_at) with TTL cleanup — used to validate the OAuth callback
+**`generate-dropi-ads/index.ts`**
+- Receives: product data (images, name), options (show name toggle, badge type)
+- Uses Lovable AI (gemini-2.5-flash-image) to generate 9 variations:
+  - 3 formats: 1:1 (1080x1080), 4:5 (1080x1350), 9:16 (1080x1920)
+  - 3 variations per format (different placements)
+- Returns image URLs or base64, client bundles into ZIP
+- Validates plan: checks `dropi_ad_generations` count for free users (1 lifetime max)
 
-**4. Rewrite `src/components/landing/ShopifyConnectDialog.tsx`**
-- Remove access token input field entirely
-- Remove test connection button
-- Keep only store domain input
-- "Connect Shopify" button calls the edge function to get the OAuth URL, then redirects
-- Show connected state: "Connected to mystore.myshopify.com" with disconnect option
+### Admin Edge Function Update
 
-**5. Update `src/components/landing/ExportPreviewDialog.tsx`**
-- Check connection now also fetches `store_domain` to display it
-- Show "Connected to {domain}" badge when connected
+**`admin-api/index.ts`** — Add `upload-dropi-catalog` action
+- Receives Excel file (parsed client-side with SheetJS)
+- Upserts rows into `dropi_products` (match by name or replace all)
 
-**6. Add route handler for OAuth return**
-- In `src/pages/Landings.tsx` (or a dedicated callback page), detect `?shopify=connected` query param and show success toast
+### Frontend Pages
 
-**7. Add secrets**
-- `SHOPIFY_API_KEY` and `SHOPIFY_API_SECRET` — will prompt you to add these
+**1. `src/pages/Dropi.tsx`** — Product grid dashboard
+- Fetches all `dropi_products`
+- Card grid: main image + product name
+- Search/filter by category
+- Mobile responsive grid (1-2-3-4 cols)
 
-### OAuth Flow Diagram
-```text
-User                    Nexsell                 Shopify
-  |                        |                       |
-  |-- enters domain ------>|                       |
-  |                        |-- save state -------->|
-  |                        |-- return auth URL --->|
-  |<-- redirect to Shopify OAuth --------------->|
-  |                        |                       |
-  |-- approves scopes --->|                       |
-  |                        |<-- callback + code ---|
-  |                        |-- exchange code ----->|
-  |                        |<-- access token ------|
-  |                        |-- save to DB -------->|
-  |<-- redirect to /landings?shopify=connected ----|
-```
+**2. `src/pages/DropiProduct.tsx`** — Product detail page
+- Image gallery viewer (main + image_2 + image_3)
+- Video player (if video_url exists)
+- "Download Images" button → ZIP of all images
+- "Download Video" button → direct download
+- "Generate Ad Images" button → opens config modal
 
-### Security
-- Tokens never touch the frontend — exchanged and stored server-side only
-- State parameter prevents CSRF attacks
-- OAuth states expire after 10 minutes
-- Access tokens stored in `shopify_connections` accessible only by the owning user (RLS)
+**3. `src/pages/AdminDropiCatalog.tsx`** — Admin Excel upload page
+- File upload for Excel (.xlsx)
+- Parses client-side with SheetJS, sends rows to edge function
+- Shows current product count and last upload date
+- Manual video URL edit per product
+
+### Frontend Components
+
+**`src/components/dropi/AdGeneratorModal.tsx`**
+- Toggle: product name ON/OFF
+- Toggle: promotional badge ON/OFF
+- Badge options: OFERTA, NUEVO, TOP VENTAS, RECOMENDADO
+- "Generate" button → calls edge function
+- Shows progress, then download ZIP of 9 images
+- Free plan check: if `dropi_ad_generations` count >= 1, show upgrade modal instead
+
+**`src/components/dropi/ProductCard.tsx`** — Grid card component
+
+**`src/components/dropi/ImageGallery.tsx`** — Lightbox-style gallery
+
+### Routing Changes (`App.tsx`)
+- `/dropi` → `Dropi.tsx` (inside ProtectedLayout)
+- `/dropi/:id` → `DropiProduct.tsx` (inside ProtectedLayout)
+- `/admin/dropi` → `AdminDropiCatalog.tsx` (inside AdminLayout)
+
+### Sidebar Changes (`AppSidebar.tsx`)
+- Add "DROPI" nav item with a package/box icon after Banners
+- Add "DROPI Catalog" in admin section
+
+### Plan Restriction Logic
+- All authenticated users: view products, download images/videos
+- Starter/Pro: unlimited ad generations
+- Free: 1 lifetime generation, then upgrade modal with Spanish copy as specified
 
 ### i18n Updates
-- `shopify.connectWithOAuth`: "Connect with Shopify"
-- `shopify.enterDomain`: "Enter your store URL"
-- `shopify.connectedTo`: "Connected to {{domain}}"
-- `shopify.oauthSuccess`: "Shopify connected successfully"
+- Add `dropi.*` keys to en.json, es.json, pt.json for all labels, modal text, buttons
+
+### Technical Details
+- Excel parsing: `xlsx` (SheetJS) library added to dependencies, parsed client-side
+- ZIP download: `JSZip` + `file-saver` (already likely available or add)
+- Image generation: Lovable AI gateway with gemini-2.5-flash-image model
+- All product images stored as external URLs (Google Drive, CDN) — no re-upload needed
 
