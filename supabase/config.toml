@@ -25,3 +25,5 @@ project_id = "fizryssrfsojiavxmhrt"
     verify_jwt = false
   [functions.shopify-oauth-callback]
     verify_jwt = false
+  [functions.generate-dropi-ads]
+    verify_jwt = false

@@ -883,5 +883,29 @@
     "saveBannerLimits": "Save banner limits",
     "configSaved": "Configuration saved",
     "configError": "Error saving"
+  },
+  "dropi": {
+    "subtitle": "Private product catalog for resellers",
+    "all": "All",
+    "noProducts": "No products in the catalog",
+    "productNotFound": "Product not found",
+    "downloadImages": "Download Images",
+    "downloadVideo": "Download Video",
+    "generateAds": "Generate Ad Images",
+    "showProductName": "Show product name",
+    "showBadge": "Show promotional badge",
+    "adFormatsDesc": "9 images will be generated: 3 formats (1:1, 4:5, 9:16) × 3 variations each",
+    "generating": "Generating...",
+    "generateAndDownload": "Generate & Download ZIP",
+    "adGenerations": "ad generations",
+    "adminCatalog": "DROPI Catalog",
+    "adminCatalogDesc": "Upload an Excel file to update the product catalog",
+    "uploadExcel": "Upload Excel",
+    "totalProducts": "Total products",
+    "catalogUploaded": "Catalog updated successfully",
+    "catalogError": "Error updating catalog",
+    "image": "Image",
+    "productName": "Name",
+    "category": "Category"
   }
 }

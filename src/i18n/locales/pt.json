@@ -883,5 +883,29 @@
     "saveBannerLimits": "Salvar limites de banners",
     "configSaved": "Configuração salva",
     "configError": "Erro ao salvar"
+  },
+  "dropi": {
+    "subtitle": "Catálogo privado de produtos para revendedores",
+    "all": "Todos",
+    "noProducts": "Não há produtos no catálogo",
+    "productNotFound": "Produto não encontrado",
+    "downloadImages": "Baixar Imagens",
+    "downloadVideo": "Baixar Vídeo",
+    "generateAds": "Gerar Imagens de Anúncios",
+    "showProductName": "Mostrar nome do produto",
+    "showBadge": "Mostrar badge promocional",
+    "adFormatsDesc": "Serão geradas 9 imagens: 3 formatos (1:1, 4:5, 9:16) × 3 variações cada",
+    "generating": "Gerando...",
+    "generateAndDownload": "Gerar e Baixar ZIP",
+    "adGenerations": "gerações de anúncios",
+    "adminCatalog": "Catálogo DROPI",
+    "adminCatalogDesc": "Faça upload de um arquivo Excel para atualizar o catálogo de produtos",
+    "uploadExcel": "Upload Excel",
+    "totalProducts": "Total de produtos",
+    "catalogUploaded": "Catálogo atualizado com sucesso",
+    "catalogError": "Erro ao atualizar o catálogo",
+    "image": "Imagem",
+    "productName": "Nome",
+    "category": "Categoria"
   }
 }

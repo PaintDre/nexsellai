@@ -37,6 +37,9 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const PublicLanding = lazy(() => import("./pages/PublicLanding"));
 const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Dropi = lazy(() => import("./pages/Dropi"));
+const DropiProduct = lazy(() => import("./pages/DropiProduct"));
+const AdminDropiCatalog = lazy(() => import("./pages/AdminDropiCatalog"));
 
 const queryClient = new QueryClient();
 
@@ -77,6 +80,8 @@ const App = () => (
                   <Route path="/pricing" element={<Pricing />} />
                   <Route path="/settings" element={<SettingsPage />} />
                   <Route path="/onboarding" element={<Onboarding />} />
+                  <Route path="/dropi" element={<Dropi />} />
+                  <Route path="/dropi/:id" element={<DropiProduct />} />
                 </Route>
                 <Route element={<AdminLayout />}>
                   <Route path="/admin" element={<AdminDashboard />} />
@@ -85,6 +90,7 @@ const App = () => (
                   <Route path="/admin/email" element={<AdminEmailCampaigns />} />
                   <Route path="/admin/automations" element={<AdminEmailAutomations />} />
                   <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
+                  <Route path="/admin/dropi" element={<AdminDropiCatalog />} />
                 </Route>
                 <Route element={<SuperAdminLayout />}>
                   <Route path="/admin/config" element={<SuperAdminConfig />} />
