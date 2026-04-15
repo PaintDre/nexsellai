@@ -91,65 +91,46 @@ const DropiProduct = () => {
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-        <Button variant="ghost" size="sm" onClick={() => navigate("/dropi")} className="gap-2">
-          <ArrowLeft className="h-4 w-4" /> {t("common.back")}
-        </Button>
+      <Button variant="ghost" size="sm" onClick={() => navigate("/dropi")} className="gap-2">
+        <ArrowLeft className="h-4 w-4" /> {t("common.back")}
+      </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Gallery */}
-          <ImageGallery images={images} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <ImageGallery images={images} />
 
-          {/* Info */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl font-bold font-display text-foreground">{product.name}</h1>
-              {product.category && (
-                <span className="mt-2 inline-block rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground uppercase">
-                  {product.category}
-                </span>
-              )}
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold font-display text-foreground">{product.name}</h1>
+            {product.category && (
+              <span className="mt-2 inline-block rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground uppercase">
+                {product.category}
+              </span>
+            )}
+          </div>
+
+          {product.video_url && (
+            <div className="rounded-xl overflow-hidden bg-muted">
+              <video src={product.video_url} controls className="w-full max-h-80 object-contain" preload="metadata" />
             </div>
+          )}
 
-            {/* Video */}
+          <div className="space-y-3">
+            <Button className="w-full" variant="outline" onClick={handleDownloadImages} disabled={!images.length || downloading}>
+              {downloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+              {t("dropi.downloadImages")}
+            </Button>
+
             {product.video_url && (
-              <div className="rounded-xl overflow-hidden bg-muted">
-                <video
-                  src={product.video_url}
-                  controls
-                  className="w-full max-h-80 object-contain"
-                  preload="metadata"
-                />
-              </div>
+              <Button className="w-full" variant="outline" onClick={handleDownloadVideo}>
+                <Play className="mr-2 h-4 w-4" />
+                {t("dropi.downloadVideo")}
+              </Button>
             )}
 
-            {/* Action buttons */}
-            <div className="space-y-3">
-              <Button
-                className="w-full"
-                variant="outline"
-                onClick={handleDownloadImages}
-                disabled={!images.length || downloading}
-              >
-                {downloading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="mr-2 h-4 w-4" />
-                )}
-                {t("dropi.downloadImages")}
-              </Button>
-
-              {product.video_url && (
-                <Button className="w-full" variant="outline" onClick={handleDownloadVideo}>
-                  <Play className="mr-2 h-4 w-4" />
-                  {t("dropi.downloadVideo")}
-                </Button>
-              )}
-
-              <Button className="w-full" onClick={() => setAdModalOpen(true)} disabled={!product.image_main}>
-                <Sparkles className="mr-2 h-4 w-4" />
-                {t("dropi.generateAds")}
-              </Button>
-            </div>
+            <Button className="w-full" onClick={() => setAdModalOpen(true)} disabled={!product.image_main}>
+              <Sparkles className="mr-2 h-4 w-4" />
+              {t("dropi.generateAds")}
+            </Button>
           </div>
         </div>
       </div>
