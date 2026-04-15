@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { ProductCard } from "@/components/dropi/ProductCard";
-import { AppLayout } from "@/components/AppLayout";
+
 import { Search, Package } from "lucide-react";
 
 interface DropiProduct {
@@ -41,8 +41,7 @@ const Dropi = () => {
   });
 
   return (
-    <AppLayout>
-      <div className="space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-bold font-display text-foreground flex items-center gap-2">
             <Package className="h-6 w-6 text-primary" />
@@ -102,8 +101,7 @@ const Dropi = () => {
             ))}
           </div>
         )}
-      </div>
-    </AppLayout>
+    </div>
   );
 };
 

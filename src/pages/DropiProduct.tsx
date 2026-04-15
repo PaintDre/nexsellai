@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
-import { AppLayout } from "@/components/AppLayout";
+
 import { ImageGallery } from "@/components/dropi/ImageGallery";
 import { AdGeneratorModal } from "@/components/dropi/AdGeneratorModal";
 import { Button } from "@/components/ui/button";
@@ -75,27 +75,22 @@ const DropiProduct = () => {
 
   if (loading) {
     return (
-      <AppLayout>
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </AppLayout>
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
     );
   }
 
   if (!product) {
     return (
-      <AppLayout>
-        <div className="text-center py-20 text-muted-foreground">
-          {t("dropi.productNotFound")}
-        </div>
-      </AppLayout>
+      <div className="text-center py-20 text-muted-foreground">
+        {t("dropi.productNotFound")}
+      </div>
     );
   }
 
   return (
-    <AppLayout>
-      <div className="space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
         <Button variant="ghost" size="sm" onClick={() => navigate("/dropi")} className="gap-2">
           <ArrowLeft className="h-4 w-4" /> {t("common.back")}
         </Button>
@@ -164,7 +159,7 @@ const DropiProduct = () => {
         onOpenChange={setAdModalOpen}
         product={{ id: product.id, name: product.name, image_main: product.image_main }}
       />
-    </AppLayout>
+    </div>
   );
 };
 
