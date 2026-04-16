@@ -47,20 +47,47 @@ const AdminDropiCatalog = () => {
       const buffer = await file.arrayBuffer();
       const wb = XLSX.read(buffer, { type: "array" });
       const sheet = wb.Sheets[wb.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json<Record<string, string>>(sheet);
+      const rows = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, { defval: "" });
 
-      const products = rows.map((r) => ({
-        name: r.name || r.Name || "",
-        image_main: r.image_main || r.imagen_principal || null,
-        image_2: r.image_2 || r.imagen_2 || null,
-        image_3: r.image_3 || r.imagen_3 || null,
-        video_url: r.video_url || r.video || null,
-        category: r.category || r.categoria || null,
-      })).filter((p) => p.name);
+      console.log("[DROPI Upload] Parsed rows:", rows.length, "First row:", rows[0]);
 
-      // Call admin-api to replace catalog
+      // Normalize keys (lowercase, trim) for flexible matching
+      const pick = (row: Record<string, any>, ...keys: string[]): string => {
+        const normalized: Record<string, any> = {};
+        for (const k of Object.keys(row)) {
+          normalized[k.toLowerCase().trim()] = row[k];
+        }
+        for (const k of keys) {
+          const v = normalized[k.toLowerCase()];
+          if (v !== undefined && v !== null && String(v).trim() !== "") {
+            return String(v).trim();
+          }
+        }
+        return "";
+      };
 
-      // Use direct admin-api call
+      const products = rows
+        .map((r) => ({
+          name: pick(r, "name", "nombre", "product", "producto"),
+          image_main: pick(r, "image_main", "imagen_principal", "image", "imagen") || null,
+          image_2: pick(r, "image_2", "imagen_2", "image2") || null,
+          image_3: pick(r, "image_3", "imagen_3", "image3") || null,
+          video_url: pick(r, "video_url", "video", "url_video") || null,
+          category: pick(r, "category", "categoria", "categoría") || null,
+        }))
+        .filter((p) => p.name);
+
+      console.log("[DROPI Upload] Valid products:", products.length);
+
+      if (!products.length) {
+        const headers = rows[0] ? Object.keys(rows[0]).join(", ") : "(empty file)";
+        toast.error(
+          `No se encontraron productos válidos. Columnas detectadas: ${headers}. Se requiere columna "name" o "nombre".`,
+          { duration: 8000 }
+        );
+        return;
+      }
+
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api/dropi-catalog`;
       const resp = await fetch(apiUrl, {
         method: "POST",
@@ -71,13 +98,17 @@ const AdminDropiCatalog = () => {
         body: JSON.stringify({ products }),
       });
 
-      if (!resp.ok) throw new Error("Upload failed");
+      const result = await resp.json().catch(() => ({}));
 
-      toast.success(t("dropi.catalogUploaded"));
+      if (!resp.ok) {
+        throw new Error(result?.error || `Upload failed (${resp.status})`);
+      }
+
+      toast.success(`${t("dropi.catalogUploaded")} (${result.count || products.length})`);
       loadProducts();
     } catch (err) {
-      console.error(err);
-      toast.error(t("dropi.catalogError"));
+      console.error("[DROPI Upload]", err);
+      toast.error((err as Error).message || t("dropi.catalogError"));
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
