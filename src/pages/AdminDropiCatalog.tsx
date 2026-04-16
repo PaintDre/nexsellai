@@ -240,7 +240,44 @@ const AdminDropiCatalog = () => {
                         <div className="h-10 w-10 rounded bg-muted" />
                       )}
                     </td>
-                    <td className="px-4 py-2 font-medium text-foreground">{p.name}</td>
+                    <td className="px-4 py-2 font-medium text-foreground">
+                      {editingName === p.id ? (
+                        <div className="flex gap-1 items-center">
+                          <Input
+                            value={nameValue}
+                            onChange={(e) => setNameValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleSaveName(p.id);
+                              if (e.key === "Escape") setEditingName(null);
+                            }}
+                            autoFocus
+                            className="h-8 text-xs"
+                          />
+                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleSaveName(p.id)}>
+                            <Check className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditingName(null)}>
+                            <X className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 group">
+                          <span>{p.name}</span>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title={t("dropi.editName")}
+                            onClick={() => {
+                              setEditingName(p.id);
+                              setNameValue(p.name);
+                            }}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </td>
                     <td className="px-4 py-2 text-muted-foreground">{p.category || "—"}</td>
                     <td className="px-4 py-2">
                       {editingVideo === p.id ? (
@@ -265,17 +302,29 @@ const AdminDropiCatalog = () => {
                       )}
                     </td>
                     <td className="px-4 py-2">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8"
-                        onClick={() => {
-                          setEditingVideo(p.id);
-                          setVideoValue(p.video_url || "");
-                        }}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
+                      <div className="flex items-center gap-1 justify-end">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          title="Video"
+                          onClick={() => {
+                            setEditingVideo(p.id);
+                            setVideoValue(p.video_url || "");
+                          }}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          title={t("dropi.deleteProduct")}
+                          onClick={() => setDeleteTarget(p)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -283,6 +332,27 @@ const AdminDropiCatalog = () => {
             </table>
           </div>
         )}
+
+        <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("dropi.deleteProduct")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("dropi.confirmDelete")}
+                {deleteTarget && <span className="block mt-2 font-medium text-foreground">{deleteTarget.name}</span>}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {t("common.delete")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
     </div>
   );
 };
