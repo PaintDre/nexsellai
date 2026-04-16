@@ -906,6 +906,10 @@
     "catalogError": "Error al actualizar el catálogo",
     "image": "Imagen",
     "productName": "Nombre",
-    "category": "Categoría"
+    "category": "Categoría",
+    "editName": "Editar nombre",
+    "deleteProduct": "Eliminar producto",
+    "confirmDelete": "¿Eliminar este producto? Esta acción no se puede deshacer.",
+    "productDeleted": "Producto eliminado"
   }
 }
