@@ -5,8 +5,18 @@ import { useAuth } from "@/hooks/useAuth";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Upload, Package, Loader2, Pencil, Check, X } from "lucide-react";
+import { Upload, Package, Loader2, Pencil, Check, X, Trash2 } from "lucide-react";
 import * as XLSX from "xlsx";
 
 interface DropiProduct {
@@ -26,6 +36,9 @@ const AdminDropiCatalog = () => {
   const [loading, setLoading] = useState(true);
   const [editingVideo, setEditingVideo] = useState<string | null>(null);
   const [videoValue, setVideoValue] = useState("");
+  const [editingName, setEditingName] = useState<string | null>(null);
+  const [nameValue, setNameValue] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<DropiProduct | null>(null);
 
   const loadProducts = async () => {
     const { data } = await supabase
@@ -130,6 +143,42 @@ const AdminDropiCatalog = () => {
     }
   };
 
+  const handleSaveName = async (productId: string) => {
+    const trimmed = nameValue.trim();
+    if (!trimmed) {
+      toast.error(t("common.error"));
+      return;
+    }
+    const { error } = await supabase
+      .from("dropi_products")
+      .update({ name: trimmed })
+      .eq("id", productId);
+
+    if (error) {
+      toast.error(t("common.error"));
+    } else {
+      toast.success(t("common.save"));
+      setEditingName(null);
+      loadProducts();
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase
+      .from("dropi_products")
+      .delete()
+      .eq("id", deleteTarget.id);
+
+    if (error) {
+      toast.error(t("common.error"));
+    } else {
+      toast.success(t("dropi.productDeleted"));
+      setDeleteTarget(null);
+      loadProducts();
+    }
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-6">
         <div className="flex items-center justify-between">
@@ -191,7 +240,44 @@ const AdminDropiCatalog = () => {
                         <div className="h-10 w-10 rounded bg-muted" />
                       )}
                     </td>
-                    <td className="px-4 py-2 font-medium text-foreground">{p.name}</td>
+                    <td className="px-4 py-2 font-medium text-foreground">
+                      {editingName === p.id ? (
+                        <div className="flex gap-1 items-center">
+                          <Input
+                            value={nameValue}
+                            onChange={(e) => setNameValue(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleSaveName(p.id);
+                              if (e.key === "Escape") setEditingName(null);
+                            }}
+                            autoFocus
+                            className="h-8 text-xs"
+                          />
+                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleSaveName(p.id)}>
+                            <Check className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditingName(null)}>
+                            <X className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 group">
+                          <span>{p.name}</span>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title={t("dropi.editName")}
+                            onClick={() => {
+                              setEditingName(p.id);
+                              setNameValue(p.name);
+                            }}
+                          >
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </td>
                     <td className="px-4 py-2 text-muted-foreground">{p.category || "—"}</td>
                     <td className="px-4 py-2">
                       {editingVideo === p.id ? (
@@ -216,17 +302,29 @@ const AdminDropiCatalog = () => {
                       )}
                     </td>
                     <td className="px-4 py-2">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8"
-                        onClick={() => {
-                          setEditingVideo(p.id);
-                          setVideoValue(p.video_url || "");
-                        }}
-                      >
-                        <Pencil className="h-3.5 w-3.5" />
-                      </Button>
+                      <div className="flex items-center gap-1 justify-end">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          title="Video"
+                          onClick={() => {
+                            setEditingVideo(p.id);
+                            setVideoValue(p.video_url || "");
+                          }}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          title={t("dropi.deleteProduct")}
+                          onClick={() => setDeleteTarget(p)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -234,6 +332,27 @@ const AdminDropiCatalog = () => {
             </table>
           </div>
         )}
+
+        <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t("dropi.deleteProduct")}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t("dropi.confirmDelete")}
+                {deleteTarget && <span className="block mt-2 font-medium text-foreground">{deleteTarget.name}</span>}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {t("common.delete")}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
     </div>
   );
 };

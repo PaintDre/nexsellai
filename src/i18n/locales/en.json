@@ -906,6 +906,10 @@
     "catalogError": "Error updating catalog",
     "image": "Image",
     "productName": "Name",
-    "category": "Category"
+    "category": "Category",
+    "editName": "Edit name",
+    "deleteProduct": "Delete product",
+    "confirmDelete": "Delete this product? This action cannot be undone.",
+    "productDeleted": "Product deleted"
   }
 }
