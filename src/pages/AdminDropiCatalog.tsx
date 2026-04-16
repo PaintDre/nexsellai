@@ -5,8 +5,18 @@ import { useAuth } from "@/hooks/useAuth";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Upload, Package, Loader2, Pencil, Check, X } from "lucide-react";
+import { Upload, Package, Loader2, Pencil, Check, X, Trash2 } from "lucide-react";
 import * as XLSX from "xlsx";
 
 interface DropiProduct {
