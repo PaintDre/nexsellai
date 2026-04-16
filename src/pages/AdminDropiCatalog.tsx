@@ -36,6 +36,9 @@ const AdminDropiCatalog = () => {
   const [loading, setLoading] = useState(true);
   const [editingVideo, setEditingVideo] = useState<string | null>(null);
   const [videoValue, setVideoValue] = useState("");
+  const [editingName, setEditingName] = useState<string | null>(null);
+  const [nameValue, setNameValue] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState<DropiProduct | null>(null);
 
   const loadProducts = async () => {
     const { data } = await supabase
@@ -136,6 +139,42 @@ const AdminDropiCatalog = () => {
     } else {
       toast.success(t("common.save"));
       setEditingVideo(null);
+      loadProducts();
+    }
+  };
+
+  const handleSaveName = async (productId: string) => {
+    const trimmed = nameValue.trim();
+    if (!trimmed) {
+      toast.error(t("common.error"));
+      return;
+    }
+    const { error } = await supabase
+      .from("dropi_products")
+      .update({ name: trimmed })
+      .eq("id", productId);
+
+    if (error) {
+      toast.error(t("common.error"));
+    } else {
+      toast.success(t("common.save"));
+      setEditingName(null);
+      loadProducts();
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    const { error } = await supabase
+      .from("dropi_products")
+      .delete()
+      .eq("id", deleteTarget.id);
+
+    if (error) {
+      toast.error(t("common.error"));
+    } else {
+      toast.success(t("dropi.productDeleted"));
+      setDeleteTarget(null);
       loadProducts();
     }
   };
