@@ -49,7 +49,7 @@ serve(async (req) => {
     if (req.method === "GET" && path === "/users") {
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("*")
+        .select("user_id, full_name, plan, plan_expires_at, landings_used, landings_reset_at, banners_used, banners_reset_at, phone, country_code, currency, language, timezone, created_at, updated_at")
         .order("created_at", { ascending: false });
 
       // Get roles and emails for all users
