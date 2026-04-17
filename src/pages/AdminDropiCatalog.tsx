@@ -64,6 +64,21 @@ const AdminDropiCatalog = () => {
 
       console.log("[DROPI Upload] Parsed rows:", rows.length, "First row:", rows[0]);
 
+      // Normalize Dropbox URLs to render inline (raw=1) and force https
+      const normalizeUrl = (url: string): string => {
+        if (!url) return url;
+        let u = url.trim();
+        if (!u) return u;
+        // Dropbox: convert dl=0/dl=1 to raw=1, and www.dropbox.com works with raw=1
+        if (/dropbox\.com/i.test(u)) {
+          u = u.replace(/([?&])dl=[01]/i, "$1raw=1");
+          if (!/[?&]raw=1/i.test(u)) {
+            u += (u.includes("?") ? "&" : "?") + "raw=1";
+          }
+        }
+        return u;
+      };
+
       // Normalize keys (lowercase, trim) for flexible matching
       const pick = (row: Record<string, any>, ...keys: string[]): string => {
         const normalized: Record<string, any> = {};
@@ -82,10 +97,10 @@ const AdminDropiCatalog = () => {
       const products = rows
         .map((r) => ({
           name: pick(r, "name", "nombre", "product", "producto"),
-          image_main: pick(r, "image_main", "imagen_principal", "image", "imagen") || null,
-          image_2: pick(r, "image_2", "imagen_2", "image2") || null,
-          image_3: pick(r, "image_3", "imagen_3", "image3") || null,
-          video_url: pick(r, "video_url", "video", "url_video") || null,
+          image_main: normalizeUrl(pick(r, "image_main", "image_1", "imagen_principal", "imagen_1", "image", "imagen")) || null,
+          image_2: normalizeUrl(pick(r, "image_2", "imagen_2", "image2")) || null,
+          image_3: normalizeUrl(pick(r, "image_3", "imagen_3", "image3")) || null,
+          video_url: normalizeUrl(pick(r, "video_url", "video", "url_video")) || null,
           category: pick(r, "category", "categoria", "categoría") || null,
         }))
         .filter((p) => p.name);
