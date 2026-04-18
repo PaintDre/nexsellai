@@ -1,30 +1,35 @@
 
-Plan: harden `fetchRole` in `src/hooks/useAuth.tsx` with robust error handling.
+Plan: harden dashboard initial load in `src/pages/Dashboard.tsx`.
 
-Scope: single function `fetchRole` in `src/hooks/useAuth.tsx` (lines ~88-103). No other code touched.
+Scope: only the `load` function inside the `useEffect` (lines ~52-81). No other code, types, or dependencies touched.
 
 Changes:
-1. Wrap entire body in `try/catch`.
-2. Destructure `{ data, error }` from the `user_roles` select.
-3. On `error`: `console.error("Error fetching user roles:", error)` + `setRole("user")` + `return`.
-4. On valid `data` with length > 0: keep current role-priority mapping (super_admin > admin > user).
-5. On empty/missing `data`: `setRole("user")`.
-6. `catch (err)`: `console.error("Unexpected error in fetchRole:", err)` + `setRole("user")`.
+1. Wrap `load` body in `try/catch/finally`.
+2. Keep `setLoading(true)` at top of `try`; move `setLoading(false)` to `finally`.
+3. After `Promise.all`, check `prodRes.error`, `landRes.error`, `verCountRes.error` individually → `console.error` each.
+4. Apply safe fallbacks: `setProducts(prodRes.data || [])`, `setLandings(landRes.data || [])`, `setVersionsCount(verCountRes.count || 0)` (already safe — preserved).
+5. Destructure `{ data: versions, error: versionsError }` on the `landing_versions` follow-up query. Log on `versionsError`. Only build `landingIds` + fetch landing names + `setRecentVersions(...)` when `versions` is valid and non-empty.
+6. `catch (err)` → `console.error("Unexpected error loading dashboard:", err)` + leave `// TODO: surface toast to user` comment.
+7. `finally` → `setLoading(false)`.
 
 Resulting shape:
 
 ```text
-fetchRole(userId)
+load()
 ├── try
-│   ├── { data, error } = supabase.from('user_roles').select('role').eq(...)
-│   ├── if (error) → console.error + setRole("user") + return
-│   ├── if (data && data.length > 0)
-│   │     ├── roles = data.map(r => r.role)
-│   │     ├── if includes super_admin → setRole("super_admin")
-│   │     ├── else if includes admin → setRole("admin")
-│   │     └── else → setRole("user")
-│   └── else → setRole("user")
-└── catch (err) → console.error + setRole("user")
+│   ├── setLoading(true)
+│   ├── [prodRes, landRes, verCountRes] = await Promise.all([...])
+│   ├── if (prodRes.error) console.error(...)
+│   ├── if (landRes.error) console.error(...)
+│   ├── if (verCountRes.error) console.error(...)
+│   ├── setProducts(prodRes.data || [])
+│   ├── setLandings(landRes.data || [])
+│   ├── setVersionsCount(verCountRes.count || 0)
+│   ├── { data: versions, error: versionsError } = await supabase...landing_versions
+│   ├── if (versionsError) console.error(...)
+│   └── if (versions && versions.length > 0) → fetch landing names → setRecentVersions(...)
+├── catch (err) → console.error(...) + // TODO toast
+└── finally → setLoading(false)
 ```
 
-After approval I'll apply the edit and show the final diff.
+`useEffect` dependency array stays `[user]`. After approval I'll apply the edit and show the final diff.
