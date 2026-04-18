@@ -46,32 +46,50 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      setLoading(true);
-      const [prodRes, landRes, verCountRes] = await Promise.all([
-        supabase.from("products").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("landings").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-        supabase.from("landing_versions").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-      ]);
-      setProducts(prodRes.data || []);
-      setLandings(landRes.data || []);
-      setVersionsCount(verCountRes.count || 0);
+      try {
+        setLoading(true);
+        const [prodRes, landRes, verCountRes] = await Promise.all([
+          supabase.from("products").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+          supabase.from("landings").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+          supabase.from("landing_versions").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+        ]);
 
-      const { data: versions } = await supabase
-        .from("landing_versions")
-        .select("id, created_at, version_number, landing_id")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(5);
-      if (versions && versions.length > 0) {
-        const landingIds = [...new Set(versions.map(v => v.landing_id))];
-        const { data: landingsData } = await supabase.from("landings").select("id, name").in("id", landingIds);
-        const nameMap = new Map((landingsData || []).map(l => [l.id, l.name]));
-        setRecentVersions(versions.map(v => ({
-          id: v.id, created_at: v.created_at, version_number: v.version_number,
-          landing_name: nameMap.get(v.landing_id) || t("dashboard.deletedLanding"),
-        })));
+        if (prodRes.error) console.error("Error loading products:", prodRes.error);
+        if (landRes.error) console.error("Error loading landings:", landRes.error);
+        if (verCountRes.error) console.error("Error loading version count:", verCountRes.error);
+
+        setProducts(prodRes.data || []);
+        setLandings(landRes.data || []);
+        setVersionsCount(verCountRes.count || 0);
+
+        const { data: versions, error: versionsError } = await supabase
+          .from("landing_versions")
+          .select("id, created_at, version_number, landing_id")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        if (versionsError) console.error("Error loading recent versions:", versionsError);
+
+        if (versions && versions.length > 0) {
+          const landingIds = [...new Set(versions.map(v => v.landing_id))];
+          const { data: landingsData, error: landingsNamesError } = await supabase
+            .from("landings")
+            .select("id, name")
+            .in("id", landingIds);
+          if (landingsNamesError) console.error("Error loading landing names:", landingsNamesError);
+          const nameMap = new Map((landingsData || []).map(l => [l.id, l.name]));
+          setRecentVersions(versions.map(v => ({
+            id: v.id, created_at: v.created_at, version_number: v.version_number,
+            landing_name: nameMap.get(v.landing_id) || t("dashboard.deletedLanding"),
+          })));
+        }
+      } catch (err) {
+        console.error("Unexpected error loading dashboard:", err);
+        // TODO: surface toast to user
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     load();
   }, [user]);
