@@ -84,18 +84,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const fetchRole = async (userId: string) => {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    
-    if (data && data.length > 0) {
-      // Pick highest role
-      const roles = data.map((r: any) => r.role as AppRole);
-      if (roles.includes("super_admin")) setRole("super_admin");
-      else if (roles.includes("admin")) setRole("admin");
-      else setRole("user");
-    } else {
+    try {
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+
+      if (error) {
+        console.error("Error fetching user roles:", error);
+        setRole("user");
+        return;
+      }
+
+      if (data && data.length > 0) {
+        // Pick highest role
+        const roles = data.map((r: any) => r.role as AppRole);
+        if (roles.includes("super_admin")) setRole("super_admin");
+        else if (roles.includes("admin")) setRole("admin");
+        else setRole("user");
+      } else {
+        setRole("user");
+      }
+    } catch (err) {
+      console.error("Unexpected error in fetchRole:", err);
       setRole("user");
     }
   };
