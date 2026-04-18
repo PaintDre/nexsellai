@@ -1,35 +1,35 @@
 
-Plan: harden dashboard initial load in `src/pages/Dashboard.tsx`.
+Plan: harden product load in `src/pages/GenerateLanding.tsx`.
 
-Scope: only the `load` function inside the `useEffect` (lines ~52-81). No other code, types, or dependencies touched.
+Scope: only the `useEffect` at lines ~46-52. No other code touched.
 
 Changes:
-1. Wrap `load` body in `try/catch/finally`.
-2. Keep `setLoading(true)` at top of `try`; move `setLoading(false)` to `finally`.
-3. After `Promise.all`, check `prodRes.error`, `landRes.error`, `verCountRes.error` individually → `console.error` each.
-4. Apply safe fallbacks: `setProducts(prodRes.data || [])`, `setLandings(landRes.data || [])`, `setVersionsCount(verCountRes.count || 0)` (already safe — preserved).
-5. Destructure `{ data: versions, error: versionsError }` on the `landing_versions` follow-up query. Log on `versionsError`. Only build `landingIds` + fetch landing names + `setRecentVersions(...)` when `versions` is valid and non-empty.
-6. `catch (err)` → `console.error("Unexpected error loading dashboard:", err)` + leave `// TODO: surface toast to user` comment.
-7. `finally` → `setLoading(false)`.
+1. Replace `.then(...)` with internal `async loadProduct()` function called from the effect.
+2. Wrap body in `try/catch`.
+3. Destructure `{ data, error }` from `supabase.from("products").select("*").eq("id", id).eq("user_id", user.id).single()`.
+4. On `error`: `console.error("Error loading product:", error)` + `navigate("/products")` + `return`.
+5. On missing `data`: `console.warn("Product not found")` + `navigate("/products")` + `return`.
+6. On valid `data`: `setProduct(data)`.
+7. `catch (err)`: `console.error("Unexpected error loading product:", err)` + `navigate("/products")`.
+8. Update `useEffect` deps from `[id, user]` to `[id, user, navigate]`.
 
 Resulting shape:
 
 ```text
-load()
-├── try
-│   ├── setLoading(true)
-│   ├── [prodRes, landRes, verCountRes] = await Promise.all([...])
-│   ├── if (prodRes.error) console.error(...)
-│   ├── if (landRes.error) console.error(...)
-│   ├── if (verCountRes.error) console.error(...)
-│   ├── setProducts(prodRes.data || [])
-│   ├── setLandings(landRes.data || [])
-│   ├── setVersionsCount(verCountRes.count || 0)
-│   ├── { data: versions, error: versionsError } = await supabase...landing_versions
-│   ├── if (versionsError) console.error(...)
-│   └── if (versions && versions.length > 0) → fetch landing names → setRecentVersions(...)
-├── catch (err) → console.error(...) + // TODO toast
-└── finally → setLoading(false)
+useEffect(() => {
+  if (!user || !id) return;
+  const loadProduct = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("products").select("*")
+        .eq("id", id).eq("user_id", user.id).single();
+      if (error) → console.error + navigate("/products") + return
+      if (!data) → console.warn + navigate("/products") + return
+      setProduct(data)
+    } catch (err) → console.error + navigate("/products")
+  };
+  loadProduct();
+}, [id, user, navigate]);
 ```
 
-`useEffect` dependency array stays `[user]`. After approval I'll apply the edit and show the final diff.
+After approval I'll apply the edit and show the final diff.
