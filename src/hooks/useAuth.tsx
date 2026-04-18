@@ -39,28 +39,47 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-    
-    // Check plan expiration — downgrade to free if expired
-    if (data && data.plan !== "free" && data.plan_expires_at) {
-      const expiresAt = new Date(data.plan_expires_at);
-      if (expiresAt < new Date()) {
-        await supabase
-          .from("profiles")
-          .update({ plan: "free", plan_expires_at: null })
-          .eq("user_id", userId);
-        setProfile({ ...data, plan: "free" as any, plan_expires_at: null });
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        setProfile(null);
         return;
       }
-    }
-    setProfile(data);
-    // Set UI language from profile preference
-    if (data) {
+
+      if (!data) {
+        console.warn("No profile data returned for user:", userId);
+        setProfile(null);
+        return;
+      }
+
+      // Check plan expiration — downgrade to free if expired
+      if (data.plan !== "free" && data.plan_expires_at) {
+        const expiresAt = new Date(data.plan_expires_at);
+        if (expiresAt < new Date()) {
+          const { error: updateError } = await supabase
+            .from("profiles")
+            .update({ plan: "free", plan_expires_at: null })
+            .eq("user_id", userId);
+          if (updateError) {
+            console.error("Error updating plan expiration:", updateError);
+          }
+          setProfile({ ...data, plan: "free" as any, plan_expires_at: null });
+          return;
+        }
+      }
+
+      setProfile(data);
+      // Set UI language from profile preference
       setLanguageFromProfile((data as any).language);
+    } catch (err) {
+      console.error("Unexpected error in fetchProfile:", err);
+      setProfile(null);
     }
   };
 
