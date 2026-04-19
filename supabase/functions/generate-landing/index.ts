@@ -410,17 +410,25 @@ async function callOpenAI(
 // ─── Pipeline Steps ─────────────────────────────────────────────────────────
 
 async function runPlannerStep(apiKey: string, params: PromptParams): Promise<Strategy> {
+  const t0 = Date.now();
   try {
+    console.log(`[planner] start — product="${params.product.name}" plan=${params.plan}`);
     const prompt = buildPlannerPrompt(params);
-    const raw = await callOpenAI(apiKey, prompt, `Analyze this product and create a strategy: "${params.product.name}"`, 0.6);
+    const raw = await callOpenAI(
+      apiKey,
+      prompt,
+      `Analyze this product and create a strategy: "${params.product.name}"`,
+      0.6,
+      { label: "planner", maxRetries: 2 },
+    );
     const parsed = JSON.parse(raw);
 
-    // Validate strategy structure
     if (
       typeof parsed.primary_angle === "string" &&
       typeof parsed.tone === "string" &&
       Array.isArray(parsed.key_objections)
     ) {
+      console.log(`[planner] done in ${Date.now() - t0}ms — angle="${parsed.primary_angle}"`);
       return {
         primary_angle: parsed.primary_angle,
         tone: parsed.tone,
@@ -432,39 +440,61 @@ async function runPlannerStep(apiKey: string, params: PromptParams): Promise<Str
         risky_blocks: Array.isArray(parsed.risky_blocks) ? parsed.risky_blocks.map(String) : ["testimonials", "comparison"],
       };
     }
-    console.warn("Planner returned invalid structure, using defaults");
+    console.warn(`[planner] invalid structure after ${Date.now() - t0}ms — using defaults`);
     return getDefaultStrategy(params);
   } catch (e) {
-    console.warn("Planner step failed, using default strategy:", e);
+    console.warn(`[planner] failed after ${Date.now() - t0}ms — using default strategy:`, e instanceof Error ? e.message : String(e));
     return getDefaultStrategy(params);
   }
 }
 
 async function runGeneratorStep(apiKey: string, params: PromptParams, strategy: Strategy): Promise<unknown[]> {
+  const t0 = Date.now();
   try {
+    console.log(`[generator] start — plan=${params.plan} intensity=${params.intensity}`);
     const prompt = buildGeneratorPrompt(params, strategy);
-    const raw = await callOpenAI(apiKey, prompt, `Generate the landing page blocks for "${params.product.name}".`, 0.8);
+    const raw = await callOpenAI(
+      apiKey,
+      prompt,
+      `Generate the landing page blocks for "${params.product.name}".`,
+      0.8,
+      { label: "generator", maxRetries: 2 },
+    );
     const blocks = parseBlocks(raw);
-    if (blocks.length > 0) return blocks;
-    console.warn("Generator returned empty blocks, using fallbacks");
+    if (blocks.length > 0) {
+      console.log(`[generator] done in ${Date.now() - t0}ms — produced ${blocks.length} raw blocks`);
+      return blocks;
+    }
+    console.warn(`[generator] empty blocks after ${Date.now() - t0}ms — using fallbacks`);
     return getFallbackBlocks(params.plan);
   } catch (e) {
-    console.warn("Generator step failed, using fallbacks:", e);
+    console.warn(`[generator] failed after ${Date.now() - t0}ms — using fallbacks:`, e instanceof Error ? e.message : String(e));
     return getFallbackBlocks(params.plan);
   }
 }
 
 async function runCriticStep(apiKey: string, blocks: Block[], plan: string): Promise<Block[]> {
+  const t0 = Date.now();
   try {
+    console.log(`[critic] start — refining ${blocks.length} blocks (plan=${plan})`);
     const prompt = buildCriticPrompt(plan);
     const blocksJson = JSON.stringify({ blocks });
-    const raw = await callOpenAI(apiKey, prompt, `Review and refine these landing blocks:\n${blocksJson}`, 0.3);
+    const raw = await callOpenAI(
+      apiKey,
+      prompt,
+      `Review and refine these landing blocks:\n${blocksJson}`,
+      0.3,
+      { label: "critic", maxRetries: 2 },
+    );
     const refined = parseBlocks(raw);
-    if (refined.length > 0) return refined as Block[];
-    console.warn("Critic returned empty/invalid, using generator output");
+    if (refined.length > 0) {
+      console.log(`[critic] done in ${Date.now() - t0}ms — returned ${refined.length} refined blocks`);
+      return refined as Block[];
+    }
+    console.warn(`[critic] empty/invalid after ${Date.now() - t0}ms — keeping generator output`);
     return blocks;
   } catch (e) {
-    console.warn("Critic step failed, using generator output:", e);
+    console.warn(`[critic] failed after ${Date.now() - t0}ms — keeping generator output:`, e instanceof Error ? e.message : String(e));
     return blocks;
   }
 }
