@@ -70,9 +70,12 @@ const DropiProduct = () => {
     }
   };
 
-  const handleDownloadVideo = () => {
-    if (!product?.video_url) return;
-    window.open(product.video_url, "_blank");
+  const videos = product
+    ? [product.video_url, product.video_2, product.video_3].filter(Boolean) as string[]
+    : [];
+
+  const handleDownloadVideo = (url: string) => {
+    window.open(url, "_blank");
   };
 
   if (loading) {
