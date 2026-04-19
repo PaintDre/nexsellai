@@ -71,8 +71,16 @@ function getPlanConfig(plan: string): PlanConfig {
       limit: 10,
     },
     pro: {
-      blockTypes: ["hero", "benefits", "features", "testimonials", "objections", "comparison", "bundles", "offer", "urgency", "guarantee", "faq", "microcopy", "cta"],
-      blockCount: 13,
+      blockTypes: [
+        "hero", "benefits", "features", "testimonials", "objections",
+        "comparison", "bundles", "offer", "urgency", "guarantee",
+        "faq", "microcopy", "cta",
+        // Shrine Pro LATAM advanced blocks
+        "shipping_timeline", "comparison_table", "results_stats",
+        "before_after_slider", "marquee_benefits", "emoji_benefits",
+        "bundle_offer", "faq_cod",
+      ],
+      blockCount: 21,
       limit: 100,
     },
   };
