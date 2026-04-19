@@ -546,6 +546,13 @@ function validateFaqContent(content: unknown): { q: string; a: string }[] {
     .filter((item) => item.q.length > 0 && item.a.length > 0);
 }
 
+// Block types that use structured fields instead of just `content`
+const ADVANCED_BLOCK_TYPES = new Set([
+  "shipping_timeline", "comparison_table", "results_stats",
+  "before_after_slider", "marquee_benefits", "emoji_benefits",
+  "bundle_offer", "faq_cod",
+]);
+
 function sanitizeBlock(block: unknown): Block | null {
   if (!block || typeof block !== "object") return null;
   const b = block as Record<string, unknown>;
@@ -554,7 +561,10 @@ function sanitizeBlock(block: unknown): Block | null {
   const title = typeof b.title === "string" ? b.title.trim() : "";
   const order = typeof b.order === "number" ? b.order : 0;
 
-  if (!type || !title) return null;
+  if (!type) return null;
+  // Advanced blocks may not have a title — provide empty string fallback
+  const safeTitle = title || (ADVANCED_BLOCK_TYPES.has(type) ? "" : "");
+  if (!ADVANCED_BLOCK_TYPES.has(type) && !title) return null;
 
   let content: string | unknown[];
   if (type === "faq") {
@@ -563,18 +573,48 @@ function sanitizeBlock(block: unknown): Block | null {
       content = [{ q: "¿Tienen soporte?", a: "Sí, contamos con soporte dedicado para resolver tus dudas." }];
     }
   } else if (Array.isArray(b.content)) {
-    content = b.content.map((item) => (typeof item === "string" ? item : JSON.stringify(item)));
+    content = b.content.map((item) => (typeof item === "string" ? item : (typeof item === "object" ? item as unknown : String(item))));
   } else {
-    content = typeof b.content === "string" ? b.content : String(b.content || "");
+    content = typeof b.content === "string" ? b.content : (b.content == null ? "" : String(b.content));
   }
 
-  return { type, title, content, order };
+  const result: Block = { type, title: safeTitle, content, order };
+
+  // Preserve advanced structured fields
+  if (Array.isArray(b.steps)) result.steps = b.steps;
+  if (Array.isArray(b.rows)) result.rows = b.rows;
+  if (typeof b.us_label === "string") result.us_label = b.us_label;
+  if (typeof b.others_label === "string") result.others_label = b.others_label;
+  if (typeof b.caption === "string") result.caption = b.caption;
+  if (Array.isArray(b.stats)) result.stats = b.stats;
+  if (typeof b.before_image === "string") result.before_image = b.before_image;
+  if (typeof b.after_image === "string") result.after_image = b.after_image;
+  if (typeof b.text === "string") result.text = b.text;
+  if (Array.isArray(b.items)) result.items = b.items;
+  if (Array.isArray(b.options)) result.options = b.options;
+
+  return result;
 }
 
 // ─── Strip Internal Metadata ────────────────────────────────────────────────
 
 function stripMeta(blocks: Block[]): Block[] {
-  return blocks.map(({ type, title, content, order }) => ({ type, title, content, order }));
+  return blocks.map((b) => {
+    const { type, title, content, order, steps, rows, us_label, others_label, caption, stats, before_image, after_image, text, items, options } = b;
+    const out: Block = { type, title, content, order };
+    if (steps) out.steps = steps;
+    if (rows) out.rows = rows;
+    if (us_label) out.us_label = us_label;
+    if (others_label) out.others_label = others_label;
+    if (caption) out.caption = caption;
+    if (stats) out.stats = stats;
+    if (before_image) out.before_image = before_image;
+    if (after_image) out.after_image = after_image;
+    if (text) out.text = text;
+    if (items) out.items = items;
+    if (options) out.options = options;
+    return out;
+  });
 }
 
 // ─── Fallback Blocks ────────────────────────────────────────────────────────
