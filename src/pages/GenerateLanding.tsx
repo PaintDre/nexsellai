@@ -332,7 +332,7 @@ const GenerateLanding = () => {
                 <Progress value={progress} className="h-2" />
               </div>
             )}
-            <Button onClick={handleGenerate} disabled={generating || !canGenerate} className="w-full min-h-[44px]" size="lg">
+            <Button onClick={handleGenerate} disabled={generating || !canGenerate || !hasEnoughImagesForTemplate} className="w-full min-h-[44px]" size="lg">
               {generating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("common.generating")}</> : <><Sparkles className="h-4 w-4 mr-2" /> {t("generateLanding.generateButton")}</>}
             </Button>
           </CardContent>
@@ -435,7 +435,7 @@ const GenerateLanding = () => {
             </div>
           )}
 
-          <Button onClick={handleGenerate} disabled={generating || !canGenerate} className="w-full min-h-[44px]" size="lg">
+          <Button onClick={handleGenerate} disabled={generating || !canGenerate || !hasEnoughImagesForTemplate} className="w-full min-h-[44px]" size="lg">
             {generating ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("common.generating")}</>
             ) : (
