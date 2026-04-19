@@ -404,8 +404,9 @@ const AdminDropiCatalog = () => {
                           <Input
                             value={videoValue}
                             onChange={(e) => setVideoValue(e.target.value)}
-                            placeholder="URL"
-                            className="h-8 text-xs"
+                            placeholder="https://..."
+                            className="h-8 text-xs w-48"
+                            autoFocus
                           />
                           <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleSaveVideo(p.id)}>
                             <Check className="h-3.5 w-3.5" />
@@ -414,10 +415,27 @@ const AdminDropiCatalog = () => {
                             <X className="h-3.5 w-3.5" />
                           </Button>
                         </div>
+                      ) : p.video_url ? (
+                        <div className="flex items-center gap-2">
+                          <video
+                            src={p.video_url}
+                            className="h-10 w-16 rounded object-cover bg-black"
+                            muted
+                            playsInline
+                            preload="metadata"
+                          />
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            title={t("dropi.copyUrl")}
+                            onClick={() => handleCopyUrl(p.video_url!)}
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       ) : (
-                        <span className="text-xs text-muted-foreground">
-                          {p.video_url ? "✓" : "—"}
-                        </span>
+                        <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </td>
                     <td className="px-4 py-2">
@@ -426,14 +444,43 @@ const AdminDropiCatalog = () => {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8"
-                          title="Video"
+                          title={p.video_url ? t("dropi.replaceVideo") : t("dropi.uploadVideo")}
+                          disabled={uploadingVideoFor === p.id}
+                          onClick={() => {
+                            setVideoUploadTarget(p.id);
+                            videoFileRef.current?.click();
+                          }}
+                        >
+                          {uploadingVideoFor === p.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Video className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          title={t("dropi.pasteUrl")}
                           onClick={() => {
                             setEditingVideo(p.id);
                             setVideoValue(p.video_url || "");
                           }}
                         >
-                          <Pencil className="h-3.5 w-3.5" />
+                          <LinkIcon className="h-3.5 w-3.5" />
                         </Button>
+                        {p.video_url && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            title={t("dropi.removeVideo")}
+                            disabled={uploadingVideoFor === p.id}
+                            onClick={() => handleRemoveVideo(p)}
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                         <Button
                           size="icon"
                           variant="ghost"
