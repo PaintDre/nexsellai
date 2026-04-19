@@ -910,6 +910,17 @@
     "editName": "Edit name",
     "deleteProduct": "Delete product",
     "confirmDelete": "Delete this product? This action cannot be undone.",
-    "productDeleted": "Product deleted"
+    "productDeleted": "Product deleted",
+    "uploadVideo": "Upload video",
+    "uploadingVideo": "Uploading video...",
+    "videoTooLarge": "Video exceeds 100 MB limit",
+    "invalidVideoType": "File must be a video",
+    "replaceVideo": "Replace video",
+    "removeVideo": "Remove video",
+    "videoUploaded": "Video uploaded successfully",
+    "videoRemoved": "Video removed",
+    "pasteUrl": "Paste URL",
+    "copyUrl": "Copy URL",
+    "urlCopied": "URL copied"
   }
 }

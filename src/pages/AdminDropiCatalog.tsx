@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Upload, Package, Loader2, Pencil, Check, X, Trash2 } from "lucide-react";
+import { Upload, Package, Loader2, Pencil, Check, X, Trash2, Video, Link as LinkIcon, Copy } from "lucide-react";
 import * as XLSX from "xlsx";
 
 interface DropiProduct {
@@ -31,6 +31,7 @@ const AdminDropiCatalog = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
+  const videoFileRef = useRef<HTMLInputElement>(null);
   const [products, setProducts] = useState<DropiProduct[]>([]);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -39,6 +40,11 @@ const AdminDropiCatalog = () => {
   const [editingName, setEditingName] = useState<string | null>(null);
   const [nameValue, setNameValue] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<DropiProduct | null>(null);
+  const [uploadingVideoFor, setUploadingVideoFor] = useState<string | null>(null);
+  const [videoUploadTarget, setVideoUploadTarget] = useState<string | null>(null);
+
+  const STORAGE_BUCKET = "dropi-videos";
+  const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
 
   const loadProducts = async () => {
     const { data } = await supabase
@@ -178,6 +184,97 @@ const AdminDropiCatalog = () => {
     }
   };
 
+  // Delete previous video file from bucket if it lives in our storage
+  const cleanupOldVideo = async (url: string | null) => {
+    if (!url) return;
+    try {
+      const marker = `/storage/v1/object/public/${STORAGE_BUCKET}/`;
+      const idx = url.indexOf(marker);
+      if (idx === -1) return;
+      const path = url.substring(idx + marker.length).split("?")[0];
+      if (path) await supabase.storage.from(STORAGE_BUCKET).remove([path]);
+    } catch (err) {
+      console.warn("[DROPI] cleanup old video", err);
+    }
+  };
+
+  const handleVideoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const productId = videoUploadTarget;
+    if (!file || !productId) return;
+
+    if (!file.type.startsWith("video/")) {
+      toast.error(t("dropi.invalidVideoType"));
+      if (videoFileRef.current) videoFileRef.current.value = "";
+      return;
+    }
+    if (file.size > MAX_VIDEO_SIZE) {
+      toast.error(t("dropi.videoTooLarge"));
+      if (videoFileRef.current) videoFileRef.current.value = "";
+      return;
+    }
+
+    const product = products.find((p) => p.id === productId);
+    setUploadingVideoFor(productId);
+    try {
+      const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
+      const path = `${productId}/${crypto.randomUUID()}.${ext}`;
+
+      const { error: upErr } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (upErr) throw upErr;
+
+      const { data: pub } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+      const publicUrl = pub.publicUrl;
+
+      const { error: updErr } = await supabase
+        .from("dropi_products")
+        .update({ video_url: publicUrl })
+        .eq("id", productId);
+      if (updErr) throw updErr;
+
+      await cleanupOldVideo(product?.video_url || null);
+
+      toast.success(t("dropi.videoUploaded"));
+      loadProducts();
+    } catch (err) {
+      console.error("[DROPI Video Upload]", err);
+      toast.error((err as Error).message || t("common.error"));
+    } finally {
+      setUploadingVideoFor(null);
+      setVideoUploadTarget(null);
+      if (videoFileRef.current) videoFileRef.current.value = "";
+    }
+  };
+
+  const handleRemoveVideo = async (product: DropiProduct) => {
+    setUploadingVideoFor(product.id);
+    try {
+      const { error } = await supabase
+        .from("dropi_products")
+        .update({ video_url: null })
+        .eq("id", product.id);
+      if (error) throw error;
+      await cleanupOldVideo(product.video_url);
+      toast.success(t("dropi.videoRemoved"));
+      loadProducts();
+    } catch (err) {
+      toast.error((err as Error).message || t("common.error"));
+    } finally {
+      setUploadingVideoFor(null);
+    }
+  };
+
+  const handleCopyUrl = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(t("dropi.urlCopied"));
+    } catch {
+      toast.error(t("common.error"));
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     const { error } = await supabase
@@ -213,6 +310,13 @@ const AdminDropiCatalog = () => {
               accept=".xlsx,.xls"
               className="hidden"
               onChange={handleUpload}
+            />
+            <input
+              ref={videoFileRef}
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={handleVideoFileChange}
             />
             <Button onClick={() => fileRef.current?.click()} disabled={uploading}>
               {uploading ? (
@@ -300,8 +404,9 @@ const AdminDropiCatalog = () => {
                           <Input
                             value={videoValue}
                             onChange={(e) => setVideoValue(e.target.value)}
-                            placeholder="URL"
-                            className="h-8 text-xs"
+                            placeholder="https://..."
+                            className="h-8 text-xs w-48"
+                            autoFocus
                           />
                           <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => handleSaveVideo(p.id)}>
                             <Check className="h-3.5 w-3.5" />
@@ -310,10 +415,27 @@ const AdminDropiCatalog = () => {
                             <X className="h-3.5 w-3.5" />
                           </Button>
                         </div>
+                      ) : p.video_url ? (
+                        <div className="flex items-center gap-2">
+                          <video
+                            src={p.video_url}
+                            className="h-10 w-16 rounded object-cover bg-black"
+                            muted
+                            playsInline
+                            preload="metadata"
+                          />
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7"
+                            title={t("dropi.copyUrl")}
+                            onClick={() => handleCopyUrl(p.video_url!)}
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
                       ) : (
-                        <span className="text-xs text-muted-foreground">
-                          {p.video_url ? "✓" : "—"}
-                        </span>
+                        <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </td>
                     <td className="px-4 py-2">
@@ -322,14 +444,43 @@ const AdminDropiCatalog = () => {
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8"
-                          title="Video"
+                          title={p.video_url ? t("dropi.replaceVideo") : t("dropi.uploadVideo")}
+                          disabled={uploadingVideoFor === p.id}
+                          onClick={() => {
+                            setVideoUploadTarget(p.id);
+                            videoFileRef.current?.click();
+                          }}
+                        >
+                          {uploadingVideoFor === p.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Video className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          title={t("dropi.pasteUrl")}
                           onClick={() => {
                             setEditingVideo(p.id);
                             setVideoValue(p.video_url || "");
                           }}
                         >
-                          <Pencil className="h-3.5 w-3.5" />
+                          <LinkIcon className="h-3.5 w-3.5" />
                         </Button>
+                        {p.video_url && (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            title={t("dropi.removeVideo")}
+                            disabled={uploadingVideoFor === p.id}
+                            onClick={() => handleRemoveVideo(p)}
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                         <Button
                           size="icon"
                           variant="ghost"
