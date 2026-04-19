@@ -276,6 +276,8 @@
     "stepImages": "Step 2/2 — Generating images with AI (Hero + Benefits + Offer)...",
     "stepDone": "Done! Redirecting...",
     "imagesHint": "Generating banners with AI for main sections...",
+    "queueTitle": "Queued — Processing with AI",
+    "queueDesc": "Your request is being processed by our AI engine. This may take 30 to 90 seconds. Please don't close this window.",
     "generateButton": "Generate Landing",
     "generateWithImages": "Generate Landing + Images",
     "generated": "Landing generated!",
