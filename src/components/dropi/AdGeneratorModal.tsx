@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
 
@@ -45,6 +46,7 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
     }
 
     setLoading(true);
+    const toastId = toast.loading(t("ai.generatingAds"), { description: t("ai.queuedDesc") });
     try {
       const res = await supabase.functions.invoke("generate-dropi-ads", {
         body: {
@@ -71,9 +73,11 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
       const zipBlob = await zip.generateAsync({ type: "blob" });
       saveAs(zipBlob, `${product.name.replace(/\s+/g, "_")}_ads.zip`);
 
+      toast.success(t("ai.readyTitle"), { id: toastId, description: t("ai.readyDesc") });
       onOpenChange(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Ad generation failed:", err);
+      toast.error(t("ai.errorTitle"), { id: toastId, description: err?.message || "Generation failed" });
     } finally {
       setLoading(false);
     }
