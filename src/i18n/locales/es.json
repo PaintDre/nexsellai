@@ -1,4 +1,15 @@
 {
+  "ai": {
+    "queuedTitle": "En cola — Procesando con IA",
+    "queuedDesc": "Tu solicitud está siendo procesada. Esto puede tomar 30-90 segundos.",
+    "readyTitle": "¡Listo!",
+    "readyDesc": "Tu generación con IA se completó correctamente.",
+    "errorTitle": "Error en la generación",
+    "generatingLanding": "Generando landing con IA…",
+    "generatingBanners": "Generando banners con IA…",
+    "generatingAds": "Generando anuncios con IA…",
+    "generatingImage": "Generando imagen con IA…"
+  },
   "common": {
     "save": "Guardar",
     "cancel": "Cancelar",

@@ -188,6 +188,8 @@ const GenerateBanner = () => {
     setLoading(true);
     setGeneratedBanners([]);
 
+    const toastId = toast.loading(t("ai.generatingBanners"), { description: t("ai.queuedDesc") });
+
     try {
       const results = await Promise.allSettled(
         sequence.map((templateId, i) =>
@@ -219,18 +221,20 @@ const GenerateBanner = () => {
         setGeneratedBanners(fulfilled);
         if (failedCount > 0) {
           toast.warning(t("generateBanner.partialSuccess", { count: fulfilled.length }), {
+            id: toastId,
             description: t("generateBanner.partialFailed", { count: failedCount }),
           });
         } else {
-          toast.success(t("generateBanner.allSuccess", { count: fulfilled.length }), {
+          toast.success(t("ai.readyTitle"), {
+            id: toastId,
             description: t("generateBanner.allSuccessDesc"),
           });
         }
       } else {
-        toast.error(t("common.error"), { description: t("generateBanner.generateError") });
+        toast.error(t("ai.errorTitle"), { id: toastId, description: t("generateBanner.generateError") });
       }
     } catch (err: any) {
-      toast.error(t("common.error"), { description: err.message || t("generateBanner.generateError") });
+      toast.error(t("ai.errorTitle"), { id: toastId, description: err.message || t("generateBanner.generateError") });
     } finally {
       setLoading(false);
     }

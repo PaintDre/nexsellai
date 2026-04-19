@@ -1,4 +1,15 @@
 {
+  "ai": {
+    "queuedTitle": "Queued — Processing with AI",
+    "queuedDesc": "Your request is being processed. This can take 30-90 seconds.",
+    "readyTitle": "Ready!",
+    "readyDesc": "Your AI generation completed successfully.",
+    "errorTitle": "Generation error",
+    "generatingLanding": "Generating landing with AI…",
+    "generatingBanners": "Generating banners with AI…",
+    "generatingAds": "Generating ads with AI…",
+    "generatingImage": "Generating image with AI…"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",

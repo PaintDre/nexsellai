@@ -352,6 +352,7 @@ const LandingView = () => {
   const handleGenerateSectionImage = async () => {
     if (!landing || !product || !selectedSection) return;
     setGeneratingImage(true);
+    const toastId = toast.loading(t("ai.generatingImage"), { description: t("ai.queuedDesc") });
     try {
       const targetBlock = blocks.find(b => b.type === selectedSection);
       const blockContent = targetBlock?.content;
@@ -383,10 +384,10 @@ const LandingView = () => {
         .from("landings").select("*").eq("id", landing.id).single();
       if (updatedLanding) setLanding(updatedLanding);
 
-      toast.success(t("landingView.imageGenerated"), { description: t("landingView.imageAddedTo", { section: selectedSectionTitle }) });
+      toast.success(t("ai.readyTitle"), { id: toastId, description: t("landingView.imageAddedTo", { section: selectedSectionTitle }) });
       setShowImageDialog(false);
     } catch (err: any) {
-      toast.error(t("landingView.imageError"), { description: err.message });
+      toast.error(t("ai.errorTitle"), { id: toastId, description: err.message });
     } finally {
       setGeneratingImage(false);
     }

@@ -114,6 +114,8 @@ const GenerateLanding = () => {
     setGenerationStep("copy");
     setProgress(10);
 
+    const toastId = toast.loading(t("ai.generatingLanding"), { description: t("ai.queuedDesc") });
+
     let insertedLanding: { id: string } | null = null;
 
     try {
@@ -140,7 +142,7 @@ const GenerateLanding = () => {
 
       if (error) {
         console.error("[handleGenerate] generate-landing edge function failed:", error);
-        toast.error(t("generateLanding.generateError"), { description: error.message || "Edge function error" });
+        toast.error(t("ai.errorTitle"), { id: toastId, description: error.message || "Edge function error" });
         setGenerationStep("idle");
         setProgress(0);
         return;
@@ -148,7 +150,7 @@ const GenerateLanding = () => {
 
       if (!data || !Array.isArray(data.blocks) || data.blocks.length === 0) {
         console.error("[handleGenerate] generate-landing returned invalid payload:", data);
-        toast.error(t("generateLanding.generateError"), { description: "Empty AI response" });
+        toast.error(t("ai.errorTitle"), { id: toastId, description: "Empty AI response" });
         setGenerationStep("idle");
         setProgress(0);
         return;
@@ -172,7 +174,7 @@ const GenerateLanding = () => {
 
       if (insertError || !inserted) {
         console.error("[handleGenerate] insert into landings failed:", insertError);
-        toast.error(t("generateLanding.generateError"), { description: insertError?.message || "DB insert failed" });
+        toast.error(t("ai.errorTitle"), { id: toastId, description: insertError?.message || "DB insert failed" });
         setGenerationStep("idle");
         setProgress(0);
         return;
