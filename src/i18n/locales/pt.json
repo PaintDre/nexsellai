@@ -631,6 +631,8 @@
     "chooseTemplate": "Escolha um template visual",
     "outputSize": "Tamanho de saída",
     "generatingImage": "Gerando imagem...",
+    "aiInQueueTitle": "Imagens com IA na fila",
+    "aiInQueueDesc": "Estamos gerando os banners da sua landing em segundo plano ({{done}}/{{total}} prontos). Aparecerão automaticamente em alguns segundos.",
     "generateImageAI": "Gerar Imagem com IA",
     "imageGenerated": "Imagem gerada!",
     "imageAddedTo": "Imagem adicionada à seção \"{{section}}\"",
