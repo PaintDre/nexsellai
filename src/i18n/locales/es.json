@@ -276,6 +276,8 @@
     "stepImages": "Paso 2/2 — Generando imágenes con IA (Hero + Beneficios + Oferta)...",
     "stepDone": "¡Listo! Redirigiendo...",
     "imagesHint": "Generando banners con IA para las secciones principales...",
+    "queueTitle": "En cola — Procesando con IA",
+    "queueDesc": "Tu solicitud está siendo procesada por nuestro motor de IA. Esto puede tomar entre 30 y 90 segundos. No cierres esta ventana.",
     "generateButton": "Generar Landing",
     "generateWithImages": "Generar Landing + Imágenes",
     "generated": "¡Landing generada!",
