@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-signature, x-request-id",
 };
 
 const PLAN_PRICES: Record<string, { monthly: number; annual: number }> = {
@@ -11,11 +11,64 @@ const PLAN_PRICES: Record<string, { monthly: number; annual: number }> = {
   pro: { monthly: 34990, annual: 349900 },
 };
 
+// Verifica la firma HMAC-SHA256 del webhook de Mercado Pago
+// Docs: https://www.mercadopago.cl/developers/es/docs/your-integrations/notifications/webhooks#editor_7
+async function verifyMpSignature(
+  req: Request,
+  dataId: string,
+  secret: string,
+): Promise<boolean> {
+  const xSignature = req.headers.get("x-signature");
+  const xRequestId = req.headers.get("x-request-id");
+
+  if (!xSignature || !xRequestId) {
+    console.error("Missing x-signature or x-request-id header");
+    return false;
+  }
+
+  // x-signature viene como: "ts=1234567890,v1=abcdef..."
+  const parts = Object.fromEntries(
+    xSignature.split(",").map((p) => {
+      const [k, v] = p.split("=");
+      return [k.trim(), v?.trim()];
+    }),
+  );
+
+  const ts = parts["ts"];
+  const v1 = parts["v1"];
+  if (!ts || !v1) {
+    console.error("Malformed x-signature header");
+    return false;
+  }
+
+  // Template oficial de MP: id:<data.id>;request-id:<x-request-id>;ts:<ts>;
+  const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sigBuf = await crypto.subtle.sign(
+    "HMAC",
+    key,
+    new TextEncoder().encode(manifest),
+  );
+  const computed = Array.from(new Uint8Array(sigBuf))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  return computed === v1;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
     const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN")!;
+    const webhookSecret = Deno.env.get("MP_WEBHOOK_SECRET"); // opcional
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, serviceKey);
@@ -30,6 +83,17 @@ serve(async (req) => {
     const paymentId = body.data?.id;
     if (!paymentId) {
       return new Response("No payment ID", { status: 200, headers: corsHeaders });
+    }
+
+    // === SIGNATURE VERIFICATION (opcional, solo si MP_WEBHOOK_SECRET está configurado) ===
+    if (webhookSecret) {
+      const valid = await verifyMpSignature(req, String(paymentId), webhookSecret);
+      if (!valid) {
+        console.error(`Invalid MP signature for payment ${paymentId}`);
+        return new Response("Unauthorized", { status: 401, headers: corsHeaders });
+      }
+    } else {
+      console.warn("MP_WEBHOOK_SECRET not set — skipping signature verification");
     }
 
     // === IDEMPOTENCY CHECK ===
