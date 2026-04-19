@@ -818,7 +818,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { product, mode, intensity, hasOffer, guarantee, plan, demo, currency, country_code } = await req.json();
+    const { product, mode, intensity, hasOffer, guarantee, plan, demo, currency, country_code, template_id, sections } = await req.json();
 
     const openaiKey = Deno.env.get("NexsellAi");
     if (!openaiKey) {
