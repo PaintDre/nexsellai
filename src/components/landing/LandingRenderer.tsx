@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, memo } from "react";
 import {
   CheckCircle2, ShieldCheck, Star, Quote, Clock,
   ChevronDown, ChevronUp, Zap, Gift, Award,
-  Package, BarChart3, Layers,
+  Package, BarChart3, Layers, Truck, PackageCheck, MapPin, X, TrendingUp,
 } from "lucide-react";
 import TrustBadges from "./TrustBadges";
 import { themes, type LandingTheme, type ThemeConfig } from "./themes";
@@ -10,13 +10,26 @@ import SectionDivider from "./SectionDivider";
 import SocialProof from "./SocialProof";
 import EditableText from "./EditableText";
 import BlockToolbar from "./BlockToolbar";
+import BeforeAfterSlider from "./BeforeAfterSlider";
 import { getHeroStyle } from "./heroStyles";
 
 interface Block {
   type: string;
   title?: string;
-  content?: string | string[] | Array<{ q: string; a: string }>;
+  content?: any;
   image_url?: string;
+  // Optional structured fields for advanced blocks (Shrine Pro LATAM)
+  steps?: Array<{ icon?: string; top?: string; bottom?: string }>;
+  rows?: Array<{ benefit: string; us?: boolean; others?: boolean }>;
+  us_label?: string;
+  others_label?: string;
+  caption?: string;
+  stats?: Array<{ percentage: number | string; text: string }>;
+  before_image?: string;
+  after_image?: string;
+  text?: string;
+  items?: any[];
+  options?: Array<{ label: string; price: string; compare_price?: string; badge?: string; savings?: string }>;
 }
 
 interface LandingRendererProps {
