@@ -114,6 +114,8 @@ const GenerateLanding = () => {
     setGenerationStep("copy");
     setProgress(10);
 
+    const toastId = toast.loading(t("ai.generatingLanding"), { description: t("ai.queuedDesc") });
+
     let insertedLanding: { id: string } | null = null;
 
     try {
