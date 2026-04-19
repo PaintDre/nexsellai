@@ -31,6 +31,7 @@ const AdminDropiCatalog = () => {
   const { t } = useTranslation();
   const { session } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
+  const videoFileRef = useRef<HTMLInputElement>(null);
   const [products, setProducts] = useState<DropiProduct[]>([]);
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -39,6 +40,11 @@ const AdminDropiCatalog = () => {
   const [editingName, setEditingName] = useState<string | null>(null);
   const [nameValue, setNameValue] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<DropiProduct | null>(null);
+  const [uploadingVideoFor, setUploadingVideoFor] = useState<string | null>(null);
+  const [videoUploadTarget, setVideoUploadTarget] = useState<string | null>(null);
+
+  const STORAGE_BUCKET = "dropi-videos";
+  const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
 
   const loadProducts = async () => {
     const { data } = await supabase
