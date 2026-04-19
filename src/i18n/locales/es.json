@@ -910,6 +910,17 @@
     "editName": "Editar nombre",
     "deleteProduct": "Eliminar producto",
     "confirmDelete": "¿Eliminar este producto? Esta acción no se puede deshacer.",
-    "productDeleted": "Producto eliminado"
+    "productDeleted": "Producto eliminado",
+    "uploadVideo": "Subir video",
+    "uploadingVideo": "Subiendo video...",
+    "videoTooLarge": "El video supera el límite de 100 MB",
+    "invalidVideoType": "El archivo debe ser un video",
+    "replaceVideo": "Reemplazar video",
+    "removeVideo": "Eliminar video",
+    "videoUploaded": "Video subido correctamente",
+    "videoRemoved": "Video eliminado",
+    "pasteUrl": "Pegar URL",
+    "copyUrl": "Copiar URL",
+    "urlCopied": "URL copiada"
   }
 }
