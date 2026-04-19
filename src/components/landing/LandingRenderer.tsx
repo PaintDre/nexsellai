@@ -105,6 +105,17 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
   const comparison = getBlock("comparison");
   const bundles = getBlock("bundles");
 
+  // ── New advanced blocks (Shrine Pro LATAM) ──
+  const shippingTimeline = getBlock("shipping_timeline");
+  const comparisonTable = getBlock("comparison_table");
+  const resultsStats = getBlock("results_stats");
+  const beforeAfterSlider = getBlock("before_after_slider");
+  const marqueeBenefits = getBlock("marquee_benefits");
+  const emojiBenefits = getBlock("emoji_benefits");
+  const bundleOffer = getBlock("bundle_offer");
+  const faqCod = getBlock("faq_cod");
+  const productImages = (product as any)?.images as string[] | undefined;
+
   const microItems: string[] = microcopy
     ? Array.isArray(microcopy.content) ? (microcopy.content as string[])
       : typeof microcopy.content === "string" ? [microcopy.content]
