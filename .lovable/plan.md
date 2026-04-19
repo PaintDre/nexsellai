@@ -1,100 +1,46 @@
 
-El usuario pide explicación, no implementación. Le doy el flujo completo paso a paso de cómo se crea una landing page en Nexsell.
 
-# Cómo se crea una landing page en Nexsell — paso a paso
+## Objetivo
 
-## Punto de entrada
-Ruta: `/products/:id/generate-landing` → componente `src/pages/GenerateLanding.tsx`. El usuario llega tras seleccionar un producto.
+Permitir al admin **subir un archivo de video** (en lugar de solo pegar una URL) en el catálogo Dropi. El video se guarda en un bucket de Supabase Storage y la URL pública se almacena en `dropi_products.video_url` para reproducirlo/descargarlo después.
 
-## Paso 1 — Carga del producto (frontend)
-Al montar la página, un `useEffect` consulta el producto en la tabla `products` filtrando por `id` y `user_id` (RLS). Si no existe o falla, redirige a `/products`. Si existe, llena el estado `product` que alimenta toda la pantalla.
+## Cambios
 
-## Paso 2 — Configuración del usuario
-El usuario elige entre dos modos:
-- **Quick Mode (⚡)**: usa defaults (template "completa", intensidad media, sin oferta, garantía 30 días, autoImages activo si el plan es pago).
-- **Custom Mode (🎛️)**: permite elegir template (Completa / Rápida / Social Proof / Educativa), intensidad (soft/medium/hard), oferta on/off, tema visual (Minimal/Bold/Clean/Warm), texto de garantía, y si genera imágenes IA.
+### 1. Storage — nuevo bucket `dropi-videos`
+Migración SQL para crear bucket público (límite ~100MB, MIME `video/*`) con RLS:
+- **SELECT** público (cualquiera puede ver el video).
+- **INSERT/UPDATE/DELETE** solo `admin` o `super_admin`.
 
-También se valida el límite del plan (`landings_used` vs límite por plan: free=1, starter=10, pro=100). Si está agotado, bloquea la generación y muestra modal de upgrade.
+### 2. `src/pages/AdminDropiCatalog.tsx`
+En la columna "Video" de cada producto, reemplazar el input de URL por un control con dos opciones:
+- **Subir archivo** (botón con icono Upload → `<input type="file" accept="video/*">`).
+- **Pegar URL** (mantener el input actual como alternativa).
 
-## Paso 3 — Disparo: `handleGenerate`
-Al hacer clic en "Generar":
-1. Setea `generating=true`, `generationStep="copy"`, progreso 10%.
-2. Invoca la Edge Function `generate-landing` con: `product`, `mode`, `intensity`, `hasOffer`, `guarantee`, `plan`, `sections` del template, `currency` y `country_code` del perfil.
+Flujo de subida:
+1. Validar que sea video y < 100MB.
+2. `supabase.storage.from('dropi-videos').upload(<productId>/<uuid>.<ext>, file)` con barra de progreso (spinner).
+3. Obtener `getPublicUrl` y hacer `update` en `dropi_products.video_url`.
+4. Si ya existía un video subido en el bucket, eliminar el anterior para no acumular basura.
+5. Mostrar un mini-preview `<video>` cuando ya hay video, con botón para reemplazar/eliminar.
 
-## Paso 4 — Edge Function `generate-landing` (pipeline de 3 etapas con OpenAI gpt-4o-mini)
+La columna "Video" pasará a mostrar un thumbnail/check + acciones (subir, copiar URL, eliminar).
 
-**4.1 Planner (Strategist)** — temperatura 0.6
-- Recibe el producto y devuelve una `Strategy` JSON: `primary_angle`, `tone`, `persuasion_level`, `awareness_level`, `key_objections`, `section_emphasis`, `category_context`, `risky_blocks` (bloques sin datos reales para usar copy seguro).
-- Si falla, usa `getDefaultStrategy()` como fallback.
+### 3. Sin cambios en `DropiProduct.tsx`
+Ya consume `product.video_url` con `<video src=...>` y un botón de descarga — funcionará automáticamente con la URL pública del bucket.
 
-**4.2 Generator (Copywriter)** — temperatura más alta para creatividad
-- Construye un prompt enorme que incluye: estrategia del planner, instrucción de idioma según `country_code` (AR voseo, CL, MX, BR portugués, etc.), reglas según el plan (free=3 bloques, starter=8, pro=13), reglas de seguridad (no inventar testimonios, no precios falsos, no stocks específicos), contexto SaaS si aplica.
-- Devuelve `{ blocks: [...] }` con los bloques tipados (`hero`, `benefits`, `features`, `testimonials`, `objections`, `faq`, `offer`, `urgency`, `guarantee`, `microcopy`, `cta`, etc.) cada uno con `type`, `title`, `content`, `order`, opcionalmente `_meta`.
+### 4. i18n
+Añadir claves: `dropi.uploadVideo`, `dropi.uploadingVideo`, `dropi.videoTooLarge`, `dropi.replaceVideo`, `dropi.removeVideo` en `es/en/pt`.
 
-**4.3 Critic (QA Editor)** — temperatura baja
-- Toma los bloques y los pule: elimina repeticiones, suaviza urgencia falsa, ajusta claims, mejora CTA, asegura tono consistente, mantiene el formato exacto.
-- Devuelve los mismos bloques refinados.
+## Notas técnicas
 
-## Paso 5 — Persistencia (frontend)
-Con los `blocks` finales, el frontend hace `INSERT` en la tabla `landings` con: `user_id`, `product_id`, `name`, `mode`, `intensity`, `has_offer`, `guarantee`, `blocks` (JSONB), `theme`. Recibe el `insertedLanding` con su `id`.
+- El bucket es **público** para que el `<video>` cargue sin firmar URLs (mismo patrón que `product-images` y `dropi-ads`).
+- Path: `{product_id}/{uuid}.{ext}` para aislar archivos por producto.
+- Se mantiene la opción de URL externa por compatibilidad con el catálogo importado vía Excel (Dropbox, etc.).
+- Límite recomendado 100 MB por archivo (configurable en el bucket).
 
-## Paso 6 — Generación de banners IA (opcional, solo planes Starter/Pro)
-Si `autoImages` está activo:
-1. Setea `generationStep="images"`, progreso 65%.
-2. Resuelve URLs públicas absolutas de las imágenes del producto desde el bucket `product-images`.
-3. Identifica bloques clave: `hero`, `benefits`, `offer` (o `cta` como fallback).
-4. En paralelo (`Promise.all`) invoca la Edge Function `generate-banner` para cada uno con: producto, template (`hero-producto`, `beneficios-grid`, `oferta-directa`), tamaño 1200x628, `landingId`, contenido del bloque.
-5. Esa función usa Google Gemini para hacer image-to-image "Product-First" (extrae color/textura del producto real).
+## Archivos tocados
 
-## Paso 7 — Cierre
-1. Incrementa `landings_used` en el perfil del usuario.
-2. Progreso 100%, `generationStep="done"`, toast de éxito.
-3. Tras 800ms redirige a `/landings/:id` (el editor/visualizador).
+- `supabase/migrations/...` (nuevo bucket + policies)
+- `src/pages/AdminDropiCatalog.tsx`
+- `src/i18n/locales/{es,en,pt}.json`
 
-## Resultado final
-Un registro en la tabla `landings` con:
-- **Bloques JSON** estructurados y validados (3 a 13 según plan)
-- **Tema visual** persistido (Minimal/Bold/Clean/Warm)
-- **Banners IA** asociados por sección (si plan pago + autoImages)
-- **Slug público** generable para URL `/p/:slug`
-- **Editable inline** vía contentEditable
-- **Versionable** (hasta 20 versiones automáticas)
-- **Exportable** a Shopify (Liquid/JSON o ZIP)
-
-## Diagrama del flujo
-
-```text
-User → GenerateLanding.tsx
-        │
-        ├─ Carga producto (Supabase: products)
-        ├─ Configura (template, intensity, theme, autoImages)
-        │
-        ▼ handleGenerate()
-        │
-        ├─ Edge Fn: generate-landing
-        │     ├─ 1. Planner  (OpenAI) → Strategy
-        │     ├─ 2. Generator (OpenAI) → Blocks
-        │     └─ 3. Critic   (OpenAI) → Blocks refinados
-        │
-        ├─ INSERT en tabla `landings`
-        │
-        ├─ Si autoImages + plan pago:
-        │     └─ Edge Fn: generate-banner (Gemini)
-        │           ├─ hero
-        │           ├─ benefits
-        │           └─ offer/cta   (en paralelo)
-        │
-        ├─ UPDATE profiles.landings_used++
-        │
-        └─ Redirige a /landings/:id
-```
-
-## Puntos críticos donde puede fallar
-1. **Producto inválido/sin permisos** → redirige a /products (recién endurecido).
-2. **Límite de plan alcanzado** → bloquea con toast y modal upgrade.
-3. **Edge Function `generate-landing` cae** → OpenAI API down, JSON malformado, timeout. Toast de error genérico.
-4. **INSERT en `landings`** → falla por RLS, columnas faltantes o tipos inválidos.
-5. **Banners IA fallan** → cada uno tiene su propio try/catch, no rompe la landing (la landing igual se crea).
-6. **UPDATE de `landings_used`** → no abortado, sin manejo de error.
-
-Esto es lo que se ejecuta exactamente en cada generación de landing.
