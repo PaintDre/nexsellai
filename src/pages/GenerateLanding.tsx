@@ -123,6 +123,7 @@ const GenerateLanding = () => {
           guarantee,
           plan: profile.plan,
           sections: selectedTemplate?.sections,
+          template_id: templateId,
           currency: (profile as any)?.currency || "USD",
           country_code: (profile as any)?.country_code || null,
         },
