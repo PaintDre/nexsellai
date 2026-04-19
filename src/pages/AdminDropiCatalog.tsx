@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Upload, Package, Loader2, Pencil, Check, X, Trash2 } from "lucide-react";
+import { Upload, Package, Loader2, Pencil, Check, X, Trash2, Video, Link as LinkIcon, Copy } from "lucide-react";
 import * as XLSX from "xlsx";
 
 interface DropiProduct {
