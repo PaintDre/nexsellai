@@ -749,6 +749,8 @@ serve(async (req) => {
       plan: userPlan,
       currency: currency || "CLP",
       country_code: country_code || null,
+      template_id: template_id || undefined,
+      sections: Array.isArray(sections) ? sections : undefined,
     };
 
     // ── Step 1: Strategy Planner ──
