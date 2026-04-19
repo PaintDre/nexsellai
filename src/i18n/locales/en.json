@@ -279,7 +279,10 @@
     "generateButton": "Generate Landing",
     "generateWithImages": "Generate Landing + Images",
     "generated": "Landing generated!",
-    "generateError": "Error generating"
+    "generateError": "Error generating",
+    "shrineImagesWarning": "The Shrine Pro LATAM template needs at least 2 product images for the before/after slider.",
+    "shrineImagesWarningTitle": "Missing images",
+    "uploadMoreImages": "Upload more images"
   },
   "generateBanner": {
     "title": "Generate Banners",
