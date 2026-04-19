@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, memo } from "react";
 import {
   CheckCircle2, ShieldCheck, Star, Quote, Clock,
   ChevronDown, ChevronUp, Zap, Gift, Award,
-  Package, BarChart3, Layers,
+  Package, BarChart3, Layers, Truck, PackageCheck, MapPin, X, TrendingUp,
 } from "lucide-react";
 import TrustBadges from "./TrustBadges";
 import { themes, type LandingTheme, type ThemeConfig } from "./themes";
@@ -10,13 +10,26 @@ import SectionDivider from "./SectionDivider";
 import SocialProof from "./SocialProof";
 import EditableText from "./EditableText";
 import BlockToolbar from "./BlockToolbar";
+import BeforeAfterSlider from "./BeforeAfterSlider";
 import { getHeroStyle } from "./heroStyles";
 
 interface Block {
   type: string;
   title?: string;
-  content?: string | string[] | Array<{ q: string; a: string }>;
+  content?: any;
   image_url?: string;
+  // Optional structured fields for advanced blocks (Shrine Pro LATAM)
+  steps?: Array<{ icon?: string; top?: string; bottom?: string }>;
+  rows?: Array<{ benefit: string; us?: boolean; others?: boolean }>;
+  us_label?: string;
+  others_label?: string;
+  caption?: string;
+  stats?: Array<{ percentage: number | string; text: string }>;
+  before_image?: string;
+  after_image?: string;
+  text?: string;
+  items?: any[];
+  options?: Array<{ label: string; price: string; compare_price?: string; badge?: string; savings?: string }>;
 }
 
 interface LandingRendererProps {
@@ -91,6 +104,17 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
   const microcopy = getBlock("microcopy");
   const comparison = getBlock("comparison");
   const bundles = getBlock("bundles");
+
+  // ── New advanced blocks (Shrine Pro LATAM) ──
+  const shippingTimeline = getBlock("shipping_timeline");
+  const comparisonTable = getBlock("comparison_table");
+  const resultsStats = getBlock("results_stats");
+  const beforeAfterSlider = getBlock("before_after_slider");
+  const marqueeBenefits = getBlock("marquee_benefits");
+  const emojiBenefits = getBlock("emoji_benefits");
+  const bundleOffer = getBlock("bundle_offer");
+  const faqCod = getBlock("faq_cod");
+  const productImages = (product as any)?.images as string[] | undefined;
 
   const microItems: string[] = microcopy
     ? Array.isArray(microcopy.content) ? (microcopy.content as string[])
@@ -566,6 +590,250 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
         </EditableSection>
       )}
 
+      {/* ═══ EMOJI BENEFITS (Shrine Pro) ═══ */}
+      {emojiBenefits && Array.isArray(emojiBenefits.items || emojiBenefits.content) && (
+        <EditableSection blockType="emoji_benefits" blockTitle={emojiBenefits.title} className={`py-8 md:py-10 ${t.sectionBg}`}>
+          <div className="mx-auto max-w-5xl px-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-5">
+              {((emojiBenefits.items || emojiBenefits.content) as any[]).slice(0, 4).map((it, i) => {
+                const emoji = typeof it === "object" ? it.emoji : "✓";
+                const text = typeof it === "object" ? it.text : String(it);
+                return (
+                  <div key={i} className={`flex flex-col items-center text-center gap-2 p-4 rounded-xl ${t.cardBg} border ${t.cardBorder}`}>
+                    <span className="text-3xl" aria-hidden>{emoji}</span>
+                    <span className={`text-xs sm:text-sm font-medium ${t.bodyColor}`}>{text}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </EditableSection>
+      )}
+
+      {/* ═══ MARQUEE BENEFITS (Shrine Pro) ═══ */}
+      {marqueeBenefits && Array.isArray(marqueeBenefits.items || marqueeBenefits.content) && (
+        <EditableSection blockType="marquee_benefits" blockTitle={marqueeBenefits.title} className={`py-4 md:py-5 bg-emerald-600 text-white overflow-hidden`}>
+          <div className="relative">
+            <div className="flex gap-12 whitespace-nowrap animate-[marquee_30s_linear_infinite]">
+              {[...((marqueeBenefits.items || marqueeBenefits.content) as any[]), ...((marqueeBenefits.items || marqueeBenefits.content) as any[])].map((item, i) => (
+                <span key={i} className="text-sm font-semibold inline-flex items-center gap-2">
+                  <Star className="h-4 w-4 fill-white" />
+                  {String(item)}
+                </span>
+              ))}
+            </div>
+          </div>
+        </EditableSection>
+      )}
+
+      {/* ═══ RESULTS STATS (Shrine Pro) ═══ */}
+      {resultsStats && Array.isArray(resultsStats.stats) && (
+        <EditableSection blockType="results_stats" blockTitle={resultsStats.title} className={`py-16 md:py-24 ${t.sectionBg}`}>
+          <div className="mx-auto max-w-5xl px-6">
+            <SectionTitle blockType="results_stats">{resultsStats.title || "Resultados comprobados"}</SectionTitle>
+            {resultsStats.caption && (
+              <p className={`text-center text-sm sm:text-base mb-8 ${t.mutedColor}`}>{resultsStats.caption}</p>
+            )}
+            <div className="grid sm:grid-cols-3 gap-6">
+              {resultsStats.stats.slice(0, 3).map((s, i) => {
+                const pct = typeof s.percentage === "number" ? s.percentage : parseInt(String(s.percentage), 10) || 0;
+                return (
+                  <div key={i} className={`p-6 rounded-2xl ${t.cardBg} border ${t.cardBorder} text-center`}>
+                    <div className="flex items-center justify-center gap-1 mb-3">
+                      <span className="text-4xl sm:text-5xl font-extrabold text-emerald-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+                        {pct}
+                      </span>
+                      <span className="text-2xl font-bold text-emerald-600">%</span>
+                    </div>
+                    <div className="h-2 w-full bg-muted rounded-full overflow-hidden mb-3">
+                      <div
+                        className="h-full bg-emerald-500 rounded-full transition-all duration-1000"
+                        style={{ width: `${Math.min(100, pct)}%` }}
+                      />
+                    </div>
+                    <p className={`text-sm leading-relaxed ${t.bodyColor}`}>{s.text}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </EditableSection>
+      )}
+
+      {/* ═══ BEFORE / AFTER SLIDER (Shrine Pro) ═══ */}
+      {beforeAfterSlider && (() => {
+        const beforeImg = beforeAfterSlider.before_image || (productImages?.[0] && (productImages[0].startsWith("http") ? productImages[0] : null)) || imagePreview;
+        const afterImg = beforeAfterSlider.after_image || (productImages?.[1] && (productImages[1].startsWith("http") ? productImages[1] : null)) || (productImages?.[0] && (productImages[0].startsWith("http") ? productImages[0] : null)) || imagePreview;
+        if (!beforeImg || !afterImg) return null;
+        return (
+          <EditableSection blockType="before_after_slider" blockTitle={beforeAfterSlider.title} className={`py-16 md:py-24 ${t.sectionAltBg}`}>
+            <div className="mx-auto max-w-3xl px-6">
+              <SectionTitle alt blockType="before_after_slider">{beforeAfterSlider.title || "Antes vs Después"}</SectionTitle>
+              {beforeAfterSlider.text && (
+                <p className={`text-center text-base mb-8 ${getBody(true)}`}>{beforeAfterSlider.text}</p>
+              )}
+              <BeforeAfterSlider beforeImage={beforeImg} afterImage={afterImg} />
+              <p className={`text-center text-xs mt-4 ${getMuted(true)}`}>Arrastra el control para comparar</p>
+            </div>
+          </EditableSection>
+        );
+      })()}
+
+      {/* ═══ COMPARISON TABLE (Shrine Pro) ═══ */}
+      {comparisonTable && Array.isArray(comparisonTable.rows) && (
+        <EditableSection blockType="comparison_table" blockTitle={comparisonTable.title} className={`py-16 md:py-24 ${t.sectionBg}`}>
+          <div className="mx-auto max-w-3xl px-6">
+            <SectionTitle blockType="comparison_table">{comparisonTable.title || "Compáranos"}</SectionTitle>
+            <div className={`overflow-hidden rounded-2xl border ${t.cardBorder} ${t.cardBg} shadow-sm`}>
+              <div className="grid grid-cols-[1fr,auto,auto] sm:grid-cols-[2fr,1fr,1fr]">
+                <div className="p-4 sm:p-5 font-semibold text-xs sm:text-sm text-muted-foreground uppercase tracking-wide">
+                  Característica
+                </div>
+                <div className="p-4 sm:p-5 text-center font-bold text-xs sm:text-sm bg-emerald-50 text-emerald-700 border-l border-border">
+                  {comparisonTable.us_label || productName}
+                </div>
+                <div className="p-4 sm:p-5 text-center font-semibold text-xs sm:text-sm text-muted-foreground border-l border-border">
+                  {comparisonTable.others_label || "Otros"}
+                </div>
+                {comparisonTable.rows.map((row, i) => (
+                  <div key={i} className="contents">
+                    <div className={`p-4 sm:p-5 text-sm border-t border-border ${t.bodyColor}`}>
+                      {row.benefit}
+                    </div>
+                    <div className="p-4 sm:p-5 text-center border-t border-l border-border bg-emerald-50/40">
+                      {row.us !== false ? (
+                        <CheckCircle2 className="h-5 w-5 text-emerald-600 mx-auto" />
+                      ) : (
+                        <X className="h-5 w-5 text-muted-foreground mx-auto" />
+                      )}
+                    </div>
+                    <div className="p-4 sm:p-5 text-center border-t border-l border-border">
+                      {row.others ? (
+                        <CheckCircle2 className="h-5 w-5 text-muted-foreground mx-auto" />
+                      ) : (
+                        <X className="h-5 w-5 text-muted-foreground/60 mx-auto" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </EditableSection>
+      )}
+
+      {/* ═══ SHIPPING TIMELINE (Shrine Pro) ═══ */}
+      {shippingTimeline && Array.isArray(shippingTimeline.steps) && (
+        <EditableSection blockType="shipping_timeline" blockTitle={shippingTimeline.title} className={`py-16 md:py-20 ${t.sectionAltBg}`}>
+          <div className="mx-auto max-w-4xl px-6">
+            <SectionTitle alt blockType="shipping_timeline">{shippingTimeline.title || "Cómo recibirás tu pedido"}</SectionTitle>
+            <div className="relative">
+              {/* Connector line - desktop */}
+              <div className="hidden sm:block absolute top-7 left-[10%] right-[10%] h-0.5 bg-emerald-200" />
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 sm:gap-2 relative">
+                {shippingTimeline.steps.slice(0, 4).map((step, i) => {
+                  const icons = [Package, PackageCheck, Truck, MapPin];
+                  const Icon = icons[i] || Package;
+                  return (
+                    <div key={i} className="flex flex-col items-center text-center gap-2">
+                      <div className="h-14 w-14 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg ring-4 ring-background relative z-10">
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <p className={`text-xs sm:text-sm font-bold ${getHeading(true)}`}>{step.top || ""}</p>
+                      <p className={`text-xs ${getMuted(true)}`}>{step.bottom || ""}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </EditableSection>
+      )}
+
+      {/* ═══ BUNDLE OFFER (Shrine Pro) ═══ */}
+      {bundleOffer && Array.isArray(bundleOffer.options) && (
+        <EditableSection blockType="bundle_offer" blockTitle={bundleOffer.title} className={`py-16 md:py-24 ${t.sectionBg}`}>
+          <div className="mx-auto max-w-5xl px-6">
+            <SectionTitle blockType="bundle_offer">{bundleOffer.title || "Elige tu pack"}</SectionTitle>
+            <div className="grid sm:grid-cols-3 gap-5">
+              {bundleOffer.options.slice(0, 3).map((opt, i) => {
+                const isFeatured = !!opt.badge;
+                return (
+                  <div
+                    key={i}
+                    className={`relative p-6 rounded-2xl border-2 transition-all hover:-translate-y-1 hover:shadow-xl ${
+                      isFeatured
+                        ? "border-emerald-500 bg-emerald-50/50 shadow-lg scale-[1.02]"
+                        : `${t.cardBorder} ${t.cardBg}`
+                    }`}
+                  >
+                    {opt.badge && (
+                      <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-emerald-600 text-white text-xs font-bold shadow-md whitespace-nowrap">
+                        {opt.badge}
+                      </span>
+                    )}
+                    <p className={`text-sm font-semibold mb-3 text-center ${t.headingColor}`}>{opt.label}</p>
+                    <div className="text-center mb-2">
+                      <span className={`text-3xl font-extrabold ${isFeatured ? "text-emerald-700" : t.headingColor}`}>
+                        {opt.price}
+                      </span>
+                    </div>
+                    {opt.compare_price && (
+                      <p className="text-center text-sm text-muted-foreground line-through mb-2">{opt.compare_price}</p>
+                    )}
+                    {opt.savings && (
+                      <p className="text-center text-xs font-bold text-emerald-600 mb-4 inline-flex items-center justify-center gap-1 w-full">
+                        <TrendingUp className="h-3 w-3" /> {opt.savings}
+                      </p>
+                    )}
+                    <button
+                      className={`w-full py-3 mt-2 rounded-xl text-sm font-bold transition-all ${
+                        isFeatured
+                          ? "bg-emerald-600 text-white hover:bg-emerald-700"
+                          : `${t.ctaBg} ${t.ctaText} ${t.ctaHover}`
+                      }`}
+                    >
+                      Elegir pack
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </EditableSection>
+      )}
+
+      {/* ═══ FAQ COD (Shrine Pro - LATAM oriented) ═══ */}
+      {faqCod && Array.isArray(faqCod.items || faqCod.content) && (
+        <EditableSection blockType="faq_cod" blockTitle={faqCod.title} className={`py-16 md:py-24 ${t.sectionAltBg}`}>
+          <div className="mx-auto max-w-2xl px-6">
+            <SectionTitle alt blockType="faq_cod">{faqCod.title || "Preguntas frecuentes"}</SectionTitle>
+            <div className="space-y-2">
+              {((faqCod.items || faqCod.content) as any[]).map((item, i) => {
+                const q = typeof item === "object" ? item.q : String(item);
+                const a = typeof item === "object" ? item.a : "";
+                return (
+                  <div key={i} className={`rounded-xl ${getCard(true)} border ${getCardBorder(true)} overflow-hidden`}>
+                    <button className="w-full text-left p-5" onClick={() => setOpenFaq(openFaq === (i + 1000) ? null : (i + 1000))}>
+                      <div className="flex items-center justify-between gap-4">
+                        <span className={`font-medium text-sm ${getHeading(true)}`}>{q}</span>
+                        {openFaq === (i + 1000)
+                          ? <ChevronUp className={`h-4 w-4 shrink-0 ${getMuted(true)}`} />
+                          : <ChevronDown className={`h-4 w-4 shrink-0 ${getMuted(true)}`} />
+                        }
+                      </div>
+                    </button>
+                    {openFaq === (i + 1000) && a && (
+                      <div className={`px-5 pb-5 text-sm leading-relaxed ${getBody(true)}`}>{a}</div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </EditableSection>
+      )}
+
       <SectionDivider theme={theme} from="alt" to="cta" />
 
       {/* ═══ FINAL CTA ═══ */}
@@ -614,6 +882,10 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
         @keyframes landing-fade-in {
           from { opacity: 0; transform: translateY(16px); }
           to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes marquee {
+          from { transform: translateX(0); }
+          to { transform: translateX(-50%); }
         }
         .landing-section {
           animation: landing-fade-in 0.6s ease-out both;

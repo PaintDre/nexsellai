@@ -12,6 +12,18 @@ interface Block {
   title: string;
   content: string | unknown[];
   order: number;
+  // Optional structured fields for advanced (Shrine Pro LATAM) blocks
+  steps?: unknown[];
+  rows?: unknown[];
+  us_label?: string;
+  others_label?: string;
+  caption?: string;
+  stats?: unknown[];
+  before_image?: string;
+  after_image?: string;
+  text?: string;
+  items?: unknown[];
+  options?: unknown[];
 }
 
 interface PlanConfig {
@@ -29,6 +41,8 @@ interface PromptParams {
   plan: string;
   currency?: string;
   country_code?: string;
+  template_id?: string;
+  sections?: string[];
 }
 
 interface Strategy {
@@ -57,8 +71,16 @@ function getPlanConfig(plan: string): PlanConfig {
       limit: 10,
     },
     pro: {
-      blockTypes: ["hero", "benefits", "features", "testimonials", "objections", "comparison", "bundles", "offer", "urgency", "guarantee", "faq", "microcopy", "cta"],
-      blockCount: 13,
+      blockTypes: [
+        "hero", "benefits", "features", "testimonials", "objections",
+        "comparison", "bundles", "offer", "urgency", "guarantee",
+        "faq", "microcopy", "cta",
+        // Shrine Pro LATAM advanced blocks
+        "shipping_timeline", "comparison_table", "results_stats",
+        "before_after_slider", "marquee_benefits", "emoji_benefits",
+        "bundle_offer", "faq_cod",
+      ],
+      blockCount: 21,
       limit: 100,
     },
   };
@@ -182,7 +204,7 @@ Return ONLY valid JSON. No markdown. No explanations.`;
 // ─── Generator Prompt (Strategy-Aware) ──────────────────────────────────────
 
 function buildGeneratorPrompt(params: PromptParams, strategy: Strategy): string {
-  const { product, hasOffer, guarantee, plan, currency, country_code } = params;
+  const { product, hasOffer, guarantee, plan, currency, country_code, template_id } = params;
   const currencyCode = currency || "CLP";
 
   const countryContextMap: Record<string, string> = {
@@ -199,6 +221,27 @@ function buildGeneratorPrompt(params: PromptParams, strategy: Strategy): string 
     ? countryContextMap[country_code]
     : "Write in Spanish (Latin American).";
 
+  // ── LATAM vs Global mode (adaptive copy) ──
+  const LATAM_COUNTRIES = new Set(["AR", "CO", "CL", "MX", "PE", "EC", "BO", "UY", "PY", "VE"]);
+  const isLatam = country_code && LATAM_COUNTRIES.has(country_code);
+
+  const latamContext = isLatam ? `
+## LATAM E-COMMERCE MODE (active for country=${country_code})
+- Mention "pago contra entrega" or "paga al recibir" naturally where it makes sense (especially in CTAs and FAQ).
+- Shipping language: "Envío en 2-6 días hábiles" or "Recibe en 3-5 días en tu ciudad".
+- Use specific LATAM city names in testimonials when needed (e.g. Bogotá, Medellín, Cali, Buenos Aires, Córdoba, Santiago, CDMX, Guadalajara, Lima, Quito).
+- Use specific customer counts that sound credible: "+5.000 clientes", "+14.000 personas confían en nosotros" — but keep them as ranges, never invent precise numbers like "14.327".
+- Guarantee phrasing: "Garantía de 30 días" + "Si no te gusta, te devolvemos tu dinero".
+- Currency: ${currencyCode}. Always show prices in this currency, formatted naturally for the country.
+` : `
+## GLOBAL E-COMMERCE MODE (active for country=${country_code || "unspecified"})
+- Use neutral, international language. Mention "secure online payment" / "pago seguro online".
+- Shipping language: "5-10 business days delivery" / "Entrega en 5-10 días hábiles".
+- Use international city/region references when needed (NYC, London, Madrid, Berlin, Sydney).
+- Customer counts as credible ranges: "+10,000 customers worldwide".
+- Guarantee phrasing: "30-day money-back guarantee" / "Garantía de 30 días con reembolso".
+- Currency: ${currencyCode}.
+`;
 
   const saasContext = product.category === "saas"
     ? `\n## SAAS PRODUCT CONTEXT\nThis is a SaaS/app product. Adapt the copy to sell software: emphasize ease of use, time savings, ROI, onboarding simplicity, and integrations. Use standard block types (hero, benefits, features, faq, cta, etc.) — do NOT use saas-prefixed block types.`
@@ -208,11 +251,111 @@ function buildGeneratorPrompt(params: PromptParams, strategy: Strategy): string 
     ? `\n## RISKY BLOCKS — USE SAFE COPY\nThe following blocks lack real user data: ${strategy.risky_blocks.join(", ")}.\nFor these blocks, use neutral trust-oriented copy. Do NOT invent specific names, dates, quantified results, or fake social proof. Use phrasing like "Nuestros clientes confirman que...", "Diseñado para quienes buscan...", etc.`
     : "";
 
+  // ── Shrine Pro LATAM advanced blocks documentation ──
+  const isShrineTemplate = template_id === "shrine-latam";
+  const advancedBlocksInstructions = (plan === "pro") ? `
+## ADVANCED STRUCTURED BLOCKS (Shrine Pro LATAM) — ${isShrineTemplate ? "REQUIRED" : "OPTIONAL — include the most relevant ones"}
+These blocks use STRUCTURED FIELDS instead of plain content arrays. Each has a specific JSON shape:
+
+### shipping_timeline
+\`\`\`json
+{ "type": "shipping_timeline", "title": "Cómo recibirás tu pedido", "order": N, "steps": [
+  { "top": "Pedido confirmado", "bottom": "Hoy" },
+  { "top": "Procesando", "bottom": "1-2 días" },
+  { "top": "Enviado", "bottom": "Día 3" },
+  { "top": "Recibes", "bottom": "Día 4-6" }
+]}
+\`\`\`
+
+### comparison_table
+\`\`\`json
+{ "type": "comparison_table", "title": "Por qué elegirnos", "order": N,
+  "us_label": "Nuestro producto", "others_label": "Otros",
+  "rows": [
+    { "benefit": "Garantía de 30 días", "us": true, "others": false },
+    { "benefit": "Envío gratis", "us": true, "others": false },
+    { "benefit": "Soporte dedicado", "us": true, "others": false },
+    { "benefit": "Materiales premium", "us": true, "others": false }
+  ]
+}
+\`\`\`
+
+### results_stats
+\`\`\`json
+{ "type": "results_stats", "title": "Resultados que hablan", "order": N,
+  "caption": "Basado en feedback de clientes",
+  "stats": [
+    { "percentage": 95, "text": "Clientes satisfechos" },
+    { "percentage": 87, "text": "Recompran en 3 meses" },
+    { "percentage": 92, "text": "Lo recomiendan a un amigo" }
+  ]
+}
+\`\`\`
+
+### before_after_slider
+\`\`\`json
+{ "type": "before_after_slider", "title": "Mira la diferencia", "order": N,
+  "text": "Compara antes y después de usar el producto" }
+\`\`\`
+(images are auto-resolved from product images by the renderer; do NOT include image URLs)
+
+### marquee_benefits
+\`\`\`json
+{ "type": "marquee_benefits", "title": "", "order": N,
+  "items": ["Envío gratis", "Garantía 30 días", "Pago seguro", "Soporte 24/7", "+14.000 clientes"]
+}
+\`\`\`
+
+### emoji_benefits
+\`\`\`json
+{ "type": "emoji_benefits", "title": "Por qué nos eligen", "order": N,
+  "items": [
+    { "emoji": "🚚", "text": "Envío rápido" },
+    { "emoji": "🛡️", "text": "Garantía 30 días" },
+    { "emoji": "💳", "text": "Pago seguro" },
+    { "emoji": "⭐", "text": "+14.000 clientes" }
+  ]
+}
+\`\`\`
+
+### bundle_offer
+\`\`\`json
+{ "type": "bundle_offer", "title": "Elige tu pack", "order": N,
+  "options": [
+    { "label": "1 unidad", "price": "$29.900", "compare_price": "$39.900" },
+    { "label": "Pack 3 unidades", "price": "$69.900", "compare_price": "$119.700", "badge": "Más popular", "savings": "Ahorra $49.800" },
+    { "label": "Pack familiar 5 unidades", "price": "$99.900", "compare_price": "$199.500", "savings": "Ahorra $99.600" }
+  ]
+}
+\`\`\`
+(only use real prices in ${currencyCode}; if hasOffer is false, omit compare_price and savings)
+
+### faq_cod
+\`\`\`json
+{ "type": "faq_cod", "title": "Preguntas frecuentes", "order": N,
+  "items": [
+    { "q": "${isLatam ? "¿Puedo pagar contra entrega?" : "¿Es el pago seguro?"}", "a": "..." },
+    { "q": "¿Cuánto demora el envío?", "a": "..." },
+    { "q": "¿Qué pasa si no me gusta?", "a": "..." },
+    { "q": "¿Tienen garantía?", "a": "..." }
+  ]
+}
+\`\`\`
+` : "";
+
+  const sectionsList = Array.isArray(params.sections) && params.sections.length > 0
+    ? `\n## REQUESTED SECTIONS FOR THIS LANDING (template=${template_id || "default"})
+The user picked a template that requests EXACTLY these block types in this order:
+${params.sections.map((s, i) => `${i + 1}. ${s}`).join("\n")}
+Generate these block types. For advanced structured blocks (shipping_timeline, comparison_table, results_stats, before_after_slider, marquee_benefits, emoji_benefits, bundle_offer, faq_cod), use the structured JSON shapes documented below — NOT plain content strings.\n`
+    : "";
+
   return `You are a conversion copywriter expert specialized in ecommerce / dropshipping.
 
 ${countryInstruction}
 
 Prices are in ${currencyCode}.
+${latamContext}
 
 Return ONLY valid JSON: { "blocks": [...] }.
 
@@ -234,18 +377,20 @@ Return a JSON object with a "blocks" array. Each block must include:
 - "title" (string)
 - "content" (string OR array — see specific rules below)
 - "order" (number)
-- "_meta" (optional object with: "variant", "emphasis", "visual_intent" — for renderer hints)
+- Plus structured fields for advanced blocks (see below)
 
 ## FAQ block format
 For blocks of type "faq", the "content" MUST be an array of objects with "q" (question) and "a" (answer) keys:
 \`\`\`json
 { "type": "faq", "title": "Preguntas frecuentes", "content": [{"q": "¿Pregunta?", "a": "Respuesta detallada."}], "order": 8 }
 \`\`\`
+${sectionsList}
+${advancedBlocksInstructions}
 
-## PLAN-SPECIFIC SECTIONS (MANDATORY)
+## PLAN-SPECIFIC SECTIONS (MANDATORY when no template sections provided)
 Plan: ${plan}
 
-${buildPlanSections(plan)}
+${Array.isArray(params.sections) && params.sections.length > 0 ? "(Template sections above take precedence — follow them.)" : buildPlanSections(plan)}
 
 ## Style & tone rules
 - Every landing must feel like a professional ecommerce sales page for the target country
@@ -258,7 +403,7 @@ ${buildPlanSections(plan)}
 - Each block should flow naturally into the next — avoid repetitive openers
 
 ## Offers / Guarantee
-${hasOffer ? "hasOffer = true: Include an offer with discounted price + anchor price + savings in CLP." : "hasOffer = false: No discount pricing. Do NOT invent discounted prices. Use value-based and time-limited framing instead."}
+${hasOffer ? `hasOffer = true: Include an offer with discounted price + anchor price + savings in ${currencyCode}.` : "hasOffer = false: No discount pricing. Do NOT invent discounted prices. Use value-based and time-limited framing instead."}
 ${guarantee ? `Guarantee: "${guarantee}" — include it in a guarantee block.` : "No guarantee text provided — use a generic satisfaction guarantee if a guarantee block is required by the plan, otherwise omit."}
 
 ## CRITICAL SAFETY RULES — DO NOT VIOLATE
@@ -524,6 +669,13 @@ function validateFaqContent(content: unknown): { q: string; a: string }[] {
     .filter((item) => item.q.length > 0 && item.a.length > 0);
 }
 
+// Block types that use structured fields instead of just `content`
+const ADVANCED_BLOCK_TYPES = new Set([
+  "shipping_timeline", "comparison_table", "results_stats",
+  "before_after_slider", "marquee_benefits", "emoji_benefits",
+  "bundle_offer", "faq_cod",
+]);
+
 function sanitizeBlock(block: unknown): Block | null {
   if (!block || typeof block !== "object") return null;
   const b = block as Record<string, unknown>;
@@ -532,7 +684,10 @@ function sanitizeBlock(block: unknown): Block | null {
   const title = typeof b.title === "string" ? b.title.trim() : "";
   const order = typeof b.order === "number" ? b.order : 0;
 
-  if (!type || !title) return null;
+  if (!type) return null;
+  // Advanced blocks may not have a title — provide empty string fallback
+  const safeTitle = title || (ADVANCED_BLOCK_TYPES.has(type) ? "" : "");
+  if (!ADVANCED_BLOCK_TYPES.has(type) && !title) return null;
 
   let content: string | unknown[];
   if (type === "faq") {
@@ -541,18 +696,48 @@ function sanitizeBlock(block: unknown): Block | null {
       content = [{ q: "¿Tienen soporte?", a: "Sí, contamos con soporte dedicado para resolver tus dudas." }];
     }
   } else if (Array.isArray(b.content)) {
-    content = b.content.map((item) => (typeof item === "string" ? item : JSON.stringify(item)));
+    content = b.content.map((item) => (typeof item === "string" ? item : (typeof item === "object" ? item as unknown : String(item))));
   } else {
-    content = typeof b.content === "string" ? b.content : String(b.content || "");
+    content = typeof b.content === "string" ? b.content : (b.content == null ? "" : String(b.content));
   }
 
-  return { type, title, content, order };
+  const result: Block = { type, title: safeTitle, content, order };
+
+  // Preserve advanced structured fields
+  if (Array.isArray(b.steps)) result.steps = b.steps;
+  if (Array.isArray(b.rows)) result.rows = b.rows;
+  if (typeof b.us_label === "string") result.us_label = b.us_label;
+  if (typeof b.others_label === "string") result.others_label = b.others_label;
+  if (typeof b.caption === "string") result.caption = b.caption;
+  if (Array.isArray(b.stats)) result.stats = b.stats;
+  if (typeof b.before_image === "string") result.before_image = b.before_image;
+  if (typeof b.after_image === "string") result.after_image = b.after_image;
+  if (typeof b.text === "string") result.text = b.text;
+  if (Array.isArray(b.items)) result.items = b.items;
+  if (Array.isArray(b.options)) result.options = b.options;
+
+  return result;
 }
 
 // ─── Strip Internal Metadata ────────────────────────────────────────────────
 
 function stripMeta(blocks: Block[]): Block[] {
-  return blocks.map(({ type, title, content, order }) => ({ type, title, content, order }));
+  return blocks.map((b) => {
+    const { type, title, content, order, steps, rows, us_label, others_label, caption, stats, before_image, after_image, text, items, options } = b;
+    const out: Block = { type, title, content, order };
+    if (steps) out.steps = steps;
+    if (rows) out.rows = rows;
+    if (us_label) out.us_label = us_label;
+    if (others_label) out.others_label = others_label;
+    if (caption) out.caption = caption;
+    if (stats) out.stats = stats;
+    if (before_image) out.before_image = before_image;
+    if (after_image) out.after_image = after_image;
+    if (text) out.text = text;
+    if (items) out.items = items;
+    if (options) out.options = options;
+    return out;
+  });
 }
 
 // ─── Fallback Blocks ────────────────────────────────────────────────────────
@@ -687,6 +872,8 @@ serve(async (req) => {
       plan: userPlan,
       currency: currency || "CLP",
       country_code: country_code || null,
+      template_id: template_id || undefined,
+      sections: Array.isArray(sections) ? sections : undefined,
     };
 
     // ── Step 1: Strategy Planner ──
