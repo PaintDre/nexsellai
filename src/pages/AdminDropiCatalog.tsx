@@ -184,6 +184,97 @@ const AdminDropiCatalog = () => {
     }
   };
 
+  // Delete previous video file from bucket if it lives in our storage
+  const cleanupOldVideo = async (url: string | null) => {
+    if (!url) return;
+    try {
+      const marker = `/storage/v1/object/public/${STORAGE_BUCKET}/`;
+      const idx = url.indexOf(marker);
+      if (idx === -1) return;
+      const path = url.substring(idx + marker.length).split("?")[0];
+      if (path) await supabase.storage.from(STORAGE_BUCKET).remove([path]);
+    } catch (err) {
+      console.warn("[DROPI] cleanup old video", err);
+    }
+  };
+
+  const handleVideoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const productId = videoUploadTarget;
+    if (!file || !productId) return;
+
+    if (!file.type.startsWith("video/")) {
+      toast.error(t("dropi.invalidVideoType"));
+      if (videoFileRef.current) videoFileRef.current.value = "";
+      return;
+    }
+    if (file.size > MAX_VIDEO_SIZE) {
+      toast.error(t("dropi.videoTooLarge"));
+      if (videoFileRef.current) videoFileRef.current.value = "";
+      return;
+    }
+
+    const product = products.find((p) => p.id === productId);
+    setUploadingVideoFor(productId);
+    try {
+      const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
+      const path = `${productId}/${crypto.randomUUID()}.${ext}`;
+
+      const { error: upErr } = await supabase.storage
+        .from(STORAGE_BUCKET)
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (upErr) throw upErr;
+
+      const { data: pub } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+      const publicUrl = pub.publicUrl;
+
+      const { error: updErr } = await supabase
+        .from("dropi_products")
+        .update({ video_url: publicUrl })
+        .eq("id", productId);
+      if (updErr) throw updErr;
+
+      await cleanupOldVideo(product?.video_url || null);
+
+      toast.success(t("dropi.videoUploaded"));
+      loadProducts();
+    } catch (err) {
+      console.error("[DROPI Video Upload]", err);
+      toast.error((err as Error).message || t("common.error"));
+    } finally {
+      setUploadingVideoFor(null);
+      setVideoUploadTarget(null);
+      if (videoFileRef.current) videoFileRef.current.value = "";
+    }
+  };
+
+  const handleRemoveVideo = async (product: DropiProduct) => {
+    setUploadingVideoFor(product.id);
+    try {
+      const { error } = await supabase
+        .from("dropi_products")
+        .update({ video_url: null })
+        .eq("id", product.id);
+      if (error) throw error;
+      await cleanupOldVideo(product.video_url);
+      toast.success(t("dropi.videoRemoved"));
+      loadProducts();
+    } catch (err) {
+      toast.error((err as Error).message || t("common.error"));
+    } finally {
+      setUploadingVideoFor(null);
+    }
+  };
+
+  const handleCopyUrl = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success(t("dropi.urlCopied"));
+    } catch {
+      toast.error(t("common.error"));
+    }
+  };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     const { error } = await supabase
