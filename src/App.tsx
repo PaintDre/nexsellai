@@ -40,6 +40,7 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Dropi = lazy(() => import("./pages/Dropi"));
 const DropiProduct = lazy(() => import("./pages/DropiProduct"));
 const AdminDropiCatalog = lazy(() => import("./pages/AdminDropiCatalog"));
+const AdminDropiVideos = lazy(() => import("./pages/AdminDropiVideos"));
 
 const queryClient = new QueryClient();
 
@@ -91,6 +92,7 @@ const App = () => (
                   <Route path="/admin/automations" element={<AdminEmailAutomations />} />
                   <Route path="/admin/subscriptions" element={<AdminSubscriptions />} />
                   <Route path="/admin/dropi" element={<AdminDropiCatalog />} />
+                  <Route path="/admin/dropi/videos" element={<AdminDropiVideos />} />
                 </Route>
                 <Route element={<SuperAdminLayout />}>
                   <Route path="/admin/config" element={<SuperAdminConfig />} />

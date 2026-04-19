@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Package, FileText, CreditCard, Settings, LogOut, Shield, ShieldCheck, ImageIcon, Banknote, Mail, RefreshCw, Zap } from "lucide-react";
+import { LayoutDashboard, Package, FileText, CreditCard, Settings, LogOut, Shield, ShieldCheck, ImageIcon, Banknote, Mail, RefreshCw, Zap, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -39,6 +39,7 @@ export const SidebarContent = ({ expanded = false, onNavigate }: SidebarContentP
     adminItems.push({ label: t("sidebar.email"), icon: Mail, href: "/admin/email" });
     adminItems.push({ label: t("sidebar.automations"), icon: Zap, href: "/admin/automations" });
     adminItems.push({ label: "DROPI Catalog", icon: Package, href: "/admin/dropi" });
+    adminItems.push({ label: "DROPI Videos", icon: Video, href: "/admin/dropi/videos" });
     adminItems.push({ label: t("sidebar.subscriptions"), icon: RefreshCw, href: "/admin/subscriptions" });
   }
   if (isSuperAdmin()) {

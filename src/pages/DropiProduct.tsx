@@ -17,6 +17,8 @@ interface Product {
   image_2: string | null;
   image_3: string | null;
   video_url: string | null;
+  video_2: string | null;
+  video_3: string | null;
   category: string | null;
 }
 
@@ -68,9 +70,12 @@ const DropiProduct = () => {
     }
   };
 
-  const handleDownloadVideo = () => {
-    if (!product?.video_url) return;
-    window.open(product.video_url, "_blank");
+  const videos = product
+    ? [product.video_url, product.video_2, product.video_3].filter(Boolean) as string[]
+    : [];
+
+  const handleDownloadVideo = (url: string) => {
+    window.open(url, "_blank");
   };
 
   if (loading) {
@@ -108,9 +113,35 @@ const DropiProduct = () => {
             )}
           </div>
 
-          {product.video_url && (
-            <div className="rounded-xl overflow-hidden bg-muted">
-              <video src={product.video_url} controls className="w-full max-h-80 object-contain" preload="metadata" />
+          {videos.length > 0 && (
+            <div className="space-y-3">
+              <h2 className="text-sm font-semibold text-foreground">
+                {t("dropi.videos")} ({videos.length})
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {videos.map((src, i) => (
+                  <div key={i} className="space-y-2">
+                    <div className="rounded-xl overflow-hidden bg-muted aspect-[9/16]">
+                      <video
+                        src={src}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => handleDownloadVideo(src)}
+                    >
+                      <Play className="mr-2 h-3.5 w-3.5" />
+                      {t("dropi.downloadVideo")} {i + 1}
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
@@ -119,13 +150,6 @@ const DropiProduct = () => {
               {downloading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
               {t("dropi.downloadImages")}
             </Button>
-
-            {product.video_url && (
-              <Button className="w-full" variant="outline" onClick={handleDownloadVideo}>
-                <Play className="mr-2 h-4 w-4" />
-                {t("dropi.downloadVideo")}
-              </Button>
-            )}
 
             <Button className="w-full" onClick={() => setAdModalOpen(true)} disabled={!product.image_main}>
               <Sparkles className="mr-2 h-4 w-4" />

@@ -1,0 +1,3 @@
+ALTER TABLE public.dropi_products
+  ADD COLUMN IF NOT EXISTS video_2 TEXT,
+  ADD COLUMN IF NOT EXISTS video_3 TEXT;
