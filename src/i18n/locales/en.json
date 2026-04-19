@@ -921,6 +921,10 @@
     "videoRemoved": "Video removed",
     "pasteUrl": "Paste URL",
     "copyUrl": "Copy URL",
-    "urlCopied": "URL copied"
+    "urlCopied": "URL copied",
+    "adminVideosTitle": "DROPI Videos",
+    "adminVideosDesc": "Upload up to 3 videos per product and get the public links.",
+    "totalVideos": "Total videos",
+    "videos": "Videos"
   }
 }
