@@ -601,6 +601,26 @@ const LandingView = () => {
         </div>
       </div>
 
+      {aiImagesInQueue && (
+        <div className="container mx-auto px-4 pt-4">
+          <div className="flex items-start gap-3 p-4 rounded-lg border border-primary/30 bg-primary/5">
+            <div className="relative shrink-0 mt-0.5">
+              <Clock className="h-5 w-5 text-primary" />
+              <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary animate-ping" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm flex items-center gap-2">
+                {t("landingView.aiInQueueTitle")}
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+              </p>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {t("landingView.aiInQueueDesc", { done: totalAiTargets - missingImages, total: totalAiTargets })}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ResizablePreview editable={editMode}>
         <LandingRenderer
           blocks={blocks}
