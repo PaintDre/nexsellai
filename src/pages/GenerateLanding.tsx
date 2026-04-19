@@ -90,11 +90,20 @@ const GenerateLanding = () => {
     }
   };
 
+  const needsTwoImages = templateId === "shrine-latam";
+  const productImageCount = product?.images?.length || 0;
+  const hasEnoughImagesForTemplate = !needsTwoImages || productImageCount >= 2;
+
   const handleGenerate = async () => {
     if (!user || !product || !profile) return;
 
     if (!canGenerate) {
       toast.error(t("generateLanding.limitReached"), { description: t("generateLanding.limitDesc") });
+      return;
+    }
+
+    if (!hasEnoughImagesForTemplate) {
+      toast.error(t("generateLanding.shrineImagesWarningTitle"), { description: t("generateLanding.shrineImagesWarning") });
       return;
     }
 
