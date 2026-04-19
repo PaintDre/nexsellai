@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { ArrowLeft, Sparkles, Loader2, ImagePlus, Check } from "lucide-react";
+import { ArrowLeft, Sparkles, Loader2, ImagePlus, Check, AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { themes, type LandingTheme } from "@/components/landing/themes";
