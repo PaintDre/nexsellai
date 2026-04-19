@@ -311,6 +311,13 @@ const AdminDropiCatalog = () => {
               className="hidden"
               onChange={handleUpload}
             />
+            <input
+              ref={videoFileRef}
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={handleVideoFileChange}
+            />
             <Button onClick={() => fileRef.current?.click()} disabled={uploading}>
               {uploading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
