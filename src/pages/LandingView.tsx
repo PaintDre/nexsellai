@@ -140,6 +140,27 @@ const LandingView = () => {
     loadViews();
   }, [landing?.id]);
 
+  // ── AI banners "in queue" detection ──
+  // If landing was created < 3 min ago and key blocks (hero/benefits/offer/cta) lack image_url,
+  // we assume banner generation is still in progress in the background. Auto-refresh every 8s.
+  const blocksRaw = (landing?.blocks as unknown as BlockWithImage[]) || [];
+  const aiTargetBlocks = blocksRaw.filter((b) => ["hero", "benefits", "offer", "cta"].includes(b.type));
+  const missingImages = aiTargetBlocks.filter((b) => !b.image_url).length;
+  const totalAiTargets = aiTargetBlocks.length;
+  const createdAt = landing ? new Date((landing as any).created_at).getTime() : 0;
+  const ageMs = Date.now() - createdAt;
+  const aiImagesInQueue = !!landing && isPaidPlan && missingImages > 0 && ageMs < 3 * 60 * 1000;
+
+  useEffect(() => {
+    if (!aiImagesInQueue || !id || !user) return;
+    const interval = setInterval(async () => {
+      const { data: l } = await supabase
+        .from("landings").select("*").eq("id", id).eq("user_id", user.id).single();
+      if (l) setLanding(l);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [aiImagesInQueue, id, user?.id]);
+
   const handleTogglePublish = async () => {
     if (!landing || !user) return;
     setPublishing(true);
