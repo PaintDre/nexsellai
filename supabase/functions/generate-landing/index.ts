@@ -316,34 +316,95 @@ Return ONLY valid JSON: { "blocks": [...] }
 No markdown. No explanations. Same structure, refined copy.`;
 }
 
-// ─── OpenAI Call (Generic) ──────────────────────────────────────────────────
+// ─── OpenAI Call (Generic) with retry + exponential backoff ────────────────
 
-async function callOpenAI(apiKey: string, systemPrompt: string, userMessage: string, temperature: number): Promise<string> {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userMessage },
-      ],
-      temperature,
-      response_format: { type: "json_object" },
-    }),
-  });
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-  if (!response.ok) {
-    const errText = await response.text();
-    console.error("OpenAI error:", errText);
-    throw new Error("Error calling OpenAI API");
+async function callOpenAI(
+  apiKey: string,
+  systemPrompt: string,
+  userMessage: string,
+  temperature: number,
+  options: { maxRetries?: number; label?: string; expectJson?: boolean } = {},
+): Promise<string> {
+  const maxRetries = options.maxRetries ?? 2; // total attempts = maxRetries + 1
+  const label = options.label ?? "openai";
+  const expectJson = options.expectJson ?? true;
+
+  let lastError: unknown = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const startedAt = Date.now();
+    try {
+      console.log(`[${label}] attempt ${attempt + 1}/${maxRetries + 1} → calling OpenAI`);
+
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userMessage },
+          ],
+          temperature,
+          response_format: { type: "json_object" },
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        const status = response.status;
+        const isRetryable = status === 429 || status >= 500;
+        console.error(`[${label}] HTTP ${status} (retryable=${isRetryable}):`, errText.slice(0, 500));
+
+        if (!isRetryable || attempt === maxRetries) {
+          throw new Error(`OpenAI HTTP ${status}: ${errText.slice(0, 200)}`);
+        }
+        // retryable → fall through to backoff
+        lastError = new Error(`OpenAI HTTP ${status}`);
+      } else {
+        const aiData = await response.json();
+        const content: string = aiData.choices?.[0]?.message?.content || "";
+        const elapsed = Date.now() - startedAt;
+
+        // Validate JSON shape if expected
+        if (expectJson) {
+          try {
+            JSON.parse(content);
+          } catch (parseErr) {
+            console.error(`[${label}] malformed JSON on attempt ${attempt + 1} (elapsed ${elapsed}ms):`, String(parseErr).slice(0, 200), "preview:", content.slice(0, 200));
+            if (attempt === maxRetries) {
+              throw new Error(`Malformed JSON from OpenAI after ${attempt + 1} attempts`);
+            }
+            lastError = parseErr;
+            // fall through to backoff
+          }
+        }
+
+        if (!expectJson || (() => { try { JSON.parse(content); return true; } catch { return false; } })()) {
+          console.log(`[${label}] success on attempt ${attempt + 1} (${elapsed}ms, ${content.length} chars)`);
+          return content;
+        }
+      }
+    } catch (err) {
+      lastError = err;
+      console.error(`[${label}] attempt ${attempt + 1} threw:`, err instanceof Error ? err.message : String(err));
+      if (attempt === maxRetries) {
+        throw err;
+      }
+    }
+
+    // Exponential backoff: 500ms, 1500ms (jittered)
+    const backoffMs = Math.round((500 * Math.pow(3, attempt)) + Math.random() * 250);
+    console.log(`[${label}] backing off ${backoffMs}ms before retry`);
+    await sleep(backoffMs);
   }
 
-  const aiData = await response.json();
-  return aiData.choices?.[0]?.message?.content || "";
+  throw lastError instanceof Error ? lastError : new Error(`[${label}] exhausted retries`);
 }
 
 // ─── Pipeline Steps ─────────────────────────────────────────────────────────
