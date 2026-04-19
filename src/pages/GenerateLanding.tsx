@@ -270,6 +270,24 @@ const GenerateLanding = () => {
       <UpgradeWarningBanner resource="landings" used={used} limit={limit} />
       <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="landings" used={used} limit={limit} />
 
+      {!hasEnoughImagesForTemplate && (
+        <div className="flex items-start gap-3 p-4 rounded-lg border border-amber-500/40 bg-amber-500/10">
+          <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+          <div className="flex-1 min-w-0 space-y-2">
+            <div>
+              <p className="font-semibold text-sm">{t("generateLanding.shrineImagesWarningTitle")}</p>
+              <p className="text-sm text-muted-foreground">
+                {t("generateLanding.shrineImagesWarning")} ({productImageCount}/2)
+              </p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => navigate(`/products/${product.id}/edit`)}>
+              <ImagePlus className="h-4 w-4 mr-2" />
+              {t("generateLanding.uploadMoreImages")}
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div>
         <h1 className="text-3xl font-bold font-display tracking-tight">{t("generateLanding.title")}</h1>
         <p className="text-muted-foreground mt-1">{t("generateLanding.product")}: <strong>{product.name}</strong></p>
