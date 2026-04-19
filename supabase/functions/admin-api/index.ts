@@ -316,7 +316,20 @@ serve(async (req) => {
     if (req.method === "PATCH" && path.match(/^\/automations\/[^/]+$/)) {
       const id = path.split("/")[2];
       const body = await req.json();
-      const { error } = await supabase.from("email_automations").update(body).eq("id", id);
+      // Allowlist: solo permitir actualizar campos esperados (previene mass assignment)
+      const allowedFields: Record<string, unknown> = {};
+      if (typeof body.name === "string") allowedFields.name = body.name;
+      if (typeof body.trigger_event === "string") allowedFields.trigger_event = body.trigger_event;
+      if (body.delay_hours !== undefined) {
+        const n = Number(body.delay_hours);
+        if (!Number.isFinite(n) || n < 0) return jsonResponse({ error: "delay_hours must be a non-negative number" }, 400);
+        allowedFields.delay_hours = Math.floor(n);
+      }
+      if (typeof body.subject === "string") allowedFields.subject = body.subject;
+      if (typeof body.body_html === "string") allowedFields.body_html = body.body_html;
+      if (body.enabled !== undefined) allowedFields.enabled = Boolean(body.enabled);
+      if (Object.keys(allowedFields).length === 0) return jsonResponse({ error: "No valid fields to update" }, 400);
+      const { error } = await supabase.from("email_automations").update(allowedFields).eq("id", id);
       if (error) return jsonResponse({ error: error.message }, 500);
       return jsonResponse({ success: true });
     }
