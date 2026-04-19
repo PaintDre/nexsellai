@@ -17,6 +17,8 @@ interface Product {
   image_2: string | null;
   image_3: string | null;
   video_url: string | null;
+  video_2: string | null;
+  video_3: string | null;
   category: string | null;
 }
 
