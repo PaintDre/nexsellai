@@ -98,13 +98,22 @@ const GenerateLanding = () => {
       return;
     }
 
+    const tStart = Date.now();
+    console.log("[handleGenerate] start", { productId: product.id, plan: profile.plan, mode, intensity, hasOffer, autoImages, templateId });
+
     setGenerating(true);
     setGenerationStep("copy");
     setProgress(10);
 
+    let insertedLanding: { id: string } | null = null;
+
     try {
+      // ── Step A: invoke generate-landing edge function ──
       setProgress(20);
       const selectedTemplate = landingTemplates.find(t => t.id === templateId);
+      console.log("[handleGenerate] invoking generate-landing edge function...");
+      const tEdge = Date.now();
+
       const { data, error } = await supabase.functions.invoke("generate-landing", {
         body: {
           product,
@@ -119,10 +128,27 @@ const GenerateLanding = () => {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("[handleGenerate] generate-landing edge function failed:", error);
+        toast.error(t("generateLanding.generateError"), { description: error.message || "Edge function error" });
+        setGenerationStep("idle");
+        setProgress(0);
+        return;
+      }
+
+      if (!data || !Array.isArray(data.blocks) || data.blocks.length === 0) {
+        console.error("[handleGenerate] generate-landing returned invalid payload:", data);
+        toast.error(t("generateLanding.generateError"), { description: "Empty AI response" });
+        setGenerationStep("idle");
+        setProgress(0);
+        return;
+      }
+
+      console.log(`[handleGenerate] generate-landing OK in ${Date.now() - tEdge}ms — ${data.blocks.length} blocks`);
       setProgress(50);
 
-      const { data: insertedLanding, error: insertError } = await supabase.from("landings").insert({
+      // ── Step B: insert landing row ──
+      const { data: inserted, error: insertError } = await supabase.from("landings").insert({
         user_id: user.id,
         product_id: product.id,
         name: product.name,
@@ -134,9 +160,19 @@ const GenerateLanding = () => {
         theme,
       } as any).select().single();
 
-      if (insertError) throw insertError;
+      if (insertError || !inserted) {
+        console.error("[handleGenerate] insert into landings failed:", insertError);
+        toast.error(t("generateLanding.generateError"), { description: insertError?.message || "DB insert failed" });
+        setGenerationStep("idle");
+        setProgress(0);
+        return;
+      }
+
+      insertedLanding = inserted;
+      console.log(`[handleGenerate] landing inserted id=${inserted.id}`);
       setProgress(60);
 
+      // ── Step C: AI banners (optional) ──
       if (autoImages && isPaidPlan && insertedLanding) {
         setGenerationStep("images");
         setProgress(65);
@@ -171,14 +207,25 @@ const GenerateLanding = () => {
           bannerPromises.push(generateBannerForSection(insertedLanding.id, offerBlock, product, allImageUrls));
         }
 
+        console.log(`[handleGenerate] generating ${bannerPromises.length} banners in parallel`);
         await Promise.all(bannerPromises);
+        console.log("[handleGenerate] banners done");
         setProgress(90);
       }
 
-      await supabase.from("profiles").update({ landings_used: used + 1 }).eq("user_id", user.id);
+      // ── Step D: increment usage counter (non-blocking on error) ──
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ landings_used: used + 1 })
+        .eq("user_id", user.id);
+      if (updateError) {
+        console.error("[handleGenerate] failed to increment landings_used:", updateError);
+        // Don't abort — landing is already created.
+      }
 
       setProgress(100);
       setGenerationStep("done");
+      console.log(`[handleGenerate] complete in ${Date.now() - tStart}ms`);
 
       toast.success(t("generateLanding.generated"));
 
@@ -186,7 +233,8 @@ const GenerateLanding = () => {
         navigate(`/landings/${insertedLanding?.id || ""}`);
       }, 800);
     } catch (err: any) {
-      toast.error(t("generateLanding.generateError"), { description: err.message });
+      console.error("[handleGenerate] unexpected error:", err);
+      toast.error(t("generateLanding.generateError"), { description: err?.message || "Unexpected error" });
       setGenerationStep("idle");
       setProgress(0);
     } finally {
