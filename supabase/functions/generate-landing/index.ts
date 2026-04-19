@@ -12,6 +12,18 @@ interface Block {
   title: string;
   content: string | unknown[];
   order: number;
+  // Optional structured fields for advanced (Shrine Pro LATAM) blocks
+  steps?: unknown[];
+  rows?: unknown[];
+  us_label?: string;
+  others_label?: string;
+  caption?: string;
+  stats?: unknown[];
+  before_image?: string;
+  after_image?: string;
+  text?: string;
+  items?: unknown[];
+  options?: unknown[];
 }
 
 interface PlanConfig {
@@ -29,6 +41,8 @@ interface PromptParams {
   plan: string;
   currency?: string;
   country_code?: string;
+  template_id?: string;
+  sections?: string[];
 }
 
 interface Strategy {
