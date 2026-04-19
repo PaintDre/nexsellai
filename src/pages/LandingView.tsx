@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2, ImagePlus, Sparkles, Pencil, Save, X, Copy, Trash2, Globe, GlobeLock, Share2, ExternalLink, Eye, TrendingUp, MoreVertical, Store } from "lucide-react";
+import { ArrowLeft, Download, Loader2, FileArchive, FileCode, Maximize2, ImagePlus, Sparkles, Pencil, Save, X, Copy, Trash2, Globe, GlobeLock, Share2, ExternalLink, Eye, TrendingUp, MoreVertical, Store, Clock } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { exportShopifyZip } from "@/lib/exportShopify";
 import LandingRenderer from "@/components/landing/LandingRenderer";
@@ -139,6 +139,27 @@ const LandingView = () => {
     };
     loadViews();
   }, [landing?.id]);
+
+  // ── AI banners "in queue" detection ──
+  // If landing was created < 3 min ago and key blocks (hero/benefits/offer/cta) lack image_url,
+  // we assume banner generation is still in progress in the background. Auto-refresh every 8s.
+  const blocksRaw = (landing?.blocks as unknown as BlockWithImage[]) || [];
+  const aiTargetBlocks = blocksRaw.filter((b) => ["hero", "benefits", "offer", "cta"].includes(b.type));
+  const missingImages = aiTargetBlocks.filter((b) => !b.image_url).length;
+  const totalAiTargets = aiTargetBlocks.length;
+  const createdAt = landing ? new Date((landing as any).created_at).getTime() : 0;
+  const ageMs = Date.now() - createdAt;
+  const aiImagesInQueue = !!landing && isPaidPlan && missingImages > 0 && ageMs < 3 * 60 * 1000;
+
+  useEffect(() => {
+    if (!aiImagesInQueue || !id || !user) return;
+    const interval = setInterval(async () => {
+      const { data: l } = await supabase
+        .from("landings").select("*").eq("id", id).eq("user_id", user.id).single();
+      if (l) setLanding(l);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [aiImagesInQueue, id, user?.id]);
 
   const handleTogglePublish = async () => {
     if (!landing || !user) return;
@@ -579,6 +600,26 @@ const LandingView = () => {
           </div>
         </div>
       </div>
+
+      {aiImagesInQueue && (
+        <div className="container mx-auto px-4 pt-4">
+          <div className="flex items-start gap-3 p-4 rounded-lg border border-primary/30 bg-primary/5">
+            <div className="relative shrink-0 mt-0.5">
+              <Clock className="h-5 w-5 text-primary" />
+              <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary animate-ping" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold text-sm flex items-center gap-2">
+                {t("landingView.aiInQueueTitle")}
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
+              </p>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {t("landingView.aiInQueueDesc", { done: totalAiTargets - missingImages, total: totalAiTargets })}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ResizablePreview editable={editMode}>
         <LandingRenderer

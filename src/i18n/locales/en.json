@@ -631,6 +631,8 @@
     "chooseTemplate": "Choose a visual template",
     "outputSize": "Output size",
     "generatingImage": "Generating image...",
+    "aiInQueueTitle": "AI images in queue",
+    "aiInQueueDesc": "We're generating your landing banners in the background ({{done}}/{{total}} ready). They'll appear automatically in a few seconds.",
     "generateImageAI": "Generate Image with AI",
     "imageGenerated": "Image generated!",
     "imageAddedTo": "Image added to section \"{{section}}\"",
