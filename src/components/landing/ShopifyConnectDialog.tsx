@@ -35,7 +35,7 @@ const ShopifyConnectDialog = ({ open, onOpenChange, onConnected }: ShopifyConnec
     if (!open || !user) return;
     const check = async () => {
       const { data } = await supabase
-        .from("shopify_connections")
+        .from("shopify_connections_safe" as any)
         .select("store_domain, shop_name")
         .eq("user_id", user.id)
         .maybeSingle();

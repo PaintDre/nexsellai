@@ -820,6 +820,30 @@ export type Database = {
           },
         ]
       }
+      shopify_connections_safe: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          shop_name: string | null
+          store_domain: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          shop_name?: string | null
+          store_domain?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          shop_name?: string | null
+          store_domain?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
