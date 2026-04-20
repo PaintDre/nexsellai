@@ -15,11 +15,11 @@ const PublicLanding = () => {
     if (!slug) return;
     const load = async () => {
       setLoading(true);
+      // Use the public_landings view which excludes user_id from public exposure
       const { data: l, error } = await (supabase
-        .from("landings")
+        .from("public_landings" as any)
         .select("*") as any)
         .eq("slug", slug)
-        .eq("published", true)
         .single();
 
       if (error || !l) {
