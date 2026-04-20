@@ -54,12 +54,11 @@ export const BannerShowcaseGallery = () => {
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    supabase
-      .from("banners")
+    (supabase as any)
+      .from("public_banner_showcase")
       .select("image_url")
-      .order("created_at", { ascending: false })
       .limit(6)
-      .then(({ data }) => {
+      .then(({ data }: { data: { image_url: string }[] | null }) => {
         if (data && data.length > 0) {
           setImages(data.map((b) => b.image_url));
         }
