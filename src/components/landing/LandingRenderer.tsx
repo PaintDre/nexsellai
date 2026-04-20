@@ -14,6 +14,7 @@ import BeforeAfterSlider from "./BeforeAfterSlider";
 import { getHeroStyle } from "./heroStyles";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import AnimatedCounter from "./AnimatedCounter";
+import { optimizeBlocks } from "./optimizeBlocks";
 
 interface Block {
   type: string;
