@@ -71,23 +71,27 @@ const AdminPayments = () => {
 
   return (
     <div className="page-in p-4 md:p-6 lg:p-10 space-y-6 max-w-5xl mx-auto">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" asChild>
-          <Link to="/admin"><ArrowLeft className="h-4 w-4" /></Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight flex items-center gap-2">
-            <CreditCard className="h-6 w-6" /> {t("adminPayments.title")}
-          </h1>
-          <p className="text-sm text-muted-foreground">{t("adminPayments.transactionsCount", { count: payments.length })}</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <CreditCard className="h-3.5 w-3.5" /> {t("admin.eyebrow")}
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight">{t("adminPayments.title")}</h1>
+          <p className="text-sm text-muted-foreground">
+            {t("adminPayments.subtitle")} · {t("adminPayments.transactionsCount", { count: payments.length })}
+          </p>
         </div>
+        <Button asChild variant="outline" size="sm" className="self-start sm:self-auto">
+          <Link to="/admin"><ArrowLeft className="h-4 w-4" /> {t("common.back")}</Link>
+        </Button>
       </div>
 
       {payments.length === 0 ? (
         <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-16">
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <CreditCard className="h-10 w-10 text-muted-foreground/30 mb-3" />
-            <p className="text-sm text-muted-foreground">{t("adminPayments.noPayments")}</p>
+            <p className="text-sm font-medium text-foreground">{t("adminPayments.noPayments")}</p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-sm">{t("adminPayments.noPaymentsHint")}</p>
           </CardContent>
         </Card>
       ) : (

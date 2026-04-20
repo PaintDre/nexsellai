@@ -158,22 +158,28 @@ const AdminUsers = () => {
 
   return (
     <div className="page-in p-4 md:p-6 lg:p-10 space-y-6 max-w-7xl mx-auto">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Button asChild variant="outline" size="sm">
-            <Link to="/admin"><ArrowLeft className="h-4 w-4 mr-1" /> {t("common.back")}</Link>
-          </Button>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground flex items-center gap-2">
-              <Users className="h-6 w-6 sm:h-7 sm:w-7" /> {t("adminUsers.title")}
-            </h1>
-            <p className="text-muted-foreground mt-1">{t("adminUsers.registeredUsers", { count: users.length })}</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <Users className="h-3.5 w-3.5" />
+            {t("admin.eyebrow")}
           </div>
+          <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground">
+            {t("adminUsers.title")}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {t("adminUsers.subtitle")} · {t("adminUsers.registeredUsers", { count: users.length })}
+          </p>
         </div>
-        <Button onClick={saveAllChanges} disabled={!hasPendingChanges || saving} className="gap-2 w-full sm:w-auto">
-          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          {t("adminUsers.saveChanges")}
-        </Button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin"><ArrowLeft className="h-4 w-4" /> {t("common.back")}</Link>
+          </Button>
+          <Button onClick={saveAllChanges} disabled={!hasPendingChanges || saving} className="gap-2 flex-1 sm:flex-none">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            {t("adminUsers.saveChanges")}
+          </Button>
+        </div>
       </div>
 
       {hasPendingChanges && (

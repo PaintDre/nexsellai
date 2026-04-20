@@ -58,21 +58,25 @@ const AdminSubscriptions = () => {
 
   return (
     <div className="page-in p-4 md:p-6 lg:p-10 space-y-6 max-w-7xl mx-auto">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl sm:text-3xl font-bold font-display tracking-tight text-foreground">{t("adminSubscriptions.title")}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{t("adminSubscriptions.subtitle")}</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <CreditCard className="h-3.5 w-3.5" /> {t("admin.eyebrow")}
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground">{t("adminSubscriptions.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("adminSubscriptions.subtitle")}</p>
         </div>
-        <Button asChild variant="outline" className="min-h-[44px] w-full sm:w-auto">
-          <Link to="/admin"><ArrowLeft className="h-4 w-4 mr-2" /> {t("common.back")}</Link>
+        <Button asChild variant="outline" size="sm" className="self-start sm:self-auto">
+          <Link to="/admin"><ArrowLeft className="h-4 w-4" /> {t("common.back")}</Link>
         </Button>
       </div>
 
       {subs.length === 0 ? (
-        <Card>
+        <Card className="border-dashed">
           <CardContent className="py-12 text-center">
-            <CreditCard className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-            <p className="text-muted-foreground">{t("adminSubscriptions.noSubscriptions")}</p>
+            <CreditCard className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
+            <p className="text-sm font-medium text-foreground">{t("adminSubscriptions.noSubscriptions")}</p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-sm mx-auto">{t("adminSubscriptions.noSubscriptionsHint")}</p>
           </CardContent>
         </Card>
       ) : (

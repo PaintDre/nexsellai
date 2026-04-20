@@ -143,10 +143,13 @@ const AdminEmailCampaigns = () => {
 
   return (
     <div className="page-in p-4 md:p-6 lg:p-10 space-y-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <Mail className="h-3.5 w-3.5" /> {t("admin.eyebrow")}
+          </div>
           <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground">{t("adminCampaigns.title")}</h1>
-          <p className="text-muted-foreground text-sm mt-1">{t("adminCampaigns.subtitle")}</p>
+          <p className="text-muted-foreground text-sm max-w-xl">{t("adminCampaigns.subtitle")}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -232,10 +235,11 @@ const AdminEmailCampaigns = () => {
       </Dialog>
 
       {campaigns.length === 0 ? (
-        <Card>
+        <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <Mail className="h-12 w-12 text-muted-foreground/40 mb-4" />
-            <p className="text-muted-foreground">{t("adminCampaigns.noCampaigns")}</p>
+            <Mail className="h-12 w-12 text-muted-foreground/30 mb-4" />
+            <p className="text-sm font-medium text-foreground">{t("adminCampaigns.noCampaigns")}</p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-sm">{t("adminCampaigns.noCampaignsHint")}</p>
           </CardContent>
         </Card>
       ) : (

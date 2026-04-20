@@ -175,13 +175,15 @@ const AdminDropiCatalog = () => {
 
   return (
     <div className="page-in p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground flex items-center gap-2">
-            <Package className="h-6 w-6 text-primary" />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <Package className="h-3.5 w-3.5" /> {t("admin.eyebrow")}
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground">
             {t("dropi.adminCatalog")}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground max-w-xl">
             {t("dropi.adminCatalogDesc")}
           </p>
         </div>
