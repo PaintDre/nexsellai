@@ -906,37 +906,6 @@
     "copyright": "© {{year}} Nexsell. Todos os direitos reservados."
   },
   "adminUsers": {
-    "title": "Gestão de Usuários",
-    "registeredUsers": "{{count}} usuários registrados",
-    "saveChanges": "Salvar alterações",
-    "unsavedChanges": "Você tem alterações não salvas em {{count}} usuário(s).",
-    "loadError": "Erro ao carregar usuários",
-    "saveError": "Erro ao salvar",
-    "saved": "Alterações salvas com sucesso",
-    "deactivated": "Usuário desativado",
-    "deactivateError": "Erro ao desativar",
-    "name": "Nome",
-    "email": "Email",
-    "plan": "Plano",
-    "role": "Função",
-    "actions": "Ações"
-  },
-  "adminPayments": {
-    "title": "Pagamentos",
-    "transactionsCount": "{{count}} transações registradas",
-    "noPayments": "Nenhum pagamento registrado ainda",
-    "user": "Usuário",
-    "plan": "Plano",
-    "amount": "Valor",
-    "currency": "Moeda",
-    "provider": "Provedor",
-    "period": "Período",
-    "status": "Status",
-    "externalId": "ID Externo",
-    "date": "Data",
-    "noName": "Sem nome"
-  },
-  "adminUsers": {
     "title": "Usuários",
     "subtitle": "Gerencie planos e permissões de cada conta",
     "registeredUsers": "{{count}} contas registradas",
