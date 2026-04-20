@@ -164,6 +164,7 @@ const LandingFullPreview = () => {
         imagePreview={productImage}
         theme={theme}
         hasOffer={!!(landing as any).has_offer}
+        countryCode={(profile as any)?.country_code || null}
       />
     </div>
   );
