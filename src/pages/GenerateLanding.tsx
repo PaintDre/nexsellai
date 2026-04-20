@@ -102,6 +102,13 @@ const GenerateLanding = () => {
       return;
     }
 
+    // Plan gating: prevent PRO templates on non-PRO plans
+    const selectedTpl = landingTemplates.find((t) => t.id === templateId);
+    if (selectedTpl?.requiredPlan === "pro" && profile.plan !== "pro") {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     if (!hasEnoughImagesForTemplate) {
       toast.error(t("generateLanding.shrineImagesWarningTitle"), { description: t("generateLanding.shrineImagesWarning") });
       return;
