@@ -50,7 +50,7 @@ const ExportPreviewDialog = ({
   const checkConnection = async () => {
     if (!user) return;
     const { data } = await supabase
-      .from("shopify_connections")
+      .from("shopify_connections_safe" as any)
       .select("id, store_domain, shop_name")
       .eq("user_id", user.id)
       .maybeSingle();
