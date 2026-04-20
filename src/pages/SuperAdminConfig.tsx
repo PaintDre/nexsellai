@@ -25,6 +25,9 @@ const SuperAdminConfig = () => {
   const [bannerLimitFree, setBannerLimitFree] = useState("2");
   const [bannerLimitStarter, setBannerLimitStarter] = useState("30");
   const [bannerLimitPro, setBannerLimitPro] = useState("150");
+  const [dropiLimitFree, setDropiLimitFree] = useState("1");
+  const [dropiLimitStarter, setDropiLimitStarter] = useState("30");
+  const [dropiLimitPro, setDropiLimitPro] = useState("150");
   const { t } = useTranslation();
 
   const baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
@@ -59,6 +62,12 @@ const SuperAdminConfig = () => {
           setBannerLimitFree(String(bLimits.value?.free ?? 2));
           setBannerLimitStarter(String(bLimits.value?.starter ?? 30));
           setBannerLimitPro(String(bLimits.value?.pro ?? 150));
+        }
+        const dLimits = items.find((c) => c.key === "dropi_ads_limits");
+        if (dLimits) {
+          setDropiLimitFree(String(dLimits.value?.free ?? 1));
+          setDropiLimitStarter(String(dLimits.value?.starter ?? 30));
+          setDropiLimitPro(String(dLimits.value?.pro ?? 150));
         }
       }
       setLoading(false);
