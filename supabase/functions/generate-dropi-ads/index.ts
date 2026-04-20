@@ -180,19 +180,28 @@ serve(async (req) => {
     .eq("user_id", user.id)
     .single();
 
-  // Free plan limit
-  if (profile?.plan === "free") {
-    const { count } = await supabase
-      .from("dropi_ad_generations")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id);
+  // Plan-based monthly (rolling 30 days) limit, configurable from /admin/config
+  const plan = (profile?.plan ?? "free") as "free" | "starter" | "pro";
+  const { data: limitsRow } = await supabase
+    .from("system_config")
+    .select("value")
+    .eq("key", "dropi_ads_limits")
+    .maybeSingle();
+  const limits = (limitsRow?.value ?? { free: 1, starter: 30, pro: 150 }) as Record<string, number>;
+  const planLimit = limits[plan] ?? 1;
 
-    if ((count ?? 0) >= 1) {
-      return new Response(JSON.stringify({ error: "Free plan limit reached" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const { count: usedCount } = await supabase
+    .from("dropi_ad_generations")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("created_at", since);
+
+  if ((usedCount ?? 0) >= planLimit) {
+    return new Response(
+      JSON.stringify({ error: "Plan limit reached", limit: planLimit, used: usedCount ?? 0 }),
+      { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   }
 
   const userLang = language || profile?.language || "es";

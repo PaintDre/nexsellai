@@ -57,16 +57,27 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
       return;
     }
 
-    if (profile?.plan === "free") {
-      const { count } = await supabase
-        .from("dropi_ad_generations")
-        .select("*", { count: "exact", head: true })
-        .eq("user_id", session.user.id);
+    // Read plan limits from system_config (managed in /admin/config)
+    const plan = (profile?.plan ?? "free") as "free" | "starter" | "pro";
+    const { data: limitsRow } = await supabase
+      .from("system_config")
+      .select("value")
+      .eq("key", "dropi_ads_limits")
+      .maybeSingle();
+    const limits = (limitsRow?.value ?? { free: 1, starter: 30, pro: 150 }) as Record<string, number>;
+    const planLimit = limits[plan] ?? 1;
 
-      if ((count ?? 0) >= 1) {
-        setUpgradeOpen(true);
-        return;
-      }
+    // 30-day rolling usage window
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { count } = await supabase
+      .from("dropi_ad_generations")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", session.user.id)
+      .gte("created_at", since);
+
+    if ((count ?? 0) >= planLimit) {
+      setUpgradeOpen(true);
+      return;
     }
 
     setLoading(true);

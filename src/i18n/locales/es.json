@@ -1029,6 +1029,10 @@
     "saveLandingLimits": "Guardar límites de landings",
     "bannerLimits": "Límites de Banners",
     "saveBannerLimits": "Guardar límites de banners",
+    "dropiAdsLimits": "Límites de Generación de Ads (Dropi)",
+    "dropiAdsLimitsDesc": "Cantidad máxima de packs de ads que cada plan puede generar desde productos del catálogo Dropi (botón \"Generar Imágenes Ads\").",
+    "dropiAdsLimitsHint": "Cada generación crea hasta 9 imágenes (3 estructuras × 3 formatos). Se cuenta por usuario en una ventana móvil de 30 días.",
+    "saveDropiAdsLimits": "Guardar límites de ads Dropi",
     "configSaved": "Configuración guardada",
     "configError": "Error al guardar"
   },

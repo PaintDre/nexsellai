@@ -25,6 +25,9 @@ const SuperAdminConfig = () => {
   const [bannerLimitFree, setBannerLimitFree] = useState("2");
   const [bannerLimitStarter, setBannerLimitStarter] = useState("30");
   const [bannerLimitPro, setBannerLimitPro] = useState("150");
+  const [dropiLimitFree, setDropiLimitFree] = useState("1");
+  const [dropiLimitStarter, setDropiLimitStarter] = useState("30");
+  const [dropiLimitPro, setDropiLimitPro] = useState("150");
   const { t } = useTranslation();
 
   const baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
@@ -59,6 +62,12 @@ const SuperAdminConfig = () => {
           setBannerLimitFree(String(bLimits.value?.free ?? 2));
           setBannerLimitStarter(String(bLimits.value?.starter ?? 30));
           setBannerLimitPro(String(bLimits.value?.pro ?? 150));
+        }
+        const dLimits = items.find((c) => c.key === "dropi_ads_limits");
+        if (dLimits) {
+          setDropiLimitFree(String(dLimits.value?.free ?? 1));
+          setDropiLimitStarter(String(dLimits.value?.starter ?? 30));
+          setDropiLimitPro(String(dLimits.value?.pro ?? 150));
         }
       }
       setLoading(false);
@@ -176,6 +185,46 @@ const SuperAdminConfig = () => {
             disabled={saving}
           >
             <Save className="h-4 w-4 mr-2" /> {t("superAdminConfig.saveBannerLimits")}
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sliders className="h-5 w-5" /> {t("superAdminConfig.dropiAdsLimits")}
+          </CardTitle>
+          <p className="text-sm text-muted-foreground mt-1">
+            {t("superAdminConfig.dropiAdsLimitsDesc")}
+          </p>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label>Free</Label>
+              <Input type="number" min={0} value={dropiLimitFree} onChange={(e) => setDropiLimitFree(e.target.value)} />
+            </div>
+            <div>
+              <Label>Starter</Label>
+              <Input type="number" min={0} value={dropiLimitStarter} onChange={(e) => setDropiLimitStarter(e.target.value)} />
+            </div>
+            <div>
+              <Label>Pro</Label>
+              <Input type="number" min={0} value={dropiLimitPro} onChange={(e) => setDropiLimitPro(e.target.value)} />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {t("superAdminConfig.dropiAdsLimitsHint")}
+          </p>
+          <Button
+            onClick={() => saveConfig("dropi_ads_limits", {
+              free: parseInt(dropiLimitFree) || 0,
+              starter: parseInt(dropiLimitStarter) || 0,
+              pro: parseInt(dropiLimitPro) || 0,
+            })}
+            disabled={saving}
+          >
+            <Save className="h-4 w-4 mr-2" /> {t("superAdminConfig.saveDropiAdsLimits")}
           </Button>
         </CardContent>
       </Card>
