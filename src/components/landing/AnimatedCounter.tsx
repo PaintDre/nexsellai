@@ -32,8 +32,7 @@ const AnimatedCounter = ({ to, duration = 1400, className, suffix = "" }: Animat
       return;
     }
 
-    // Initial paint at 0 (avoids layout shift when animation starts)
-    write(0);
+    // Initial value already rendered as "0{suffix}" in JSX — no extra write needed.
 
     const io = new IntersectionObserver(
       (entries) => {
@@ -77,6 +76,9 @@ const AnimatedCounter = ({ to, duration = 1400, className, suffix = "" }: Animat
         minWidth: `${reservedCh}ch`,
         fontVariantNumeric: "tabular-nums",
         textAlign: "center",
+        // Isolate layout/paint so per-frame text changes don't reflow ancestors.
+        contain: "layout style paint",
+        willChange: "contents",
       }}
     >
       0{suffix}
