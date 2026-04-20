@@ -599,6 +599,7 @@ const LandingView = () => {
           editable={editMode}
           onBlocksChange={handleBlocksChange}
           hasOffer={!!(landing as any).has_offer}
+          countryCode={profile?.country_code || null}
         />
       </ResizablePreview>
 

@@ -137,6 +137,7 @@ const PublicLanding = () => {
       imagePreview={productImage}
       theme={theme}
       hasOffer={!!(landing as any).has_offer}
+      countryCode={(landing as any)?.country_code || (product as any)?.country_code || null}
     />
   );
 };
