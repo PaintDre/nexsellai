@@ -11,6 +11,11 @@ const colorMap: Record<LandingTheme, Record<string, string>> = {
   bold: { hero: "#030712", main: "#ffffff", alt: "#030712", accent: "#ecfdf5", cta: "#030712" },
   clean: { hero: "#eff6ff", main: "#ffffff", alt: "#f8fafc", accent: "#eff6ff", cta: "#f8fafc" },
   warm: { hero: "#fffbeb", main: "#ffffff", alt: "#fff7ed", accent: "#fffbeb", cta: "#fff7ed" },
+  "saas-mono": { hero: "#fafafa", main: "#ffffff", alt: "#fafafa", accent: "#eef2ff", cta: "#fafafa" },
+  "dtc-bold": { hero: "#09090b", main: "#09090b", alt: "#fde047", accent: "#fde047", cta: "#09090b" },
+  "editorial-apple": { hero: "#ffffff", main: "#ffffff", alt: "#f5f5f5", accent: "#fafafa", cta: "#f5f5f5" },
+  "modern-ecommerce": { hero: "#f5f5f4", main: "#fafaf9", alt: "#ffffff", accent: "#ecfdf5", cta: "#fafaf9" },
+  "story-soft": { hero: "#fff1f2", main: "#fffbeb", alt: "#ffffff", accent: "#fff1f2", cta: "#fffbeb" },
 };
 
 const SectionDivider = ({ theme, from, to }: SectionDividerProps) => {

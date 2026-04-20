@@ -1,4 +1,14 @@
-export type LandingTheme = "minimal" | "bold" | "clean" | "warm";
+export type LandingTheme =
+  | "minimal"
+  | "bold"
+  | "clean"
+  | "warm"
+  // Premium curated themes (Awwwards-inspired)
+  | "saas-mono"
+  | "dtc-bold"
+  | "editorial-apple"
+  | "modern-ecommerce"
+  | "story-soft";
 
 export interface ThemeConfig {
   name: string;
@@ -146,5 +156,162 @@ export const themes: Record<LandingTheme, ThemeConfig> = {
     urgencyText: "text-red-600",
     starColor: "text-orange-400 fill-orange-400",
     trustColor: "text-amber-400",
+  },
+
+  // ─── PREMIUM CURATED THEMES (Awwwards-inspired) ───────────────
+
+  // SaaS Minimal — estilo Linear/Vercel: gris claro, tipografía respirada, acento índigo
+  "saas-mono": {
+    name: "SaaS Mono",
+    description: "Linear/Vercel — gris respirado, índigo sutil",
+    heroBg: "bg-gradient-to-b from-zinc-50 via-white to-white",
+    heroText: "text-zinc-950",
+    sectionBg: "bg-white",
+    sectionAltBg: "bg-zinc-50",
+    sectionAltHeading: "text-zinc-950",
+    sectionAltBody: "text-zinc-600",
+    sectionAltMuted: "text-zinc-400",
+    sectionAltCardBg: "bg-white",
+    sectionAltCardBorder: "border-zinc-200",
+    ctaBg: "bg-zinc-950",
+    ctaText: "text-white",
+    ctaHover: "hover:bg-zinc-800",
+    headingColor: "text-zinc-950",
+    bodyColor: "text-zinc-600",
+    mutedColor: "text-zinc-400",
+    accentBg: "bg-indigo-50",
+    accentBorder: "border-indigo-100",
+    cardBg: "bg-white",
+    cardBorder: "border-zinc-200",
+    guaranteeBg: "bg-indigo-50",
+    guaranteeBorder: "border-indigo-200",
+    urgencyBg: "bg-zinc-100",
+    urgencyText: "text-zinc-700",
+    starColor: "text-indigo-500 fill-indigo-500",
+    trustColor: "text-zinc-400",
+  },
+
+  // DTC Bold — estilo Liquid Death/Olipop: negro absoluto + amarillo eléctrico
+  "dtc-bold": {
+    name: "DTC Bold",
+    description: "Liquid Death — negro + amarillo eléctrico",
+    heroBg: "bg-zinc-950",
+    heroText: "text-yellow-300",
+    sectionBg: "bg-zinc-950",
+    sectionAltBg: "bg-yellow-300",
+    sectionAltHeading: "text-zinc-950",
+    sectionAltBody: "text-zinc-900",
+    sectionAltMuted: "text-zinc-700",
+    sectionAltCardBg: "bg-zinc-950",
+    sectionAltCardBorder: "border-zinc-950",
+    ctaBg: "bg-yellow-300",
+    ctaText: "text-zinc-950",
+    ctaHover: "hover:bg-yellow-400",
+    headingColor: "text-zinc-950",
+    bodyColor: "text-zinc-800",
+    mutedColor: "text-zinc-600",
+    accentBg: "bg-yellow-300",
+    accentBorder: "border-zinc-950",
+    cardBg: "bg-white",
+    cardBorder: "border-zinc-950 border-2",
+    guaranteeBg: "bg-yellow-300",
+    guaranteeBorder: "border-zinc-950 border-2",
+    urgencyBg: "bg-red-600",
+    urgencyText: "text-white",
+    starColor: "text-yellow-400 fill-yellow-400",
+    trustColor: "text-zinc-500",
+  },
+
+  // Editorial Apple — estilo Apple product page: blanco puro, gris elegante
+  "editorial-apple": {
+    name: "Editorial Apple",
+    description: "Apple product — blanco, gris elegante",
+    heroBg: "bg-white",
+    heroText: "text-neutral-900",
+    sectionBg: "bg-white",
+    sectionAltBg: "bg-neutral-100",
+    sectionAltHeading: "text-neutral-900",
+    sectionAltBody: "text-neutral-600",
+    sectionAltMuted: "text-neutral-400",
+    sectionAltCardBg: "bg-white",
+    sectionAltCardBorder: "border-neutral-200",
+    ctaBg: "bg-blue-600",
+    ctaText: "text-white",
+    ctaHover: "hover:bg-blue-700",
+    headingColor: "text-neutral-900",
+    bodyColor: "text-neutral-600",
+    mutedColor: "text-neutral-400",
+    accentBg: "bg-neutral-50",
+    accentBorder: "border-neutral-200",
+    cardBg: "bg-white",
+    cardBorder: "border-neutral-200",
+    guaranteeBg: "bg-neutral-50",
+    guaranteeBorder: "border-neutral-200",
+    urgencyBg: "bg-orange-50",
+    urgencyText: "text-orange-600",
+    starColor: "text-blue-500 fill-blue-500",
+    trustColor: "text-neutral-400",
+  },
+
+  // Modern E-commerce — estilo Allbirds/Aesop: tierra clara, verde sage
+  "modern-ecommerce": {
+    name: "Modern E-commerce",
+    description: "Allbirds/Aesop — tierra, verde sage",
+    heroBg: "bg-gradient-to-b from-stone-100 to-stone-50",
+    heroText: "text-stone-900",
+    sectionBg: "bg-stone-50",
+    sectionAltBg: "bg-white",
+    sectionAltHeading: "text-stone-900",
+    sectionAltBody: "text-stone-700",
+    sectionAltMuted: "text-stone-500",
+    sectionAltCardBg: "bg-stone-50",
+    sectionAltCardBorder: "border-stone-200",
+    ctaBg: "bg-emerald-800",
+    ctaText: "text-stone-50",
+    ctaHover: "hover:bg-emerald-900",
+    headingColor: "text-stone-900",
+    bodyColor: "text-stone-700",
+    mutedColor: "text-stone-500",
+    accentBg: "bg-emerald-50",
+    accentBorder: "border-emerald-200",
+    cardBg: "bg-white",
+    cardBorder: "border-stone-200",
+    guaranteeBg: "bg-emerald-50",
+    guaranteeBorder: "border-emerald-200",
+    urgencyBg: "bg-stone-100",
+    urgencyText: "text-stone-700",
+    starColor: "text-emerald-700 fill-emerald-700",
+    trustColor: "text-stone-400",
+  },
+
+  // Storytelling Soft — estilo editorial cálido, tonos crema y burdeos
+  "story-soft": {
+    name: "Story Soft",
+    description: "Editorial cálido — crema y burdeos",
+    heroBg: "bg-gradient-to-br from-rose-50 via-orange-50/40 to-amber-50",
+    heroText: "text-rose-950",
+    sectionBg: "bg-amber-50/30",
+    sectionAltBg: "bg-white",
+    sectionAltHeading: "text-rose-950",
+    sectionAltBody: "text-rose-900/80",
+    sectionAltMuted: "text-rose-700/60",
+    sectionAltCardBg: "bg-white",
+    sectionAltCardBorder: "border-rose-100",
+    ctaBg: "bg-rose-900",
+    ctaText: "text-rose-50",
+    ctaHover: "hover:bg-rose-950",
+    headingColor: "text-rose-950",
+    bodyColor: "text-rose-900/80",
+    mutedColor: "text-rose-700/60",
+    accentBg: "bg-rose-50",
+    accentBorder: "border-rose-200",
+    cardBg: "bg-white",
+    cardBorder: "border-rose-100",
+    guaranteeBg: "bg-amber-50",
+    guaranteeBorder: "border-amber-200",
+    urgencyBg: "bg-rose-100",
+    urgencyText: "text-rose-800",
+    starColor: "text-rose-500 fill-rose-500",
+    trustColor: "text-rose-400/70",
   },
 };
