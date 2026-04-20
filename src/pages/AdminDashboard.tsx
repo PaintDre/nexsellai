@@ -51,10 +51,10 @@ const AdminDashboard = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-10 space-y-6 md:space-y-8">
+    <div className="page-in p-4 md:p-6 lg:p-10 space-y-6 md:space-y-8 max-w-7xl mx-auto">
       <div className="flex flex-col gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-foreground">{t("admin.title")}</h1>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-display tracking-tight text-foreground">{t("admin.title")}</h1>
           <p className="text-sm text-muted-foreground mt-1">{t("admin.subtitle")}</p>
         </div>
         <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3 w-full sm:w-auto">

@@ -145,10 +145,10 @@ const AdminEmailAutomations = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-10 space-y-6">
+    <div className="page-in p-4 md:p-6 lg:p-10 space-y-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold font-display text-foreground">{t("adminAutomations.title")}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground">{t("adminAutomations.title")}</h1>
           <p className="text-muted-foreground text-sm mt-1">{t("adminAutomations.subtitle")}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

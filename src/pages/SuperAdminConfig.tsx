@@ -91,9 +91,9 @@ const SuperAdminConfig = () => {
   }
 
   return (
-    <div className="p-6 md:p-10 space-y-8">
+    <div className="page-in p-6 md:p-10 space-y-8 max-w-6xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold font-display text-foreground flex items-center gap-2">
+        <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground flex items-center gap-2">
           <Settings className="h-7 w-7" /> {t("superAdminConfig.title")}
         </h1>
         <p className="text-muted-foreground mt-1">{t("superAdminConfig.subtitle")}</p>
