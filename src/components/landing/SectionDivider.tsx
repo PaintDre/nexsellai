@@ -20,25 +20,28 @@ const colorMap: Record<LandingTheme, Record<string, string>> = {
   "story-soft": { hero: "#fff1f2", main: "#fffbeb", alt: "#ffffff", accent: "#fff1f2", cta: "#fffbeb" },
 };
 
+/**
+ * Renderiza una transición SUAVE entre dos secciones.
+ * - Si los colores son iguales o muy cercanos: no renderiza nada (transición natural).
+ * - Si difieren: renderiza un degradado lineal corto (24-40px) en lugar de una onda SVG abrupta.
+ *   Esto evita los "flashes" de color que aparecían cuando el SVG dejaba ver el fondo del body.
+ */
 const SectionDivider = ({ theme, from, to }: SectionDividerProps) => {
   const colors = colorMap[theme];
-  const fillColor = colors[to] || "#ffffff";
+  const fromColor = colors[from] || "#ffffff";
+  const toColor = colors[to] || "#ffffff";
+
+  // Si los colores son iguales, no necesitamos divisor
+  if (fromColor.toLowerCase() === toColor.toLowerCase()) return null;
 
   return (
-    <div className="relative -mt-px" style={{ color: fillColor }}>
-      <svg
-        viewBox="0 0 1440 48"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-full h-6 md:h-10 block"
-        preserveAspectRatio="none"
-      >
-        <path
-          d="M0 48h1440V24C1200 44 960 0 720 24C480 48 240 4 0 24v24z"
-          fill="currentColor"
-        />
-      </svg>
-    </div>
+    <div
+      aria-hidden
+      className="w-full h-8 md:h-10 -mt-px -mb-px"
+      style={{
+        background: `linear-gradient(to bottom, ${fromColor} 0%, ${toColor} 100%)`,
+      }}
+    />
   );
 };
 
