@@ -15,6 +15,7 @@ import { getHeroStyle } from "./heroStyles";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import AnimatedCounter from "./AnimatedCounter";
 import { optimizeBlocks } from "./optimizeBlocks";
+import { formatProductPrice } from "@/lib/countries";
 
 interface Block {
   type: string;
@@ -43,15 +44,18 @@ interface LandingRendererProps {
     category?: string;
     target_audience?: string;
     description?: string | null;
+    country_code?: string | null;
   } | null;
   imagePreview?: string | null;
   theme?: LandingTheme;
   editable?: boolean;
   onBlocksChange?: (blocks: Block[]) => void;
   hasOffer?: boolean;
+  /** Optional: visitor/owner country code used for currency formatting. Falls back to product.country_code. */
+  countryCode?: string | null;
 }
 
-const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "clean", editable = false, onBlocksChange, hasOffer = false }: LandingRendererProps) => {
+const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "clean", editable = false, onBlocksChange, hasOffer = false, countryCode = null }: LandingRendererProps) => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const t = themes[theme];
 
@@ -64,7 +68,9 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
 
   const getBlock = (type: string) => blocks.find((b) => b.type === type);
   const price = product?.price ?? 0;
-  const formattedPrice = `$${price.toLocaleString()}`;
+  // Normaliza precio según país (locale + símbolo). Prioriza prop countryCode → product.country_code → default.
+  const resolvedCountry = countryCode || product?.country_code || null;
+  const formattedPrice = formatProductPrice(price, resolvedCountry);
   const productName = product?.name ?? "Producto";
 
   // Editing helpers
