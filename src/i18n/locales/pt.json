@@ -431,15 +431,18 @@
     ]
   },
   "admin": {
-    "title": "Painel de Administração",
-    "subtitle": "Estatísticas e gestão da plataforma",
+    "title": "Painel de controle",
+    "subtitle": "Uma visão clara do estado da plataforma",
+    "eyebrow": "Administração",
     "users": "Usuários",
-    "totalUsers": "Total de Usuários",
-    "landingsGenerated": "Landings Geradas",
-    "totalBanners": "Total de Banners Gerados",
-    "planDistribution": "Distribuição por Plano",
-    "topUsers": "Usuários mais ativos",
-    "noName": "Sem nome"
+    "totalUsers": "Usuários",
+    "landingsGenerated": "Landings criadas",
+    "totalBanners": "Banners gerados",
+    "planDistribution": "Distribuição por plano",
+    "topUsers": "Contas mais ativas",
+    "topUsersDesc": "Os 10 usuários com maior uso do produto",
+    "noName": "Sem nome",
+    "config": "Configuração"
   },
   "upgrade": {
     "warning": "Você está próximo do seu limite de <strong>{{resource}}</strong> ({{used}}/{{limit}}). <link>Atualize seu plano</link> para continuar criando.",

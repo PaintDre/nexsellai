@@ -431,15 +431,18 @@
     ]
   },
   "admin": {
-    "title": "Administration Panel",
-    "subtitle": "Platform statistics and management",
+    "title": "Control panel",
+    "subtitle": "A clear view of how the platform is doing",
+    "eyebrow": "Administration",
     "users": "Users",
-    "totalUsers": "Total Users",
-    "landingsGenerated": "Landings Generated",
-    "totalBanners": "Total Banners Generated",
-    "planDistribution": "Plan Distribution",
-    "topUsers": "Most active users",
-    "noName": "No name"
+    "totalUsers": "Users",
+    "landingsGenerated": "Landings created",
+    "totalBanners": "Banners generated",
+    "planDistribution": "Plan distribution",
+    "topUsers": "Most active accounts",
+    "topUsersDesc": "The 10 users with the highest product usage",
+    "noName": "No name",
+    "config": "Configuration"
   },
   "upgrade": {
     "warning": "You're close to your <strong>{{resource}}</strong> limit ({{used}}/{{limit}}). <link>Upgrade your plan</link> to keep creating.",
