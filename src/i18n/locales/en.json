@@ -910,10 +910,34 @@
     "generateAds": "Generate Ad Images",
     "showProductName": "Show product name",
     "showBadge": "Show promotional badge",
-    "adFormatsDesc": "9 images will be generated: 3 formats (1:1, 4:5, 9:16) × 3 variations each",
+    "adFormatsDesc": "1 variation per selected structure × 3 formats (1:1, 4:5, 9:16). Up to 9 images total.",
     "generating": "Generating...",
     "generateAndDownload": "Generate & Download ZIP",
     "adGenerations": "ad generations",
+    "adStructuresTitle": "Ad structure",
+    "adStructuresDesc": "Pick at least one structure. Creatives are generated in your language using LATAM social-commerce codes.",
+    "selectAtLeastOne": "Select at least one structure",
+    "structures": {
+      "price_urgency": {
+        "name": "Price + Urgency",
+        "desc": "Mercado Libre / Temu style. Slashed price, huge discount and offer badge."
+      },
+      "lifestyle_benefit": {
+        "name": "Benefit + Lifestyle",
+        "desc": "Shein / premium DTC style. Emotional headline on a clean aspirational background."
+      },
+      "direct_response": {
+        "name": "Direct Response",
+        "desc": "TikTok Shop / dropshipping style. Before/After, multi-use or features with bold CTA."
+      }
+    },
+    "badgePresets": {
+      "offer": "OFFER",
+      "new": "NEW",
+      "topSales": "BEST SELLER",
+      "recommended": "RECOMMENDED",
+      "freeShipping": "FREE SHIPPING"
+    },
     "adminCatalog": "DROPI Catalog",
     "adminCatalogDesc": "Upload an Excel file to update the product catalog",
     "uploadExcel": "Upload Excel",

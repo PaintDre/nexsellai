@@ -910,10 +910,34 @@
     "generateAds": "Gerar Imagens de Anúncios",
     "showProductName": "Mostrar nome do produto",
     "showBadge": "Mostrar badge promocional",
-    "adFormatsDesc": "Serão geradas 9 imagens: 3 formatos (1:1, 4:5, 9:16) × 3 variações cada",
+    "adFormatsDesc": "1 variação por estrutura escolhida × 3 formatos (1:1, 4:5, 9:16). Até 9 imagens no total.",
     "generating": "Gerando...",
     "generateAndDownload": "Gerar e Baixar ZIP",
     "adGenerations": "gerações de anúncios",
+    "adStructuresTitle": "Estrutura do anúncio",
+    "adStructuresDesc": "Escolha pelo menos uma estrutura. As criações são geradas no seu idioma com códigos visuais do LATAM.",
+    "selectAtLeastOne": "Selecione pelo menos uma estrutura",
+    "structures": {
+      "price_urgency": {
+        "name": "Preço + Urgência",
+        "desc": "Estilo Mercado Livre / Temu. Preço riscado, desconto gigante e badge de oferta."
+      },
+      "lifestyle_benefit": {
+        "name": "Benefício + Lifestyle",
+        "desc": "Estilo Shein / DTC premium. Headline emocional sobre fundo limpo e aspiracional."
+      },
+      "direct_response": {
+        "name": "Resposta Direta",
+        "desc": "Estilo TikTok Shop / dropshipping. Antes/Depois, multi-uso ou features com CTA forte."
+      }
+    },
+    "badgePresets": {
+      "offer": "OFERTA",
+      "new": "NOVO",
+      "topSales": "MAIS VENDIDO",
+      "recommended": "RECOMENDADO",
+      "freeShipping": "FRETE GRÁTIS"
+    },
     "adminCatalog": "Catálogo DROPI",
     "adminCatalogDesc": "Faça upload de um arquivo Excel para atualizar o catálogo de produtos",
     "uploadExcel": "Upload Excel",
