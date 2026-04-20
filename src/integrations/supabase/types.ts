@@ -322,6 +322,13 @@ export type Database = {
             referencedRelation: "landings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "landing_versions_landing_id_fkey"
+            columns: ["landing_id"]
+            isOneToOne: false
+            referencedRelation: "public_landings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       landing_views: {
@@ -352,6 +359,13 @@ export type Database = {
             columns: ["landing_id"]
             isOneToOne: false
             referencedRelation: "landings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "landing_views_landing_id_fkey"
+            columns: ["landing_id"]
+            isOneToOne: false
+            referencedRelation: "public_landings"
             referencedColumns: ["id"]
           },
         ]
@@ -749,6 +763,62 @@ export type Database = {
           image_url: string | null
         }
         Relationships: []
+      }
+      public_landings: {
+        Row: {
+          blocks: Json | null
+          created_at: string | null
+          guarantee: string | null
+          has_offer: boolean | null
+          id: string | null
+          intensity: Database["public"]["Enums"]["landing_intensity"] | null
+          mode: Database["public"]["Enums"]["landing_mode"] | null
+          name: string | null
+          product_id: string | null
+          published_at: string | null
+          slug: string | null
+          theme: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          blocks?: Json | null
+          created_at?: string | null
+          guarantee?: string | null
+          has_offer?: boolean | null
+          id?: string | null
+          intensity?: Database["public"]["Enums"]["landing_intensity"] | null
+          mode?: Database["public"]["Enums"]["landing_mode"] | null
+          name?: string | null
+          product_id?: string | null
+          published_at?: string | null
+          slug?: string | null
+          theme?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          blocks?: Json | null
+          created_at?: string | null
+          guarantee?: string | null
+          has_offer?: boolean | null
+          id?: string | null
+          intensity?: Database["public"]["Enums"]["landing_intensity"] | null
+          mode?: Database["public"]["Enums"]["landing_mode"] | null
+          name?: string | null
+          product_id?: string | null
+          published_at?: string | null
+          slug?: string | null
+          theme?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landings_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
