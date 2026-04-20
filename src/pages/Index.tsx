@@ -16,9 +16,10 @@ import { useScrollReveal } from "@/hooks/useScrollReveal";
 import AnimatedCounter from "@/components/landing/AnimatedCounter";
 import {
   Sparkles, Zap, Code2, ShoppingCart, ArrowRight, Loader2,
-  CheckCircle2, Upload, Wand2, Download, ChevronDown,
+  CheckCircle2, Upload, Wand2, Download,
   ImagePlus, X, XCircle, Image, FileCode, Layers, Star, Rocket, Menu,
 } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PRODUCT_CATEGORIES } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
 
@@ -41,7 +42,6 @@ const Index = () => {
   const [demoDescription, setDemoDescription] = useState("");
   const [demoAudience, setDemoAudience] = useState("");
   const [generating, setGenerating] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "annual">("monthly");
   const [demoImage, setDemoImage] = useState<File | null>(null);
   const [demoImagePreview, setDemoImagePreview] = useState<string | null>(null);
@@ -741,42 +741,28 @@ const Index = () => {
             <Badge variant="secondary" className="mb-4">FAQ</Badge>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-display tracking-tight">{t("indexPage.faqTitle")}</h2>
           </div>
-          <div className="space-y-3">
-            {faqs.map((faq, i) => {
-              const isOpen = openFaq === i;
-              return (
-                <div
-                  key={i}
-                  className={cn(
-                    "reveal-on-scroll rounded-xl border transition-all duration-300 overflow-hidden",
-                    isOpen
-                      ? "border-primary/30 bg-card shadow-md shadow-primary/5"
-                      : "border-border/40 bg-card/40 hover:bg-card/70 hover:border-border"
-                  )}
-                  style={{ transitionDelay: `${i * 30}ms` }}
-                >
-                  <button
-                    className="w-full text-left p-5 flex items-center justify-between gap-4"
-                    onClick={() => setOpenFaq(isOpen ? null : i)}
-                    aria-expanded={isOpen}
-                  >
-                    <span className="font-medium text-sm sm:text-base">{faq.q}</span>
-                    <div className={cn("h-7 w-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-300", isOpen ? "bg-primary text-primary-foreground rotate-180" : "bg-muted text-muted-foreground")}>
-                      <ChevronDown className="h-4 w-4" />
+          <Accordion type="single" collapsible className="space-y-3">
+            {faqs.map((faq, i) => (
+              <AccordionItem
+                key={i}
+                value={`faq-${i}`}
+                className="group reveal-on-scroll overflow-hidden rounded-xl border border-border/40 bg-card/40 px-0 transition-all duration-300 hover:border-border hover:bg-card/70 data-[state=open]:border-primary/30 data-[state=open]:bg-card data-[state=open]:shadow-md data-[state=open]:shadow-primary/5"
+                style={{ transitionDelay: `${i * 30}ms` }}
+              >
+                <AccordionTrigger className="w-full px-5 py-5 text-left text-sm font-medium no-underline hover:no-underline sm:text-base [&>svg]:hidden">
+                  <div className="flex w-full items-center justify-between gap-4">
+                    <span>{faq.q}</span>
+                    <div className="h-7 w-7 rounded-full bg-muted text-muted-foreground transition-all duration-300 shrink-0 flex items-center justify-center group-data-[state=open]:bg-primary group-data-[state=open]:text-primary-foreground">
+                      <span className="text-base leading-none transition-transform duration-300 group-data-[state=open]:rotate-180">⌄</span>
                     </div>
-                  </button>
-                  <div
-                    className={cn(
-                      "overflow-hidden transition-all duration-300 ease-out",
-                      isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-                    )}
-                  >
-                    <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-5 pb-5 pt-0 text-sm leading-relaxed text-muted-foreground">
+                  {faq.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
       </section>
 
