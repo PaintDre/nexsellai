@@ -146,10 +146,13 @@ const AdminEmailAutomations = () => {
 
   return (
     <div className="page-in p-4 md:p-6 lg:p-10 space-y-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <Zap className="h-3.5 w-3.5" /> {t("admin.eyebrow")}
+          </div>
           <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground">{t("adminAutomations.title")}</h1>
-          <p className="text-muted-foreground text-sm mt-1">{t("adminAutomations.subtitle")}</p>
+          <p className="text-muted-foreground text-sm max-w-xl">{t("adminAutomations.subtitle")}</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
@@ -236,10 +239,11 @@ const AdminEmailAutomations = () => {
       </Dialog>
 
       {automations.length === 0 ? (
-        <Card>
+        <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <Zap className="h-12 w-12 text-muted-foreground/40 mb-4" />
-            <p className="text-muted-foreground">{t("adminAutomations.noAutomations")}</p>
+            <Zap className="h-12 w-12 text-muted-foreground/30 mb-4" />
+            <p className="text-sm font-medium text-foreground">{t("adminAutomations.noAutomations")}</p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-sm">{t("adminAutomations.noAutomationsHint")}</p>
           </CardContent>
         </Card>
       ) : (
@@ -256,7 +260,7 @@ const AdminEmailAutomations = () => {
                   </div>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1"><Zap className="h-3 w-3" /> {triggerLabels[a.trigger_event] || a.trigger_event}</span>
-                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {a.delay_hours}h delay</span>
+                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {t("adminAutomations.delayLabel", { hours: a.delay_hours })}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">

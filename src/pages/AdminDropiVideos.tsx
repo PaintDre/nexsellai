@@ -166,12 +166,14 @@ const AdminDropiVideos = () => {
         onChange={handleFileChange}
       />
 
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground flex items-center gap-2">
-          <Video className="h-6 w-6 text-primary" />
+      <div className="space-y-2">
+        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          <Video className="h-3.5 w-3.5" /> {t("admin.eyebrow")}
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground">
           {t("dropi.adminVideosTitle")}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-muted-foreground max-w-xl">
           {t("dropi.adminVideosDesc")}
         </p>
       </div>
@@ -196,9 +198,10 @@ const AdminDropiVideos = () => {
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-          <Video className="h-12 w-12 mb-3 opacity-40" />
-          <p className="text-sm">{t("dropi.noProducts")}</p>
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <Video className="h-12 w-12 mb-3 text-muted-foreground/30" />
+          <p className="text-sm font-medium text-foreground">{t("dropi.adminVideosEmpty")}</p>
+          <p className="text-xs text-muted-foreground mt-1 max-w-sm">{t("dropi.adminVideosEmptyHint")}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
