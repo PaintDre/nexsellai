@@ -51,9 +51,16 @@ interface LandingRendererProps {
   hasOffer?: boolean;
 }
 
-const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", editable = false, onBlocksChange, hasOffer = false }: LandingRendererProps) => {
+const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "clean", editable = false, onBlocksChange, hasOffer = false }: LandingRendererProps) => {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const t = themes[theme];
+
+  // Auto-optimiza el orden y la cantidad para garantizar jerarquía perfecta
+  // (sin afectar la edición: si el usuario está editando, respetamos su orden).
+  const blocks = useMemo(
+    () => (editable ? rawBlocks : optimizeBlocks(rawBlocks)),
+    [rawBlocks, editable]
+  );
 
   const getBlock = (type: string) => blocks.find((b) => b.type === type);
   const price = product?.price ?? 0;
@@ -145,6 +152,20 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
       <CTAButton />
       <TrustBadges colorClass={trustColor || t.trustColor} extraItems={microItems} />
     </div>
+  );
+
+  // Mid-page CTA — bloque ligero para insertar entre secciones clave
+  const MidCTA = ({ headline }: { headline?: string }) => (
+    <section className={`py-12 md:py-16 ${t.accentBg}`}>
+      <div className="mx-auto max-w-2xl px-6 text-center space-y-5">
+        {headline && (
+          <p className={`text-base sm:text-lg font-semibold ${t.headingColor}`} style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+            {headline}
+          </p>
+        )}
+        <CTAButton />
+      </div>
+    </section>
   );
 
   const SectionTitle = ({ children, className = "", alt = false, blockType }: { children: React.ReactNode; className?: string; alt?: boolean; blockType?: string }) => {
