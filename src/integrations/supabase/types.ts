@@ -743,7 +743,13 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_banner_showcase: {
+        Row: {
+          created_at: string | null
+          image_url: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
