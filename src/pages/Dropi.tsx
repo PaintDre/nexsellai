@@ -140,7 +140,7 @@ const Dropi = () => {
         <EmptyState
           icon={Package}
           title={t("dropi.noProducts")}
-          description={search || category ? "Prueba con otra búsqueda o categoría." : undefined}
+          description={search || category ? t("dropi.noProductsHint") : undefined}
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
