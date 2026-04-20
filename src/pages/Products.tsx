@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Package, Plus, Pencil, Sparkles, ImageIcon } from "lucide-react";
 import { formatProductPrice } from "@/lib/countries";
 import { useTranslation } from "react-i18next";
+import EmptyState from "@/components/EmptyState";
 
 type Product = Tables<"products">;
 
@@ -27,10 +28,17 @@ const Products = () => {
   }, [user]);
 
   return (
-    <div className="p-5 md:p-8 lg:p-10 space-y-6 max-w-6xl mx-auto">
+    <div className="page-in p-5 md:p-8 lg:p-10 space-y-6 max-w-6xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold font-display">{t("products.title")}</h1>
-        <Button asChild size="sm">
+        <div className="min-w-0">
+          <h1 className="text-2xl md:text-3xl font-bold font-display tracking-tight truncate">{t("products.title")}</h1>
+          {!loading && products.length > 0 && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {t("dashboard.productCount", { count: products.length })}
+            </p>
+          )}
+        </div>
+        <Button asChild size="sm" className="press-on-active w-full sm:w-auto min-h-[44px] sm:min-h-0">
           <Link to="/products/new"><Plus className="h-3.5 w-3.5 mr-1.5" /> {t("products.new")}</Link>
         </Button>
       </div>
@@ -52,21 +60,23 @@ const Products = () => {
           ))}
         </div>
       ) : products.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <Package className="h-10 w-10 text-muted-foreground/30 mb-4" />
-            <p className="text-sm text-muted-foreground mb-4">{t("products.empty")}</p>
-            <Button asChild size="sm"><Link to="/products/new"><Plus className="h-3.5 w-3.5 mr-1.5" /> {t("products.createProduct")}</Link></Button>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Package}
+          title={t("products.empty")}
+          action={{
+            label: t("products.createProduct"),
+            to: "/products/new",
+            icon: Plus,
+          }}
+        />
       ) : (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((product) => (
-            <Card key={product.id} className="group overflow-hidden hover:shadow-md transition-all duration-200">
+            <Card key={product.id} className="group overflow-hidden lift-on-hover">
               <Link to={`/products/${product.id}`} className="block">
-                <div className="aspect-video overflow-hidden bg-muted">
+                <div className="aspect-video overflow-hidden bg-muted/60">
                   {product.images[0] ? (
-                    <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
+                    <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover group-hover:scale-[1.04] transition-transform duration-500" loading="lazy" />
                   ) : (
                     <div className="h-full w-full flex items-center justify-center"><Package className="h-8 w-8 text-muted-foreground/20" /></div>
                   )}
@@ -80,14 +90,14 @@ const Products = () => {
                 <p className="text-xs text-muted-foreground">{formatProductPrice(product.price, profile?.country_code)}</p>
                 <div className="flex flex-col gap-2">
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" asChild className="flex-1 h-9 text-xs">
+                    <Button variant="outline" size="sm" asChild className="flex-1 h-9 text-xs press-on-active">
                       <Link to={`/products/${product.id}/edit`}><Pencil className="h-3 w-3 mr-1" /> {t("common.edit")}</Link>
                     </Button>
-                    <Button size="sm" asChild className="flex-1 h-9 text-xs">
+                    <Button size="sm" asChild className="flex-1 h-9 text-xs press-on-active">
                       <Link to={`/products/${product.id}/generate`}><Sparkles className="h-3 w-3 mr-1" /> Landing</Link>
                     </Button>
                   </div>
-                  <Button variant="secondary" size="sm" asChild className="w-full h-9 text-xs">
+                  <Button variant="secondary" size="sm" asChild className="w-full h-9 text-xs press-on-active">
                     <Link to={`/products/${product.id}/banner`}><ImageIcon className="h-3 w-3 mr-1" /> {t("products.generateBanners")}</Link>
                   </Button>
                 </div>

@@ -104,14 +104,14 @@ const ProductForm = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 w-full max-w-2xl mx-auto">
-      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4">
+    <div className="page-in p-4 md:p-6 lg:p-8 w-full max-w-2xl mx-auto">
+      <Button variant="ghost" onClick={() => navigate(-1)} className="mb-4 press-on-active">
         <ArrowLeft className="h-4 w-4 mr-2" /> {t("common.back")}
       </Button>
-      <h1 className="text-3xl font-bold font-display tracking-tight mb-6">
+      <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight mb-6">
         {isEdit ? t("products.editProduct") : t("products.newProduct")}
       </h1>
-      <Card>
+      <Card className="glass-card">
         <form onSubmit={handleSubmit}>
           <CardContent className="p-4 sm:p-6 space-y-6">
             <div className="space-y-2">
@@ -126,7 +126,7 @@ const ProductForm = () => {
                   </div>
                 ))}
                 {images.length < 4 && (
-                  <label className="aspect-square rounded-lg border-2 border-dashed border-input flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors">
+                  <label className="aspect-square rounded-lg border-2 border-dashed border-input flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all duration-200 press-on-active">
                     {uploading ? <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /> : <Upload className="h-6 w-6 text-muted-foreground" />}
                     <span className="text-xs text-muted-foreground mt-1">{t("common.upload")}</span>
                     <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} disabled={uploading} />
@@ -161,7 +161,7 @@ const ProductForm = () => {
               <Label htmlFor="desc">{t("products.descriptionLabel")}</Label>
               <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("products.descriptionPlaceholder")} rows={3} />
             </div>
-            <Button type="submit" className="w-full min-h-[44px]" disabled={saving}>
+            <Button type="submit" className="w-full min-h-[44px] press-on-active" disabled={saving}>
               {saving ? t("common.saving") : isEdit ? t("products.saveChanges") : t("products.createProduct")}
             </Button>
           </CardContent>

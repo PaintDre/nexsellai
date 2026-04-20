@@ -70,13 +70,13 @@ const AdminPayments = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-10 space-y-6 max-w-5xl mx-auto">
+    <div className="page-in p-4 md:p-6 lg:p-10 space-y-6 max-w-5xl mx-auto">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" asChild>
           <Link to="/admin"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold font-display flex items-center gap-2">
+          <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight flex items-center gap-2">
             <CreditCard className="h-6 w-6" /> {t("adminPayments.title")}
           </h1>
           <p className="text-sm text-muted-foreground">{t("adminPayments.transactionsCount", { count: payments.length })}</p>

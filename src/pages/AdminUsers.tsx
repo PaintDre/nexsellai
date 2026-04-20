@@ -157,14 +157,14 @@ const AdminUsers = () => {
   }
 
   return (
-    <div className="p-4 md:p-6 lg:p-10 space-y-6">
+    <div className="page-in p-4 md:p-6 lg:p-10 space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
           <Button asChild variant="outline" size="sm">
             <Link to="/admin"><ArrowLeft className="h-4 w-4 mr-1" /> {t("common.back")}</Link>
           </Button>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold font-display text-foreground flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-bold font-display tracking-tight text-foreground flex items-center gap-2">
               <Users className="h-6 w-6 sm:h-7 sm:w-7" /> {t("adminUsers.title")}
             </h1>
             <p className="text-muted-foreground mt-1">{t("adminUsers.registeredUsers", { count: users.length })}</p>

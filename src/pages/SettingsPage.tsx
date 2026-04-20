@@ -133,8 +133,8 @@ const SettingsPage = () => {
   ];
 
   return (
-    <div className="p-5 md:p-8 lg:p-10 max-w-2xl mx-auto space-y-6">
-      <h1 className="text-2xl md:text-3xl font-bold font-display">{t("settings.title")}</h1>
+    <div className="page-in p-5 md:p-8 lg:p-10 max-w-2xl mx-auto space-y-6">
+      <h1 className="text-2xl md:text-3xl font-bold font-display tracking-tight">{t("settings.title")}</h1>
 
       {/* Account */}
       <Card>
