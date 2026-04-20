@@ -767,13 +767,11 @@ const Index = () => {
                   </button>
                   <div
                     className={cn(
-                      "grid transition-all duration-300 ease-out",
-                      isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                      "overflow-hidden transition-all duration-300 ease-out",
+                      isOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
                     )}
                   >
-                    <div className="overflow-hidden">
-                      <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
-                    </div>
+                    <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
                   </div>
                 </div>
               );
