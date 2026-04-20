@@ -12,6 +12,8 @@ import EditableText from "./EditableText";
 import BlockToolbar from "./BlockToolbar";
 import BeforeAfterSlider from "./BeforeAfterSlider";
 import { getHeroStyle } from "./heroStyles";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
+import AnimatedCounter from "./AnimatedCounter";
 
 interface Block {
   type: string;
@@ -130,7 +132,8 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
 
   const CTAButton = ({ className = "" }: { className?: string }) => (
     <button
-      className={`inline-flex items-center justify-center px-6 sm:px-10 py-3 sm:py-4 text-sm sm:text-base md:text-lg font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 animate-[pulse-glow_2s_ease-in-out_infinite] ${t.ctaBg} ${t.ctaText} ${t.ctaHover} ${className}`}
+      className={`cta-polished inline-flex items-center justify-center px-6 sm:px-10 py-3 sm:py-4 text-sm sm:text-base md:text-lg font-bold rounded-xl shadow-lg ${t.ctaBg} ${t.ctaText} ${t.ctaHover} ${className}`}
+      style={{ animation: "pulse-glow 2.4s ease-in-out infinite" }}
     >
       Comprar ahora — {formattedPrice}
     </button>
@@ -167,8 +170,8 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
 
   const Section = ({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) => (
     <section
-      className={`landing-section ${className}`}
-      style={{ animationDelay: `${delay}ms` }}
+      className={`landing-section reveal-on-scroll ${className}`}
+      style={{ transitionDelay: `${Math.min(delay, 200)}ms` }}
     >
       {children}
     </section>
@@ -219,8 +222,10 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
   const heroStyle = getHeroStyle(product?.category);
   const isDarkHero = heroStyle.textClass === "text-white";
 
+  const revealRef = useScrollReveal([blocks.length, theme]);
+
   return (
-    <div className="min-h-screen landing-container" style={{ fontFamily: "'Inter', sans-serif", overflowWrap: "anywhere", wordBreak: "break-word" }}>
+    <div ref={revealRef} className="min-h-screen landing-container" style={{ fontFamily: "'Inter', sans-serif", overflowWrap: "anywhere", wordBreak: "break-word" }}>
 
       {/* ═══ HERO ═══ */}
       {hero && (
@@ -261,7 +266,7 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
               </div>
               {imagePreview && !hero.image_url && (
                 <div className="flex justify-center lg:justify-end">
-                  <div className="relative">
+                  <div className="relative hero-parallax">
                     <img src={imagePreview} alt={productName} className={`rounded-2xl shadow-2xl max-h-[480px] object-contain w-full max-w-md ring-1 ${heroStyle.imageRingClass}`} />
                     <div className={`absolute -inset-1 rounded-2xl bg-gradient-to-tr ${heroStyle.accentClass} pointer-events-none`} />
                   </div>
@@ -638,11 +643,12 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
               {resultsStats.stats.slice(0, 3).map((s, i) => {
                 const pct = typeof s.percentage === "number" ? s.percentage : parseInt(String(s.percentage), 10) || 0;
                 return (
-                  <div key={i} className={`p-6 rounded-2xl ${t.cardBg} border ${t.cardBorder} text-center`}>
+                  <div key={i} className={`p-6 rounded-2xl ${t.cardBg} border ${t.cardBorder} text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-lg`}>
                     <div className="flex items-center justify-center gap-1 mb-3">
-                      <span className="text-4xl sm:text-5xl font-extrabold text-emerald-600" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-                        {pct}
-                      </span>
+                      <AnimatedCounter
+                        to={pct}
+                        className="text-4xl sm:text-5xl font-extrabold text-emerald-600"
+                      />
                       <span className="text-2xl font-bold text-emerald-600">%</span>
                     </div>
                     <div className="h-2 w-full bg-muted rounded-full overflow-hidden mb-3">

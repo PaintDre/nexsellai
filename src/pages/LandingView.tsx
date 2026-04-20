@@ -31,6 +31,7 @@ import { bannerSizes } from "@/components/banner/templates";
 import VersionHistory from "@/components/landing/VersionHistory";
 import ExportPreviewDialog from "@/components/landing/ExportPreviewDialog";
 import ResizablePreview from "@/components/landing/ResizablePreview";
+import DesignCriticPanel from "@/components/landing/DesignCriticPanel";
 import { useTranslation } from "react-i18next";
 
 type Landing = Tables<"landings">;
@@ -579,6 +580,14 @@ const LandingView = () => {
             )}
           </div>
         </div>
+      </div>
+
+      <div className="container mx-auto px-4 pb-3">
+        <DesignCriticPanel
+          blocks={blocks}
+          theme={theme}
+          product={product ? { name: product.name, price: product.price, category: product.category } : null}
+        />
       </div>
 
       <ResizablePreview editable={editMode}>
