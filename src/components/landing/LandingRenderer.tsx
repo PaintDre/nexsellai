@@ -303,7 +303,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
 
       {/* ═══ BENEFITS ═══ */}
       {benefits && (
-        <EditableSection blockType="benefits" blockTitle={benefits.title} className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={100}>
+        <EditableSection blockType="benefits" blockTitle={benefits.title} className={`py-20 md:py-28 ${t.sectionAltBg}`} delay={100}>
           <div className="mx-auto max-w-5xl px-6">
             <SectionTitle alt blockType="benefits">{benefits.title || "Beneficios"}</SectionTitle>
             {benefits.image_url ? (
@@ -366,7 +366,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
 
       {/* ═══ FEATURES ═══ */}
       {features && (
-        <EditableSection blockType="features" blockTitle={features.title} className={`py-16 md:py-24 ${t.sectionBg}`} delay={200}>
+        <EditableSection blockType="features" blockTitle={features.title} className={`py-20 md:py-28 ${t.sectionBg}`} delay={200}>
           <div className="mx-auto max-w-4xl px-6">
             <SectionTitle blockType="features">{features.title || "Características"}</SectionTitle>
             {features.image_url ? (
@@ -409,7 +409,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
 
       {/* ═══ TESTIMONIALS ═══ */}
       {testimonials && (
-        <EditableSection blockType="testimonials" blockTitle={testimonials.title} className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={300}>
+        <EditableSection blockType="testimonials" blockTitle={testimonials.title} className={`py-20 md:py-28 ${t.sectionAltBg}`} delay={300}>
           <div className="mx-auto max-w-5xl px-6">
             <SectionTitle alt blockType="testimonials">{testimonials.title || "Lo que dicen nuestros clientes"}</SectionTitle>
             {Array.isArray(testimonials.content) ? (
@@ -447,7 +447,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
 
       {/* ═══ OBJECTIONS ═══ */}
       {objections && (
-        <EditableSection blockType="objections" blockTitle={objections.title} className={`py-16 md:py-24 ${t.sectionBg}`} delay={400}>
+        <EditableSection blockType="objections" blockTitle={objections.title} className={`py-20 md:py-28 ${t.sectionBg}`} delay={400}>
           <div className="mx-auto max-w-3xl px-6">
             <SectionTitle blockType="objections">{objections.title || "¿Aún tienes dudas?"}</SectionTitle>
             {Array.isArray(objections.content) ? (
@@ -468,7 +468,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
 
       {/* ═══ FAQ ═══ */}
       {faq && Array.isArray(faq.content) && (
-        <EditableSection blockType="faq" blockTitle={faq.title} className={`py-16 md:py-24 ${t.sectionAltBg}`} delay={500}>
+        <EditableSection blockType="faq" blockTitle={faq.title} className={`py-20 md:py-28 ${t.sectionAltBg}`} delay={500}>
           <div className="mx-auto max-w-2xl px-6">
             <SectionTitle alt blockType="faq">{faq.title || "Preguntas frecuentes"}</SectionTitle>
             <div className="space-y-2">
@@ -497,7 +497,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
 
       {/* ═══ COMPARISON ═══ */}
       {comparison && Array.isArray(comparison.content) && (
-        <EditableSection blockType="comparison" blockTitle={comparison.title} className={`py-16 md:py-24 ${t.sectionBg}`}>
+        <EditableSection blockType="comparison" blockTitle={comparison.title} className={`py-20 md:py-28 ${t.sectionBg}`}>
           <div className="mx-auto max-w-4xl px-6">
             <SectionTitle blockType="comparison">{comparison.title || "¿Por qué elegirnos?"}</SectionTitle>
             <div className="grid sm:grid-cols-2 gap-6">
@@ -536,7 +536,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
 
       {/* ═══ BUNDLES ═══ */}
       {bundles && Array.isArray(bundles.content) && (
-        <EditableSection blockType="bundles" blockTitle={bundles.title} className={`py-16 md:py-24 ${t.sectionAltBg}`}>
+        <EditableSection blockType="bundles" blockTitle={bundles.title} className={`py-20 md:py-28 ${t.sectionAltBg}`}>
           <div className="mx-auto max-w-4xl px-6">
             <SectionTitle alt blockType="bundles">{bundles.title || "Packs disponibles"}</SectionTitle>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
