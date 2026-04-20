@@ -41,19 +41,19 @@ const ProductDetail = () => {
   if (!product) return null;
 
   return (
-    <div className="p-5 md:p-8 lg:p-10 max-w-4xl mx-auto space-y-8">
+    <div className="page-in p-5 md:p-8 lg:p-10 max-w-4xl mx-auto space-y-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Link to="/products" className="hover:text-foreground transition-colors">{t("products.title")}</Link>
+        <Link to="/products" className="hover:text-primary transition-colors">{t("products.title")}</Link>
         <ChevronRight className="h-3 w-3" />
         <span className="text-foreground font-medium truncate">{product.name}</span>
       </nav>
 
       {/* Product Header */}
       <div className="flex flex-col md:flex-row gap-6">
-        <div className="w-full md:w-44 aspect-square rounded-xl overflow-hidden border bg-muted shrink-0">
+        <div className="w-full md:w-44 aspect-square rounded-xl overflow-hidden border border-border/60 bg-muted/60 shrink-0 lift-on-hover">
           {product.images[0] ? (
-            <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" />
+            <img src={product.images[0]} alt={product.name} className="h-full w-full object-cover" loading="eager" />
           ) : (
             <div className="h-full w-full flex items-center justify-center">
               <Package className="h-10 w-10 text-muted-foreground/20" />
@@ -79,21 +79,21 @@ const ProductDetail = () => {
 
       {/* Action Buttons */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Button size="lg" asChild className="h-auto py-3.5 flex-col gap-0.5">
+        <Button size="lg" asChild className="h-auto py-3.5 flex-col gap-0.5 press-on-active">
           <Link to={`/products/${id}/generate`}>
             <Sparkles className="h-4 w-4" />
             <span className="font-semibold text-sm">{t("products.generateLanding")}</span>
             <span className="text-[10px] opacity-70">{t("products.generateLandingDesc")}</span>
           </Link>
         </Button>
-        <Button size="lg" variant="secondary" asChild className="h-auto py-3.5 flex-col gap-0.5">
+        <Button size="lg" variant="secondary" asChild className="h-auto py-3.5 flex-col gap-0.5 press-on-active">
           <Link to={`/products/${id}/banner`}>
             <ImageIcon className="h-4 w-4" />
             <span className="font-semibold text-sm">{t("products.generateBanners")}</span>
             <span className="text-[10px] opacity-70">{t("products.generateBannersDesc")}</span>
           </Link>
         </Button>
-        <Button size="lg" variant="outline" asChild className="h-auto py-3.5 flex-col gap-0.5">
+        <Button size="lg" variant="outline" asChild className="h-auto py-3.5 flex-col gap-0.5 press-on-active">
           <Link to={`/products/${id}/edit`}>
             <Pencil className="h-4 w-4" />
             <span className="font-semibold text-sm">{t("products.editProductAction")}</span>
@@ -104,20 +104,24 @@ const ProductDetail = () => {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
-        <Card>
+        <Card className="lift-on-hover">
           <CardContent className="p-4 flex items-center gap-3">
-            <FileText className="h-4 w-4 text-primary" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+              <FileText className="h-4 w-4 text-primary" />
+            </div>
             <div>
-              <p className="text-xl font-bold font-display">{landings.length}</p>
+              <p className="text-xl font-bold font-display tabular-nums">{landings.length}</p>
               <p className="text-[11px] text-muted-foreground">{t("products.landingsGenerated")}</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="lift-on-hover">
           <CardContent className="p-4 flex items-center gap-3">
-            <ImageIcon className="h-4 w-4 text-primary" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
+              <ImageIcon className="h-4 w-4 text-primary" />
+            </div>
             <div>
-              <p className="text-xl font-bold font-display">{bannerCount}</p>
+              <p className="text-xl font-bold font-display tabular-nums">{bannerCount}</p>
               <p className="text-[11px] text-muted-foreground">{t("products.bannersGenerated")}</p>
             </div>
           </CardContent>
@@ -146,7 +150,7 @@ const ProductDetail = () => {
           <h2 className="text-base font-semibold font-display mb-3">{t("products.productLandings")}</h2>
           <div className="space-y-2">
             {landings.map((landing) => (
-              <Card key={landing.id} className="hover:shadow-md transition-all duration-200">
+              <Card key={landing.id} className="lift-on-hover group">
                 <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5">
                   <div className="flex items-center gap-3 min-w-0">
                     <FileText className="h-4 w-4 text-primary shrink-0" />
