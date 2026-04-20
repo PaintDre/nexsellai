@@ -596,18 +596,45 @@
       "free": {
         "name": "Free",
         "description": "Explore o Nexsell sem custo",
-        "features": ["1 landing total", "2 banners / mês", "1 gancho de venda", "Preview de landing", "Exportar HTML básico"],
-        "excluded": ["Sem imagens IA", "Sem edição avançada"]
+        "features": [
+          "1 landing total",
+          "2 banners / mês",
+          "1 gancho de venda",
+          "Preview de landing",
+          "Exportar HTML básico"
+        ],
+        "excluded": [
+          "Sem imagens IA",
+          "Sem edição avançada"
+        ]
       },
       "starter": {
         "name": "Starter",
         "description": "Ideal para lançar e testar produtos",
-        "features": ["10 landings / mês", "30 banners / mês", "3 ganchos por produto", "Imagens IA em landings", "Objeções e urgência", "FAQs editáveis", "Exportar HTML + CSS"]
+        "features": [
+          "10 landings / mês",
+          "30 banners / mês",
+          "3 ganchos por produto",
+          "Imagens IA em landings",
+          "Objeções e urgência",
+          "FAQs editáveis",
+          "Exportar HTML + CSS"
+        ]
       },
       "pro": {
         "name": "Pro",
         "description": "Para vendedores que escalam com anúncios",
-        "features": ["100 landings / mês", "150 banners / mês", "Ângulos psicológicos ilimitados", "Imagens IA em landings", "Ganchos otimizados para anúncios", "Variantes de CTA", "Bundles e comparações", "Microcopy de checkout", "Exportar ZIP completo"]
+        "features": [
+          "100 landings / mês",
+          "150 banners / mês",
+          "Ângulos psicológicos ilimitados",
+          "Imagens IA em landings",
+          "Ganchos otimizados para anúncios",
+          "Variantes de CTA",
+          "Bundles e comparações",
+          "Microcopy de checkout",
+          "Exportar ZIP completo"
+        ]
       }
     }
   },
@@ -661,75 +688,131 @@
   "indexPage": {
     "login": "Entrar",
     "createAccount": "Criar conta",
-    "badge": "Gerador de Landing Pages com IA",
-    "heroTitle": "Crie landings e banners que",
-    "heroTitleHighlight": " vendem seu produto em minutos",
-    "heroSubtitle": "Nexsell usa inteligência artificial para gerar páginas de vendas e banners otimizados para ecommerce e dropshipping.",
+    "badge": "Plataforma tudo-em-um para vender mais online",
+    "heroTitle": "Landings e banners com IA que",
+    "heroTitleHighlight": " transformam visitas em vendas",
+    "heroSubtitle": "Nexsell é a plataforma tudo-em-um para vendedores e dropshippers: gera landings AIDA otimizadas, banners profissionais e publica na Shopify em minutos. Sem código, sem designers.",
     "tryFree": "Testar grátis",
-    "seeHow": "Veja como funciona",
-    "buyButton": "Comprar",
-    "aiBadge": "IA ✨",
-    "timeBadge": "30 seg",
-    "problemTitle": "Criar páginas de venda não deveria ser tão difícil",
-    "problemSubtitle": "Vender online não deveria exigir horas de design ou orçamentos altos",
+    "seeHow": "Ver como funciona",
+    "buyButton": "Comprar agora",
+    "aiBadge": "IA Pro ✨",
+    "timeBadge": "Pronto em 60s",
+    "problemTitle": "Vender online não deveria levar semanas",
+    "problemSubtitle": "80% das lojas não convertem porque a landing foi feita como catálogo, não como máquina de vendas.",
     "withoutNexsell": "Sem Nexsell",
     "withNexsell": "Com Nexsell",
     "problems": [
-      { "text": "Criar páginas de venda e banners leva horas", "detail": "Escrever copy, montar estrutura, buscar templates..." },
-      { "text": "Contratar um designer ou copywriter é caro", "detail": "Um freelancer cobra $50-200 USD por página" },
-      { "text": "Templates genéricos não convertem visitantes em compradores", "detail": "Sem copy persuasivo nem estrutura de conversão" }
+      {
+        "text": "Você passa horas escrevendo copy e montando blocos",
+        "detail": "Hooks, benefícios, objeções, FAQs, CTAs… cada landing é um projeto inteiro."
+      },
+      {
+        "text": "Freelancers cobram USD 200–800 por página",
+        "detail": "E ainda assim você precisa coordenar design, copy e dev separados."
+      },
+      {
+        "text": "Templates genéricos não convertem",
+        "detail": "Sem estrutura AIDA, prova social ou urgência, suas visitas saem sem comprar."
+      },
+      {
+        "text": "Subir tudo para a Shopify é uma dor de cabeça",
+        "detail": "Colar HTML, ajustar Liquid, quebrar o tema… você acaba precisando de um dev."
+      }
     ],
     "solutions": [
-      { "text": "Gere landings e banners em segundos com IA", "detail": "Landing completa com IA em um clique" },
-      { "text": "Sem custos extras de design ou redação", "detail": "Tudo incluído no seu plano desde $0" },
-      { "text": "Copy e estrutura otimizados para conversão", "detail": "Estrutura AIDA e técnicas de persuasão" }
+      {
+        "text": "Landing AIDA completa gerada em 60 segundos",
+        "detail": "Hero, problema, solução, prova social, oferta, garantia, FAQ e CTA — tudo pronto."
+      },
+      {
+        "text": "Banners 'Product-First' com seu produto real",
+        "detail": "A IA respeita cores, texturas e forma reais — nada de imagens genéricas."
+      },
+      {
+        "text": "Publica direto na Shopify em um clique",
+        "detail": "Conexão OAuth nativa: exporta como página, seção Liquid ou ZIP para download."
+      },
+      {
+        "text": "Catálogo Dropi integrado para dropshipping",
+        "detail": "Escolha produtos do catálogo e gere anúncios + landing no mesmo fluxo."
+      }
     ],
-    "benefitsTitle": "Tudo que você precisa para vender mais",
-    "benefitsSubtitle": "Ferramentas projetadas para converter visitantes em compradores",
+    "benefitsTitle": "Tudo o que você precisa para escalar sua loja",
+    "benefitsSubtitle": "Um ecossistema completo: copywriting com IA, banners prontos para anúncios, exportação nativa Shopify e analytics em tempo real.",
     "benefits": [
-      { "title": "Landings de alta conversão", "desc": "Gere páginas de venda com estrutura otimizada para que seus visitantes comprem." },
-      { "title": "Banners prontos para anúncios", "desc": "Crie banners promocionais para Facebook, Instagram e Google Ads." },
-      { "title": "Teste diferentes ângulos", "desc": "Gere múltiplas versões com diferentes ganchos e abordagens de venda." },
-      { "title": "Exporte pronto para sua loja", "desc": "Baixe HTML pronto para Shopify, WooCommerce ou qualquer plataforma." },
-      { "title": "Sem código nem design", "desc": "Apenas descreva seu produto. A IA escreve o copy e monta a página." },
-      { "title": "Multi-produto", "desc": "Gerencie todos os seus produtos e gere conteúdo para cada um." }
+      {
+        "title": "Landings AIDA de 7 blocos",
+        "desc": "Estrutura comprovada (Atenção → Interesse → Desejo → Ação) com hooks, prova social, objeções, FAQ e bundles."
+      },
+      {
+        "title": "Banners IA Product-First",
+        "desc": "Gere packs 1080×1920 para Instagram, TikTok e Meta Ads usando seu produto real."
+      },
+      {
+        "title": "Catálogo Dropi integrado",
+        "desc": "Importe produtos vencedores do Dropi e gere anúncios prontos para vender em um passo."
+      },
+      {
+        "title": "Exportação nativa Shopify",
+        "desc": "Conecte sua loja via OAuth e publique como página, seção Liquid ou baixe o ZIP completo."
+      },
+      {
+        "title": "Multi-idioma e multi-moeda",
+        "desc": "Espanhol, inglês e português. Preços localizados automaticamente pelo país do seu público."
+      },
+      {
+        "title": "Analytics e versionamento",
+        "desc": "Visitas, referrers e até 20 versões automáticas por landing — volte atrás quando quiser."
+      }
     ],
-    "howTitle": "Como funciona",
-    "howSubtitle": "De produto a página de venda pronta em 4 passos",
+    "howTitle": "De ideia a venda em 4 passos",
+    "howSubtitle": "Sem código, sem templates, sem esperar pelo designer.",
     "steps": [
-      { "title": "Envie seu produto", "desc": "Adicione imagens, nome, preço e descrição do seu produto." },
-      { "title": "A IA analisa tudo", "desc": "Nosso motor identifica os melhores ângulos de venda para seu produto." },
-      { "title": "Gere landings e banners", "desc": "Obtenha páginas de venda e banners com copy persuasivo instantaneamente." },
-      { "title": "Publique e venda", "desc": "Exporte o HTML para sua loja e comece a receber vendas." }
+      {
+        "title": "Suba seu produto",
+        "desc": "Nome, preço, categoria, público e ao menos uma foto. Pronto em 30 segundos."
+      },
+      {
+        "title": "A IA monta a estratégia",
+        "desc": "Nosso pipeline em 3 passos define o ângulo, escreve os blocos e revisa a qualidade."
+      },
+      {
+        "title": "Edite e escolha o estilo",
+        "desc": "Ajuste textos inline, escolha o tema visual (Minimal, Bold, Clean, Warm) e adicione banners IA na hora."
+      },
+      {
+        "title": "Publique na Shopify ou baixe",
+        "desc": "Conexão Shopify nativa, ou exporte como ZIP com HTML/Liquid pronto para subir."
+      }
     ],
     "examplesTitle": "Veja o que você pode criar",
-    "examplesSubtitle": "Landings e banners gerados com Nexsell em segundos",
-    "demoTitle": "Teste o gerador",
-    "demoSubtitle": "Gere 1 landing grátis sem criar conta",
-    "demoBadge": "Teste grátis",
+    "examplesSubtitle": "Banners e landings reais gerados por usuários Nexsell.",
+    "demoTitle": "Teste agora — sem conta",
+    "demoSubtitle": "Gere 1 landing demo grátis para ver a mágica com seu próprio produto.",
+    "demoBadge": "Demo gratuito",
     "productName": "Nome do produto *",
     "productNamePlaceholder": "Ex: Massageador Cervical Pro",
     "category": "Categoria",
-    "priceCLP": "Preço CLP",
+    "priceCLP": "Preço",
     "targetAudience": "Público-alvo",
     "targetAudiencePlaceholder": "Ex: Mulheres 25-45, escritório",
     "descriptionOptional": "Descrição (opcional)",
-    "descriptionPlaceholder": "Detalhes do produto...",
+    "descriptionPlaceholder": "Detalhes do produto que a IA deve destacar…",
     "productImage": "Imagem do produto *",
-    "uploadHint": "Envie uma imagem (JPG, PNG, WEBP · máx 5MB)",
-    "imageSizeError": "A imagem não pode exceder 5MB.",
-    "imageRequired": "Você deve enviar uma imagem para gerar a landing.",
-    "generatingAI": "Gerando com IA...",
-    "demoUsed": "Demo já utilizado — Crie uma conta",
-    "generateDemo": "Gerar Landing Demo",
+    "uploadHint": "Suba uma imagem (JPG, PNG, WEBP · máx 5MB)",
+    "imageSizeError": "A imagem não pode passar de 5MB.",
+    "imageRequired": "Precisamos da sua imagem para gerar uma landing real.",
+    "generatingAI": "Gerando com IA…",
+    "demoUsed": "Demo já utilizado — Crie sua conta",
+    "generateDemo": "Gerar minha landing demo",
     "demoUsedMsg": "Você já usou seu demo grátis.",
     "createAccountToGenerate": "Crie uma conta",
-    "toGenerateMore": "para gerar mais.",
-    "demoSuccess": "Landing demo gerada!",
+    "toGenerateMore": "para continuar criando.",
+    "demoSuccess": "Sua landing está pronta!",
     "demoErrorTitle": "Demo já utilizado",
     "demoErrorDesc": "Crie uma conta para continuar gerando.",
-    "plansTitle": "Planos e Preços",
-    "plansSubtitle": "Escolha o plano que melhor se adapta ao seu negócio",
+    "plansTitle": "Planos pensados para crescer com você",
+    "plansSubtitle": "Comece grátis. Escale quando vender mais. Sem contratos, cancele quando quiser.",
     "monthly": "Mensal",
     "annual": "Anual",
     "annualDiscount": "-2 meses",
@@ -738,35 +821,84 @@
     "perMonth": "mês",
     "mostPopular": "Mais popular",
     "startFree": "Começar grátis",
-    "subscribe": "Assinar",
+    "subscribe": "Começar agora",
     "plans": [
       {
         "name": "Free",
-        "landings": "1 landing",
-        "features": ["1 gancho de venda", "2 banners / mês", "Preview de landing", "Exportar HTML básico"]
+        "landings": "1 landing publicada",
+        "features": [
+          "Gerador AIDA básico",
+          "2 banners IA / mês",
+          "Tema Minimal",
+          "Exportação HTML básica",
+          "Subdomínio nexsell.app/p/…"
+        ]
       },
       {
         "name": "Starter",
         "landings": "10 landings / mês",
-        "features": ["3 ganchos por produto", "30 banners / mês", "Imagens IA em landings", "Objeções e urgência", "FAQs editáveis", "Exportar HTML + CSS"]
+        "features": [
+          "3 hooks por produto",
+          "30 banners IA / mês",
+          "Os 4 temas visuais",
+          "Imagens IA nos blocos",
+          "Conexão Shopify (OAuth)",
+          "Analytics de visitas",
+          "Catálogo Dropi básico"
+        ]
       },
       {
         "name": "Pro",
         "landings": "100 landings / mês",
-        "features": ["Ângulos psicológicos ilimitados", "150 banners / mês", "Ganchos otimizados para anúncios", "Variantes de CTA", "Bundles e comparações", "Microcopy de checkout", "Exportar ZIP completo"]
+        "features": [
+          "Ângulos psicológicos ilimitados",
+          "150 banners IA / mês",
+          "Variantes A/B de CTA",
+          "Bundles e comparações",
+          "Microcopy de checkout",
+          "Catálogo Dropi completo + vídeos",
+          "Exportação ZIP Liquid completa",
+          "Suporte prioritário"
+        ]
       }
     ],
     "faqTitle": "Perguntas Frequentes",
     "faqs": [
-      { "q": "Preciso saber programar?", "a": "Não. Nexsell gera todo o conteúdo pronto para usar. Apenas descreva seu produto e a IA faz o resto." },
-      { "q": "Em que idioma as landings são geradas?", "a": "Todas as landings são geradas em copy otimizado para ecommerce, com preços na moeda do seu país." },
-      { "q": "Posso testar sem criar uma conta?", "a": "Sim. Você pode gerar 1 landing demo sem se registrar. Para exportar ou baixar precisa criar uma conta." },
-      { "q": "Quantas landings posso gerar?", "a": "Depende do seu plano: Free (1), Starter (10), Pro (100). Cada plano tem recursos adicionais de persuasão." },
-      { "q": "Posso editar a landing depois?", "a": "Sim. Uma vez gerada, você pode editar os blocos de texto e ajustar o conteúdo ao seu gosto." },
-      { "q": "Como envio minha landing para o Shopify?", "a": "Exporte o HTML gerado, vá ao painel do Shopify → Online Store → Pages → Add page, cole o código e publique. Pronto em 2 minutos!" }
+      {
+        "q": "Preciso saber programar ou desenhar?",
+        "a": "Não. O Nexsell gera copy, blocos e banners automaticamente. Você só sobe o produto e escolhe um estilo."
+      },
+      {
+        "q": "Como conecto minha loja Shopify?",
+        "a": "Temos conexão nativa via OAuth (sem tokens manuais). Do editor você publica em um clique como página, seção Liquid ou baixa o ZIP completo."
+      },
+      {
+        "q": "Quais idiomas são suportados?",
+        "a": "A interface está em espanhol, inglês e português. As landings são geradas no idioma escolhido e os preços são localizados pelo país do seu público."
+      },
+      {
+        "q": "Como funcionam os banners IA?",
+        "a": "Usamos Google Gemini com abordagem 'Product-First': a IA pega sua foto real e respeita cores, textura e forma. Geramos packs de 7 peças verticais (1080×1920) prontas para Instagram, TikTok e Meta Ads."
+      },
+      {
+        "q": "O que é o catálogo Dropi?",
+        "a": "Uma biblioteca curada de produtos vencedores para dropshipping. Os planos Starter e Pro podem importar um produto e gerar landing + anúncios em um único fluxo."
+      },
+      {
+        "q": "Posso editar as landings depois?",
+        "a": "Sim. Editor inline (clique e digite), reordenar blocos, mudar o tema visual e até 20 versões automáticas salvas — volte atrás quando quiser."
+      },
+      {
+        "q": "Posso testar sem criar conta?",
+        "a": "Sim. Você pode gerar 1 landing demo sem se cadastrar para ver o resultado com seu próprio produto. Para publicar e exportar precisa de uma conta gratuita."
+      },
+      {
+        "q": "Tem contrato ou fidelidade?",
+        "a": "Não. Você paga mensalmente via Mercado Pago (aceita cartões internacionais). Cancela quando quiser do seu painel e mantém acesso até o fim do período."
+      }
     ],
-    "ctaTitle": "Crie sua primeira landing em minutos",
-    "ctaSubtitle": "Cadastre-se grátis e gere sua primeira página de vendas com inteligência artificial.",
+    "ctaTitle": "Sua próxima venda começa com uma landing que converte",
+    "ctaSubtitle": "Junte-se aos vendedores que pararam de brigar com templates e começaram a publicar landings que vendem de verdade.",
     "footerPricing": "Preços",
     "copyright": "© {{year}} Nexsell. Todos os direitos reservados."
   },
