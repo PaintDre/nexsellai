@@ -1,6 +1,7 @@
 import { useState, lazy, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import Logo from "@/components/Logo";
 const BannerShowcaseGallery = lazy(() => import("@/components/landing/BannerShowcaseGallery").then(m => ({ default: m.BannerShowcaseGallery })));
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,7 +125,7 @@ const Index = () => {
       <nav className="border-b bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-2">
-            <img src="/logo-ns.png" alt="Nexsell" className="h-8 w-8 object-contain" width={32} height={32} />
+            <Logo size={32} className="rounded-lg" />
             <span className="font-display text-xl font-bold tracking-tight">
               <span className="text-primary">Nex</span>sell
             </span>
@@ -530,7 +531,7 @@ const Index = () => {
           <div className="flex flex-col items-center gap-6">
             <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-4">
               <div className="flex items-center gap-2">
-                <img src="/logo-ns.png" alt="Nexsell" className="h-7 w-7 object-contain" width={28} height={28} />
+                <Logo size={28} className="rounded-lg" />
                 <span className="font-display text-lg font-bold tracking-tight">
                   <span className="text-primary">Nex</span>sell
                 </span>

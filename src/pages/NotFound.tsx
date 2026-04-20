@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Home, ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import Logo from "@/components/Logo";
 
 const NotFound = () => {
   const { t } = useTranslation();
@@ -9,9 +10,7 @@ const NotFound = () => {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="text-center space-y-6 max-w-md">
         <div className="flex justify-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl overflow-hidden">
-            <img src="/logo-ns.png" alt="Nexsell" className="h-16 w-16 object-contain" />
-          </div>
+          <Logo size={64} className="rounded-2xl" />
         </div>
         <div className="space-y-2">
           <h1 className="text-6xl font-bold font-display tracking-tight text-foreground">404</h1>

@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Upload, X, Loader2, Sparkles, Rocket, ArrowRight } from "lucide-react";
 import { PRODUCT_CATEGORIES } from "@/lib/constants";
 import { useTranslation } from "react-i18next";
+import Logo from "@/components/Logo";
 
 const Onboarding = () => {
   const { t } = useTranslation();
@@ -178,9 +179,7 @@ const Onboarding = () => {
         {step === 1 && (
           <Card>
             <CardContent className="flex flex-col items-center text-center space-y-6 py-10 px-6">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl overflow-hidden">
-                <img src="/logo-ns.png" alt="Nexsell" className="h-20 w-20 object-contain" />
-              </div>
+              <Logo size={80} className="rounded-2xl" />
               <div className="space-y-2">
                 <h1 className="text-2xl font-bold font-display tracking-tight">
                   {t("onboarding.welcome")}

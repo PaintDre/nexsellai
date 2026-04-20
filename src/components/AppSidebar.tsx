@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTranslation } from "react-i18next";
+import Logo from "@/components/Logo";
 
 const planColors: Record<string, string> = {
   free: "bg-muted text-muted-foreground",
@@ -52,9 +53,7 @@ export const SidebarContent = ({ expanded = false, onNavigate }: SidebarContentP
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className={cn("flex items-center gap-2.5 py-6", collapsed ? "justify-center px-2" : "px-5")}>
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0 overflow-hidden">
-          <img src="/logo-ns.png" alt="Nexsell" className="h-8 w-8 object-contain" />
-        </div>
+        <Logo size={32} className="rounded-lg shrink-0" />
         {expanded && (
           <span className="text-lg font-bold font-display tracking-tight text-sidebar-primary-foreground whitespace-nowrap">
             Nexsell

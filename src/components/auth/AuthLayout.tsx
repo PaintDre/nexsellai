@@ -1,5 +1,6 @@
 import { Sparkles, Zap, Shield } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import Logo from "@/components/Logo";
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -19,9 +20,7 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
       <div className="hidden md:flex md:w-[44%] lg:w-[40%] flex-col justify-between bg-sidebar p-10 lg:p-14 text-sidebar-primary-foreground">
         <div>
           <div className="flex items-center gap-2.5 mb-14">
-            <div className="h-9 w-9 rounded-lg overflow-hidden flex items-center justify-center">
-              <img src="/logo-ns.png" alt="Nexsell" className="h-9 w-9 object-contain" />
-            </div>
+            <Logo size={36} className="rounded-lg" />
             <span className="text-xl font-bold font-display tracking-tight">Nexsell</span>
           </div>
 
@@ -69,9 +68,7 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
       <div className="flex flex-1 flex-col items-center justify-center px-5 py-10 sm:px-8 bg-background">
         {/* Mobile branding */}
         <div className="md:hidden flex items-center gap-2 mb-8">
-          <div className="h-8 w-8 rounded-lg overflow-hidden">
-            <img src="/logo-ns.png" alt="Nexsell" className="h-8 w-8 object-contain" />
-          </div>
+          <Logo size={32} className="rounded-lg" />
           <span className="text-xl font-bold font-display tracking-tight text-foreground">Nexsell</span>
         </div>
 
