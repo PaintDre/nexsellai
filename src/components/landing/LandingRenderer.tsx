@@ -413,10 +413,9 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
         </EditableSection>
       )}
 
-      {/* ═══ MID-CTA #1 — tras propuesta de valor ═══ */}
-      {(benefits || features) && (
-        <MidCTA headline="Pruébalo sin riesgos hoy mismo" />
-      )}
+      {/* Mid-CTA removido para eliminar duplicación: el flujo es Hero CTA → Offer CTA → Final CTA + Sticky mobile.
+          Tener un MidCTA extra entre features y testimonials saturaba la página y reducía la jerarquía. */}
+
 
       {/* ═══ TESTIMONIALS ═══ */}
       {testimonials && (
