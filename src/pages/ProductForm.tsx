@@ -161,7 +161,7 @@ const ProductForm = () => {
               <Label htmlFor="desc">{t("products.descriptionLabel")}</Label>
               <Textarea id="desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder={t("products.descriptionPlaceholder")} rows={3} />
             </div>
-            <Button type="submit" className="w-full min-h-[44px]" disabled={saving}>
+            <Button type="submit" className="w-full min-h-[44px] press-on-active" disabled={saving}>
               {saving ? t("common.saving") : isEdit ? t("products.saveChanges") : t("products.createProduct")}
             </Button>
           </CardContent>
