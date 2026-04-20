@@ -1,4 +1,14 @@
-export type LandingTheme = "minimal" | "bold" | "clean" | "warm";
+export type LandingTheme =
+  | "minimal"
+  | "bold"
+  | "clean"
+  | "warm"
+  // Premium curated themes (Awwwards-inspired)
+  | "saas-mono"
+  | "dtc-bold"
+  | "editorial-apple"
+  | "modern-ecommerce"
+  | "story-soft";
 
 export interface ThemeConfig {
   name: string;
