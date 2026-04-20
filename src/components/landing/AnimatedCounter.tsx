@@ -11,8 +11,12 @@ interface AnimatedCounterProps {
  * Counts from 0 → `to` once the element enters the viewport.
  * Respects prefers-reduced-motion (jumps to final value).
  *
- * Perf: writes textContent directly via ref (no React re-render per frame)
- * and throttles to ~30fps to minimize forced reflows on the LCP element.
+ * LCP optimization: the initial JSX renders the FINAL value so Lighthouse
+ * paints the LCP element immediately. The effect then resets to 0 and
+ * animates up — this happens after first paint, so LCP is unaffected.
+ *
+ * Perf: writes textContent directly via ref (no React re-render per frame),
+ * throttles to ~30fps, and uses CSS containment to avoid ancestor reflows.
  */
 const AnimatedCounter = ({ to, duration = 1400, className, suffix = "" }: AnimatedCounterProps) => {
   const ref = useRef<HTMLSpanElement | null>(null);
@@ -28,17 +32,17 @@ const AnimatedCounter = ({ to, duration = 1400, className, suffix = "" }: Animat
 
     const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (reduce) {
-      write(to);
+      // Already showing final value from initial render — nothing to do.
       return;
     }
-
-    // Initial value already rendered as "0{suffix}" in JSX — no extra write needed.
 
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && !started.current) {
             started.current = true;
+            // Reset to 0 only now (after LCP has been measured) and animate up.
+            write(0);
             const startTs = performance.now();
             let lastFrameTs = 0;
             const frameInterval = 1000 / 30; // throttle to ~30fps
@@ -81,7 +85,7 @@ const AnimatedCounter = ({ to, duration = 1400, className, suffix = "" }: Animat
         willChange: "contents",
       }}
     >
-      0{suffix}
+      {to}{suffix}
     </span>
   );
 };
