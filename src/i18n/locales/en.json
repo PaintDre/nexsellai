@@ -1029,6 +1029,10 @@
     "saveLandingLimits": "Save landing limits",
     "bannerLimits": "Banner Limits",
     "saveBannerLimits": "Save banner limits",
+    "dropiAdsLimits": "Dropi Ad Generation Limits",
+    "dropiAdsLimitsDesc": "Maximum ad packs each plan can generate from Dropi catalog products (\"Generate Ad Images\" button).",
+    "dropiAdsLimitsHint": "Each generation creates up to 9 images (3 structures × 3 formats). Counted per user on a rolling 30-day window.",
+    "saveDropiAdsLimits": "Save Dropi ad limits",
     "configSaved": "Configuration saved",
     "configError": "Error saving"
   },
