@@ -407,6 +407,11 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
         </EditableSection>
       )}
 
+      {/* ═══ MID-CTA #1 — tras propuesta de valor ═══ */}
+      {(benefits || features) && (
+        <MidCTA headline="Pruébalo sin riesgos hoy mismo" />
+      )}
+
       {/* ═══ TESTIMONIALS ═══ */}
       {testimonials && (
         <EditableSection blockType="testimonials" blockTitle={testimonials.title} className={`py-20 md:py-28 ${t.sectionAltBg}`} delay={300}>
