@@ -18,7 +18,7 @@ type Product = Tables<"products">;
 const LandingFullPreview = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { t } = useTranslation();
   
   const [landing, setLanding] = useState<Landing | null>(null);
