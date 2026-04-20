@@ -310,7 +310,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
       {/* ═══ BENEFITS ═══ */}
       {benefits && (
         <EditableSection blockType="benefits" blockTitle={benefits.title} className={`py-20 md:py-28 ${t.sectionAltBg}`} delay={100}>
-          <div className="mx-auto max-w-5xl px-6">
+          <div className="mx-auto max-w-6xl px-6">
             <SectionTitle alt blockType="benefits">{benefits.title || "Beneficios"}</SectionTitle>
             {benefits.image_url ? (
               <div className="grid lg:grid-cols-2 gap-10 items-center">
@@ -373,7 +373,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
       {/* ═══ FEATURES ═══ */}
       {features && (
         <EditableSection blockType="features" blockTitle={features.title} className={`py-20 md:py-28 ${t.sectionBg}`} delay={200}>
-          <div className="mx-auto max-w-4xl px-6">
+          <div className="mx-auto max-w-6xl px-6">
             <SectionTitle blockType="features">{features.title || "Características"}</SectionTitle>
             {features.image_url ? (
               <div className="grid lg:grid-cols-2 gap-10 items-center">
@@ -420,7 +420,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
       {/* ═══ TESTIMONIALS ═══ */}
       {testimonials && (
         <EditableSection blockType="testimonials" blockTitle={testimonials.title} className={`py-20 md:py-28 ${t.sectionAltBg}`} delay={300}>
-          <div className="mx-auto max-w-5xl px-6">
+          <div className="mx-auto max-w-6xl px-6">
             <SectionTitle alt blockType="testimonials">{testimonials.title || "Lo que dicen nuestros clientes"}</SectionTitle>
             {Array.isArray(testimonials.content) ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -458,7 +458,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
       {/* ═══ OBJECTIONS ═══ */}
       {objections && (
         <EditableSection blockType="objections" blockTitle={objections.title} className={`py-20 md:py-28 ${t.sectionBg}`} delay={400}>
-          <div className="mx-auto max-w-3xl px-6">
+          <div className="mx-auto max-w-4xl px-6">
             <SectionTitle blockType="objections">{objections.title || "¿Aún tienes dudas?"}</SectionTitle>
             {Array.isArray(objections.content) ? (
               <div className="space-y-3">
@@ -479,7 +479,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
       {/* ═══ FAQ ═══ */}
       {faq && Array.isArray(faq.content) && (
         <EditableSection blockType="faq" blockTitle={faq.title} className={`py-20 md:py-28 ${t.sectionAltBg}`} delay={500}>
-          <div className="mx-auto max-w-2xl px-6">
+          <div className="mx-auto max-w-3xl px-6">
             <SectionTitle alt blockType="faq">{faq.title || "Preguntas frecuentes"}</SectionTitle>
             <div className="space-y-2">
               {parseFaqItems(faq.content).map((item, i) => (
@@ -508,7 +508,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
       {/* ═══ COMPARISON ═══ */}
       {comparison && Array.isArray(comparison.content) && (
         <EditableSection blockType="comparison" blockTitle={comparison.title} className={`py-20 md:py-28 ${t.sectionBg}`}>
-          <div className="mx-auto max-w-4xl px-6">
+          <div className="mx-auto max-w-5xl px-6">
             <SectionTitle blockType="comparison">{comparison.title || "¿Por qué elegirnos?"}</SectionTitle>
             <div className="grid sm:grid-cols-2 gap-6">
               <div className={`p-6 rounded-xl border-2 border-emerald-500 ${t.cardBg} shadow-md`}>
@@ -547,7 +547,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
       {/* ═══ BUNDLES ═══ */}
       {bundles && Array.isArray(bundles.content) && (
         <EditableSection blockType="bundles" blockTitle={bundles.title} className={`py-20 md:py-28 ${t.sectionAltBg}`}>
-          <div className="mx-auto max-w-4xl px-6">
+          <div className="mx-auto max-w-5xl px-6">
             <SectionTitle alt blockType="bundles">{bundles.title || "Packs disponibles"}</SectionTitle>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {(bundles.content as string[]).map((item, i) => (
@@ -566,7 +566,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
       {/* ═══ OFFER / URGENCY ═══ */}
       {(offer || urgency) && (
         <EditableSection blockType="offer" blockTitle={offer?.title || "Oferta"} className={`relative overflow-hidden ${`py-16 md:py-24 ${t.accentBg}`}`}>
-          <div className="mx-auto max-w-3xl px-6 text-center space-y-6">
+          <div className="mx-auto max-w-4xl px-6 text-center space-y-6">
             {urgency && (
               <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${t.urgencyBg} ${t.urgencyText}`}>
                 <Clock className="h-4 w-4" />
@@ -602,7 +602,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
       {/* ═══ GUARANTEE ═══ */}
       {guarantee && (
         <EditableSection blockType="guarantee" blockTitle="Garantía" className={`py-12 md:py-16 ${t.sectionBg}`}>
-          <div className="mx-auto max-w-2xl px-6">
+          <div className="mx-auto max-w-3xl px-6">
             <div className={`flex items-start gap-5 p-6 rounded-2xl ${t.guaranteeBg} border ${t.guaranteeBorder}`}>
               <ShieldCheck className="h-8 w-8 text-emerald-600 shrink-0 mt-1" />
               <div>
@@ -876,7 +876,7 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
 
       {/* ═══ FINAL CTA ═══ */}
       <EditableSection blockType="cta" blockTitle="CTA Final" className={`relative overflow-hidden py-20 md:py-28 ${t.sectionAltBg}`}>
-        <div className="mx-auto max-w-2xl px-6 text-center space-y-8">
+        <div className="mx-auto max-w-3xl px-6 text-center space-y-8">
           <EditableText
             value={cta?.title || "¿Listo para probarlo?"}
             onChange={(v) => updateBlock("cta", { title: v })}
