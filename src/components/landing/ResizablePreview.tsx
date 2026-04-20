@@ -1,7 +1,9 @@
 import { useState, useRef, useCallback, useEffect, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Smartphone, Tablet, Monitor } from "lucide-react";
+import { Smartphone, Tablet, Monitor, Frame } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Toggle } from "@/components/ui/toggle";
+import DeviceFrame from "./DeviceFrame";
 
 interface ResizablePreviewProps {
   children: ReactNode;
@@ -9,7 +11,7 @@ interface ResizablePreviewProps {
 }
 
 const PRESETS = [
-  { label: "Móvil", icon: Smartphone, width: 375 },
+  { label: "Móvil", icon: Smartphone, width: 390 },
   { label: "Tablet", icon: Tablet, width: 768 },
   { label: "Desktop", icon: Monitor, width: 0 }, // 0 = full width
 ];
@@ -126,6 +128,131 @@ const IframePreview = ({ children, width }: { children: ReactNode; width: number
 };
 
 const ResizablePreview = ({ children, editable = false }: ResizablePreviewProps) => {
+  const [previewWidth, setPreviewWidth] = useState(0); // 0 = full
+  const [isDragging, setIsDragging] = useState(false);
+  const [showFrame, setShowFrame] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+
+    const handleMouseMove = (ev: MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const newHalfWidth = Math.abs(ev.clientX - centerX);
+      const newWidth = Math.max(320, Math.min(newHalfWidth * 2, rect.width));
+      setPreviewWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  }, []);
+
+  const activePreset = PRESETS.find(p => p.width === previewWidth) 
+    || (previewWidth === 0 ? PRESETS[2] : null);
+
+  const useIframe = previewWidth > 0 && !editable;
+
+  // Choose device frame: iPhone for mobile width, MacBook for desktop, none for tablet/custom or editable
+  const frameDevice: "iphone" | "macbook" | "none" =
+    !showFrame || editable
+      ? "none"
+      : previewWidth === 390
+        ? "iphone"
+        : previewWidth === 0
+          ? "macbook"
+          : "none";
+
+  const frameApplied = frameDevice !== "none";
+
+  return (
+    <div className="flex flex-col" ref={containerRef}>
+      {/* Device preset bar */}
+      <div className="flex items-center justify-center gap-1 py-2 bg-muted/50 border-b flex-wrap">
+        {PRESETS.map((preset) => (
+          <Button
+            key={preset.label}
+            variant={activePreset === preset ? "default" : "ghost"}
+            size="sm"
+            className="text-xs h-7 px-2"
+            onClick={() => setPreviewWidth(preset.width)}
+          >
+            <preset.icon className="h-3.5 w-3.5 mr-1" />
+            {preset.label}
+            {preset.width > 0 && (
+              <span className="text-[10px] text-muted-foreground ml-1 opacity-70">{preset.width}px</span>
+            )}
+          </Button>
+        ))}
+        {previewWidth > 0 && previewWidth !== 390 && previewWidth !== 768 && (
+          <span className="text-xs text-muted-foreground ml-2">{Math.round(previewWidth)}px</span>
+        )}
+        {!editable && (previewWidth === 0 || previewWidth === 390) && (
+          <>
+            <span className="mx-2 h-4 w-px bg-border" />
+            <Toggle
+              size="sm"
+              pressed={showFrame}
+              onPressedChange={setShowFrame}
+              className="h-7 px-2 text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+              aria-label="Toggle device frame"
+            >
+              <Frame className="h-3.5 w-3.5 mr-1" />
+              Mockup
+            </Toggle>
+          </>
+        )}
+      </div>
+
+      {/* Content with resize handles */}
+      <div className={`relative flex justify-center ${frameApplied ? "py-8 bg-gradient-to-b from-muted/40 to-muted/10" : ""}`}>
+        <div
+          className={`relative ${isDragging ? "" : "transition-[width] duration-200 ease-out"}`}
+          style={{
+            width: previewWidth > 0 ? `${previewWidth}px` : "100%",
+            maxWidth: "100%",
+          }}
+        >
+          {frameApplied ? (
+            <DeviceFrame device={frameDevice}>
+              {useIframe ? (
+                <IframePreview width={previewWidth || 1280}>{children}</IframePreview>
+              ) : (
+                children
+              )}
+            </DeviceFrame>
+          ) : useIframe ? (
+            <IframePreview width={previewWidth}>{children}</IframePreview>
+          ) : (
+            children
+          )}
+
+          {/* Right drag handle (hidden when device frame is on for cleaner look) */}
+          {previewWidth > 0 && !frameApplied && (
+            <div
+              className="absolute top-0 -right-3 w-6 h-full flex items-center justify-center cursor-col-resize z-10 group"
+              onMouseDown={handleMouseDown}
+            >
+              <div className={`w-1.5 h-12 rounded-full transition-colors ${
+                isDragging ? "bg-primary" : "bg-border group-hover:bg-primary/60"
+              }`} />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ResizablePreview;
   const [previewWidth, setPreviewWidth] = useState(0); // 0 = full
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
