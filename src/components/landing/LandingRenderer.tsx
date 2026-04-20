@@ -12,6 +12,8 @@ import EditableText from "./EditableText";
 import BlockToolbar from "./BlockToolbar";
 import BeforeAfterSlider from "./BeforeAfterSlider";
 import { getHeroStyle } from "./heroStyles";
+import { useScrollReveal } from "@/hooks/useScrollReveal";
+import AnimatedCounter from "./AnimatedCounter";
 
 interface Block {
   type: string;
@@ -130,7 +132,8 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
 
   const CTAButton = ({ className = "" }: { className?: string }) => (
     <button
-      className={`inline-flex items-center justify-center px-6 sm:px-10 py-3 sm:py-4 text-sm sm:text-base md:text-lg font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5 animate-[pulse-glow_2s_ease-in-out_infinite] ${t.ctaBg} ${t.ctaText} ${t.ctaHover} ${className}`}
+      className={`cta-polished inline-flex items-center justify-center px-6 sm:px-10 py-3 sm:py-4 text-sm sm:text-base md:text-lg font-bold rounded-xl shadow-lg ${t.ctaBg} ${t.ctaText} ${t.ctaHover} ${className}`}
+      style={{ animation: "pulse-glow 2.4s ease-in-out infinite" }}
     >
       Comprar ahora — {formattedPrice}
     </button>
@@ -167,8 +170,8 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
 
   const Section = ({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) => (
     <section
-      className={`landing-section ${className}`}
-      style={{ animationDelay: `${delay}ms` }}
+      className={`landing-section reveal-on-scroll ${className}`}
+      style={{ transitionDelay: `${Math.min(delay, 200)}ms` }}
     >
       {children}
     </section>
@@ -219,8 +222,10 @@ const LandingRenderer = ({ blocks, product, imagePreview, theme = "clean", edita
   const heroStyle = getHeroStyle(product?.category);
   const isDarkHero = heroStyle.textClass === "text-white";
 
+  const revealRef = useScrollReveal([blocks.length, theme]);
+
   return (
-    <div className="min-h-screen landing-container" style={{ fontFamily: "'Inter', sans-serif", overflowWrap: "anywhere", wordBreak: "break-word" }}>
+    <div ref={revealRef} className="min-h-screen landing-container" style={{ fontFamily: "'Inter', sans-serif", overflowWrap: "anywhere", wordBreak: "break-word" }}>
 
       {/* ═══ HERO ═══ */}
       {hero && (
