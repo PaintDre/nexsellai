@@ -10,6 +10,7 @@ import { PageBreadcrumb } from "./PageBreadcrumb";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "react-i18next";
+import Logo from "@/components/Logo";
 
 const planLabels: Record<string, string> = { free: "Free", starter: "Starter", pro: "Pro" };
 
@@ -44,9 +45,7 @@ export const AppLayout = () => {
               <Button variant="ghost" size="icon" className="text-foreground h-9 w-9" onClick={() => setMobileOpen(true)}>
                 <Menu className="h-5 w-5" />
               </Button>
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden">
-                <img src="/logo-ns.png" alt="Nexsell" className="h-7 w-7 object-contain" />
-              </div>
+              <Logo size={28} className="rounded-lg" />
               <span className="text-base font-bold font-display tracking-tight">Nexsell</span>
             </div>
             {profile && (
