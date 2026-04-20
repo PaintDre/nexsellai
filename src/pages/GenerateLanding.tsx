@@ -271,8 +271,8 @@ const GenerateLanding = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-2xl mx-auto space-y-6">
-      <Button variant="ghost" onClick={() => navigate(-1)}>
+    <div className="page-in p-4 md:p-6 lg:p-8 max-w-2xl mx-auto space-y-6">
+      <Button variant="ghost" onClick={() => navigate(-1)} className="press-on-active">
         <ArrowLeft className="h-4 w-4 mr-2" /> {t("common.back")}
       </Button>
 

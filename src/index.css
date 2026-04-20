@@ -111,11 +111,58 @@
 }
 
 @layer utilities {
+  /* ── Glassmorphism tokens (use across the internal ecosystem) ── */
   .glass {
     @apply bg-card/80 backdrop-blur-md;
   }
   .glass-card {
-    @apply bg-card/70 backdrop-blur-xl border-border/40 shadow-sm;
+    @apply bg-card/70 backdrop-blur-xl border border-border/40 shadow-sm;
+  }
+  .glass-panel {
+    @apply bg-background/60 backdrop-blur-2xl border border-border/40;
+  }
+
+  /* ── Internal app micro-interactions ── */
+  .lift-on-hover {
+    @apply transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/[0.06] dark:hover:shadow-black/[0.25];
+  }
+  .press-on-active {
+    @apply transition-transform duration-150 active:scale-[0.98];
+  }
+  .icon-pop {
+    @apply transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-4deg];
+  }
+
+  /* ── Page entrance ── */
+  @keyframes page-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .page-in {
+    animation: page-in 400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* ── Soft shimmer for skeletons / placeholders ── */
+  @keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+  }
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--muted) / 0.6) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s linear infinite;
+  }
+
+  /* ── Subtle gradient backgrounds for empty states & headers ── */
+  .bg-aurora {
+    background-image:
+      radial-gradient(at 20% 0%, hsl(var(--primary) / 0.08) 0px, transparent 50%),
+      radial-gradient(at 80% 100%, hsl(var(--accent) / 0.6) 0px, transparent 50%);
   }
 
   /* ── Landing micro-interactions ── */

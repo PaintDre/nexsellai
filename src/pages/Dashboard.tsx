@@ -15,6 +15,7 @@ import {
 import { computeBannersUsed } from "@/lib/planUsage";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import { UpgradeWarningBanner } from "@/components/UpgradeWarningBanner";
+import EmptyState from "@/components/EmptyState";
 import { useTranslation } from "react-i18next";
 
 type Product = Tables<"products">;
@@ -107,10 +108,10 @@ const Dashboard = () => {
   if (loading) return <DashboardSkeleton />;
 
   return (
-    <div className="p-4 md:p-8 lg:p-10 space-y-6 md:space-y-8 max-w-6xl mx-auto">
+    <div className="page-in p-4 md:p-8 lg:p-10 space-y-6 md:space-y-8 max-w-6xl mx-auto">
       {/* Header */}
       <div className="space-y-1">
-        <h1 className="text-2xl md:text-3xl font-bold font-display">
+        <h1 className="text-2xl md:text-3xl font-bold font-display tracking-tight">
           {getGreeting()}, {profile?.full_name?.split(" ")[0] || t("common.user")}
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -252,23 +253,21 @@ const Dashboard = () => {
             )}
           </div>
           {landings.length === 0 ? (
-            <Card className="border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-10">
-                <FileText className="h-10 w-10 text-muted-foreground/30 mb-3" />
-                <p className="text-sm text-muted-foreground">{t("dashboard.noLandingsYet")}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{t("dashboard.noLandingsHint")}</p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={FileText}
+              title={t("dashboard.noLandingsYet")}
+              description={t("dashboard.noLandingsHint")}
+            />
           ) : (
             <div className="space-y-2">
               {landings.slice(0, 8).map((landing) => (
-                <Card key={landing.id} className="hover:shadow-md transition-all duration-200">
+                <Card key={landing.id} className="lift-on-hover group">
                   <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5">
-                    <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent shrink-0">
-                        <FileText className="h-4 w-4 text-accent-foreground" />
+                        <FileText className="h-4 w-4 text-accent-foreground icon-pop" />
                       </div>
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <h3 className="font-medium text-sm truncate">{landing.name}</h3>
                         <p className="text-xs text-muted-foreground">
                           {new Date(landing.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
@@ -324,15 +323,15 @@ const Dashboard = () => {
 const QuickActionCard = ({ to, icon: Icon, title, description, variant }: {
   to: string; icon: React.ComponentType<{ className?: string }>; title: string; description: string; variant?: "primary";
 }) => (
-  <Link to={to} className="group block">
-    <Card className={`transition-all duration-200 group-hover:shadow-md ${variant === "primary" ? "border-primary/20 bg-accent/20" : ""}`}>
+  <Link to={to} className="group block press-on-active">
+    <Card className={`lift-on-hover ${variant === "primary" ? "border-primary/20 bg-accent/20" : ""}`}>
       <CardContent className="flex items-center gap-3.5 p-4">
         <div className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 transition-colors ${variant === "primary" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-          <Icon className="h-4 w-4" />
+          <Icon className="h-4 w-4 icon-pop" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-sm group-hover:text-primary transition-colors">{title}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+          <p className="font-medium text-sm group-hover:text-primary transition-colors truncate">{title}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">{description}</p>
         </div>
         <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
       </CardContent>
