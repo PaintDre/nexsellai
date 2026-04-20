@@ -323,15 +323,15 @@ const Dashboard = () => {
 const QuickActionCard = ({ to, icon: Icon, title, description, variant }: {
   to: string; icon: React.ComponentType<{ className?: string }>; title: string; description: string; variant?: "primary";
 }) => (
-  <Link to={to} className="group block">
-    <Card className={`transition-all duration-200 group-hover:shadow-md ${variant === "primary" ? "border-primary/20 bg-accent/20" : ""}`}>
+  <Link to={to} className="group block press-on-active">
+    <Card className={`lift-on-hover ${variant === "primary" ? "border-primary/20 bg-accent/20" : ""}`}>
       <CardContent className="flex items-center gap-3.5 p-4">
         <div className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 transition-colors ${variant === "primary" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-          <Icon className="h-4 w-4" />
+          <Icon className="h-4 w-4 icon-pop" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-sm group-hover:text-primary transition-colors">{title}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">{description}</p>
+          <p className="font-medium text-sm group-hover:text-primary transition-colors truncate">{title}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">{description}</p>
         </div>
         <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
       </CardContent>
