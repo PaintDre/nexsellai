@@ -356,7 +356,16 @@ const GenerateLanding = () => {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label>{t("generateLanding.template")}</Label>
-            <LandingTemplatePicker selected={templateId} onSelect={setTemplateId} />
+            <LandingTemplatePicker
+              selected={templateId}
+              onSelect={(id) => {
+                setTemplateId(id);
+                const tpl = landingTemplates.find((t) => t.id === id);
+                if (tpl?.theme) setTheme(tpl.theme);
+              }}
+              userPlan={profile?.plan as "free" | "starter" | "pro" | undefined}
+              onLockedClick={() => setShowUpgradeModal(true)}
+            />
           </div>
 
           <div className="space-y-2">
