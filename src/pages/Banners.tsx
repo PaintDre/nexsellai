@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import EmptyState from "@/components/EmptyState";
 
 interface BannerWithProduct {
   id: string;
@@ -183,51 +184,54 @@ const Banners = () => {
   const previewBanner = previewIndex !== null ? filteredBanners[previewIndex] : null;
 
   const BannerCard = ({ banner, idx }: { banner: BannerWithProduct; idx: number }) => (
-    <Card className="group overflow-hidden hover:shadow-md transition-shadow relative">
+    <Card className="group overflow-hidden lift-on-hover relative">
       {selectionMode && (
         <div className="absolute top-3 left-3 z-10">
           <Checkbox
             checked={selectedIds.has(banner.id)}
             onCheckedChange={() => toggleSelect(banner.id)}
-            className="bg-background/80 backdrop-blur-sm"
+            className="bg-background/80 backdrop-blur-sm shadow-sm"
           />
         </div>
       )}
-      <div className="overflow-hidden bg-muted relative">
+      <div className="overflow-hidden bg-muted/60 relative">
         <img
           src={banner.image_url}
           alt="Banner"
-          className="w-full h-auto object-contain group-hover:scale-105 transition-transform"
+          className="w-full h-auto object-contain transition-transform duration-500 group-hover:scale-[1.03]"
           loading="lazy"
         />
         <button
           onClick={() => setPreviewIndex(idx)}
-          className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100"
+          className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent transition-opacity duration-300 flex items-end justify-center opacity-0 group-hover:opacity-100 pb-4"
+          aria-label={t("common.view")}
         >
-          <Eye className="h-8 w-8 text-white" />
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-background/90 backdrop-blur-md px-3 py-1.5 text-xs font-medium text-foreground shadow-lg">
+            <Eye className="h-3.5 w-3.5" /> {t("common.view")}
+          </span>
         </button>
       </div>
-      <CardContent className="p-4 space-y-2">
+      <CardContent className="p-3.5 sm:p-4 space-y-2">
         {banner.products?.name && (
           <p className="text-xs font-medium text-foreground truncate">{banner.products.name}</p>
         )}
-        <div className="flex items-center justify-between">
-          <Badge variant="secondary" className="capitalize text-xs">
+        <div className="flex items-center justify-between gap-2">
+          <Badge variant="secondary" className="capitalize text-[10px] truncate max-w-[60%]">
             {TEMPLATE_LABELS[banner.template_id] || banner.template_id.replace("-", " ")}
           </Badge>
-          <span className="text-xs text-muted-foreground">{banner.output_size}</span>
+          <span className="text-[10px] text-muted-foreground tabular-nums">{banner.output_size}</span>
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-[10px] text-muted-foreground">
           {new Date(banner.created_at).toLocaleDateString("es-CL")}
         </p>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1 min-h-[44px]" onClick={() => setPreviewIndex(idx)}>
-            <Eye className="h-3 w-3 mr-1" /> {t("common.view")}
+        <div className="flex gap-1.5 pt-1">
+          <Button variant="outline" size="sm" className="flex-1 min-h-[44px] text-xs press-on-active" onClick={() => setPreviewIndex(idx)}>
+            <Eye className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline">{t("common.view")}</span>
           </Button>
-          <Button variant="outline" size="sm" className="flex-1 min-h-[44px]" onClick={() => handleDownload(banner)}>
-            <Download className="h-3 w-3 mr-1" /> {t("common.download")}
+          <Button variant="outline" size="sm" className="flex-1 min-h-[44px] text-xs press-on-active" onClick={() => handleDownload(banner)}>
+            <Download className="h-3 w-3 sm:mr-1" /><span className="hidden sm:inline">{t("common.download")}</span>
           </Button>
-          <Button variant="ghost" size="icon" className="text-destructive shrink-0 min-h-[44px]" onClick={() => setDeleteTarget(banner.id)}>
+          <Button variant="ghost" size="icon" className="text-destructive shrink-0 min-h-[44px] press-on-active" onClick={() => setDeleteTarget(banner.id)}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
@@ -236,31 +240,31 @@ const Banners = () => {
   );
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="page-in p-4 md:p-6 lg:p-8 space-y-6">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-xl sm:text-3xl font-bold font-display tracking-tight">{t("banners.title")}</h1>
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-3xl font-bold font-display tracking-tight truncate">{t("banners.title")}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {t("banners.count", { count: banners.length })}
           </p>
         </div>
-        <Button onClick={() => setProductSelectorOpen(true)} className="gap-2 w-full sm:w-auto min-h-[44px]">
+        <Button onClick={() => setProductSelectorOpen(true)} className="gap-2 w-full sm:w-auto min-h-[44px] press-on-active">
           <Plus className="h-4 w-4" /> {t("banners.generateBanners")}
         </Button>
       </div>
 
       {banners.length === 0 && !loading ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <ImageIcon className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <p className="text-muted-foreground font-medium">{t("banners.empty")}</p>
-            <p className="text-sm text-muted-foreground mt-1">{t("banners.emptyDesc")}</p>
-            <Button className="mt-4 gap-2" onClick={() => setProductSelectorOpen(true)}>
-              <Plus className="h-4 w-4" /> {t("banners.generateFirst")}
-            </Button>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={ImageIcon}
+          title={t("banners.empty")}
+          description={t("banners.emptyDesc")}
+          action={{
+            label: t("banners.generateFirst"),
+            icon: Plus,
+            onClick: () => setProductSelectorOpen(true),
+          }}
+        />
       ) : (
         <Tabs defaultValue="todos" className="space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

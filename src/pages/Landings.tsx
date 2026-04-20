@@ -6,9 +6,10 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Eye, Loader2, Maximize2, Copy, Trash2, Store } from "lucide-react";
+import { FileText, Eye, Loader2, Maximize2, Copy, Trash2, Store, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { type LandingTheme } from "@/components/landing/themes";
+import EmptyState from "@/components/EmptyState";
 import { useTranslation } from "react-i18next";
 import ExportPreviewDialog from "@/components/landing/ExportPreviewDialog";
 import {
@@ -168,17 +169,33 @@ const Landings = () => {
   }
 
   return (
-    <div className="p-4 md:p-8 lg:p-10 space-y-6 max-w-6xl mx-auto">
-      <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-display">{t("landings.title")}</h1>
+    <div className="page-in p-4 md:p-8 lg:p-10 space-y-6 max-w-6xl mx-auto">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-display tracking-tight truncate">{t("landings.title")}</h1>
+          {landings.length > 0 && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {t("dashboard.landingCount", { count: landings.length })}
+            </p>
+          )}
+        </div>
+        {landings.length > 0 && (
+          <Button asChild size="sm" className="press-on-active shrink-0">
+            <Link to="/products"><Plus className="h-3.5 w-3.5 mr-1.5" />{t("landings.viewProducts")}</Link>
+          </Button>
+        )}
+      </div>
 
       {landings.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <FileText className="h-10 w-10 text-muted-foreground/30 mb-4" />
-            <p className="text-sm text-muted-foreground mb-4">{t("landings.empty")}</p>
-            <Button asChild size="sm"><Link to="/products">{t("landings.viewProducts")}</Link></Button>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={FileText}
+          title={t("landings.empty")}
+          action={{
+            label: t("landings.viewProducts"),
+            to: "/products",
+            icon: Plus,
+          }}
+        />
       ) : (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {landings.map((landing) => {
@@ -187,7 +204,7 @@ const Landings = () => {
             const theme = (landing as any).theme || "clean";
 
             return (
-              <Card key={landing.id} className="overflow-hidden hover:shadow-md transition-all duration-200 group">
+              <Card key={landing.id} className="overflow-hidden lift-on-hover group">
                 <Link to={`/landings/${landing.id}/preview`} className="block">
                   <div className="relative h-36 overflow-hidden bg-muted">
                     {image && (
