@@ -26,6 +26,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTranslation } from "react-i18next";
 import Logo from "@/components/Logo";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { CreditsBadge } from "@/components/credits/CreditsBadge";
 
 const planColors: Record<string, string> = {
   free: "bg-muted text-muted-foreground",
@@ -213,6 +214,8 @@ export const SidebarContent = ({
           collapsed && "px-2",
         )}
       >
+        {/* Credits balance — links to /pricing */}
+        <CreditsBadge collapsed={collapsed} />
         {profile && expanded && (
           <div className="flex items-center gap-2">
             <div

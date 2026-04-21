@@ -12,6 +12,9 @@ import { es } from "date-fns/locale";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { Tables } from "@/integrations/supabase/types";
+import { useCredits } from "@/hooks/useCredits";
+import { Coins } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 type Subscription = Tables<"subscriptions">;
 type Payment = Tables<"payments">;
@@ -26,6 +29,7 @@ const Subscription = () => {
   const { t, i18n } = useTranslation();
   const { profile, user } = useAuth();
   const navigate = useNavigate();
+  const { balance, allowance, resetAt } = useCredits();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -184,20 +188,39 @@ const Subscription = () => {
       {/* Usage */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">{t("subscription.usage", "Uso este mes")}</CardTitle>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Coins className="h-4 w-4 text-primary" />
+            {t("subscription.creditsTitle", "Créditos disponibles")}
+          </CardTitle>
           <CardDescription>
-            {t("subscription.usageDesc", "Resumen del consumo dentro de tu plan.")}
+            {t("subscription.creditsDesc", "Tu plan incluye una bolsa mensual de créditos para todas las generaciones IA.")}
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border bg-muted/30 p-4">
-            <p className="text-xs text-muted-foreground">{t("subscription.landingsUsed", "Landings creadas")}</p>
-            <p className="text-2xl font-bold mt-1">{profile?.landings_used ?? 0}</p>
+        <CardContent className="space-y-4">
+          <div className="rounded-lg border bg-muted/30 p-4 space-y-3">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="text-xs text-muted-foreground">{t("subscription.balance", "Saldo")}</p>
+                <p className="text-3xl font-bold mt-1 tabular-nums">{balance}</p>
+              </div>
+              <p className="text-sm text-muted-foreground tabular-nums">/ {allowance}</p>
+            </div>
+            <Progress
+              value={allowance > 0 ? Math.min(100, (balance / allowance) * 100) : 0}
+              className="h-2"
+            />
+            {resetAt && (
+              <p className="text-xs text-muted-foreground">
+                {t("subscription.resetAt", "Próxima recarga")}:{" "}
+                {format(new Date(new Date(resetAt).getTime() + 30 * 24 * 60 * 60 * 1000), "PPP", { locale })}
+              </p>
+            )}
           </div>
-          <div className="rounded-lg border bg-muted/30 p-4">
-            <p className="text-xs text-muted-foreground">{t("subscription.bannersUsed", "Banners generados")}</p>
-            <p className="text-2xl font-bold mt-1">{profile?.banners_used ?? 0}</p>
-          </div>
+          <Button variant="outline" size="sm" asChild className="w-full">
+            <Link to="/pricing">
+              <Sparkles className="h-4 w-4" /> {t("subscription.getMore", "Conseguir más créditos")}
+            </Link>
+          </Button>
         </CardContent>
       </Card>
 

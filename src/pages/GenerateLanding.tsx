@@ -17,9 +17,10 @@ import { themes, type LandingTheme } from "@/components/landing/themes";
 import LandingTemplatePicker, { landingTemplates } from "@/components/landing/LandingTemplates";
 import { useTranslation } from "react-i18next";
 
-import { usePlanLimits } from "@/hooks/usePlanLimits";
-import { UpgradeWarningBanner } from "@/components/UpgradeWarningBanner";
 import { UpgradeModal } from "@/components/UpgradeModal";
+import { useCredits, isInsufficientCreditsError } from "@/hooks/useCredits";
+import { InsufficientCreditsModal } from "@/components/credits/InsufficientCreditsModal";
+import { Coins } from "lucide-react";
 
 type Product = Tables<"products">;
 
@@ -43,6 +44,7 @@ const GenerateLanding = () => {
   const [progress, setProgress] = useState(0);
   const [quickMode, setQuickMode] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showInsufficient, setShowInsufficient] = useState(false);
 
   const isPaidPlan = profile?.plan === "starter" || profile?.plan === "pro";
 
@@ -54,10 +56,10 @@ const GenerateLanding = () => {
     });
   }, [id, user]);
 
-  const { landing: landingLimits } = usePlanLimits();
-  const limit = landingLimits[profile?.plan || "free"];
-  const used = profile?.landings_used || 0;
-  const canGenerate = used < limit;
+  const { balance, costOf, refresh: refreshCredits } = useCredits();
+  const willUseImages = autoImages && isPaidPlan;
+  const generationCost = willUseImages ? costOf("landing_with_images") : costOf("landing_text");
+  const canGenerate = balance >= generationCost;
 
   const generateBannerForSection = async (
     landingId: string,
@@ -98,8 +100,7 @@ const GenerateLanding = () => {
     if (!user || !product || !profile) return;
 
     if (!canGenerate) {
-      // Show upgrade modal that redirects to /pricing instead of a plain toast
-      setShowUpgradeModal(true);
+      setShowInsufficient(true);
       return;
     }
 
@@ -145,23 +146,17 @@ const GenerateLanding = () => {
           template_id: templateId,
           currency: (profile as any)?.currency || "USD",
           country_code: (profile as any)?.country_code || null,
+          with_images: willUseImages,
         },
       });
 
       if (error) {
-        // Backend may return 403 plan_limit_reached even if frontend allowed it
-        // (e.g. counter drift). Always escalate to the upgrade modal in that case.
-        const ctx: any = (error as any).context;
-        const status = ctx?.status ?? (error as any).status;
-        let payload: any = ctx?.body;
-        if (typeof payload === "string") {
-          try { payload = JSON.parse(payload); } catch { /* ignore */ }
-        }
-        if (status === 403 || payload?.error === "plan_limit_reached") {
+        if (isInsufficientCreditsError(error)) {
           toast.dismiss(toastId);
-          setShowUpgradeModal(true);
+          setShowInsufficient(true);
           setGenerationStep("idle");
           setProgress(0);
+          await refreshCredits();
           return;
         }
         console.error("[handleGenerate] generate-landing edge function failed:", error);
@@ -248,15 +243,8 @@ const GenerateLanding = () => {
         setProgress(90);
       }
 
-      // ── Step D: increment usage counter (non-blocking on error) ──
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ landings_used: used + 1 })
-        .eq("user_id", user.id);
-      if (updateError) {
-        console.error("[handleGenerate] failed to increment landings_used:", updateError);
-        // Don't abort — landing is already created.
-      }
+      // Credits were charged server-side by the edge function; refresh local balance.
+      await refreshCredits();
 
       setProgress(100);
       setGenerationStep("done");
@@ -292,8 +280,13 @@ const GenerateLanding = () => {
         <ArrowLeft className="h-4 w-4 mr-2" /> {t("common.back")}
       </Button>
 
-      <UpgradeWarningBanner resource="landings" used={used} limit={limit} />
-      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="landings" used={used} limit={limit} />
+      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="landings" used={0} limit={0} />
+      <InsufficientCreditsModal
+        open={showInsufficient}
+        onOpenChange={setShowInsufficient}
+        required={generationCost}
+        action={willUseImages ? "landing_with_images" : "landing_text"}
+      />
 
       {!hasEnoughImagesForTemplate && (
         <div className="flex items-start gap-3 p-4 rounded-lg border border-amber-500/40 bg-amber-500/10">
@@ -345,8 +338,13 @@ const GenerateLanding = () => {
               </p>
             </div>
             <div className="flex items-center gap-2 justify-center text-sm text-muted-foreground">
-              <span>{t("generateLanding.landingsUsed")}:</span>
-              <Badge variant={canGenerate ? "secondary" : "destructive"}>{used} / {limit}</Badge>
+              <Coins className="h-3.5 w-3.5 text-primary" />
+              <span>{t("credits.cost", "Costo")}:</span>
+              <Badge variant={canGenerate ? "secondary" : "destructive"} className="tabular-nums">
+                {generationCost} {t("credits.unit", "créditos")}
+              </Badge>
+              <span className="text-xs">·</span>
+              <span className="text-xs">{t("credits.balance", "Saldo")}: <strong className="tabular-nums">{balance}</strong></span>
             </div>
             {generationStep !== "idle" && (
               <div className="space-y-3 p-4 rounded-lg border bg-muted/50">
@@ -452,10 +450,13 @@ const GenerateLanding = () => {
           </div>
 
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>{t("generateLanding.landingsUsed")}:</span>
-            <Badge variant={canGenerate ? "secondary" : "destructive"}>
-              {used} / {limit}
+            <Coins className="h-3.5 w-3.5 text-primary" />
+            <span>{t("credits.cost", "Costo")}:</span>
+            <Badge variant={canGenerate ? "secondary" : "destructive"} className="tabular-nums">
+              {generationCost} {t("credits.unit", "créditos")}
             </Badge>
+            <span className="text-xs">·</span>
+            <span className="text-xs">{t("credits.balance", "Saldo")}: <strong className="tabular-nums">{balance}</strong></span>
           </div>
 
           {/* Generation progress */}

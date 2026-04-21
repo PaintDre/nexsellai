@@ -3,10 +3,11 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, Download, Sparkles, Check, Tag, Heart, Zap } from "lucide-react";
+import { Loader2, Download, Sparkles, Check, Tag, Heart, Zap, Coins } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { UpgradeModal } from "@/components/UpgradeModal";
+import { useCredits, isInsufficientCreditsError } from "@/hooks/useCredits";
+import { InsufficientCreditsModal } from "@/components/credits/InsufficientCreditsModal";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import JSZip from "jszip";
@@ -32,6 +33,7 @@ interface Props {
 export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
   const { t, i18n } = useTranslation();
   const { profile, session } = useAuth();
+  const { balance, costOf, refresh: refreshCredits } = useCredits();
   const [showName, setShowName] = useState(true);
   const [showBadge, setShowBadge] = useState(true);
   const [badgeKey, setBadgeKey] = useState<(typeof BADGE_KEYS)[number]>("offer");
@@ -41,7 +43,13 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
     "direct_response",
   ]);
   const [loading, setLoading] = useState(false);
-  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [insufficientOpen, setInsufficientOpen] = useState(false);
+
+  // 3 structures = pack of 3, otherwise per-image charge
+  const isPack3 = selected.length === 3;
+  const totalCost = isPack3
+    ? costOf("dropi_ad_pack_3")
+    : costOf("dropi_ad_with_image") * selected.length;
 
   const toggleStructure = (k: StructureKey) => {
     setSelected((prev) =>
@@ -57,26 +65,8 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
       return;
     }
 
-    // Read plan limits from system_config (managed in /admin/config)
-    const plan = (profile?.plan ?? "free") as "free" | "starter" | "pro";
-    const { data: limitsRow } = await supabase
-      .from("system_config")
-      .select("value")
-      .eq("key", "dropi_ads_limits")
-      .maybeSingle();
-    const limits = (limitsRow?.value ?? { free: 1, starter: 30, pro: 150 }) as Record<string, number>;
-    const planLimit = limits[plan] ?? 1;
-
-    // 30-day rolling usage window
-    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const { count } = await supabase
-      .from("dropi_ad_generations")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", session.user.id)
-      .gte("created_at", since);
-
-    if ((count ?? 0) >= planLimit) {
-      setUpgradeOpen(true);
+    if (balance < totalCost) {
+      setInsufficientOpen(true);
       return;
     }
 
@@ -102,7 +92,15 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
         },
       });
 
-      if (res.error) throw res.error;
+      if (res.error) {
+        if (isInsufficientCreditsError(res.error)) {
+          setInsufficientOpen(true);
+          await refreshCredits();
+          toast.dismiss(toastId);
+          return;
+        }
+        throw res.error;
+      }
       const { images } = res.data as {
         images: { format: string; structure: string; variation: number; url: string }[];
       };
@@ -124,6 +122,7 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
         id: toastId,
         description: t("ai.readyDesc"),
       });
+      await refreshCredits();
       onOpenChange(false);
     } catch (err: any) {
       console.error("Ad generation failed:", err);
@@ -244,10 +243,22 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
               {t("dropi.adFormatsDesc")}
             </p>
 
+            {/* Cost summary */}
+            <div className="flex items-center justify-between rounded-lg border bg-muted/40 px-3 py-2">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Coins className="h-3.5 w-3.5 text-primary" />
+                <span>{t("credits.cost", "Costo")}</span>
+              </div>
+              <div className="text-xs">
+                <span className="font-semibold tabular-nums">{totalCost}</span>{" "}
+                <span className="text-muted-foreground">/ {balance} {t("credits.unit", "créditos")}</span>
+              </div>
+            </div>
+
             <Button
               className="w-full h-11"
               onClick={handleGenerate}
-              disabled={loading || !product.image_main || selected.length === 0}
+              disabled={loading || !product.image_main || selected.length === 0 || balance < totalCost}
             >
               {loading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -260,12 +271,11 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
         </DialogContent>
       </Dialog>
 
-      <UpgradeModal
-        open={upgradeOpen}
-        onOpenChange={setUpgradeOpen}
-        resource={t("dropi.adGenerations")}
-        used={1}
-        limit={1}
+      <InsufficientCreditsModal
+        open={insufficientOpen}
+        onOpenChange={setInsufficientOpen}
+        required={totalCost}
+        action={isPack3 ? "dropi_ad_pack_3" : "dropi_ad_with_image"}
       />
     </>
   );

@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Settings, Save, Cpu, Gauge, Layers, Image as ImageIcon, Megaphone } from "lucide-react";
+import { Coins } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface ConfigItem {
@@ -29,6 +30,11 @@ const SuperAdminConfig = () => {
   const [dropiLimitFree, setDropiLimitFree] = useState("1");
   const [dropiLimitStarter, setDropiLimitStarter] = useState("30");
   const [dropiLimitPro, setDropiLimitPro] = useState("150");
+  // Credits system
+  const [creditCosts, setCreditCosts] = useState<Record<string, number>>({});
+  const [allowFree, setAllowFree] = useState("30");
+  const [allowStarter, setAllowStarter] = useState("300");
+  const [allowPro, setAllowPro] = useState("1500");
   const { t } = useTranslation();
 
   const baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
@@ -69,6 +75,14 @@ const SuperAdminConfig = () => {
           setDropiLimitFree(String(dLimits.value?.free ?? 1));
           setDropiLimitStarter(String(dLimits.value?.starter ?? 30));
           setDropiLimitPro(String(dLimits.value?.pro ?? 150));
+        }
+        const costs = items.find((c) => c.key === "credit_costs");
+        if (costs?.value) setCreditCosts(costs.value as Record<string, number>);
+        const allow = items.find((c) => c.key === "credit_allowances");
+        if (allow?.value) {
+          setAllowFree(String(allow.value?.free ?? 30));
+          setAllowStarter(String(allow.value?.starter ?? 300));
+          setAllowPro(String(allow.value?.pro ?? 1500));
         }
       }
       setLoading(false);
@@ -331,6 +345,97 @@ const SuperAdminConfig = () => {
                 {saving === "dropi_ads_limits"
                   ? t("common.saving")
                   : t("superAdminConfig.saveDropiAdsLimits")}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      {/* Credits System */}
+      <section className="space-y-5">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Coins className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+              Sistema de Créditos
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Bolsas mensuales por plan y costos por cada acción IA.
+            </p>
+          </div>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Bolsas mensuales (créditos por plan)</CardTitle>
+            <CardDescription>Cantidad de créditos que recibe cada plan al inicio del ciclo.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <PlanInputs
+              free={allowFree} starter={allowStarter} pro={allowPro}
+              setFree={setAllowFree} setStarter={setAllowStarter} setPro={setAllowPro}
+            />
+            <div className="flex justify-end">
+              <Button
+                onClick={() => saveConfig("credit_allowances", {
+                  free: parseInt(allowFree) || 0,
+                  starter: parseInt(allowStarter) || 0,
+                  pro: parseInt(allowPro) || 0,
+                })}
+                disabled={saving === "credit_allowances"}
+              >
+                <Save className="h-4 w-4" />
+                {saving === "credit_allowances" ? t("common.saving") : "Guardar bolsas"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Costos por acción</CardTitle>
+            <CardDescription>Créditos descontados al ejecutar cada acción IA.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                ["landing_text", "Landing solo texto"],
+                ["landing_with_images", "Landing con imágenes IA"],
+                ["banner_single", "Banner individual"],
+                ["banner_aida_pack", "Pack AIDA (7 banners)"],
+                ["regenerate_block", "Regenerar bloque landing"],
+                ["regenerate_banner", "Regenerar banner"],
+                ["design_critic", "Design Critic"],
+                ["edit_banner_variation", "Editar banner (variación)"],
+                ["dropi_image_single", "Dropi: 1 imagen IA"],
+                ["dropi_image_pack_3", "Dropi: pack 3 imágenes"],
+                ["dropi_image_pack_5", "Dropi: pack 5 imágenes"],
+                ["dropi_ad_with_image", "Dropi: ad + imagen"],
+                ["dropi_ad_pack_3", "Dropi: pack 3 ads"],
+                ["dropi_regenerate_image", "Dropi: regenerar imagen"],
+                ["shopify_export", "Exportar a Shopify"],
+                ["publish_landing", "Publicar landing"],
+              ].map(([key, label]) => (
+                <div key={key} className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">{label}</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={creditCosts[key] ?? 0}
+                    onChange={(e) => setCreditCosts((prev) => ({ ...prev, [key]: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button
+                onClick={() => saveConfig("credit_costs", creditCosts)}
+                disabled={saving === "credit_costs"}
+              >
+                <Save className="h-4 w-4" />
+                {saving === "credit_costs" ? t("common.saving") : "Guardar costos"}
               </Button>
             </div>
           </CardContent>

@@ -13,14 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, AlertTriangle, Zap, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, AlertTriangle, Zap, SlidersHorizontal, Coins } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
-import { computeBannersUsed } from "@/lib/planUsage";
-import { usePlanLimits } from "@/hooks/usePlanLimits";
-import { UpgradeWarningBanner } from "@/components/UpgradeWarningBanner";
 import { UpgradeModal } from "@/components/UpgradeModal";
+import { useCredits, isInsufficientCreditsError } from "@/hooks/useCredits";
+import { InsufficientCreditsModal } from "@/components/credits/InsufficientCreditsModal";
 
 type Product = Tables<"products">;
 
@@ -147,13 +146,17 @@ const GenerateBanner = () => {
     setFormState((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const { banner: bannerLimits } = usePlanLimits();
   const plan = profile?.plan || "free";
-  const bannerLimit = bannerLimits[plan] || 2;
-  const bannersUsed = useMemo(() => computeBannersUsed(profile), [profile]);
-  const bannersRemaining = useMemo(() => Math.max(0, bannerLimit - bannersUsed), [bannerLimit, bannersUsed]);
-  const hasReachedLimit = bannersRemaining <= 0;
+  const { balance, costOf, refresh: refreshCredits } = useCredits();
+  const sequenceLength = formState.bannerCount;
+  const isPack = sequenceLength >= 5;
+  const totalCost = useMemo(() => {
+    if (isPack) return costOf("banner_aida_pack");
+    return costOf("banner_single") * sequenceLength;
+  }, [isPack, sequenceLength, costOf]);
+  const hasReachedLimit = balance < totalCost;
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showInsufficient, setShowInsufficient] = useState(false);
   const sequence = useMemo(() => getSequence(formState.bannerCount), [formState.bannerCount]);
 
   const canGoNext = useMemo(() => {
@@ -197,7 +200,12 @@ const GenerateBanner = () => {
             const { data, error } = await supabase.functions.invoke("generate-banner", {
               body: buildBannerPayload(product, formState, templateId, i, sequence.length),
             });
-            if (error) throw error;
+            if (error) {
+              if (isInsufficientCreditsError(error)) {
+                setShowInsufficient(true);
+              }
+              throw error;
+            }
             if (data?.error) throw new Error(data.error);
             return {
               templateId,
@@ -233,12 +241,13 @@ const GenerateBanner = () => {
       } else {
         toast.error(t("ai.errorTitle"), { id: toastId, description: t("generateBanner.generateError") });
       }
+      await refreshCredits();
     } catch (err: any) {
       toast.error(t("ai.errorTitle"), { id: toastId, description: err.message || t("generateBanner.generateError") });
     } finally {
       setLoading(false);
     }
-  }, [product, hasReachedLimit, sequence, formState, t]);
+  }, [product, hasReachedLimit, sequence, formState, t, refreshCredits]);
 
   const handleDownload = useCallback(
     (banner: GeneratedBanner) => downloadBanner(banner, product?.name || "", formState.outputSize, t),
@@ -290,19 +299,24 @@ const GenerateBanner = () => {
         </div>
       </div>
 
-      <UpgradeWarningBanner resource="banners" used={bannersUsed} limit={bannerLimit} />
-      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="banners" used={bannersUsed} limit={bannerLimit} />
+      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="banners" used={0} limit={0} />
+      <InsufficientCreditsModal
+        open={showInsufficient}
+        onOpenChange={setShowInsufficient}
+        required={totalCost}
+        action={isPack ? "banner_aida_pack" : "banner_single"}
+      />
 
       {hasReachedLimit ? (
         <Card className="border-dashed border-2 border-destructive/30">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <Lock className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">{t("generateBanner.limitTitle")}</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("credits.insufficientTitle", "No tienes suficientes créditos")}</h3>
             <p className="text-muted-foreground mb-2 max-w-md">
-              {t("generateBanner.limitUsed", { used: bannersUsed, limit: bannerLimit })}
+              {t("credits.needed", "Necesitas {{required}} créditos y tienes {{balance}} disponibles.", { required: totalCost, balance })}
             </p>
             <p className="text-muted-foreground mb-6 max-w-md">
-              {t("generateBanner.limitUpgrade")}
+              {t("credits.upgradeHint", "Mejora tu plan para obtener más créditos cada mes.")}
             </p>
             <Button asChild>
               <Link to="/pricing">{t("generateBanner.upgradePlan")}</Link>
@@ -604,20 +618,23 @@ const GenerateBanner = () => {
               </Card>
 
               <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{t("generateBanner.bannersUsedMonth")}</span>
-                  <span className="font-semibold">{bannersUsed} / {bannerLimit}</span>
+                <div className="flex justify-between text-sm items-center">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <Coins className="h-3.5 w-3.5 text-primary" />
+                    {t("credits.cost", "Costo")}
+                  </span>
+                  <span className="font-semibold tabular-nums">{totalCost} {t("credits.unit", "créditos")}</span>
                 </div>
-                <Progress value={(bannersUsed / bannerLimit) * 100} className="h-2" />
-                <p className="text-xs text-muted-foreground">
-                  {t("generateBanner.bannersRemaining", { count: bannersRemaining, plan })}
-                </p>
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>{t("credits.balance", "Saldo")}</span>
+                  <span className="tabular-nums">{balance}</span>
+                </div>
               </div>
 
               {generatedBanners.length === 0 && (
                 <Button
                   onClick={handleGenerate}
-                  disabled={loading || sequence.length > bannersRemaining}
+                  disabled={loading || balance < totalCost}
                   className="w-full h-12 text-base font-semibold"
                   size="lg"
                 >
@@ -626,10 +643,10 @@ const GenerateBanner = () => {
                       <Loader2 className="h-5 w-5 animate-spin mr-2" />
                       {t("generateBanner.analyzingProduct")}
                     </>
-                  ) : sequence.length > bannersRemaining ? (
+                  ) : balance < totalCost ? (
                     <>
                       <Lock className="h-5 w-5 mr-2" />
-                      {t("generateBanner.notEnough", { count: bannersRemaining })}
+                      {t("credits.insufficientShort", "Créditos insuficientes")}
                     </>
                   ) : (
                     <>
