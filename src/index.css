@@ -253,9 +253,9 @@
 
   .animate-float-slow { animation: float-slow 7s ease-in-out infinite; }
   .animate-float-slower { animation: float-slower 11s ease-in-out infinite; }
-  .animate-blob { animation: blob 18s ease-in-out infinite; }
+  .animate-blob { animation: blob 18s ease-in-out infinite; will-change: transform; contain: layout paint; }
   .animate-gradient { background-size: 200% 200%; animation: gradient-shift 8s ease infinite; }
-  .animate-marquee { animation: marquee 40s linear infinite; }
+  .animate-marquee { animation: marquee 40s linear infinite; will-change: transform; }
   .animate-glow-pulse { animation: glow-pulse 3.5s ease-in-out infinite; }
   .group:hover .group-hover\:animate-arrow { animation: arrow-slide 0.9s ease-in-out infinite; }
 
@@ -298,6 +298,14 @@
 
   /* Number/stat tabular */
   .tnum { font-variant-numeric: tabular-nums; }
+
+  /* Defer offscreen section rendering for long marketing pages.
+     Reserves height to avoid CLS while keeping the browser from painting
+     until the section nears the viewport. */
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 800px;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .reveal-on-scroll { opacity: 1; transform: none; transition: none; }
