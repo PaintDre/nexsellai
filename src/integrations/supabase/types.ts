@@ -432,6 +432,36 @@ export type Database = {
           },
         ]
       }
+      payment_events: {
+        Row: {
+          created_at: string
+          id: string
+          payment_id: string
+          processed_at: string | null
+          raw_payload: Json | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payment_id: string
+          processed_at?: string | null
+          raw_payload?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payment_id?: string
+          processed_at?: string | null
+          raw_payload?: Json | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number

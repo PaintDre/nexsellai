@@ -129,18 +129,67 @@ serve(async (req) => {
       return new Response("Unauthorized", { status: 401, headers: corsHeaders });
     }
 
-    // === IDEMPOTENCY CHECK ===
-    const { data: existingPayment } = await supabase
-      .from("payments")
-      .select("id, status")
-      .eq("mp_payment_id", String(paymentId))
-      .eq("status", "approved")
+    // === IDEMPOTENCY CHECK (payment_events ledger) ===
+    // Prevents duplicate webhook deliveries from activating the subscription twice.
+    const paymentIdStr = String(paymentId);
+    const { data: existingEvent, error: fetchEventErr } = await supabase
+      .from("payment_events")
+      .select("status")
+      .eq("payment_id", paymentIdStr)
       .maybeSingle();
 
-    if (existingPayment) {
-      console.log(`Payment ${paymentId} already processed, skipping`);
-      return new Response("OK", { status: 200, headers: corsHeaders });
+    if (fetchEventErr) {
+      console.error("payment_events fetch error:", fetchEventErr);
+      return new Response("Error", { status: 500, headers: corsHeaders });
     }
+
+    if (existingEvent) {
+      if (existingEvent.status === "processed") {
+        console.log(`Payment ${paymentId} already processed (idempotent OK)`);
+        return new Response("OK", { status: 200, headers: corsHeaders });
+      }
+      if (existingEvent.status === "processing") {
+        console.warn(`Payment ${paymentId} already processing — returning 409`);
+        return new Response("Conflict", { status: 409, headers: corsHeaders });
+      }
+      // 'failed' → allow retry by flipping back to 'processing'
+      const { error: retryErr } = await supabase
+        .from("payment_events")
+        .update({ status: "processing", processed_at: null })
+        .eq("payment_id", paymentIdStr);
+      if (retryErr) {
+        console.error("payment_events retry update error:", retryErr);
+        return new Response("Error", { status: 500, headers: corsHeaders });
+      }
+    } else {
+      const { error: insertEventErr } = await supabase
+        .from("payment_events")
+        .insert({ payment_id: paymentIdStr, status: "processing", raw_payload: body });
+      if (insertEventErr) {
+        // Race: another delivery beat us to the insert. Treat as conflict.
+        console.warn(`payment_events insert race for ${paymentId}:`, insertEventErr.message);
+        return new Response("Conflict", { status: 409, headers: corsHeaders });
+      }
+    }
+
+    // Helper used by every error path below to mark the event as failed
+    // so a future retry can re-process it.
+    const markEventFailed = async (errorDetail: unknown) => {
+      try {
+        await supabase
+          .from("payment_events")
+          .update({
+            status: "failed",
+            raw_payload: {
+              webhook_body: body,
+              error: typeof errorDetail === "string" ? errorDetail : (errorDetail as any)?.message ?? String(errorDetail),
+            },
+          })
+          .eq("payment_id", paymentIdStr);
+      } catch (e) {
+        console.error("Failed to mark payment_event as failed:", e);
+      }
+    };
 
     // Fetch payment details from MP
     const mpRes = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
@@ -150,6 +199,11 @@ serve(async (req) => {
 
     if (payment.status !== "approved") {
       console.log(`Payment ${paymentId} status: ${payment.status}`);
+      // Mark as processed so we don't keep re-fetching MP for non-approved states.
+      await supabase
+        .from("payment_events")
+        .update({ status: "processed", processed_at: new Date().toISOString() })
+        .eq("payment_id", paymentIdStr);
       return new Response("OK", { status: 200, headers: corsHeaders });
     }
 
@@ -157,6 +211,7 @@ serve(async (req) => {
     const ref = payment.external_reference;
     if (!ref) {
       console.error("No external_reference in payment");
+      await markEventFailed("missing external_reference");
       return new Response("OK", { status: 200, headers: corsHeaders });
     }
 
@@ -164,6 +219,7 @@ serve(async (req) => {
 
     if (!userId || !planId) {
       console.error("Invalid external_reference:", ref);
+      await markEventFailed(`invalid external_reference: ${ref}`);
       return new Response("OK", { status: 200, headers: corsHeaders });
     }
 
@@ -171,12 +227,14 @@ serve(async (req) => {
     const expectedPrices = PLAN_PRICES[planId];
     if (!expectedPrices) {
       console.error("Unknown plan in external_reference:", planId);
+      await markEventFailed(`unknown plan: ${planId}`);
       return new Response("OK", { status: 200, headers: corsHeaders });
     }
 
     const expectedAmount = period === "annual" ? expectedPrices.annual : expectedPrices.monthly;
     if (payment.transaction_amount !== expectedAmount) {
       console.error(`Amount mismatch: expected ${expectedAmount}, got ${payment.transaction_amount} for plan ${planId}/${period}`);
+      await markEventFailed(`amount mismatch: expected ${expectedAmount}, got ${payment.transaction_amount}`);
       return new Response("OK", { status: 200, headers: corsHeaders });
     }
 
@@ -191,6 +249,7 @@ serve(async (req) => {
 
       if (pendingRecord && pendingRecord.user_id !== userId) {
         console.error(`User mismatch: preference belongs to ${pendingRecord.user_id}, but external_reference says ${userId}`);
+        await markEventFailed("user mismatch with preference");
         return new Response("OK", { status: 200, headers: corsHeaders });
       }
     }
@@ -279,9 +338,39 @@ serve(async (req) => {
     }
 
     console.log(`Payment approved: user=${userId}, plan=${planId}, currency=${paymentCurrency}, expires=${expiresAt.toISOString()}`);
+
+    // === MARK EVENT AS PROCESSED (idempotency complete) ===
+    const { error: markProcessedErr } = await supabase
+      .from("payment_events")
+      .update({ status: "processed", processed_at: new Date().toISOString() })
+      .eq("payment_id", paymentIdStr);
+    if (markProcessedErr) {
+      console.error("Failed to mark payment_event as processed:", markProcessedErr);
+      // Subscription is already active, so we still return 200.
+    }
+
     return new Response("OK", { status: 200, headers: corsHeaders });
   } catch (err) {
     console.error("Webhook error:", err);
+    // Best-effort: mark event as failed so MP retries can re-process it.
+    try {
+      const url = new URL(req.url);
+      const pid = url.searchParams.get("data.id") ?? url.searchParams.get("id");
+      if (pid) {
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        const supa = createClient(supabaseUrl, serviceKey);
+        await supa
+          .from("payment_events")
+          .update({
+            status: "failed",
+            raw_payload: { error: (err as any)?.message ?? String(err) },
+          })
+          .eq("payment_id", String(pid));
+      }
+    } catch (e) {
+      console.error("Failed to mark payment_event as failed in outer catch:", e);
+    }
     return new Response("Error", { status: 500, headers: corsHeaders });
   }
 });
