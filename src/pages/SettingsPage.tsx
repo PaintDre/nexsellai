@@ -22,8 +22,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { computeBannersUsed } from "@/lib/planUsage";
-import { usePlanLimits } from "@/hooks/usePlanLimits";
+import { useCredits } from "@/hooks/useCredits";
 import { cn } from "@/lib/utils";
 import { COUNTRIES, getCountryByCode } from "@/lib/countries";
 import { useTranslation } from "react-i18next";
@@ -116,15 +115,9 @@ const SettingsPage = () => {
     toast.success(t("settings.language.saved"));
   };
 
-  const { landing: landingLimits, banner: bannerLimits } = usePlanLimits();
   const plan = profile?.plan || "free";
-  const landingsUsed = profile?.landings_used || 0;
-  const limit = landingLimits[plan] || 1;
-  const usagePercent = Math.min((landingsUsed / limit) * 100, 100);
-
-  const bannerLimit = bannerLimits[plan] || 2;
-  const bannersUsed = computeBannersUsed(profile);
-  const bannerUsagePercent = Math.min((bannersUsed / bannerLimit) * 100, 100);
+  const { balance, allowance } = useCredits();
+  const creditsPercent = allowance > 0 ? Math.min(100, (balance / allowance) * 100) : 0;
 
   const themeOptions = [
     { value: "light", label: t("settings.appearance.light"), icon: Sun },
@@ -328,17 +321,10 @@ const SettingsPage = () => {
           </div>
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs">
-              <span>{t("settings.plan.landingsUsed")}</span>
-              <span className="font-medium">{landingsUsed} / {limit}</span>
+              <span>{t("credits.title", "Créditos disponibles")}</span>
+              <span className="font-medium tabular-nums">{balance} / {allowance}</span>
             </div>
-            <Progress value={usagePercent} className="h-1.5" />
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs">
-              <span className="flex items-center gap-1"><Image className="h-3 w-3" /> {t("settings.plan.bannersUsed")}</span>
-              <span className="font-medium">{bannersUsed} / {bannerLimit}</span>
-            </div>
-            <Progress value={bannerUsagePercent} className="h-1.5" />
+            <Progress value={creditsPercent} className="h-1.5" />
           </div>
           {plan !== "pro" && (
             <Button asChild variant="outline" size="sm" className="w-full">
