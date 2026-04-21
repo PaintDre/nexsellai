@@ -1,11 +1,7 @@
-import { useState } from "react";
 import { Outlet } from "react-router-dom";
-import { AppSidebar, SidebarContent } from "./AppSidebar";
+import { AppSidebar } from "./AppSidebar";
+import { MobileBottomNav } from "./MobileBottomNav";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { PageBreadcrumb } from "./PageBreadcrumb";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +12,6 @@ const planLabels: Record<string, string> = { free: "Free", starter: "Starter", p
 
 export const AppLayout = () => {
   const isMobile = useIsMobile();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const { profile } = useAuth();
   const { t } = useTranslation();
 
@@ -25,27 +20,12 @@ export const AppLayout = () => {
       {/* Desktop/Tablet: hover-expand sidebar */}
       {!isMobile && <AppSidebar />}
 
-      {/* Mobile sheet */}
-      {isMobile && (
-        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-          <SheetContent side="left" className="w-60 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border">
-            <VisuallyHidden>
-              <SheetTitle>{t("appLayout.navMenu")}</SheetTitle>
-            </VisuallyHidden>
-            <SidebarContent expanded onNavigate={() => setMobileOpen(false)} />
-          </SheetContent>
-        </Sheet>
-      )}
-
       <div className="flex flex-1 flex-col overflow-hidden max-w-full">
         {/* Mobile header */}
         {isMobile && (
-          <header className="sticky top-0 z-40 flex h-13 items-center justify-between border-b border-border/40 bg-background/60 backdrop-blur-xl px-3">
+          <header className="sticky top-0 z-40 flex h-12 items-center justify-between border-b border-border/40 bg-background/80 backdrop-blur-xl px-4">
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="text-foreground h-9 w-9" onClick={() => setMobileOpen(true)}>
-                <Menu className="h-5 w-5" />
-              </Button>
-              <Logo size={28} className="rounded-lg" />
+              <Logo size={26} className="rounded-lg" />
               <span className="text-base font-bold font-display tracking-tight">Nexsell</span>
             </div>
             {profile && (
@@ -78,10 +58,17 @@ export const AppLayout = () => {
           </header>
         )}
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-background">
+        <main
+          className="flex-1 overflow-y-auto overflow-x-hidden bg-background"
+          // Reserve space for the mobile bottom nav (56px bar + safe-area)
+          style={isMobile ? { paddingBottom: "calc(56px + env(safe-area-inset-bottom))" } : undefined}
+        >
           <Outlet />
         </main>
       </div>
+
+      {/* Mobile-only bottom navigation */}
+      {isMobile && <MobileBottomNav />}
     </div>
   );
 };
