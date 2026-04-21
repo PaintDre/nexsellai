@@ -52,6 +52,39 @@ export type Database = {
           },
         ]
       }
+      credit_transactions: {
+        Row: {
+          action: string
+          amount: number
+          balance_after: number
+          created_at: string
+          id: string
+          metadata: Json | null
+          resource_id: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          amount: number
+          balance_after: number
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          resource_id?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          resource_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       demo_landings: {
         Row: {
           blocks: Json
@@ -582,6 +615,9 @@ export type Database = {
           banners_used: number
           country_code: string | null
           created_at: string
+          credits_balance: number
+          credits_plan_snapshot: string | null
+          credits_reset_at: string | null
           currency: string | null
           full_name: string | null
           id: string
@@ -600,6 +636,9 @@ export type Database = {
           banners_used?: number
           country_code?: string | null
           created_at?: string
+          credits_balance?: number
+          credits_plan_snapshot?: string | null
+          credits_reset_at?: string | null
           currency?: string | null
           full_name?: string | null
           id?: string
@@ -618,6 +657,9 @@ export type Database = {
           banners_used?: number
           country_code?: string | null
           created_at?: string
+          credits_balance?: number
+          credits_plan_snapshot?: string | null
+          credits_reset_at?: string | null
           currency?: string | null
           full_name?: string | null
           id?: string
@@ -876,12 +918,35 @@ export type Database = {
       }
     }
     Functions: {
+      charge_credits: {
+        Args: {
+          _action: string
+          _amount: number
+          _metadata?: Json
+          _resource_id?: string
+          _user_id: string
+        }
+        Returns: Json
+      }
+      grant_monthly_credits: {
+        Args: {
+          _amount: number
+          _force?: boolean
+          _plan: string
+          _user_id: string
+        }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      refund_credits: {
+        Args: { _reason?: string; _transaction_id: string }
+        Returns: Json
       }
     }
     Enums: {
