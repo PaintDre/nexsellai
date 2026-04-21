@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { checkLimit } from "../_shared/planLimits.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -362,39 +363,21 @@ serve(async (req) => {
     }
     const userId = authUser.id;
 
-    // Check plan and banner limits
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("plan, banners_used, banners_reset_at")
-      .eq("user_id", userId)
-      .single();
-
-    if (!profile) {
-      return new Response(JSON.stringify({ error: "Profile not found" }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const bannerLimits: Record<string, number> = { free: 2, starter: 30, pro: 150 };
-    const limit = bannerLimits[profile.plan] || 2;
-
-    let currentUsed = profile.banners_used || 0;
-    const resetAt = profile.banners_reset_at ? new Date(profile.banners_reset_at) : null;
-    const now = new Date();
-    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
-
-    if (!resetAt || (now.getTime() - resetAt.getTime()) >= thirtyDaysMs) {
-      currentUsed = 0;
-      await supabase
-        .from("profiles")
-        .update({ banners_used: 0, banners_reset_at: now.toISOString() })
-        .eq("user_id", userId);
-    }
-
-    if (currentUsed >= limit) {
-      return new Response(JSON.stringify({ error: `Has alcanzado el límite de banners de tu plan (${currentUsed}/${limit}). Actualiza tu plan para seguir generando banners.` }), {
-        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // Server-authoritative plan + banner limit check (rolling 30-day window).
+    // Plan is read from the `subscriptions` table — never trusted from the request.
+    const limitResult = await checkLimit(supabase, userId, "banners");
+    if (!limitResult.allowed) {
+      return new Response(
+        JSON.stringify({
+          error: "plan_limit_reached",
+          resource: "banners",
+          plan: limitResult.plan,
+          limit: limitResult.limit,
+          current: limitResult.current,
+          upgrade_url: "/pricing",
+        }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
     }
 
     // --- Build prompt ---
