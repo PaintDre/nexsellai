@@ -222,7 +222,15 @@ const AdminDropiCatalog = () => {
             {t("dropi.adminCatalogDesc")}
           </p>
         </div>
-        <div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={handleExport} disabled={exporting || loading}>
+            {exporting ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Download className="mr-2 h-4 w-4" />
+            )}
+            Descargar Excel
+          </Button>
           <input
             ref={fileRef}
             type="file"
