@@ -7,8 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Settings, Save, Cpu, Gauge, Layers, Image as ImageIcon, Megaphone } from "lucide-react";
-import { Coins } from "lucide-react";
+import { Settings, Save, Cpu, Coins } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface ConfigItem {
@@ -21,15 +20,6 @@ const SuperAdminConfig = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [aiPrompt, setAiPrompt] = useState("");
-  const [limitFree, setLimitFree] = useState("1");
-  const [limitStarter, setLimitStarter] = useState("10");
-  const [limitPro, setLimitPro] = useState("100");
-  const [bannerLimitFree, setBannerLimitFree] = useState("2");
-  const [bannerLimitStarter, setBannerLimitStarter] = useState("30");
-  const [bannerLimitPro, setBannerLimitPro] = useState("150");
-  const [dropiLimitFree, setDropiLimitFree] = useState("1");
-  const [dropiLimitStarter, setDropiLimitStarter] = useState("30");
-  const [dropiLimitPro, setDropiLimitPro] = useState("150");
   // Credits system
   const [creditCosts, setCreditCosts] = useState<Record<string, number>>({});
   const [allowFree, setAllowFree] = useState("30");
