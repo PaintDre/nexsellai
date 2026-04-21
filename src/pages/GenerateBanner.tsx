@@ -13,14 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, AlertTriangle, Zap, SlidersHorizontal } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Download, Loader2, Lock, Check, Eye, AlertTriangle, Zap, SlidersHorizontal, Coins } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "react-i18next";
 
-import { computeBannersUsed } from "@/lib/planUsage";
-import { usePlanLimits } from "@/hooks/usePlanLimits";
-import { UpgradeWarningBanner } from "@/components/UpgradeWarningBanner";
 import { UpgradeModal } from "@/components/UpgradeModal";
+import { useCredits, isInsufficientCreditsError } from "@/hooks/useCredits";
+import { InsufficientCreditsModal } from "@/components/credits/InsufficientCreditsModal";
 
 type Product = Tables<"products">;
 
@@ -147,13 +146,17 @@ const GenerateBanner = () => {
     setFormState((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const { banner: bannerLimits } = usePlanLimits();
   const plan = profile?.plan || "free";
-  const bannerLimit = bannerLimits[plan] || 2;
-  const bannersUsed = useMemo(() => computeBannersUsed(profile), [profile]);
-  const bannersRemaining = useMemo(() => Math.max(0, bannerLimit - bannersUsed), [bannerLimit, bannersUsed]);
-  const hasReachedLimit = bannersRemaining <= 0;
+  const { balance, costOf, refresh: refreshCredits } = useCredits();
+  const sequenceLength = formState.bannerCount;
+  const isPack = sequenceLength >= 5;
+  const totalCost = useMemo(() => {
+    if (isPack) return costOf("banner_aida_pack");
+    return costOf("banner_single") * sequenceLength;
+  }, [isPack, sequenceLength, costOf]);
+  const hasReachedLimit = balance < totalCost;
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showInsufficient, setShowInsufficient] = useState(false);
   const sequence = useMemo(() => getSequence(formState.bannerCount), [formState.bannerCount]);
 
   const canGoNext = useMemo(() => {
@@ -197,7 +200,12 @@ const GenerateBanner = () => {
             const { data, error } = await supabase.functions.invoke("generate-banner", {
               body: buildBannerPayload(product, formState, templateId, i, sequence.length),
             });
-            if (error) throw error;
+            if (error) {
+              if (isInsufficientCreditsError(error)) {
+                setShowInsufficient(true);
+              }
+              throw error;
+            }
             if (data?.error) throw new Error(data.error);
             return {
               templateId,
@@ -233,12 +241,13 @@ const GenerateBanner = () => {
       } else {
         toast.error(t("ai.errorTitle"), { id: toastId, description: t("generateBanner.generateError") });
       }
+      await refreshCredits();
     } catch (err: any) {
       toast.error(t("ai.errorTitle"), { id: toastId, description: err.message || t("generateBanner.generateError") });
     } finally {
       setLoading(false);
     }
-  }, [product, hasReachedLimit, sequence, formState, t]);
+  }, [product, hasReachedLimit, sequence, formState, t, refreshCredits]);
 
   const handleDownload = useCallback(
     (banner: GeneratedBanner) => downloadBanner(banner, product?.name || "", formState.outputSize, t),
