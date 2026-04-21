@@ -299,6 +299,14 @@
   /* Number/stat tabular */
   .tnum { font-variant-numeric: tabular-nums; }
 
+  /* Defer offscreen section rendering for long marketing pages.
+     Reserves height to avoid CLS while keeping the browser from painting
+     until the section nears the viewport. */
+  .cv-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 800px;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .reveal-on-scroll { opacity: 1; transform: none; transition: none; }
     .hero-parallax { animation: none; }
