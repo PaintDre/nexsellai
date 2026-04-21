@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, Play, Sparkles, Loader2 } from "lucide-react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { getDownloadUrl } from "@/lib/dropiAssets";
 
 interface Product {
   id: string;
@@ -53,16 +54,20 @@ const DropiProduct = () => {
     setDownloading(true);
     try {
       const zip = new JSZip();
+      const safeName = product!.name.replace(/\s+/g, "_");
       await Promise.all(
         images.map(async (url, i) => {
-          const res = await fetch(url);
+          // Use cache-friendly URL so repeated downloads hit the CDN edge.
+          const res = await fetch(getDownloadUrl(url, `${safeName}_${i + 1}`), {
+            cache: "force-cache",
+          });
           const blob = await res.blob();
           const ext = blob.type.includes("png") ? "png" : "jpg";
           zip.file(`image_${i + 1}.${ext}`, blob);
         })
       );
       const blob = await zip.generateAsync({ type: "blob" });
-      saveAs(blob, `${product!.name.replace(/\s+/g, "_")}_images.zip`);
+      saveAs(blob, `${safeName}_images.zip`);
     } catch (e) {
       console.error(e);
     } finally {
@@ -74,8 +79,18 @@ const DropiProduct = () => {
     ? [product.video_url, product.video_2, product.video_3].filter(Boolean) as string[]
     : [];
 
-  const handleDownloadVideo = (url: string) => {
-    window.open(url, "_blank");
+  const handleDownloadVideo = (url: string, index: number) => {
+    const safeName = product!.name.replace(/\s+/g, "_");
+    // ?download triggers Content-Disposition: attachment from Supabase CDN
+    // and gives the file a friendly name for the user.
+    const downloadUrl = getDownloadUrl(url, `${safeName}_video_${index + 1}.mp4`);
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.rel = "noopener";
+    a.target = "_blank";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   if (loading) {
@@ -134,7 +149,7 @@ const DropiProduct = () => {
                       variant="outline"
                       size="sm"
                       className="w-full"
-                      onClick={() => handleDownloadVideo(src)}
+                      onClick={() => handleDownloadVideo(src, i)}
                     >
                       <Play className="mr-2 h-3.5 w-3.5" />
                       {t("dropi.downloadVideo")} {i + 1}

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { getCachedImageUrl, getCachedThumbUrl } from "@/lib/dropiAssets";
 
 interface Props {
   images: string[];
@@ -19,8 +20,10 @@ export const ImageGallery = ({ images }: Props) => {
           onClick={() => setLightbox(true)}
         >
           <img
-            src={images[selected]}
+            src={getCachedImageUrl(images[selected], { width: 1024 })}
             alt=""
+            loading="eager"
+            decoding="async"
             className="h-full w-full object-cover"
           />
         </div>
@@ -34,7 +37,13 @@ export const ImageGallery = ({ images }: Props) => {
                   i === selected ? "border-primary" : "border-transparent"
                 }`}
               >
-                <img src={img} alt="" className="h-full w-full object-cover" />
+                <img
+                  src={getCachedThumbUrl(img)}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
               </button>
             ))}
           </div>
@@ -44,8 +53,10 @@ export const ImageGallery = ({ images }: Props) => {
       <Dialog open={lightbox} onOpenChange={setLightbox}>
         <DialogContent className="max-w-3xl p-2">
           <img
-            src={images[selected]}
+            src={getCachedImageUrl(images[selected], { width: 1600, quality: 85 })}
             alt=""
+            loading="eager"
+            decoding="async"
             className="w-full rounded-lg"
           />
         </DialogContent>
