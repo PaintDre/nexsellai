@@ -18,7 +18,7 @@ import LandingTemplatePicker, { landingTemplates } from "@/components/landing/La
 import { useTranslation } from "react-i18next";
 
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { useCredits, isInsufficientCreditsError } from "@/hooks/useCredits";
+import { useCredits, isInsufficientCreditsError, isFreeLimitReachedError } from "@/hooks/useCredits";
 import { InsufficientCreditsModal } from "@/components/credits/InsufficientCreditsModal";
 import { Coins } from "lucide-react";
 
@@ -157,6 +157,19 @@ const GenerateLanding = () => {
           setGenerationStep("idle");
           setProgress(0);
           await refreshCredits();
+          return;
+        }
+        if (isFreeLimitReachedError(error)) {
+          toast.dismiss(toastId);
+          toast.error(t("generateLanding.freeLimitTitle", "Plan Free agotado"), {
+            description: t(
+              "generateLanding.freeLimitDesc",
+              "Tu plan Free permite solo 1 landing. Actualiza para crear más.",
+            ),
+          });
+          setGenerationStep("idle");
+          setProgress(0);
+          setTimeout(() => navigate("/subscription"), 600);
           return;
         }
         console.error("[handleGenerate] generate-landing edge function failed:", error);

@@ -163,3 +163,14 @@ export function isInsufficientCreditsError(error: unknown): boolean {
   }
   return body?.error === "insufficient_credits";
 }
+
+/** Helper to detect Free-plan landing limit responses from Edge Functions. */
+export function isFreeLimitReachedError(error: unknown): boolean {
+  if (!error) return false;
+  const ctx = (error as { context?: { status?: number; body?: unknown } }).context;
+  let body: any = ctx?.body;
+  if (typeof body === "string") {
+    try { body = JSON.parse(body); } catch { /* */ }
+  }
+  return body?.error === "free_limit_reached";
+}
