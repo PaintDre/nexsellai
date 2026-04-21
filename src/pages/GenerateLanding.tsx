@@ -98,7 +98,8 @@ const GenerateLanding = () => {
     if (!user || !product || !profile) return;
 
     if (!canGenerate) {
-      toast.error(t("generateLanding.limitReached"), { description: t("generateLanding.limitDesc") });
+      // Show upgrade modal that redirects to /pricing instead of a plain toast
+      setShowUpgradeModal(true);
       return;
     }
 
