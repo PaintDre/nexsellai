@@ -149,6 +149,21 @@ const GenerateLanding = () => {
       });
 
       if (error) {
+        // Backend may return 403 plan_limit_reached even if frontend allowed it
+        // (e.g. counter drift). Always escalate to the upgrade modal in that case.
+        const ctx: any = (error as any).context;
+        const status = ctx?.status ?? (error as any).status;
+        let payload: any = ctx?.body;
+        if (typeof payload === "string") {
+          try { payload = JSON.parse(payload); } catch { /* ignore */ }
+        }
+        if (status === 403 || payload?.error === "plan_limit_reached") {
+          toast.dismiss(toastId);
+          setShowUpgradeModal(true);
+          setGenerationStep("idle");
+          setProgress(0);
+          return;
+        }
         console.error("[handleGenerate] generate-landing edge function failed:", error);
         toast.error(t("ai.errorTitle"), { id: toastId, description: error.message || "Edge function error" });
         setGenerationStep("idle");
