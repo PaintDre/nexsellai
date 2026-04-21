@@ -7,8 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Settings, Save, Cpu, Gauge, Layers, Image as ImageIcon, Megaphone } from "lucide-react";
-import { Coins } from "lucide-react";
+import { Settings, Save, Cpu, Coins } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface ConfigItem {
@@ -21,15 +20,6 @@ const SuperAdminConfig = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [aiPrompt, setAiPrompt] = useState("");
-  const [limitFree, setLimitFree] = useState("1");
-  const [limitStarter, setLimitStarter] = useState("10");
-  const [limitPro, setLimitPro] = useState("100");
-  const [bannerLimitFree, setBannerLimitFree] = useState("2");
-  const [bannerLimitStarter, setBannerLimitStarter] = useState("30");
-  const [bannerLimitPro, setBannerLimitPro] = useState("150");
-  const [dropiLimitFree, setDropiLimitFree] = useState("1");
-  const [dropiLimitStarter, setDropiLimitStarter] = useState("30");
-  const [dropiLimitPro, setDropiLimitPro] = useState("150");
   // Credits system
   const [creditCosts, setCreditCosts] = useState<Record<string, number>>({});
   const [allowFree, setAllowFree] = useState("30");
@@ -58,24 +48,6 @@ const SuperAdminConfig = () => {
         setConfig(items);
         const prompt = items.find((c) => c.key === "ai_prompt");
         if (prompt) setAiPrompt(prompt.value?.text || "");
-        const limits = items.find((c) => c.key === "plan_limits");
-        if (limits) {
-          setLimitFree(String(limits.value?.free ?? 1));
-          setLimitStarter(String(limits.value?.starter ?? 10));
-          setLimitPro(String(limits.value?.pro ?? 100));
-        }
-        const bLimits = items.find((c) => c.key === "banner_limits");
-        if (bLimits) {
-          setBannerLimitFree(String(bLimits.value?.free ?? 2));
-          setBannerLimitStarter(String(bLimits.value?.starter ?? 30));
-          setBannerLimitPro(String(bLimits.value?.pro ?? 150));
-        }
-        const dLimits = items.find((c) => c.key === "dropi_ads_limits");
-        if (dLimits) {
-          setDropiLimitFree(String(dLimits.value?.free ?? 1));
-          setDropiLimitStarter(String(dLimits.value?.starter ?? 30));
-          setDropiLimitPro(String(dLimits.value?.pro ?? 150));
-        }
         const costs = items.find((c) => c.key === "credit_costs");
         if (costs?.value) setCreditCosts(costs.value as Record<string, number>);
         const allow = items.find((c) => c.key === "credit_allowances");
@@ -199,157 +171,6 @@ const SuperAdminConfig = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Usage allowance section */}
-      <section className="space-y-5">
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Gauge className="h-4.5 w-4.5 text-primary" />
-          </div>
-          <div>
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">
-              {t("superAdminConfig.sectionUsageLimits")}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {t("superAdminConfig.sectionUsageLimitsDesc")}
-            </p>
-          </div>
-        </div>
-
-        {/* Landings */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div className="space-y-1.5">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Layers className="h-4.5 w-4.5 text-primary" />
-                  {t("superAdminConfig.landingLimits")}
-                </CardTitle>
-                <CardDescription>{t("superAdminConfig.landingLimitsDesc")}</CardDescription>
-              </div>
-              <Badge variant="secondary" className="text-[10px] uppercase tracking-wider font-medium">
-                {t("superAdminConfig.cyclePill")}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <PlanInputs
-              free={limitFree}
-              starter={limitStarter}
-              pro={limitPro}
-              setFree={setLimitFree}
-              setStarter={setLimitStarter}
-              setPro={setLimitPro}
-            />
-            <div className="flex justify-end">
-              <Button
-                onClick={() =>
-                  saveConfig("plan_limits", {
-                    free: parseInt(limitFree) || 0,
-                    starter: parseInt(limitStarter) || 0,
-                    pro: parseInt(limitPro) || 0,
-                  })
-                }
-                disabled={saving === "plan_limits"}
-              >
-                <Save className="h-4 w-4" />
-                {saving === "plan_limits" ? t("common.saving") : t("superAdminConfig.saveLandingLimits")}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Banners */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div className="space-y-1.5">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <ImageIcon className="h-4.5 w-4.5 text-primary" />
-                  {t("superAdminConfig.bannerLimits")}
-                </CardTitle>
-                <CardDescription>{t("superAdminConfig.bannerLimitsDesc")}</CardDescription>
-              </div>
-              <Badge variant="secondary" className="text-[10px] uppercase tracking-wider font-medium">
-                {t("superAdminConfig.cyclePill")}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <PlanInputs
-              free={bannerLimitFree}
-              starter={bannerLimitStarter}
-              pro={bannerLimitPro}
-              setFree={setBannerLimitFree}
-              setStarter={setBannerLimitStarter}
-              setPro={setBannerLimitPro}
-            />
-            <div className="flex justify-end">
-              <Button
-                onClick={() =>
-                  saveConfig("banner_limits", {
-                    free: parseInt(bannerLimitFree) || 0,
-                    starter: parseInt(bannerLimitStarter) || 0,
-                    pro: parseInt(bannerLimitPro) || 0,
-                  })
-                }
-                disabled={saving === "banner_limits"}
-              >
-                <Save className="h-4 w-4" />
-                {saving === "banner_limits" ? t("common.saving") : t("superAdminConfig.saveBannerLimits")}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Dropi Ads */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div className="space-y-1.5">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Megaphone className="h-4.5 w-4.5 text-primary" />
-                  {t("superAdminConfig.dropiAdsLimits")}
-                </CardTitle>
-                <CardDescription>{t("superAdminConfig.dropiAdsLimitsDesc")}</CardDescription>
-              </div>
-              <Badge variant="secondary" className="text-[10px] uppercase tracking-wider font-medium">
-                {t("superAdminConfig.cyclePill")}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <PlanInputs
-              free={dropiLimitFree}
-              starter={dropiLimitStarter}
-              pro={dropiLimitPro}
-              setFree={setDropiLimitFree}
-              setStarter={setDropiLimitStarter}
-              setPro={setDropiLimitPro}
-            />
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {t("superAdminConfig.dropiAdsLimitsHint")}
-            </p>
-            <div className="flex justify-end">
-              <Button
-                onClick={() =>
-                  saveConfig("dropi_ads_limits", {
-                    free: parseInt(dropiLimitFree) || 0,
-                    starter: parseInt(dropiLimitStarter) || 0,
-                    pro: parseInt(dropiLimitPro) || 0,
-                  })
-                }
-                disabled={saving === "dropi_ads_limits"}
-              >
-                <Save className="h-4 w-4" />
-                {saving === "dropi_ads_limits"
-                  ? t("common.saving")
-                  : t("superAdminConfig.saveDropiAdsLimits")}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
 
       {/* Credits System */}
       <section className="space-y-5">

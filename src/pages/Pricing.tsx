@@ -7,18 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Check, Loader2, Globe } from "lucide-react";
+import { Check, Loader2, Globe, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { getPricingForCountry, formatPrice } from "@/lib/pricing";
 import { COUNTRIES } from "@/lib/countries";
 import { useTranslation } from "react-i18next";
+import { useCredits } from "@/hooks/useCredits";
 
 type BillingPeriod = "monthly" | "annual";
 
 const Pricing = () => {
   const { t } = useTranslation();
   const { profile, session } = useAuth();
+  const { allowances } = useCredits();
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("monthly");
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
@@ -159,6 +161,12 @@ const Pricing = () => {
               <CardHeader className="text-center pb-2">
                 <CardTitle className="font-display text-base">{meta.name}</CardTitle>
                 <CardDescription className="text-xs">{meta.description}</CardDescription>
+                <div className="mt-2 flex justify-center">
+                  <Badge variant="secondary" className="gap-1.5 text-[11px] py-0.5 px-2">
+                    <Sparkles className="h-3 w-3 text-primary" />
+                    {t("pricing.creditsPerMonth", { count: allowances[planId] ?? 0 })}
+                  </Badge>
+                </div>
                 <div className="mt-3">
                   {!isPaid ? (
                     <span className="text-3xl font-bold font-display">{t("pricing.free")}</span>

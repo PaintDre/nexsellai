@@ -603,48 +603,49 @@
     "paymentPending": "Tu pago está pendiente de confirmación.",
     "paymentError": "No pudimos iniciar el pago. Inténtalo nuevamente.",
     "currencyNote": "Precios mostrados en {{currency}} como referencia. El cobro se procesa en CLP al tipo de cambio vigente.",
+    "creditsPerMonth": "{{count}} créditos / mes",
+    "creditsExamples": "Equivale aprox. a:",
     "plans": {
       "free": {
         "name": "Free",
-        "description": "Explora la plataforma sin costo",
+        "description": "Prueba el sistema con créditos gratis",
         "features": [
-          "1 landing total",
-          "2 banners por ciclo",
-          "1 hook de venta",
-          "Vista previa de landing",
+          "30 créditos / mes",
+          "≈ 3 landings de texto",
+          "≈ 6 banners individuales",
+          "Editor visual completo",
           "Exportar HTML básico"
         ],
         "excluded": [
-          "Sin imágenes IA",
-          "Sin edición avanzada"
+          "Sin recarga de créditos",
+          "Soporte estándar"
         ]
       },
       "starter": {
         "name": "Starter",
-        "description": "Para lanzar y validar productos",
+        "description": "Para lanzar y validar productos con IA",
         "features": [
-          "10 landings por ciclo",
-          "30 banners por ciclo",
-          "3 hooks por producto",
-          "Imágenes IA en landings",
-          "Bloques de objeciones y urgencia",
-          "FAQs editables",
-          "Exportar HTML + CSS"
+          "300 créditos / mes",
+          "≈ 12 landings con imágenes IA",
+          "≈ 60 banners individuales",
+          "≈ 10 packs AIDA completos",
+          "Generación de imágenes Dropi",
+          "Exportar a Shopify",
+          "Soporte prioritario"
         ]
       },
       "pro": {
         "name": "Pro",
         "description": "Para vendedores que escalan con ads",
         "features": [
-          "100 landings por ciclo",
-          "150 banners por ciclo",
-          "Ángulos psicológicos ilimitados",
-          "Imágenes IA en landings",
-          "Hooks optimizados para ads",
-          "Variantes de CTA",
-          "Bundles y comparativas",
-          "Microcopys de checkout",
-          "Exportar ZIP completo"
+          "1500 créditos / mes",
+          "≈ 60 landings con imágenes IA",
+          "≈ 300 banners individuales",
+          "≈ 50 packs AIDA completos",
+          "Generación masiva Dropi (imágenes + ads)",
+          "Variantes y regeneraciones ilimitadas en presupuesto",
+          "Exportar ZIP completo y Shopify",
+          "Soporte prioritario premium"
         ]
       }
     }
