@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LayoutDashboard, Package, FileText, CreditCard, Settings, LogOut, Shield, ShieldCheck, ImageIcon, Banknote, Mail, RefreshCw, Zap, Video } from "lucide-react";
+import { LayoutDashboard, Package, FileText, CreditCard, Settings, LogOut, Shield, ShieldCheck, ImageIcon, Banknote, Mail, RefreshCw, Zap, Video, BadgeCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -31,6 +31,7 @@ export const SidebarContent = ({ expanded = false, onNavigate }: SidebarContentP
     { label: t("sidebar.banners"), icon: ImageIcon, href: "/banners" },
     { label: "DROPI", icon: Package, href: "/dropi" },
     { label: t("sidebar.plans"), icon: CreditCard, href: "/pricing" },
+    { label: t("sidebar.subscription"), icon: BadgeCheck, href: "/subscription" },
   ];
 
   const adminItems: typeof navItems = [];
