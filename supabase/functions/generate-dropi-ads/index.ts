@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { chargeCredits, refundCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,17 +13,14 @@ const FORMATS = [
   { name: "9x16", width: 1080, height: 1920, platform: "Stories/Reels/TikTok" },
 ];
 
-// LATAM-specific ad structure presets (Mercado Libre, Shein, Temu, Dropi, TikTok Shop)
 type StructureKey = "price_urgency" | "lifestyle_benefit" | "direct_response";
 
 interface LangPack {
-  // headlines / labels
   offerToday: string;
   freeShipping: string;
   buyNow: string;
   beforeLabel: string;
   afterLabel: string;
-  // generation guidance (keeps the AI on language)
   languageInstruction: string;
 }
 
@@ -43,7 +41,7 @@ const LANG_PACKS: Record<string, LangPack> = {
     beforeLabel: "ANTES",
     afterLabel: "DEPOIS",
     languageInstruction:
-      "ALL text overlays must be in Brazilian Portuguese. Use Brazilian e-commerce conventions (FRETE GRÁTIS, COMPRE AGORA, OFERTA RELÂMPAGO, ÚLTIMAS UNIDADES).",
+      "ALL text overlays must be in Brazilian Portuguese.",
   },
   en: {
     offerToday: "TODAY'S DEAL",
@@ -88,7 +86,6 @@ Keep the product from the reference image as the HERO — realistic, recognizabl
 Professional e-commerce ad quality: high contrast, clean composition, strong visual hierarchy. NO watermarks, NO logos other than the badge.
 Text rules: max 5-7 words per text block, super legible from a phone screen, sans-serif bold typography, no spelling mistakes.`;
 
-  // ---- Variation 1: Price + Urgency (Mercado Libre / Temu style) ----
   if (structure === "price_urgency") {
     const layouts = [
       `Layout A: Product CENTERED on a vibrant solid background (deep red, electric yellow or hot pink). LARGE price tag bottom area with a fake "old price" struck-through and a NEW DISCOUNTED PRICE in huge bold numbers. Add an URGENCY label like "${pack.offerToday}" at the top in a bright contrasting color.`,
@@ -100,7 +97,6 @@ ${layouts[variation - 1]}
 ${baseRules}`;
   }
 
-  // ---- Variation 2: Lifestyle Benefit (Shein / Dropi style) ----
   if (structure === "lifestyle_benefit") {
     const layouts = [
       `Layout A: Product CENTERED on a clean pastel or aspirational solid background (soft beige, sage green, blush pink, or muted navy). A short BENEFIT HEADLINE (3-5 words, e.g. "Ahorra tiempo. Vive mejor.") in elegant bold typography above the product.`,
@@ -112,7 +108,6 @@ ${layouts[variation - 1]}
 ${baseRules}`;
   }
 
-  // ---- Variation 3: Direct Response (split / before-after / multi-use) ----
   const layouts = [
     `Layout A: SPLIT the canvas in two halves. LEFT side labeled "${pack.beforeLabel}" showing a problem or messy/old scenario, RIGHT side labeled "${pack.afterLabel}" showing the product solving it. Bold CTA at the bottom: "${pack.buyNow}" in a vibrant button shape.`,
     `Layout B: Multi-use grid — split into 3 small scenes showing the product used in 3 different ways/contexts, with tiny labels under each. Bottom strip with CTA "${pack.buyNow}" + "${pack.freeShipping}".`,
@@ -154,8 +149,8 @@ serve(async (req) => {
     image_url,
     show_name,
     badge,
-    structures, // optional array of StructureKey
-    language,   // optional override; otherwise we read from profile
+    structures,
+    language,
   }: {
     product_id: string;
     product_name: string;
@@ -173,41 +168,35 @@ serve(async (req) => {
     });
   }
 
-  // Load profile (plan + language)
+  // Charge credits up-front. The Dropi ad pack generates 9 high-quality images
+  // (3 structures × 3 formats) — billed as a single "dropi_ad_pack_3" action.
+  const chargeResult = await chargeCredits(
+    supabase,
+    user.id,
+    "dropi_ad_pack_3",
+    product_id,
+    { source: "generate-dropi-ads" },
+  );
+  if (!chargeResult.success) {
+    if (chargeResult.error === "insufficient_credits") {
+      return insufficientCreditsResponse(chargeResult, corsHeaders, "dropi_ad_pack_3");
+    }
+    return new Response(JSON.stringify({ error: "charge_failed" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const chargeTxId = chargeResult.transactionId;
+
   const { data: profile } = await supabase
     .from("profiles")
-    .select("plan, language")
+    .select("language")
     .eq("user_id", user.id)
     .single();
-
-  // Plan-based monthly (rolling 30 days) limit, configurable from /admin/config
-  const plan = (profile?.plan ?? "free") as "free" | "starter" | "pro";
-  const { data: limitsRow } = await supabase
-    .from("system_config")
-    .select("value")
-    .eq("key", "dropi_ads_limits")
-    .maybeSingle();
-  const limits = (limitsRow?.value ?? { free: 1, starter: 30, pro: 150 }) as Record<string, number>;
-  const planLimit = limits[plan] ?? 1;
-
-  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const { count: usedCount } = await supabase
-    .from("dropi_ad_generations")
-    .select("*", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .gte("created_at", since);
-
-  if ((usedCount ?? 0) >= planLimit) {
-    return new Response(
-      JSON.stringify({ error: "Plan limit reached", limit: planLimit, used: usedCount ?? 0 }),
-      { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  }
 
   const userLang = language || profile?.language || "es";
   const pack = getLangPack(userLang);
 
-  // Default to all 3 structures if user did not pick
   const VALID: StructureKey[] = ["price_urgency", "lifestyle_benefit", "direct_response"];
   const selected: StructureKey[] =
     Array.isArray(structures) && structures.length > 0
@@ -225,17 +214,9 @@ serve(async (req) => {
   try {
     for (const format of FORMATS) {
       for (const structure of selected) {
-        // 1 high-quality variation per structure per format = 3 structures × 3 formats = 9 images
-        // (matches existing "9 images" UX expectation)
         const variation = 1;
         const prompt = buildStructurePrompt(
-          structure,
-          variation,
-          product_name,
-          show_name,
-          badge,
-          pack,
-          format,
+          structure, variation, product_name, show_name, badge, pack, format,
         );
 
         const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -266,7 +247,6 @@ serve(async (req) => {
 
         const aiData = await aiRes.json();
         const imageData = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-
         if (!imageData) continue;
 
         const base64 = imageData.replace(/^data:image\/\w+;base64,/, "");
@@ -288,16 +268,29 @@ serve(async (req) => {
       }
     }
 
+    // If nothing was generated, refund the user
+    if (generatedImages.length === 0) {
+      if (chargeTxId) await refundCredits(supabase, chargeTxId, "no_images_generated");
+      return new Response(
+        JSON.stringify({ error: "no_images_generated" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     await supabase.from("dropi_ad_generations").insert({
       user_id: user.id,
       dropi_product_id: product_id,
     });
 
-    return new Response(JSON.stringify({ images: generatedImages, language: userLang }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ images: generatedImages, language: userLang, balance: chargeResult.balance }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
   } catch (err) {
     console.error("generate-dropi-ads failed", err);
+    if (chargeTxId) {
+      try { await refundCredits(supabase, chargeTxId, "generation_exception"); } catch (_) {}
+    }
     return new Response(JSON.stringify({ error: (err as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

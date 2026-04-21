@@ -601,11 +601,6 @@ ${customText ? `\nCUSTOM SLOGAN (include prominently): "${customText}"` : ""}`;
       output_size: outputSize || "1080x1080",
     });
 
-    await supabase
-      .from("profiles")
-      .update({ banners_used: (currentUsed + 1) })
-      .eq("user_id", userId);
-
     // If this is for a landing section, update the landing blocks
     if (landingId && sectionType) {
       const { data: landing } = await supabase
@@ -636,6 +631,14 @@ ${customText ? `\nCUSTOM SLOGAN (include prominently): "${customText}"` : ""}`;
     });
   } catch (e) {
     console.error("generate-banner error:", e);
+    // Best-effort refund (chargeTxId may not yet be defined if error happened pre-charge)
+    try {
+      // @ts-ignore - chargeTxId is defined in scope when error occurs after charge
+      if (typeof chargeTxId === "string" && chargeTxId) {
+        // @ts-ignore
+        await refundCredits(supabase, chargeTxId, "banner_generation_failed");
+      }
+    } catch (_) { /* ignore refund errors */ }
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

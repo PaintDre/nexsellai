@@ -845,22 +845,24 @@ serve(async (req) => {
       const { data: { user }, error: userError } = await supabase.auth.getUser(token);
       if (userError || !user) throw new Error("Unauthorized");
 
-      // Server-authoritative plan + limit check (never trust the request body).
-      const limitResult = await checkLimit(supabase, user.id, "landings");
-      if (!limitResult.allowed) {
+      // Server-authoritative credit charge.
+      const chargeResult = await chargeCredits(supabase, user.id, "landing_text");
+      if (!chargeResult.success) {
+        if (chargeResult.error === "insufficient_credits") {
+          return insufficientCreditsResponse(chargeResult, corsHeaders, "landing_text");
+        }
         return new Response(
-          JSON.stringify({
-            error: "plan_limit_reached",
-            resource: "landings",
-            plan: limitResult.plan,
-            limit: limitResult.limit,
-            current: limitResult.current,
-            upgrade_url: "/pricing",
-          }),
-          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          JSON.stringify({ error: "charge_failed" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      userPlan = limitResult.plan;
+      // Determine plan (still needed for prompt-shaping logic)
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("plan")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      userPlan = (profile?.plan as string) || "free";
     } else {
       userPlan = "free";
     }
