@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { CreditsBadge } from "@/components/credits/CreditsBadge";
 
 type NavItem = { label: string; icon: any; href: string };
 
@@ -134,6 +135,10 @@ export const MobileBottomNav = () => {
               {t("sidebar.more")}
             </SheetTitle>
           </SheetHeader>
+
+          <div className="px-4 pt-3">
+            <CreditsBadge />
+          </div>
 
           <div className="p-3 space-y-1">
             {secondary.map((item) => {
