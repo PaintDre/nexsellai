@@ -11,37 +11,62 @@ const PLAN_PRICES: Record<string, { monthly: number; annual: number }> = {
   pro: { monthly: 34990, annual: 349900 },
 };
 
-// Verifica la firma HMAC-SHA256 del webhook de Mercado Pago
-// Docs: https://www.mercadopago.cl/developers/es/docs/your-integrations/notifications/webhooks#editor_7
+// Constant-time comparison to prevent timing attacks
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
+type SignatureCheck =
+  | { ok: true }
+  | { ok: false; reason: string };
+
+// Verifies HMAC-SHA256 signature of the Mercado Pago webhook
+// Docs: https://www.mercadopago.cl/developers/es/docs/your-integrations/notifications/webhooks
 async function verifyMpSignature(
   req: Request,
   dataId: string,
   secret: string,
-): Promise<boolean> {
+): Promise<SignatureCheck> {
   const xSignature = req.headers.get("x-signature");
   const xRequestId = req.headers.get("x-request-id");
 
   if (!xSignature || !xRequestId) {
-    console.error("Missing x-signature or x-request-id header");
-    return false;
+    return { ok: false, reason: "Missing x-signature or x-request-id header" };
   }
 
-  // x-signature viene como: "ts=1234567890,v1=abcdef..."
+  // x-signature format: "ts=1234567890,v1=abcdef..."
   const parts = Object.fromEntries(
     xSignature.split(",").map((p) => {
       const [k, v] = p.split("=");
-      return [k.trim(), v?.trim()];
+      return [k?.trim(), v?.trim()];
     }),
   );
 
   const ts = parts["ts"];
   const v1 = parts["v1"];
   if (!ts || !v1) {
-    console.error("Malformed x-signature header");
-    return false;
+    return { ok: false, reason: "Malformed x-signature header" };
   }
 
-  // Template oficial de MP: id:<data.id>;request-id:<x-request-id>;ts:<ts>;
+  // Replay protection: reject timestamps older than 5 minutes (or > 5 min in the future)
+  const tsNumber = Number(ts);
+  if (!Number.isFinite(tsNumber)) {
+    return { ok: false, reason: "Invalid ts value" };
+  }
+  // MP timestamps are in milliseconds
+  const nowMs = Date.now();
+  const ageMs = Math.abs(nowMs - tsNumber);
+  const FIVE_MIN_MS = 5 * 60 * 1000;
+  if (ageMs > FIVE_MIN_MS) {
+    return { ok: false, reason: `Timestamp outside 5-minute window (age=${ageMs}ms)` };
+  }
+
+  // Official MP template: id:<data.id>;request-id:<x-request-id>;ts:<ts>;
   const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
 
   const key = await crypto.subtle.importKey(
@@ -60,7 +85,10 @@ async function verifyMpSignature(
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 
-  return computed === v1;
+  if (!timingSafeEqual(computed, v1)) {
+    return { ok: false, reason: "Signature mismatch" };
+  }
+  return { ok: true };
 }
 
 serve(async (req) => {
