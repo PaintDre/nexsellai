@@ -1,12 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, Download, Sparkles, Check, Tag, Heart, Zap, Coins } from "lucide-react";
+import { Loader2, Download, Sparkles, Check, Tag, Heart, Zap, Coins, Lock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useCredits, isInsufficientCreditsError } from "@/hooks/useCredits";
+import {
+  useCredits,
+  isInsufficientCreditsError,
+  isFreeDropiLimitReachedError,
+} from "@/hooks/useCredits";
 import { InsufficientCreditsModal } from "@/components/credits/InsufficientCreditsModal";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -34,6 +39,7 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
   const { t, i18n } = useTranslation();
   const { profile, session } = useAuth();
   const { balance, costOf, refresh: refreshCredits } = useCredits();
+  const navigate = useNavigate();
   const [showName, setShowName] = useState(true);
   const [showBadge, setShowBadge] = useState(true);
   const [badgeKey, setBadgeKey] = useState<(typeof BADGE_KEYS)[number]>("offer");
@@ -99,6 +105,18 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
           toast.dismiss(toastId);
           return;
         }
+        if (isFreeDropiLimitReachedError(res.error)) {
+          toast.dismiss(toastId);
+          toast.error(t("dropi.freeLimitTitle", "Límite del plan Free alcanzado"), {
+            description: t(
+              "dropi.freeLimitDesc",
+              "Tu plan Free permite generar anuncios con IA solo 1 vez. Mejora tu plan para seguir creando.",
+            ),
+          });
+          onOpenChange(false);
+          navigate("/subscription");
+          return;
+        }
         throw res.error;
       }
       const { images } = res.data as {
@@ -148,6 +166,23 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
           </DialogDescription>
 
           <div className="space-y-5 py-2">
+            {profile?.plan === "free" && (
+              <div className="flex items-start gap-2.5 rounded-lg border border-primary/30 bg-primary/5 p-3">
+                <Lock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <div className="text-xs leading-snug">
+                  <p className="font-semibold text-foreground">
+                    {t("dropi.freeOneShotTitle", "Generación única en plan Free")}
+                  </p>
+                  <p className="text-muted-foreground mt-0.5">
+                    {t(
+                      "dropi.freeOneShotDesc",
+                      "Las descargas de imágenes y videos del catálogo son gratis. Solo puedes generar anuncios con IA 1 vez. Mejora tu plan para uso ilimitado.",
+                    )}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Structure selector */}
             <div className="space-y-2">
               <div>
