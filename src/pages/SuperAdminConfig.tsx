@@ -48,24 +48,6 @@ const SuperAdminConfig = () => {
         setConfig(items);
         const prompt = items.find((c) => c.key === "ai_prompt");
         if (prompt) setAiPrompt(prompt.value?.text || "");
-        const limits = items.find((c) => c.key === "plan_limits");
-        if (limits) {
-          setLimitFree(String(limits.value?.free ?? 1));
-          setLimitStarter(String(limits.value?.starter ?? 10));
-          setLimitPro(String(limits.value?.pro ?? 100));
-        }
-        const bLimits = items.find((c) => c.key === "banner_limits");
-        if (bLimits) {
-          setBannerLimitFree(String(bLimits.value?.free ?? 2));
-          setBannerLimitStarter(String(bLimits.value?.starter ?? 30));
-          setBannerLimitPro(String(bLimits.value?.pro ?? 150));
-        }
-        const dLimits = items.find((c) => c.key === "dropi_ads_limits");
-        if (dLimits) {
-          setDropiLimitFree(String(dLimits.value?.free ?? 1));
-          setDropiLimitStarter(String(dLimits.value?.starter ?? 30));
-          setDropiLimitPro(String(dLimits.value?.pro ?? 150));
-        }
         const costs = items.find((c) => c.key === "credit_costs");
         if (costs?.value) setCreditCosts(costs.value as Record<string, number>);
         const allow = items.find((c) => c.key === "credit_allowances");
