@@ -175,7 +175,14 @@
     "automations": "Automations",
     "subscriptions": "Subscriptions",
     "system": "System",
-    "user": "User"
+    "user": "User",
+    "logout": "Sign out",
+    "more": "More",
+    "pin": "Pin menu",
+    "unpin": "Unpin menu",
+    "groupMain": "Main",
+    "groupCreate": "Create",
+    "groupAccount": "Account"
   },
   "exportDialog": {
     "title": "Export to Shopify",
