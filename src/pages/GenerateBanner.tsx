@@ -299,19 +299,24 @@ const GenerateBanner = () => {
         </div>
       </div>
 
-      <UpgradeWarningBanner resource="banners" used={bannersUsed} limit={bannerLimit} />
-      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="banners" used={bannersUsed} limit={bannerLimit} />
+      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="banners" used={0} limit={0} />
+      <InsufficientCreditsModal
+        open={showInsufficient}
+        onOpenChange={setShowInsufficient}
+        required={totalCost}
+        action={isPack ? "banner_aida_pack" : "banner_single"}
+      />
 
       {hasReachedLimit ? (
         <Card className="border-dashed border-2 border-destructive/30">
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <Lock className="h-12 w-12 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">{t("generateBanner.limitTitle")}</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("credits.insufficientTitle", "No tienes suficientes créditos")}</h3>
             <p className="text-muted-foreground mb-2 max-w-md">
-              {t("generateBanner.limitUsed", { used: bannersUsed, limit: bannerLimit })}
+              {t("credits.needed", "Necesitas {{required}} créditos y tienes {{balance}} disponibles.", { required: totalCost, balance })}
             </p>
             <p className="text-muted-foreground mb-6 max-w-md">
-              {t("generateBanner.limitUpgrade")}
+              {t("credits.upgradeHint", "Mejora tu plan para obtener más créditos cada mes.")}
             </p>
             <Button asChild>
               <Link to="/pricing">{t("generateBanner.upgradePlan")}</Link>
@@ -613,20 +618,23 @@ const GenerateBanner = () => {
               </Card>
 
               <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{t("generateBanner.bannersUsedMonth")}</span>
-                  <span className="font-semibold">{bannersUsed} / {bannerLimit}</span>
+                <div className="flex justify-between text-sm items-center">
+                  <span className="text-muted-foreground flex items-center gap-1.5">
+                    <Coins className="h-3.5 w-3.5 text-primary" />
+                    {t("credits.cost", "Costo")}
+                  </span>
+                  <span className="font-semibold tabular-nums">{totalCost} {t("credits.unit", "créditos")}</span>
                 </div>
-                <Progress value={(bannersUsed / bannerLimit) * 100} className="h-2" />
-                <p className="text-xs text-muted-foreground">
-                  {t("generateBanner.bannersRemaining", { count: bannersRemaining, plan })}
-                </p>
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>{t("credits.balance", "Saldo")}</span>
+                  <span className="tabular-nums">{balance}</span>
+                </div>
               </div>
 
               {generatedBanners.length === 0 && (
                 <Button
                   onClick={handleGenerate}
-                  disabled={loading || sequence.length > bannersRemaining}
+                  disabled={loading || balance < totalCost}
                   className="w-full h-12 text-base font-semibold"
                   size="lg"
                 >
@@ -635,10 +643,10 @@ const GenerateBanner = () => {
                       <Loader2 className="h-5 w-5 animate-spin mr-2" />
                       {t("generateBanner.analyzingProduct")}
                     </>
-                  ) : sequence.length > bannersRemaining ? (
+                  ) : balance < totalCost ? (
                     <>
                       <Lock className="h-5 w-5 mr-2" />
-                      {t("generateBanner.notEnough", { count: bannersRemaining })}
+                      {t("credits.insufficientShort", "Créditos insuficientes")}
                     </>
                   ) : (
                     <>
