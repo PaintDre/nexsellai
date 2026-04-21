@@ -180,21 +180,40 @@ const AdminDropiCatalog = () => {
       const { data, error } = await supabase
         .from("dropi_products")
         .select("name, category, image_main, image_2, image_3, video_url, video_2, video_3")
-        .order("created_at", { ascending: false });
+        .order("name", { ascending: true });
       if (error) throw error;
       const rows = (data || []).map((p) => ({
-        name: p.name ?? "",
-        category: p.category ?? "",
-        image_main: p.image_main ?? "",
-        image_2: p.image_2 ?? "",
-        image_3: p.image_3 ?? "",
-        video_url: p.video_url ?? "",
-        video_2: p.video_2 ?? "",
-        video_3: p.video_3 ?? "",
+        name: (p.name ?? "").toString().trim(),
+        category: (p.category ?? "").toString().trim(),
+        image_main: (p.image_main ?? "").toString().trim(),
+        image_2: (p.image_2 ?? "").toString().trim(),
+        image_3: (p.image_3 ?? "").toString().trim(),
+        video_url: (p.video_url ?? "").toString().trim(),
+        video_2: (p.video_2 ?? "").toString().trim(),
+        video_3: (p.video_3 ?? "").toString().trim(),
       }));
-      const ws = XLSX.utils.json_to_sheet(rows, {
-        header: ["name", "category", "image_main", "image_2", "image_3", "video_url", "video_2", "video_3"],
-      });
+      const header = [
+        "name",
+        "category",
+        "image_main",
+        "image_2",
+        "image_3",
+        "video_url",
+        "video_2",
+        "video_3",
+      ];
+      const ws = XLSX.utils.json_to_sheet(rows, { header });
+      // Column widths for readability
+      ws["!cols"] = [
+        { wch: 40 }, // name
+        { wch: 18 }, // category
+        { wch: 60 }, // image_main
+        { wch: 60 }, // image_2
+        { wch: 60 }, // image_3
+        { wch: 60 }, // video_url
+        { wch: 60 }, // video_2
+        { wch: 60 }, // video_3
+      ];
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Dropi Products");
       const date = new Date().toISOString().slice(0, 10);
