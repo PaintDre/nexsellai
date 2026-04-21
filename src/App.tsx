@@ -8,9 +8,9 @@ import { CreditsProvider } from "@/hooks/useCredits";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ProtectedLayout } from "@/components/ProtectedRoute";
 import { AdminLayout, SuperAdminLayout } from "@/components/AdminRoute";
-import Index from "./pages/Index";
 import { Loader2 } from "lucide-react";
 
+const Index = lazy(() => import("./pages/Index"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
