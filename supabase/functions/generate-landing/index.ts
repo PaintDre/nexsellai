@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { checkLimit } from "../_shared/planLimits.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -844,21 +845,22 @@ serve(async (req) => {
       const { data: { user }, error: userError } = await supabase.auth.getUser(token);
       if (userError || !user) throw new Error("Unauthorized");
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("plan, landings_used")
-        .eq("user_id", user.id)
-        .single();
-
-      const config = getPlanConfig(profile.plan);
-      if ((profile.landings_used || 0) >= config.limit) {
-        return new Response(JSON.stringify({ error: "Landing limit reached" }), {
-          status: 403,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+      // Server-authoritative plan + limit check (never trust the request body).
+      const limitResult = await checkLimit(supabase, user.id, "landings");
+      if (!limitResult.allowed) {
+        return new Response(
+          JSON.stringify({
+            error: "plan_limit_reached",
+            resource: "landings",
+            plan: limitResult.plan,
+            limit: limitResult.limit,
+            current: limitResult.current,
+            upgrade_url: "/pricing",
+          }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
       }
-
-      userPlan = profile.plan;
+      userPlan = limitResult.plan;
     } else {
       userPlan = "free";
     }
