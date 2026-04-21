@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Upload, Package, Loader2, Pencil, Check, X, Trash2 } from "lucide-react";
+import { Upload, Package, Loader2, Pencil, Check, X, Trash2, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 
 interface DropiProduct {
@@ -36,6 +36,7 @@ const AdminDropiCatalog = () => {
   const [editingName, setEditingName] = useState<string | null>(null);
   const [nameValue, setNameValue] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<DropiProduct | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const loadProducts = async () => {
     const { data } = await supabase
