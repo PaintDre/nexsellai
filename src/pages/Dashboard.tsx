@@ -12,9 +12,8 @@ import {
   Package, FileText, Zap, Eye, History, Plus, Image,
   ArrowRight, Sparkles, Download, ImageIcon,
 } from "lucide-react";
-import { computeBannersUsed } from "@/lib/planUsage";
-import { usePlanLimits } from "@/hooks/usePlanLimits";
-import { UpgradeWarningBanner } from "@/components/UpgradeWarningBanner";
+import { useCredits } from "@/hooks/useCredits";
+import { Coins } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useTranslation } from "react-i18next";
 
@@ -95,13 +94,8 @@ const Dashboard = () => {
     load();
   }, [user]);
 
-  const { landing: landingLimits, banner: bannerLimits } = usePlanLimits();
-  const limit = landingLimits[profile?.plan || "free"];
-  const used = profile?.landings_used || 0;
-  const usagePercent = Math.min((used / limit) * 100, 100);
-  const bannerLimit = bannerLimits[profile?.plan || "free"];
-  const bannersUsed = computeBannersUsed(profile);
-  const bannerUsagePercent = Math.min((bannersUsed / bannerLimit) * 100, 100);
+  const { balance, allowance } = useCredits();
+  const creditsPercent = allowance > 0 ? Math.min(100, (balance / allowance) * 100) : 0;
   const isNewUser = products.length === 0;
   const hasNoLandings = products.length > 0 && landings.length === 0;
 
@@ -187,33 +181,27 @@ const Dashboard = () => {
       )}
 
       {/* Upgrade warnings */}
-      <UpgradeWarningBanner resource="landings" used={used} limit={limit} />
-      <UpgradeWarningBanner resource="banners" used={bannersUsed} limit={bannerLimit} />
-
       {/* Usage Stats */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-medium text-muted-foreground">{t("credits.title", "Créditos")}</span>
+              <Coins className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <div className="text-xl sm:text-2xl font-bold font-display tabular-nums">
+              {balance}<span className="text-xs sm:text-sm text-muted-foreground font-normal ml-0.5">/{allowance}</span>
+            </div>
+            <Progress value={creditsPercent} className="h-1.5 mt-2" />
+          </CardContent>
+        </Card>
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-muted-foreground">{t("dashboard.stats.landings")}</span>
               <FileText className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
-            <div className="text-xl sm:text-2xl font-bold font-display">
-              {used}<span className="text-xs sm:text-sm text-muted-foreground font-normal ml-0.5">/{limit}</span>
-            </div>
-            <Progress value={usagePercent} className="h-1.5 mt-2" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-muted-foreground">{t("dashboard.stats.banners")}</span>
-              <Image className="h-3.5 w-3.5 text-muted-foreground/60" />
-            </div>
-            <div className="text-xl sm:text-2xl font-bold font-display">
-              {bannersUsed}<span className="text-xs sm:text-sm text-muted-foreground font-normal ml-0.5">/{bannerLimit}</span>
-            </div>
-            <Progress value={bannerUsagePercent} className="h-1.5 mt-2" />
+            <div className="text-xl sm:text-2xl font-bold font-display tabular-nums">{landings.length}</div>
           </CardContent>
         </Card>
         <Card>
