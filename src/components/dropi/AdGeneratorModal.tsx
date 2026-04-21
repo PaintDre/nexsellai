@@ -166,6 +166,23 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
           </DialogDescription>
 
           <div className="space-y-5 py-2">
+            {profile?.plan === "free" && (
+              <div className="flex items-start gap-2.5 rounded-lg border border-primary/30 bg-primary/5 p-3">
+                <Lock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <div className="text-xs leading-snug">
+                  <p className="font-semibold text-foreground">
+                    {t("dropi.freeOneShotTitle", "Generación única en plan Free")}
+                  </p>
+                  <p className="text-muted-foreground mt-0.5">
+                    {t(
+                      "dropi.freeOneShotDesc",
+                      "Las descargas de imágenes y videos del catálogo son gratis. Solo puedes generar anuncios con IA 1 vez. Mejora tu plan para uso ilimitado.",
+                    )}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Structure selector */}
             <div className="space-y-2">
               <div>
