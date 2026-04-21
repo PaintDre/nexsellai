@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Settings, Save, Cpu, Gauge, Layers, Image as ImageIcon, Megaphone } from "lucide-react";
+import { Coins } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface ConfigItem {
@@ -29,6 +30,11 @@ const SuperAdminConfig = () => {
   const [dropiLimitFree, setDropiLimitFree] = useState("1");
   const [dropiLimitStarter, setDropiLimitStarter] = useState("30");
   const [dropiLimitPro, setDropiLimitPro] = useState("150");
+  // Credits system
+  const [creditCosts, setCreditCosts] = useState<Record<string, number>>({});
+  const [allowFree, setAllowFree] = useState("30");
+  const [allowStarter, setAllowStarter] = useState("300");
+  const [allowPro, setAllowPro] = useState("1500");
   const { t } = useTranslation();
 
   const baseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`;
@@ -69,6 +75,14 @@ const SuperAdminConfig = () => {
           setDropiLimitFree(String(dLimits.value?.free ?? 1));
           setDropiLimitStarter(String(dLimits.value?.starter ?? 30));
           setDropiLimitPro(String(dLimits.value?.pro ?? 150));
+        }
+        const costs = items.find((c) => c.key === "credit_costs");
+        if (costs?.value) setCreditCosts(costs.value as Record<string, number>);
+        const allow = items.find((c) => c.key === "credit_allowances");
+        if (allow?.value) {
+          setAllowFree(String(allow.value?.free ?? 30));
+          setAllowStarter(String(allow.value?.starter ?? 300));
+          setAllowPro(String(allow.value?.pro ?? 1500));
         }
       }
       setLoading(false);
