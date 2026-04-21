@@ -280,8 +280,13 @@ const GenerateLanding = () => {
         <ArrowLeft className="h-4 w-4 mr-2" /> {t("common.back")}
       </Button>
 
-      <UpgradeWarningBanner resource="landings" used={used} limit={limit} />
-      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="landings" used={used} limit={limit} />
+      <UpgradeModal open={showUpgradeModal} onOpenChange={setShowUpgradeModal} resource="landings" used={0} limit={0} />
+      <InsufficientCreditsModal
+        open={showInsufficient}
+        onOpenChange={setShowInsufficient}
+        required={generationCost}
+        action={willUseImages ? "landing_with_images" : "landing_text"}
+      />
 
       {!hasEnoughImagesForTemplate && (
         <div className="flex items-start gap-3 p-4 rounded-lg border border-amber-500/40 bg-amber-500/10">
@@ -333,8 +338,13 @@ const GenerateLanding = () => {
               </p>
             </div>
             <div className="flex items-center gap-2 justify-center text-sm text-muted-foreground">
-              <span>{t("generateLanding.landingsUsed")}:</span>
-              <Badge variant={canGenerate ? "secondary" : "destructive"}>{used} / {limit}</Badge>
+              <Coins className="h-3.5 w-3.5 text-primary" />
+              <span>{t("credits.cost", "Costo")}:</span>
+              <Badge variant={canGenerate ? "secondary" : "destructive"} className="tabular-nums">
+                {generationCost} {t("credits.unit", "créditos")}
+              </Badge>
+              <span className="text-xs">·</span>
+              <span className="text-xs">{t("credits.balance", "Saldo")}: <strong className="tabular-nums">{balance}</strong></span>
             </div>
             {generationStep !== "idle" && (
               <div className="space-y-3 p-4 rounded-lg border bg-muted/50">
@@ -440,10 +450,13 @@ const GenerateLanding = () => {
           </div>
 
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>{t("generateLanding.landingsUsed")}:</span>
-            <Badge variant={canGenerate ? "secondary" : "destructive"}>
-              {used} / {limit}
+            <Coins className="h-3.5 w-3.5 text-primary" />
+            <span>{t("credits.cost", "Costo")}:</span>
+            <Badge variant={canGenerate ? "secondary" : "destructive"} className="tabular-nums">
+              {generationCost} {t("credits.unit", "créditos")}
             </Badge>
+            <span className="text-xs">·</span>
+            <span className="text-xs">{t("credits.balance", "Saldo")}: <strong className="tabular-nums">{balance}</strong></span>
           </div>
 
           {/* Generation progress */}
