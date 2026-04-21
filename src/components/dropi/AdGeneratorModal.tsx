@@ -1,12 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Loader2, Download, Sparkles, Check, Tag, Heart, Zap, Coins } from "lucide-react";
+import { Loader2, Download, Sparkles, Check, Tag, Heart, Zap, Coins, Lock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { useCredits, isInsufficientCreditsError } from "@/hooks/useCredits";
+import {
+  useCredits,
+  isInsufficientCreditsError,
+  isFreeDropiLimitReachedError,
+} from "@/hooks/useCredits";
 import { InsufficientCreditsModal } from "@/components/credits/InsufficientCreditsModal";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -34,6 +39,7 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
   const { t, i18n } = useTranslation();
   const { profile, session } = useAuth();
   const { balance, costOf, refresh: refreshCredits } = useCredits();
+  const navigate = useNavigate();
   const [showName, setShowName] = useState(true);
   const [showBadge, setShowBadge] = useState(true);
   const [badgeKey, setBadgeKey] = useState<(typeof BADGE_KEYS)[number]>("offer");
@@ -97,6 +103,18 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
           setInsufficientOpen(true);
           await refreshCredits();
           toast.dismiss(toastId);
+          return;
+        }
+        if (isFreeDropiLimitReachedError(res.error)) {
+          toast.dismiss(toastId);
+          toast.error(t("dropi.freeLimitTitle", "Límite del plan Free alcanzado"), {
+            description: t(
+              "dropi.freeLimitDesc",
+              "Tu plan Free permite generar anuncios con IA solo 1 vez. Mejora tu plan para seguir creando.",
+            ),
+          });
+          onOpenChange(false);
+          navigate("/subscription");
           return;
         }
         throw res.error;
