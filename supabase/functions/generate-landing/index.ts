@@ -845,6 +845,39 @@ serve(async (req) => {
       const { data: { user }, error: userError } = await supabase.auth.getUser(token);
       if (userError || !user) throw new Error("Unauthorized");
 
+      // Determine plan first (needed for free-plan landing limit + prompt-shaping)
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("plan")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      userPlan = (profile?.plan as string) || "free";
+
+      // ── Free plan: hard limit of 1 landing total ──
+      if (userPlan === "free") {
+        const { count, error: countError } = await supabase
+          .from("landings")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", user.id);
+        if (countError) {
+          console.error("free-limit count error:", countError);
+          return new Response(
+            JSON.stringify({ error: "limit_check_failed" }),
+            { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+        if ((count ?? 0) >= 1) {
+          return new Response(
+            JSON.stringify({
+              error: "free_limit_reached",
+              message: "El plan Free permite solo 1 landing. Actualiza tu plan para crear más.",
+              upgrade_url: "/subscription",
+            }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+          );
+        }
+      }
+
       // Server-authoritative credit charge.
       const chargeResult = await chargeCredits(supabase, user.id, "landing_text");
       if (!chargeResult.success) {
@@ -856,13 +889,6 @@ serve(async (req) => {
           { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
       }
-      // Determine plan (still needed for prompt-shaping logic)
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("plan")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      userPlan = (profile?.plan as string) || "free";
     } else {
       userPlan = "free";
     }
