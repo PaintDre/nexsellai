@@ -703,7 +703,7 @@
     "badge": "Plataforma tudo-em-um para vender mais online",
     "heroTitle": "Landings e banners com IA que",
     "heroTitleHighlight": " transformam visitas em vendas",
-    "heroSubtitle": "Nexsell é a plataforma tudo-em-um para vendedores e dropshippers: gera landings AIDA otimizadas, banners profissionais e publica na Shopify em minutos. Sem código, sem designers.",
+    "heroSubtitle": "Nexsell é a plataforma tudo-em-um para vendedores e dropshippers: gera landings AIDA, banners profissionais e publica na Shopify usando um sistema simples de créditos. Sem código, sem designers.",
     "tryFree": "Testar grátis",
     "seeHow": "Ver como funciona",
     "buyButton": "Comprar agora",
@@ -800,7 +800,7 @@
     "examplesTitle": "Veja o que você pode criar",
     "examplesSubtitle": "Banners e landings reais gerados por usuários Nexsell.",
     "demoTitle": "Teste agora — sem conta",
-    "demoSubtitle": "Gere 1 landing demo grátis para ver a mágica com seu próprio produto.",
+    "demoSubtitle": "Gere 1 landing demo grátis (sem gastar créditos) para ver a mágica com seu próprio produto.",
     "demoBadge": "Demo gratuito",
     "productName": "Nome do produto *",
     "productNamePlaceholder": "Ex: Massageador Cervical Pro",
@@ -824,7 +824,7 @@
     "demoErrorTitle": "Demo já utilizado",
     "demoErrorDesc": "Crie uma conta para continuar gerando.",
     "plansTitle": "Planos pensados para crescer com você",
-    "plansSubtitle": "Comece grátis. Escale quando vender mais. Sem contratos, cancele quando quiser.",
+    "plansSubtitle": "Cada plano te dá uma bolsa mensal de créditos para gastar em landings, banners e imagens IA. Sem contratos, cancele quando quiser.",
     "monthly": "Mensal",
     "annual": "Anual",
     "annualDiscount": "-2 meses",
@@ -837,21 +837,22 @@
     "plans": [
       {
         "name": "Free",
-        "landings": "1 landing publicada",
+        "landings": "30 créditos / mês · 1 landing total",
         "features": [
+          "Apenas 1 landing no total (depois upgrade)",
+          "≈ 3 landings de texto ou 6 banners",
           "Gerador AIDA básico",
-          "2 banners IA / mês",
           "Tema Minimal",
-          "Exportação HTML básica",
-          "Subdomínio nexsell.app/p/…"
+          "Subdomínio nexsell.app/p/…",
+          "Demo sem conta para testar"
         ]
       },
       {
         "name": "Starter",
-        "landings": "10 landings / mês",
+        "landings": "300 créditos / mês · landings ilimitadas",
         "features": [
-          "3 hooks por produto",
-          "30 banners IA / mês",
+          "≈ 30 landings de texto ou 12 com imagens IA",
+          "≈ 60 banners individuais",
           "Os 4 temas visuais",
           "Imagens IA nos blocos",
           "Conexão Shopify (OAuth)",
@@ -861,10 +862,11 @@
       },
       {
         "name": "Pro",
-        "landings": "100 landings / mês",
+        "landings": "1.500 créditos / mês · landings ilimitadas",
         "features": [
+          "≈ 150 landings de texto ou 60 com imagens IA",
+          "≈ 300 banners individuais",
           "Ângulos psicológicos ilimitados",
-          "150 banners IA / mês",
           "Variantes A/B de CTA",
           "Bundles e comparações",
           "Microcopy de checkout",
@@ -903,6 +905,10 @@
       {
         "q": "Posso testar sem criar conta?",
         "a": "Sim. Você pode gerar 1 landing demo sem se cadastrar para ver o resultado com seu próprio produto. Para publicar e exportar precisa de uma conta gratuita."
+      },
+      {
+        "q": "Como funcionam os créditos?",
+        "a": "Cada ação de IA (gerar landing, banner, imagem, etc.) desconta créditos da sua bolsa mensal. A bolsa é renovada automaticamente a cada 30 dias conforme seu plano. Se acabar, você pode fazer upgrade ou esperar o próximo ciclo."
       },
       {
         "q": "Tem contrato ou fidelidade?",
