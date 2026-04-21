@@ -546,7 +546,7 @@ const Index = () => {
       </section>
 
       {/* ── 6. DEMO GENERATOR ── */}
-      <section id="demo" className="py-20 lg:py-28 relative overflow-hidden">
+      <section id="demo" className="py-20 lg:py-28 relative overflow-hidden cv-auto">
         <div aria-hidden className="absolute inset-0 -z-10 bg-mesh-glow opacity-60" />
         <div className="container mx-auto px-4 max-w-3xl relative">
           <div className="text-center mb-10 reveal-on-scroll">
@@ -636,7 +636,7 @@ const Index = () => {
       </section>
 
       {/* ── 7. PLANES ── */}
-      <section id="pricing" className="py-20 lg:py-28 bg-muted/30">
+      <section id="pricing" className="py-20 lg:py-28 bg-muted/30 cv-auto">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center mb-10 reveal-on-scroll">
             <Badge variant="secondary" className="mb-4">Precios</Badge>
@@ -735,7 +735,7 @@ const Index = () => {
       </section>
 
       {/* ── 8. FAQ ── */}
-      <section className="py-20 lg:py-28">
+      <section className="py-20 lg:py-28 cv-auto">
         <div className="container mx-auto px-4 max-w-3xl">
           <div className="text-center mb-12 reveal-on-scroll">
             <Badge variant="secondary" className="mb-4">FAQ</Badge>
@@ -767,7 +767,7 @@ const Index = () => {
       </section>
 
       {/* ── 9. CTA FINAL ── */}
-      <section className="py-20 lg:py-28 relative overflow-hidden">
+      <section className="py-20 lg:py-28 relative overflow-hidden cv-auto">
         <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/10 via-background to-accent/30" />
         <div aria-hidden className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 bg-primary/20 blur-3xl rounded-full animate-glow-pulse" />
 
