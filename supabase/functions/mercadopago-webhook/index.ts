@@ -338,9 +338,39 @@ serve(async (req) => {
     }
 
     console.log(`Payment approved: user=${userId}, plan=${planId}, currency=${paymentCurrency}, expires=${expiresAt.toISOString()}`);
+
+    // === MARK EVENT AS PROCESSED (idempotency complete) ===
+    const { error: markProcessedErr } = await supabase
+      .from("payment_events")
+      .update({ status: "processed", processed_at: new Date().toISOString() })
+      .eq("payment_id", paymentIdStr);
+    if (markProcessedErr) {
+      console.error("Failed to mark payment_event as processed:", markProcessedErr);
+      // Subscription is already active, so we still return 200.
+    }
+
     return new Response("OK", { status: 200, headers: corsHeaders });
   } catch (err) {
     console.error("Webhook error:", err);
+    // Best-effort: mark event as failed so MP retries can re-process it.
+    try {
+      const url = new URL(req.url);
+      const pid = url.searchParams.get("data.id") ?? url.searchParams.get("id");
+      if (pid) {
+        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+        const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        const supa = createClient(supabaseUrl, serviceKey);
+        await supa
+          .from("payment_events")
+          .update({
+            status: "failed",
+            raw_payload: { error: (err as any)?.message ?? String(err) },
+          })
+          .eq("payment_id", String(pid));
+      }
+    } catch (e) {
+      console.error("Failed to mark payment_event as failed in outer catch:", e);
+    }
     return new Response("Error", { status: 500, headers: corsHeaders });
   }
 });
