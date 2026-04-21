@@ -174,6 +174,40 @@ const AdminDropiCatalog = () => {
     }
   };
 
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const { data, error } = await supabase
+        .from("dropi_products")
+        .select("name, category, image_main, image_2, image_3, video_url, video_2, video_3")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const rows = (data || []).map((p) => ({
+        name: p.name ?? "",
+        category: p.category ?? "",
+        image_main: p.image_main ?? "",
+        image_2: p.image_2 ?? "",
+        image_3: p.image_3 ?? "",
+        video_url: p.video_url ?? "",
+        video_2: p.video_2 ?? "",
+        video_3: p.video_3 ?? "",
+      }));
+      const ws = XLSX.utils.json_to_sheet(rows, {
+        header: ["name", "category", "image_main", "image_2", "image_3", "video_url", "video_2", "video_3"],
+      });
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Dropi Products");
+      const date = new Date().toISOString().slice(0, 10);
+      XLSX.writeFile(wb, `dropi-products-${date}.xlsx`);
+      toast.success(`Excel exportado (${rows.length})`);
+    } catch (err) {
+      console.error("[DROPI Export]", err);
+      toast.error((err as Error).message || t("common.error"));
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="page-in p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
