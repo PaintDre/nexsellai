@@ -149,7 +149,7 @@ const DropiProduct = () => {
                       variant="outline"
                       size="sm"
                       className="w-full"
-                      onClick={() => handleDownloadVideo(src)}
+                      onClick={() => handleDownloadVideo(src, i)}
                     >
                       <Play className="mr-2 h-3.5 w-3.5" />
                       {t("dropi.downloadVideo")} {i + 1}
