@@ -174,3 +174,14 @@ export function isFreeLimitReachedError(error: unknown): boolean {
   }
   return body?.error === "free_limit_reached";
 }
+
+/** Helper to detect Free-plan Dropi AI generation limit responses. */
+export function isFreeDropiLimitReachedError(error: unknown): boolean {
+  if (!error) return false;
+  const ctx = (error as { context?: { status?: number; body?: unknown } }).context;
+  let body: any = ctx?.body;
+  if (typeof body === "string") {
+    try { body = JSON.parse(body); } catch { /* */ }
+  }
+  return body?.error === "free_dropi_limit_reached";
+}

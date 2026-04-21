@@ -168,6 +168,36 @@ serve(async (req) => {
     });
   }
 
+  // Free plan users can generate Dropi ads only once (lifetime).
+  // After that they must upgrade to keep using the AI generator.
+  const { data: planProfile } = await supabase
+    .from("profiles")
+    .select("plan")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (planProfile?.plan === "free") {
+    const { count: usedCount } = await supabase
+      .from("dropi_ad_generations")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id);
+
+    if ((usedCount ?? 0) >= 1) {
+      return new Response(
+        JSON.stringify({
+          error: "free_dropi_limit_reached",
+          upgrade_url: "/subscription",
+          message:
+            "Free plan allows only 1 AI ad generation. Upgrade to keep generating.",
+        }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        },
+      );
+    }
+  }
+
   // Charge credits up-front. The Dropi ad pack generates 9 high-quality images
   // (3 structures × 3 formats) — billed as a single "dropi_ad_pack_3" action.
   const chargeResult = await chargeCredits(
