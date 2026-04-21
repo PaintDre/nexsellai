@@ -444,7 +444,7 @@ const Index = () => {
       </section>
 
       {/* ── 3. BENEFICIOS ── */}
-      <section className="py-20 lg:py-28 bg-muted/30 relative overflow-hidden">
+      <section className="py-20 lg:py-28 bg-muted/30 relative overflow-hidden cv-auto">
         <div aria-hidden className="absolute top-0 right-0 h-96 w-96 bg-primary/5 blur-3xl rounded-full -translate-y-1/2" />
         <div className="container mx-auto px-4 max-w-7xl relative">
           <div className="text-center mb-14 reveal-on-scroll">
@@ -480,7 +480,7 @@ const Index = () => {
       </section>
 
       {/* ── 4. CÓMO FUNCIONA ── */}
-      <section id="how" className="py-20 lg:py-28">
+      <section id="how" className="py-20 lg:py-28 cv-auto">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center mb-16 reveal-on-scroll">
             <Badge variant="secondary" className="mb-4">¿Cómo funciona?</Badge>
@@ -522,7 +522,7 @@ const Index = () => {
       </section>
 
       {/* ── 5. EJEMPLOS ── */}
-      <section id="examples" className="py-20 lg:py-28 bg-muted/30">
+      <section id="examples" className="py-20 lg:py-28 bg-muted/30 cv-auto">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="text-center mb-12 reveal-on-scroll">
             <Badge variant="secondary" className="mb-4">Galería</Badge>
