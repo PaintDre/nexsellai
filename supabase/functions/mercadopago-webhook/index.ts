@@ -96,9 +96,18 @@ serve(async (req) => {
 
   try {
     const mpToken = Deno.env.get("MERCADOPAGO_ACCESS_TOKEN")!;
-    const webhookSecret = Deno.env.get("MP_WEBHOOK_SECRET"); // opcional
+    const webhookSecret =
+      Deno.env.get("MERCADOPAGO_WEBHOOK_SECRET") ?? Deno.env.get("MP_WEBHOOK_SECRET");
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    if (!webhookSecret) {
+      console.error(
+        "MERCADOPAGO_WEBHOOK_SECRET is not configured. Refusing to process webhook.",
+      );
+      return new Response("Server misconfiguration", { status: 500, headers: corsHeaders });
+    }
+
     const supabase = createClient(supabaseUrl, serviceKey);
 
     const body = await req.json();
@@ -113,15 +122,11 @@ serve(async (req) => {
       return new Response("No payment ID", { status: 200, headers: corsHeaders });
     }
 
-    // === SIGNATURE VERIFICATION (opcional, solo si MP_WEBHOOK_SECRET está configurado) ===
-    if (webhookSecret) {
-      const valid = await verifyMpSignature(req, String(paymentId), webhookSecret);
-      if (!valid) {
-        console.error(`Invalid MP signature for payment ${paymentId}`);
-        return new Response("Unauthorized", { status: 401, headers: corsHeaders });
-      }
-    } else {
-      console.warn("MP_WEBHOOK_SECRET not set — skipping signature verification");
+    // === SIGNATURE VERIFICATION (mandatory) ===
+    const verification = await verifyMpSignature(req, String(paymentId), webhookSecret);
+    if (!verification.ok) {
+      console.error(`Invalid MP signature for payment ${paymentId}: ${verification.reason}`);
+      return new Response("Unauthorized", { status: 401, headers: corsHeaders });
     }
 
     // === IDEMPOTENCY CHECK ===
