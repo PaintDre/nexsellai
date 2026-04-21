@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { checkLimit } from "../_shared/planLimits.ts";
+import { chargeCredits, refundCredits, insufficientCreditsResponse } from "../_shared/credits.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -363,22 +363,19 @@ serve(async (req) => {
     }
     const userId = authUser.id;
 
-    // Server-authoritative plan + banner limit check (rolling 30-day window).
-    // Plan is read from the `subscriptions` table — never trusted from the request.
-    const limitResult = await checkLimit(supabase, userId, "banners");
-    if (!limitResult.allowed) {
+    // Server-authoritative credit charge.
+    // Cost is read from system_config.credit_costs (banner_single).
+    const chargeResult = await chargeCredits(supabase, userId, "banner_single");
+    if (!chargeResult.success) {
+      if (chargeResult.error === "insufficient_credits") {
+        return insufficientCreditsResponse(chargeResult, corsHeaders, "banner_single");
+      }
       return new Response(
-        JSON.stringify({
-          error: "plan_limit_reached",
-          resource: "banners",
-          plan: limitResult.plan,
-          limit: limitResult.limit,
-          current: limitResult.current,
-          upgrade_url: "/pricing",
-        }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        JSON.stringify({ error: "charge_failed" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }
+    const chargeTxId = chargeResult.transactionId;
 
     // --- Build prompt ---
     const actualTemplateId = templateId || "hook-visual";
