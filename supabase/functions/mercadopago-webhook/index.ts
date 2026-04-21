@@ -306,6 +306,27 @@ serve(async (req) => {
       payment_id: paymentRecordId,
     });
 
+    // === GRANT MONTHLY CREDITS for the new plan ===
+    try {
+      const { data: allowanceCfg } = await supabase
+        .from("system_config")
+        .select("value")
+        .eq("key", "credit_allowances")
+        .maybeSingle();
+      const allowances = (allowanceCfg?.value ?? { free: 30, starter: 300, pro: 1500 }) as Record<string, number>;
+      const amount = allowances[planId] ?? 0;
+      if (amount > 0) {
+        await supabase.rpc("grant_monthly_credits", {
+          _user_id: userId,
+          _plan: planId,
+          _amount: amount,
+          _force: true,
+        });
+      }
+    } catch (creditsErr) {
+      console.error("Error granting monthly credits (non-blocking):", creditsErr);
+    }
+
     // === SEND PAYMENT CONFIRMATION EMAIL ===
     try {
       const { data: { user: authUser } } = await supabase.auth.admin.getUserById(userId);

@@ -350,6 +350,97 @@ const SuperAdminConfig = () => {
           </CardContent>
         </Card>
       </section>
+
+      {/* Credits System */}
+      <section className="space-y-5">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Coins className="h-4 w-4 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+              Sistema de Créditos
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Bolsas mensuales por plan y costos por cada acción IA.
+            </p>
+          </div>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Bolsas mensuales (créditos por plan)</CardTitle>
+            <CardDescription>Cantidad de créditos que recibe cada plan al inicio del ciclo.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <PlanInputs
+              free={allowFree} starter={allowStarter} pro={allowPro}
+              setFree={setAllowFree} setStarter={setAllowStarter} setPro={setAllowPro}
+            />
+            <div className="flex justify-end">
+              <Button
+                onClick={() => saveConfig("credit_allowances", {
+                  free: parseInt(allowFree) || 0,
+                  starter: parseInt(allowStarter) || 0,
+                  pro: parseInt(allowPro) || 0,
+                })}
+                disabled={saving === "credit_allowances"}
+              >
+                <Save className="h-4 w-4" />
+                {saving === "credit_allowances" ? t("common.saving") : "Guardar bolsas"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Costos por acción</CardTitle>
+            <CardDescription>Créditos descontados al ejecutar cada acción IA.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                ["landing_text", "Landing solo texto"],
+                ["landing_with_images", "Landing con imágenes IA"],
+                ["banner_single", "Banner individual"],
+                ["banner_aida_pack", "Pack AIDA (7 banners)"],
+                ["regenerate_block", "Regenerar bloque landing"],
+                ["regenerate_banner", "Regenerar banner"],
+                ["design_critic", "Design Critic"],
+                ["edit_banner_variation", "Editar banner (variación)"],
+                ["dropi_image_single", "Dropi: 1 imagen IA"],
+                ["dropi_image_pack_3", "Dropi: pack 3 imágenes"],
+                ["dropi_image_pack_5", "Dropi: pack 5 imágenes"],
+                ["dropi_ad_with_image", "Dropi: ad + imagen"],
+                ["dropi_ad_pack_3", "Dropi: pack 3 ads"],
+                ["dropi_regenerate_image", "Dropi: regenerar imagen"],
+                ["shopify_export", "Exportar a Shopify"],
+                ["publish_landing", "Publicar landing"],
+              ].map(([key, label]) => (
+                <div key={key} className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">{label}</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={creditCosts[key] ?? 0}
+                    onChange={(e) => setCreditCosts((prev) => ({ ...prev, [key]: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end">
+              <Button
+                onClick={() => saveConfig("credit_costs", creditCosts)}
+                disabled={saving === "credit_costs"}
+              >
+                <Save className="h-4 w-4" />
+                {saving === "credit_costs" ? t("common.saving") : "Guardar costos"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
     </div>
   );
 };
