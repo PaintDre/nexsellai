@@ -347,7 +347,11 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
               ) : (
                 <Download className="mr-2 h-4 w-4" />
               )}
-              {loading ? t("dropi.generating") : t("dropi.generateAndDownload")}
+              {loading
+                ? progress
+                  ? `${t("dropi.generating")} (${progress.done}/${progress.total})`
+                  : t("dropi.generating")
+                : t("dropi.generateAndDownload")}
             </Button>
           </div>
         </DialogContent>
