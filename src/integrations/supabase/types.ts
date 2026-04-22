@@ -138,6 +138,54 @@ export type Database = {
           },
         ]
       }
+      dropi_ad_jobs: {
+        Row: {
+          charge_transaction_id: string | null
+          completed_at: string | null
+          created_at: string
+          dropi_product_id: string
+          error_message: string | null
+          id: string
+          progress_done: number
+          progress_total: number
+          result_images: Json
+          started_at: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          charge_transaction_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          dropi_product_id: string
+          error_message?: string | null
+          id?: string
+          progress_done?: number
+          progress_total?: number
+          result_images?: Json
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          charge_transaction_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          dropi_product_id?: string
+          error_message?: string | null
+          id?: string
+          progress_done?: number
+          progress_total?: number
+          result_images?: Json
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       dropi_products: {
         Row: {
           category: string | null
