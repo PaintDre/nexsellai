@@ -13,6 +13,7 @@ import {
   isFreeDropiLimitReachedError,
 } from "@/hooks/useCredits";
 import { InsufficientCreditsModal } from "@/components/credits/InsufficientCreditsModal";
+import { FreeBadge } from "@/components/FreeBadge";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import JSZip from "jszip";
