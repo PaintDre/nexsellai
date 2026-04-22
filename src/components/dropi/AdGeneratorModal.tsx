@@ -50,6 +50,7 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
   ]);
   const [loading, setLoading] = useState(false);
   const [insufficientOpen, setInsufficientOpen] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
   // 3 structures = pack of 3, otherwise per-image charge
   const isPack3 = selected.length === 3;
@@ -77,6 +78,7 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
     }
 
     setLoading(true);
+    setProgress(null);
     const toastId = toast.loading(t("ai.generatingAds"), {
       description: t("ai.queuedDesc"),
     });
@@ -119,15 +121,59 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
         }
         throw res.error;
       }
-      const { images } = res.data as {
-        images: { format: string; structure: string; variation: number; url: string }[];
-      };
 
-      if (!images?.length) throw new Error("No images generated");
+      const { job_id, total } = (res.data || {}) as { job_id?: string; total?: number };
+      if (!job_id) throw new Error("No job_id returned");
+
+      setProgress({ done: 0, total: total ?? selected.length * 3 });
+
+      // Poll the job row until it completes or fails.
+      // Hard timeout safety: 8 minutes (way more than expected).
+      const startedAt = Date.now();
+      const HARD_TIMEOUT_MS = 8 * 60 * 1000;
+      let finalImages: { format: string; structure: string; variation: number; url: string }[] = [];
+
+      while (true) {
+        if (Date.now() - startedAt > HARD_TIMEOUT_MS) {
+          throw new Error("Tiempo de espera agotado. Intenta nuevamente.");
+        }
+        await new Promise((r) => setTimeout(r, 2500));
+
+        const { data: job, error: jobErr } = await supabase
+          .from("dropi_ad_jobs")
+          .select("status, progress_done, progress_total, result_images, error_message")
+          .eq("id", job_id)
+          .single();
+
+        if (jobErr) {
+          console.error("Job poll error", jobErr);
+          continue;
+        }
+
+        setProgress({
+          done: job.progress_done ?? 0,
+          total: job.progress_total ?? total ?? 9,
+        });
+
+        toast.loading(t("ai.generatingAds"), {
+          id: toastId,
+          description: `${job.progress_done ?? 0} / ${job.progress_total ?? total ?? 9}`,
+        });
+
+        if (job.status === "completed") {
+          finalImages = (job.result_images as typeof finalImages) || [];
+          break;
+        }
+        if (job.status === "failed") {
+          throw new Error(job.error_message || "Generation failed");
+        }
+      }
+
+      if (!finalImages.length) throw new Error("No images generated");
 
       const zip = new JSZip();
       await Promise.all(
-        images.map(async (img) => {
+        finalImages.map(async (img) => {
           const resp = await fetch(img.url);
           const blob = await resp.blob();
           zip.file(`${img.structure}_${img.format}.png`, blob);
@@ -150,6 +196,7 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
       });
     } finally {
       setLoading(false);
+      setProgress(null);
     }
   };
 
