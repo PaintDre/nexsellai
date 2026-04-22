@@ -928,6 +928,13 @@ export type Database = {
         }
         Returns: Json
       }
+      get_showcase_banners: {
+        Args: never
+        Returns: {
+          created_at: string
+          image_url: string
+        }[]
+      }
       grant_monthly_credits: {
         Args: {
           _amount: number
