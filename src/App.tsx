@@ -26,6 +26,7 @@ const LandingPreview = lazy(() => import("./pages/LandingPreview"));
 const LandingFullPreview = lazy(() => import("./pages/LandingFullPreview"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminUsers = lazy(() => import("./pages/AdminUsers"));
+const AdminFreeUsers = lazy(() => import("./pages/AdminFreeUsers"));
 const SuperAdminConfig = lazy(() => import("./pages/SuperAdminConfig"));
 const GenerateBanner = lazy(() => import("./pages/GenerateBanner"));
 const Banners = lazy(() => import("./pages/Banners"));
@@ -91,6 +92,7 @@ const App = () => (
                 <Route element={<AdminLayout />}>
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/admin/users" element={<AdminUsers />} />
+                  <Route path="/admin/free-users" element={<AdminFreeUsers />} />
                   <Route path="/admin/payments" element={<AdminPayments />} />
                   <Route path="/admin/email" element={<AdminEmailCampaigns />} />
                   <Route path="/admin/automations" element={<AdminEmailAutomations />} />
