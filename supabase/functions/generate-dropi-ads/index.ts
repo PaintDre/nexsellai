@@ -233,24 +233,61 @@ serve(async (req) => {
       ? structures.filter((s): s is StructureKey => VALID.includes(s))
       : VALID;
 
-  const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
-  type GenItem = {
-    format: string;
-    structure: StructureKey;
-    variation: number;
-    url: string;
-  };
+  const totalJobs = FORMATS.length * selected.length;
 
-  try {
-    // Build the full job matrix and run ALL generations in PARALLEL.
-    // Sequential execution exceeded the edge function timeout (3 structures × 3 formats × ~20s = up to 3 min).
-    // With Promise.all the wall time drops to roughly the slowest single generation.
+  // Create a job row IMMEDIATELY so the client can poll for progress.
+  const { data: jobRow, error: jobErr } = await supabase
+    .from("dropi_ad_jobs")
+    .insert({
+      user_id: user.id,
+      dropi_product_id: product_id,
+      status: "pending",
+      progress_total: totalJobs,
+      progress_done: 0,
+      charge_transaction_id: chargeTxId,
+    })
+    .select("id")
+    .single();
+
+  if (jobErr || !jobRow) {
+    console.error("Failed to create job row", jobErr);
+    if (chargeTxId) {
+      try { await refundCredits(supabase, chargeTxId, "job_create_failed"); } catch (_) {}
+    }
+    return new Response(JSON.stringify({ error: "job_create_failed" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  const jobId = jobRow.id;
+
+  // Process generations in the background. The HTTP response returns immediately
+  // with the job_id so the UI can poll for progress without blocking on the
+  // edge function execution time limit.
+  const processInBackground = async () => {
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
+    type GenItem = {
+      format: string;
+      structure: StructureKey;
+      variation: number;
+      url: string;
+    };
+
+    await supabase
+      .from("dropi_ad_jobs")
+      .update({ status: "processing", started_at: new Date().toISOString() })
+      .eq("id", jobId);
+
     const jobs: { format: typeof FORMATS[number]; structure: StructureKey }[] = [];
     for (const format of FORMATS) {
       for (const structure of selected) {
         jobs.push({ format, structure });
       }
     }
+
+    let completedCount = 0;
+    const completed: GenItem[] = [];
 
     const generateOne = async (
       job: { format: typeof FORMATS[number]; structure: StructureKey },
@@ -321,35 +358,89 @@ serve(async (req) => {
       }
     };
 
-    const results = await Promise.all(jobs.map(generateOne));
-    const generatedImages: GenItem[] = results.filter((r): r is GenItem => r !== null);
-
-    // If nothing was generated, refund the user
-    if (generatedImages.length === 0) {
-      if (chargeTxId) await refundCredits(supabase, chargeTxId, "no_images_generated");
-      return new Response(
-        JSON.stringify({ error: "no_images_generated" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    try {
+      // Run all jobs in parallel; update progress as each one settles.
+      await Promise.all(
+        jobs.map(async (j) => {
+          const result = await generateOne(j);
+          completedCount += 1;
+          if (result) completed.push(result);
+          // Best-effort progress update; ignore errors.
+          await supabase
+            .from("dropi_ad_jobs")
+            .update({
+              progress_done: completedCount,
+              result_images: completed,
+            })
+            .eq("id", jobId);
+        }),
       );
-    }
 
-    await supabase.from("dropi_ad_generations").insert({
-      user_id: user.id,
-      dropi_product_id: product_id,
-    });
+      if (completed.length === 0) {
+        if (chargeTxId) {
+          try { await refundCredits(supabase, chargeTxId, "no_images_generated"); } catch (_) {}
+        }
+        await supabase
+          .from("dropi_ad_jobs")
+          .update({
+            status: "failed",
+            error_message: "no_images_generated",
+            completed_at: new Date().toISOString(),
+          })
+          .eq("id", jobId);
+        return;
+      }
 
-    return new Response(
-      JSON.stringify({ images: generatedImages, language: userLang, balance: chargeResult.balance }),
-      { headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
-  } catch (err) {
-    console.error("generate-dropi-ads failed", err);
-    if (chargeTxId) {
-      try { await refundCredits(supabase, chargeTxId, "generation_exception"); } catch (_) {}
+      await supabase.from("dropi_ad_generations").insert({
+        user_id: user.id,
+        dropi_product_id: product_id,
+      });
+
+      await supabase
+        .from("dropi_ad_jobs")
+        .update({
+          status: "completed",
+          progress_done: completedCount,
+          result_images: completed,
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", jobId);
+    } catch (err) {
+      console.error("background generation failed", err);
+      if (chargeTxId) {
+        try { await refundCredits(supabase, chargeTxId, "generation_exception"); } catch (_) {}
+      }
+      await supabase
+        .from("dropi_ad_jobs")
+        .update({
+          status: "failed",
+          error_message: (err as Error).message,
+          completed_at: new Date().toISOString(),
+        })
+        .eq("id", jobId);
     }
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  };
+
+  // Fire-and-forget: keep the worker alive after the response is sent.
+  // @ts-ignore EdgeRuntime is provided by Supabase Edge Functions runtime.
+  if (typeof EdgeRuntime !== "undefined" && typeof EdgeRuntime.waitUntil === "function") {
+    // @ts-ignore
+    EdgeRuntime.waitUntil(processInBackground());
+  } else {
+    // Fallback: just kick it off (best-effort)
+    processInBackground().catch((e) => console.error("background fallback error", e));
   }
+
+  return new Response(
+    JSON.stringify({
+      job_id: jobId,
+      total: totalJobs,
+      language: userLang,
+      balance: chargeResult.balance,
+    }),
+    {
+      status: 202,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    },
+  );
 });
