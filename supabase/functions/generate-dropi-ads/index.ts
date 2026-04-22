@@ -234,21 +234,33 @@ serve(async (req) => {
       : VALID;
 
   const lovableApiKey = Deno.env.get("LOVABLE_API_KEY")!;
-  const generatedImages: {
+  type GenItem = {
     format: string;
     structure: StructureKey;
     variation: number;
     url: string;
-  }[] = [];
+  };
 
   try {
+    // Build the full job matrix and run ALL generations in PARALLEL.
+    // Sequential execution exceeded the edge function timeout (3 structures × 3 formats × ~20s = up to 3 min).
+    // With Promise.all the wall time drops to roughly the slowest single generation.
+    const jobs: { format: typeof FORMATS[number]; structure: StructureKey }[] = [];
     for (const format of FORMATS) {
       for (const structure of selected) {
-        const variation = 1;
-        const prompt = buildStructurePrompt(
-          structure, variation, product_name, show_name, badge, pack, format,
-        );
+        jobs.push({ format, structure });
+      }
+    }
 
+    const generateOne = async (
+      job: { format: typeof FORMATS[number]; structure: StructureKey },
+    ): Promise<GenItem | null> => {
+      const variation = 1;
+      const prompt = buildStructurePrompt(
+        job.structure, variation, product_name, show_name, badge, pack, job.format,
+      );
+
+      try {
         const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -271,32 +283,46 @@ serve(async (req) => {
         });
 
         if (!aiRes.ok) {
-          console.error("AI gateway error", aiRes.status, await aiRes.text());
-          continue;
+          const errText = await aiRes.text();
+          console.error("AI gateway error", aiRes.status, errText);
+          return null;
         }
 
         const aiData = await aiRes.json();
         const imageData = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-        if (!imageData) continue;
+        if (!imageData) {
+          console.error("AI gateway returned no image", JSON.stringify(aiData).slice(0, 500));
+          return null;
+        }
 
         const base64 = imageData.replace(/^data:image\/\w+;base64,/, "");
         const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
-        const filePath = `${user.id}/${product_id}/${structure}_${format.name}.png`;
+        const filePath = `${user.id}/${product_id}/${job.structure}_${job.format.name}.png`;
 
-        await supabase.storage.from("dropi-ads").upload(filePath, bytes, {
+        const { error: upErr } = await supabase.storage.from("dropi-ads").upload(filePath, bytes, {
           contentType: "image/png",
           upsert: true,
         });
+        if (upErr) {
+          console.error("Storage upload error", upErr);
+          return null;
+        }
 
         const { data: urlData } = supabase.storage.from("dropi-ads").getPublicUrl(filePath);
-        generatedImages.push({
-          format: format.name,
-          structure,
+        return {
+          format: job.format.name,
+          structure: job.structure,
           variation,
           url: urlData.publicUrl,
-        });
+        };
+      } catch (e) {
+        console.error("generateOne exception", job.structure, job.format.name, e);
+        return null;
       }
-    }
+    };
+
+    const results = await Promise.all(jobs.map(generateOne));
+    const generatedImages: GenItem[] = results.filter((r): r is GenItem => r !== null);
 
     // If nothing was generated, refund the user
     if (generatedImages.length === 0) {
