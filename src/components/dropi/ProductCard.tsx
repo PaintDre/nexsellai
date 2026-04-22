@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { FreeBadge } from "@/components/FreeBadge";
 
 interface Props {
   id: string;
@@ -27,6 +28,10 @@ export const ProductCard = ({ id, name, image_main, category }: Props) => (
       )}
       {/* Subtle vignette on hover */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden />
+      {/* Free badge for new users (auto-hides after 2h) */}
+      <div className="absolute top-1.5 left-1.5 z-10 pointer-events-none">
+        <FreeBadge size="xs" labelKey="common.freeDownload" />
+      </div>
     </div>
     <div className="p-2.5 sm:p-3 space-y-1.5">
       <h3 className="text-xs sm:text-sm font-semibold text-foreground line-clamp-2 leading-snug group-hover:text-primary transition-colors">
