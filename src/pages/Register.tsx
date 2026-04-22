@@ -62,7 +62,20 @@ const Register = () => {
     });
     setLoading(false);
     if (error) {
-      toast.error(t("auth.register.errorTitle"), { description: error.message });
+      const raw = (error.message || "").toLowerCase();
+      let description = error.message;
+      if (raw.includes("disposable_email_blocked")) {
+        description = t(
+          "auth.register.errorDisposable",
+          "Por favor usa un correo personal válido. Los correos temporales no están permitidos.",
+        );
+      } else if (raw.includes("duplicate_account_blocked")) {
+        description = t(
+          "auth.register.errorDuplicate",
+          "Ya existe una cuenta con este correo. Inicia sesión o recupera tu contraseña.",
+        );
+      }
+      toast.error(t("auth.register.errorTitle"), { description });
     } else {
       setRegisteredEmail(email);
       setShowVerificationDialog(true);
