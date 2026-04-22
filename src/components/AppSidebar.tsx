@@ -19,6 +19,7 @@ import {
   BadgeCheck,
   Pin,
   PinOff,
+  ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -84,6 +85,7 @@ export const SidebarContent = ({
   const adminItems: NavItem[] = [];
   if (isAdmin()) {
     adminItems.push({ label: t("sidebar.admin"), icon: Shield, href: "/admin" });
+    adminItems.push({ label: "Free & Anti-abuso", icon: ShieldAlert, href: "/admin/free-users" });
     adminItems.push({ label: t("sidebar.payments"), icon: Banknote, href: "/admin/payments" });
     adminItems.push({ label: t("sidebar.email"), icon: Mail, href: "/admin/email" });
     adminItems.push({ label: t("sidebar.automations"), icon: Zap, href: "/admin/automations" });
