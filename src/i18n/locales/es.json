@@ -13,6 +13,9 @@
   "common": {
     "save": "Guardar",
     "cancel": "Cancelar",
+    "freeBadge": "GRATIS",
+    "freeDownload": "Descarga gratis",
+    "firstFree": "1 gratis",
     "delete": "Eliminar",
     "edit": "Editar",
     "create": "Crear",

@@ -13,6 +13,7 @@ import {
   isFreeDropiLimitReachedError,
 } from "@/hooks/useCredits";
 import { InsufficientCreditsModal } from "@/components/credits/InsufficientCreditsModal";
+import { FreeBadge } from "@/components/FreeBadge";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import JSZip from "jszip";
@@ -204,9 +205,12 @@ export const AdGeneratorModal = ({ open, onOpenChange, product }: Props) => {
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogTitle className="text-lg font-bold font-display flex items-center gap-2">
+          <DialogTitle className="text-lg font-bold font-display flex items-center gap-2 flex-wrap">
             <Sparkles className="h-5 w-5 text-primary" />
             {t("dropi.generateAds")}
+            {profile?.plan === "free" && (
+              <FreeBadge size="sm" labelKey="common.firstFree" />
+            )}
           </DialogTitle>
           <DialogDescription className="sr-only">
             {t("dropi.adStructuresDesc")}

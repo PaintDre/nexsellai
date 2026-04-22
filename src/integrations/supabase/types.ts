@@ -774,6 +774,33 @@ export type Database = {
         }
         Relationships: []
       }
+      signup_fingerprints: {
+        Row: {
+          created_at: string
+          email_domain: string
+          id: string
+          normalized_email: string
+          raw_email: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_domain: string
+          id?: string
+          normalized_email: string
+          raw_email: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_domain?: string
+          id?: string
+          normalized_email?: string
+          raw_email?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           created_at: string
@@ -999,6 +1026,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_disposable_email_domain: { Args: { _email: string }; Returns: boolean }
+      normalize_email: { Args: { _email: string }; Returns: string }
       refund_credits: {
         Args: { _reason?: string; _transaction_id: string }
         Returns: Json
