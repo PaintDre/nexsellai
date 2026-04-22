@@ -184,6 +184,116 @@ serve(async (req) => {
       return jsonResponse({ payments: enriched });
     }
 
+    // GET /free-users-audit
+    // Returns:
+    //  - free users with their signup fingerprint info
+    //  - whether they are still in the "new user free badge" window (2h)
+    //  - per-domain stats (signups by email_domain)
+    //  - groups of normalized_emails that have >1 raw_email variants (potential abuse)
+    if (req.method === "GET" && path === "/free-users-audit") {
+      const NEW_USER_FREE_BADGE_HOURS = 2;
+      const windowMs = NEW_USER_FREE_BADGE_HOURS * 60 * 60 * 1000;
+
+      // 1. All free profiles
+      const { data: freeProfiles, error: freeErr } = await supabase
+        .from("profiles")
+        .select("user_id, full_name, plan, created_at, landings_used, banners_used, credits_balance, country_code")
+        .eq("plan", "free")
+        .order("created_at", { ascending: false });
+
+      if (freeErr) return jsonResponse({ error: freeErr.message }, 500);
+
+      const freeUserIds = (freeProfiles || []).map((p: any) => p.user_id);
+
+      // 2. Fingerprints for those free users
+      const { data: fingerprints } = await supabase
+        .from("signup_fingerprints")
+        .select("user_id, normalized_email, raw_email, email_domain, created_at")
+        .in("user_id", freeUserIds.length ? freeUserIds : ["00000000-0000-0000-0000-000000000000"]);
+
+      const fpByUser = new Map<string, any>();
+      (fingerprints || []).forEach((f: any) => fpByUser.set(f.user_id, f));
+
+      // 3. Pull emails from auth (batch)
+      const emailByUser = new Map<string, string>();
+      for (const uid of freeUserIds) {
+        try {
+          const { data: { user: authUser } } = await supabase.auth.admin.getUserById(uid);
+          if (authUser?.email) emailByUser.set(uid, authUser.email);
+        } catch { /* ignore */ }
+      }
+
+      // 4. Has the user used dropi free generation lifetime?
+      const { data: adGens } = await supabase
+        .from("dropi_ad_generations")
+        .select("user_id")
+        .in("user_id", freeUserIds.length ? freeUserIds : ["00000000-0000-0000-0000-000000000000"]);
+      const usedFreeGen = new Set<string>((adGens || []).map((g: any) => g.user_id));
+
+      const now = Date.now();
+      const users = (freeProfiles || []).map((p: any) => {
+        const fp = fpByUser.get(p.user_id);
+        const createdMs = new Date(p.created_at).getTime();
+        const ageMs = now - createdMs;
+        const inFreeWindow = ageMs < windowMs;
+        return {
+          user_id: p.user_id,
+          full_name: p.full_name,
+          email: emailByUser.get(p.user_id) || fp?.raw_email || "",
+          normalized_email: fp?.normalized_email || null,
+          email_domain: fp?.email_domain || null,
+          country_code: p.country_code,
+          created_at: p.created_at,
+          age_hours: Math.floor(ageMs / (60 * 60 * 1000)),
+          in_free_window: inFreeWindow,
+          free_window_remaining_minutes: inFreeWindow
+            ? Math.max(0, Math.ceil((windowMs - ageMs) / (60 * 1000)))
+            : 0,
+          credits_balance: p.credits_balance,
+          landings_used: p.landings_used,
+          banners_used: p.banners_used,
+          used_free_dropi_generation: usedFreeGen.has(p.user_id),
+        };
+      });
+
+      // 5. Domain stats — across ALL fingerprints, not only free
+      const { data: allFingerprints } = await supabase
+        .from("signup_fingerprints")
+        .select("email_domain, normalized_email, raw_email, user_id, created_at");
+
+      const domainCounts = new Map<string, number>();
+      const normalizedGroups = new Map<string, { raw_email: string; user_id: string; created_at: string }[]>();
+      (allFingerprints || []).forEach((f: any) => {
+        domainCounts.set(f.email_domain, (domainCounts.get(f.email_domain) || 0) + 1);
+        const arr = normalizedGroups.get(f.normalized_email) || [];
+        arr.push({ raw_email: f.raw_email, user_id: f.user_id, created_at: f.created_at });
+        normalizedGroups.set(f.normalized_email, arr);
+      });
+
+      const topDomains = [...domainCounts.entries()]
+        .map(([domain, count]) => ({ domain, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 15);
+
+      const suspiciousGroups = [...normalizedGroups.entries()]
+        .filter(([_, variants]) => variants.length > 1)
+        .map(([normalized_email, variants]) => ({ normalized_email, variants }))
+        .sort((a, b) => b.variants.length - a.variants.length);
+
+      return jsonResponse({
+        users,
+        totals: {
+          free_users: users.length,
+          in_free_window: users.filter((u) => u.in_free_window).length,
+          used_free_dropi: users.filter((u) => u.used_free_dropi_generation).length,
+          unique_domains: domainCounts.size,
+          suspicious_groups: suspiciousGroups.length,
+        },
+        top_domains: topDomains,
+        suspicious_groups: suspiciousGroups,
+      });
+    }
+
     // GET /config
     if (req.method === "GET" && path === "/config") {
       if (!isSuperAdmin) return jsonResponse({ error: "Forbidden" }, 403);
