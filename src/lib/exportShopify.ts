@@ -206,7 +206,11 @@ export function generateShopifyCustomLiquid(
   const button = `<div class="nexsell-cta-wrap">
     {% assign nexsell_variant = product.selected_or_first_available_variant %}
     {% if product and nexsell_variant %}
-      <form action="/cart/add" method="post"><input type="hidden" name="id" value="{{ nexsell_variant.id }}"><button type="submit" class="nexsell-btn" {% unless nexsell_variant.available %}disabled{% endunless %}>{% if nexsell_variant.available %}Comprar ahora — {{ product.price | money }}{% else %}Agotado{% endif %}</button></form>
+      <form action="/cart/add" method="post" enctype="multipart/form-data" class="nexsell-cart-form">
+        <input type="hidden" name="id" value="{{ nexsell_variant.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" class="nexsell-btn" {% unless nexsell_variant.available %}disabled aria-disabled="true"{% endunless %}>{% if nexsell_variant.available %}Comprar ahora — {{ nexsell_variant.price | money }}{% else %}Agotado{% endif %}</button>
+      </form>
     {% else %}
       <a href="/collections/all" class="nexsell-btn">Comprar ahora${fallbackPrice ? ` — ${escapeHtml(fallbackPrice)}` : ""}</a>
     {% endif %}
@@ -284,11 +288,17 @@ export function generateShopifyLiquid(
   // Add-to-Cart CTA
   const addToCartForm = `
     <div class="nexsell-cta-wrap">
-      {% if nexsell_product %}
-        <form action="/cart/add" method="post">
-          <input type="hidden" name="id" value="{{ nexsell_product.variants.first.id }}">
-          <button type="submit" class="nexsell-btn">
-            {{ section.settings.cta_label | default: "Comprar ahora" }} — {{ nexsell_product.price | money }}
+      {% assign nexsell_variant = nexsell_product.selected_or_first_available_variant %}
+      {% if nexsell_product and nexsell_variant %}
+        <form action="/cart/add" method="post" enctype="multipart/form-data" class="nexsell-cart-form">
+          <input type="hidden" name="id" value="{{ nexsell_variant.id }}">
+          <input type="hidden" name="quantity" value="1">
+          <button type="submit" class="nexsell-btn" {% unless nexsell_variant.available %}disabled aria-disabled="true"{% endunless %}>
+            {% if nexsell_variant.available %}
+              {{ section.settings.cta_label | default: "Comprar ahora" }} — {{ nexsell_variant.price | money }}
+            {% else %}
+              Agotado
+            {% endif %}
           </button>
         </form>
       {% else %}
