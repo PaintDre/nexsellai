@@ -204,8 +204,9 @@ export function generateShopifyCustomLiquid(
   const fallbackPrice = product?.price ? `$${product.price.toLocaleString("es-CL")}` : "";
   const productName = product?.name || hero?.title || "Producto";
   const button = `<div class="nexsell-cta-wrap">
-    {% if product %}
-      <form action="/cart/add" method="post"><input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}"><button type="submit" class="nexsell-btn">Comprar ahora — {{ product.price | money }}</button></form>
+    {% assign nexsell_variant = product.selected_or_first_available_variant %}
+    {% if product and nexsell_variant %}
+      <form action="/cart/add" method="post"><input type="hidden" name="id" value="{{ nexsell_variant.id }}"><button type="submit" class="nexsell-btn" {% unless nexsell_variant.available %}disabled{% endunless %}>{% if nexsell_variant.available %}Comprar ahora — {{ product.price | money }}{% else %}Agotado{% endif %}</button></form>
     {% else %}
       <a href="/collections/all" class="nexsell-btn">Comprar ahora${fallbackPrice ? ` — ${escapeHtml(fallbackPrice)}` : ""}</a>
     {% endif %}
