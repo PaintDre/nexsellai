@@ -11,6 +11,7 @@ interface Block {
 interface ThemeColors {
   heroBg: string;
   heroText: string;
+  sectionBg: string;
   sectionAltBg: string;
   sectionAltText: string;
   sectionAltMuted: string;
@@ -35,7 +36,7 @@ interface ThemeColors {
 
 const themeCSS: Record<LandingTheme, ThemeColors> = {
   minimal: {
-    heroBg: "#ffffff", heroText: "#111827", sectionAltBg: "#f9fafb",
+    heroBg: "#ffffff", heroText: "#111827", sectionBg: "#ffffff", sectionAltBg: "#f9fafb",
     sectionAltText: "#111827", sectionAltMuted: "#6b7280",
     sectionAltCardBg: "#ffffff", sectionAltCardBorder: "#f3f4f6",
     ctaBg: "#111827", ctaHover: "#1f2937", ctaText: "#ffffff",
@@ -46,18 +47,18 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#facc15", trustColor: "#9ca3af",
   },
   bold: {
-    heroBg: "#030712", heroText: "#ffffff", sectionAltBg: "#030712",
+    heroBg: "#030712", heroText: "#ffffff", sectionBg: "#111827", sectionAltBg: "#030712",
     sectionAltText: "#ffffff", sectionAltMuted: "#9ca3af",
     sectionAltCardBg: "#111827", sectionAltCardBorder: "#1f2937",
     ctaBg: "#10b981", ctaHover: "#059669", ctaText: "#ffffff",
     headingColor: "#111827", bodyColor: "#374151", mutedColor: "#6b7280",
-    accentBg: "#ecfdf5", cardBg: "#ffffff", cardBorder: "#e5e7eb",
+    accentBg: "#111827", cardBg: "#111827", cardBorder: "#1f2937",
     guaranteeBg: "#ecfdf5", guaranteeBorder: "#6ee7b7",
     urgencyBg: "#dc2626", urgencyText: "#ffffff",
     starColor: "#facc15", trustColor: "#9ca3af",
   },
   clean: {
-    heroBg: "#eff6ff", heroText: "#0f172a", sectionAltBg: "#f8fafc",
+    heroBg: "linear-gradient(180deg,#eff6ff 0%,#ffffff 100%)", heroText: "#0f172a", sectionBg: "#ffffff", sectionAltBg: "#f8fafc",
     sectionAltText: "#0f172a", sectionAltMuted: "#94a3b8",
     sectionAltCardBg: "#ffffff", sectionAltCardBorder: "#f1f5f9",
     ctaBg: "#2563eb", ctaHover: "#1d4ed8", ctaText: "#ffffff",
@@ -68,7 +69,7 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#3b82f6", trustColor: "#94a3b8",
   },
   warm: {
-    heroBg: "#fffbeb", heroText: "#451a03", sectionAltBg: "#fff7ed",
+    heroBg: "linear-gradient(180deg,#fffbeb 0%,#fff7ed 100%)", heroText: "#451a03", sectionBg: "#ffffff", sectionAltBg: "#fff7ed",
     sectionAltText: "#451a03", sectionAltMuted: "#a16207",
     sectionAltCardBg: "#ffffff", sectionAltCardBorder: "#ffedd5",
     ctaBg: "#f97316", ctaHover: "#ea580c", ctaText: "#ffffff",
@@ -79,7 +80,7 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#fb923c", trustColor: "#d97706",
   },
   "saas-mono": {
-    heroBg: "#fafafa", heroText: "#09090b", sectionAltBg: "#fafafa",
+    heroBg: "linear-gradient(180deg,#fafafa 0%,#ffffff 100%)", heroText: "#09090b", sectionBg: "#ffffff", sectionAltBg: "#fafafa",
     sectionAltText: "#09090b", sectionAltMuted: "#a1a1aa",
     sectionAltCardBg: "#ffffff", sectionAltCardBorder: "#e4e4e7",
     ctaBg: "#09090b", ctaHover: "#27272a", ctaText: "#ffffff",
@@ -90,9 +91,9 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#6366f1", trustColor: "#a1a1aa",
   },
   "dtc-bold": {
-    heroBg: "#09090b", heroText: "#fde047", sectionAltBg: "#fde047",
-    sectionAltText: "#09090b", sectionAltMuted: "#3f3f46",
-    sectionAltCardBg: "#09090b", sectionAltCardBorder: "#09090b",
+    heroBg: "#09090b", heroText: "#fde047", sectionBg: "#09090b", sectionAltBg: "#18181b",
+    sectionAltText: "#fde047", sectionAltMuted: "#a1a1aa",
+    sectionAltCardBg: "#18181b", sectionAltCardBorder: "#27272a",
     ctaBg: "#fde047", ctaHover: "#facc15", ctaText: "#09090b",
     headingColor: "#09090b", bodyColor: "#27272a", mutedColor: "#52525b",
     accentBg: "#fde047", cardBg: "#ffffff", cardBorder: "#09090b",
@@ -101,7 +102,7 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#fbbf24", trustColor: "#71717a",
   },
   "editorial-apple": {
-    heroBg: "#ffffff", heroText: "#171717", sectionAltBg: "#f5f5f5",
+    heroBg: "#ffffff", heroText: "#171717", sectionBg: "#ffffff", sectionAltBg: "#f5f5f5",
     sectionAltText: "#171717", sectionAltMuted: "#a3a3a3",
     sectionAltCardBg: "#ffffff", sectionAltCardBorder: "#e5e5e5",
     ctaBg: "#2563eb", ctaHover: "#1d4ed8", ctaText: "#ffffff",
@@ -112,7 +113,7 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#3b82f6", trustColor: "#a3a3a3",
   },
   "modern-ecommerce": {
-    heroBg: "#f5f5f4", heroText: "#1c1917", sectionAltBg: "#ffffff",
+    heroBg: "linear-gradient(180deg,#f5f5f4 0%,#fafaf9 100%)", heroText: "#1c1917", sectionBg: "#fafaf9", sectionAltBg: "#ffffff",
     sectionAltText: "#1c1917", sectionAltMuted: "#78716c",
     sectionAltCardBg: "#fafaf9", sectionAltCardBorder: "#e7e5e4",
     ctaBg: "#065f46", ctaHover: "#064e3b", ctaText: "#fafaf9",
@@ -123,7 +124,7 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#047857", trustColor: "#a8a29e",
   },
   "story-soft": {
-    heroBg: "#fff1f2", heroText: "#4c0519", sectionAltBg: "#ffffff",
+    heroBg: "linear-gradient(135deg,#fff1f2 0%,#fff7ed 55%,#fffbeb 100%)", heroText: "#4c0519", sectionBg: "#fffbeb", sectionAltBg: "#ffffff",
     sectionAltText: "#4c0519", sectionAltMuted: "#9f1239",
     sectionAltCardBg: "#ffffff", sectionAltCardBorder: "#ffe4e6",
     ctaBg: "#881337", ctaHover: "#4c0519", ctaText: "#fff1f2",
