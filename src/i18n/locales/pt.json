@@ -188,17 +188,17 @@
     "groupAccount": "Conta"
   },
   "exportDialog": {
-    "title": "Baixar template Shopify",
+    "title": "Enviar landing para Shopify",
     "copied": "Copiado",
-    "copyLiquid": "Copiar Liquid para Shopify",
-    "liquidCopied": "Liquid copiado para Shopify",
+    "copyLiquid": "Copiar para Shopify",
+    "liquidCopied": "Código Shopify copiado corretamente",
     "easyTitle": "Instalação fácil no Shopify",
-    "easyDescription": "Cole este código em uma seção Liquid personalizado. Ele é adaptado para Shopify e mantém o design do Nexsell com CSS encapsulado e imagens absolutas.",
+    "easyDescription": "Cole no Shopify dentro do produto: Temas → Personalizar → Adicionar seção → Liquid personalizado.",
     "copyInstructions": "Vá para Shopify → Temas → Personalizar → Adicionar seção → Liquid personalizado e cole o código.",
-    "downloadLiquid": "Baixar template Shopify",
+    "downloadLiquid": "Baixar ZIP avançado",
     "liquidDownloaded": "✅ Template Shopify baixado",
     "liquidInstructions": "Não instala apps nem usa OAuth. Para o fluxo fácil, copie custom-liquid/nexsell-copy-paste.liquid em uma seção Liquid personalizado. Os arquivos sections/templates continuam como opção avançada.",
-    "advancedTitle": "Publicação automática opcional",
+    "advancedTitle": "Para agências ou desenvolvedores",
     "advancedDescription": "Use apenas se quiser autorizar o Nexsell no Shopify. O Shopify mostrará como app conectado."
   },
   "shopify": {
