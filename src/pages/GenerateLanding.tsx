@@ -23,6 +23,7 @@ import { InsufficientCreditsModal } from "@/components/credits/InsufficientCredi
 import { Coins } from "lucide-react";
 
 type Product = Tables<"products">;
+type GenerationStatus = "idle" | "generating" | "saving" | "success" | "error";
 
 const GenerateLanding = () => {
   const { t } = useTranslation();
@@ -40,7 +41,8 @@ const GenerateLanding = () => {
   const [theme, setTheme] = useState<LandingTheme>("clean");
   const [autoImages, setAutoImages] = useState(true);
   const [templateId, setTemplateId] = useState("completa");
-  const [generationStep, setGenerationStep] = useState<"idle" | "copy" | "images" | "done">("idle");
+  const [generationStatus, setGenerationStatus] = useState<GenerationStatus>("idle");
+  const [generationDetail, setGenerationDetail] = useState<"copy" | "images" | null>(null);
   const [progress, setProgress] = useState(0);
   const [quickMode, setQuickMode] = useState(true);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -120,7 +122,8 @@ const GenerateLanding = () => {
     console.log("[handleGenerate] start", { productId: product.id, plan: profile.plan, mode, intensity, hasOffer, autoImages, templateId });
 
     setGenerating(true);
-    setGenerationStep("copy");
+    setGenerationStatus("generating");
+    setGenerationDetail("copy");
     setProgress(10);
 
     const toastId = toast.loading(t("ai.generatingLanding"), { description: t("ai.queuedDesc") });
@@ -154,7 +157,8 @@ const GenerateLanding = () => {
         if (isInsufficientCreditsError(error)) {
           toast.dismiss(toastId);
           setShowInsufficient(true);
-          setGenerationStep("idle");
+          setGenerationStatus("idle");
+          setGenerationDetail(null);
           setProgress(0);
           await refreshCredits();
           return;
@@ -167,14 +171,16 @@ const GenerateLanding = () => {
               "Tu plan Free permite solo 1 landing. Actualiza para crear más.",
             ),
           });
-          setGenerationStep("idle");
+          setGenerationStatus("idle");
+          setGenerationDetail(null);
           setProgress(0);
           setTimeout(() => navigate("/subscription"), 600);
           return;
         }
         console.error("[handleGenerate] generate-landing edge function failed:", error);
         toast.error(t("ai.errorTitle"), { id: toastId, description: error.message || "Edge function error" });
-        setGenerationStep("idle");
+        setGenerationStatus("error");
+        setGenerationDetail(null);
         setProgress(0);
         return;
       }
@@ -182,12 +188,15 @@ const GenerateLanding = () => {
       if (!data || !Array.isArray(data.blocks) || data.blocks.length === 0) {
         console.error("[handleGenerate] generate-landing returned invalid payload:", data);
         toast.error(t("ai.errorTitle"), { id: toastId, description: "Empty AI response" });
-        setGenerationStep("idle");
+        setGenerationStatus("error");
+        setGenerationDetail(null);
         setProgress(0);
         return;
       }
 
       console.log(`[handleGenerate] generate-landing OK in ${Date.now() - tEdge}ms — ${data.blocks.length} blocks`);
+      setGenerationStatus("saving");
+      setGenerationDetail(null);
       setProgress(50);
 
       // ── Step B: insert landing row ──
@@ -206,7 +215,8 @@ const GenerateLanding = () => {
       if (insertError || !inserted) {
         console.error("[handleGenerate] insert into landings failed:", insertError);
         toast.error(t("ai.errorTitle"), { id: toastId, description: insertError?.message || "DB insert failed" });
-        setGenerationStep("idle");
+        setGenerationStatus("error");
+        setGenerationDetail(null);
         setProgress(0);
         return;
       }
@@ -217,7 +227,8 @@ const GenerateLanding = () => {
 
       // ── Step C: AI banners (optional) ──
       if (autoImages && isPaidPlan && insertedLanding) {
-        setGenerationStep("images");
+        setGenerationStatus("generating");
+        setGenerationDetail("images");
         setProgress(65);
 
         const allImageUrls: string[] = [];
@@ -260,10 +271,11 @@ const GenerateLanding = () => {
       await refreshCredits();
 
       setProgress(100);
-      setGenerationStep("done");
+      setGenerationStatus("success");
+      setGenerationDetail(null);
       console.log(`[handleGenerate] complete in ${Date.now() - tStart}ms`);
 
-      toast.success(t("generateLanding.generated"));
+      toast.success(t("generateLanding.generatedCorrectly"), { id: toastId });
 
       setTimeout(() => {
         navigate(`/landings/${insertedLanding?.id || ""}`);
@@ -271,7 +283,8 @@ const GenerateLanding = () => {
     } catch (err: any) {
       console.error("[handleGenerate] unexpected error:", err);
       toast.error(t("generateLanding.generateError"), { description: err?.message || "Unexpected error" });
-      setGenerationStep("idle");
+      setGenerationStatus("error");
+      setGenerationDetail(null);
       setProgress(0);
     } finally {
       setGenerating(false);
@@ -280,11 +293,48 @@ const GenerateLanding = () => {
 
   if (!product) return null;
 
-  const stepLabels: Record<string, string> = {
+  const statusLabel = {
     idle: "",
-    copy: t("generateLanding.stepCopy"),
-    images: t("generateLanding.stepImages"),
-    done: t("generateLanding.stepDone"),
+    generating: generationDetail === "images" ? t("generateLanding.stepImages") : t("generateLanding.stepGenerating"),
+    saving: t("generateLanding.stepSaving"),
+    success: t("generateLanding.generatedCorrectly"),
+    error: t("generateLanding.stepError"),
+  }[generationStatus];
+
+  const isWorking = generationStatus === "generating" || generationStatus === "saving";
+
+  const renderGenerationStatus = () => {
+    if (generationStatus === "idle") return null;
+
+    return (
+      <div className="space-y-3 p-4 rounded-lg border bg-muted/50">
+        {isWorking && (
+          <div className="flex items-start gap-3 p-3 rounded-md border border-primary/30 bg-primary/5">
+            <Loader2 className="h-5 w-5 animate-spin text-primary mt-0.5 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-primary">{t("generateLanding.queueTitle")}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{t("generateLanding.queueDesc")}</p>
+            </div>
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          {generationStatus === "success" ? (
+            <Check className="h-4 w-4 text-primary" />
+          ) : generationStatus === "error" ? (
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+          ) : (
+            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          )}
+          <span className="text-sm font-medium">{statusLabel}</span>
+        </div>
+        <Progress value={progress} className="h-2" />
+        {generationDetail === "images" && (
+          <p className="text-xs text-muted-foreground">
+            {t("generateLanding.imagesHint")}
+          </p>
+        )}
+      </div>
+    );
   };
 
   return (
