@@ -750,17 +750,12 @@ export function generateShopifyTemplate(): string {
 export function generateShopifyProductTemplate(): string {
   return JSON.stringify({
     sections: {
-      main: {
-        type: "main-product",
-        disabled: true,
-        settings: {},
-      },
       "nexsell-landing": {
         type: "nexsell-landing",
         settings: {},
       },
     },
-    order: ["main", "nexsell-landing"],
+    order: ["nexsell-landing"],
   }, null, 2);
 }
 
@@ -790,6 +785,8 @@ Importante: no pegues este archivo dentro de "Custom liquid". Esta exportación 
 2. En **Theme template**, selecciona \`product.nexsell\`
 3. Guarda el producto
 4. El botón de compra usará ese producto automáticamente
+
+Este template no incluye \`main-product\`, \`product-details\` ni bloques de apps externas. Así evita errores de Shopify como \`block_order\` con apps de suscripción o bloques que no existen en el tema.
 
 ### 3. Usarlo como página independiente
 
