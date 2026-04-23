@@ -6,11 +6,21 @@ interface Block {
   title?: string;
   content?: string | string[] | Array<{ q: string; a: string }>;
   image_url?: string;
+  steps?: Array<{ icon?: string; top?: string; bottom?: string }>;
+  rows?: Array<{ benefit: string; us?: boolean; others?: boolean }>;
+  us_label?: string;
+  others_label?: string;
+  caption?: string;
+  stats?: Array<{ percentage: number | string; text: string }>;
+  text?: string;
+  items?: Array<string | { emoji?: string; text?: string; q?: string; a?: string }>;
+  options?: Array<{ label: string; price: string; compare_price?: string; badge?: string; savings?: string }>;
 }
 
 interface ThemeColors {
   heroBg: string;
   heroText: string;
+  sectionBg: string;
   sectionAltBg: string;
   sectionAltText: string;
   sectionAltMuted: string;
@@ -35,7 +45,7 @@ interface ThemeColors {
 
 const themeCSS: Record<LandingTheme, ThemeColors> = {
   minimal: {
-    heroBg: "#ffffff", heroText: "#111827", sectionAltBg: "#f9fafb",
+    heroBg: "#ffffff", heroText: "#111827", sectionBg: "#ffffff", sectionAltBg: "#f9fafb",
     sectionAltText: "#111827", sectionAltMuted: "#6b7280",
     sectionAltCardBg: "#ffffff", sectionAltCardBorder: "#f3f4f6",
     ctaBg: "#111827", ctaHover: "#1f2937", ctaText: "#ffffff",
@@ -46,18 +56,18 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#facc15", trustColor: "#9ca3af",
   },
   bold: {
-    heroBg: "#030712", heroText: "#ffffff", sectionAltBg: "#030712",
+    heroBg: "#030712", heroText: "#ffffff", sectionBg: "#111827", sectionAltBg: "#030712",
     sectionAltText: "#ffffff", sectionAltMuted: "#9ca3af",
     sectionAltCardBg: "#111827", sectionAltCardBorder: "#1f2937",
     ctaBg: "#10b981", ctaHover: "#059669", ctaText: "#ffffff",
     headingColor: "#111827", bodyColor: "#374151", mutedColor: "#6b7280",
-    accentBg: "#ecfdf5", cardBg: "#ffffff", cardBorder: "#e5e7eb",
+    accentBg: "#111827", cardBg: "#111827", cardBorder: "#1f2937",
     guaranteeBg: "#ecfdf5", guaranteeBorder: "#6ee7b7",
     urgencyBg: "#dc2626", urgencyText: "#ffffff",
     starColor: "#facc15", trustColor: "#9ca3af",
   },
   clean: {
-    heroBg: "#eff6ff", heroText: "#0f172a", sectionAltBg: "#f8fafc",
+    heroBg: "linear-gradient(180deg,#eff6ff 0%,#ffffff 100%)", heroText: "#0f172a", sectionBg: "#ffffff", sectionAltBg: "#f8fafc",
     sectionAltText: "#0f172a", sectionAltMuted: "#94a3b8",
     sectionAltCardBg: "#ffffff", sectionAltCardBorder: "#f1f5f9",
     ctaBg: "#2563eb", ctaHover: "#1d4ed8", ctaText: "#ffffff",
@@ -68,7 +78,7 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#3b82f6", trustColor: "#94a3b8",
   },
   warm: {
-    heroBg: "#fffbeb", heroText: "#451a03", sectionAltBg: "#fff7ed",
+    heroBg: "linear-gradient(180deg,#fffbeb 0%,#fff7ed 100%)", heroText: "#451a03", sectionBg: "#ffffff", sectionAltBg: "#fff7ed",
     sectionAltText: "#451a03", sectionAltMuted: "#a16207",
     sectionAltCardBg: "#ffffff", sectionAltCardBorder: "#ffedd5",
     ctaBg: "#f97316", ctaHover: "#ea580c", ctaText: "#ffffff",
@@ -79,7 +89,7 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#fb923c", trustColor: "#d97706",
   },
   "saas-mono": {
-    heroBg: "#fafafa", heroText: "#09090b", sectionAltBg: "#fafafa",
+    heroBg: "linear-gradient(180deg,#fafafa 0%,#ffffff 100%)", heroText: "#09090b", sectionBg: "#ffffff", sectionAltBg: "#fafafa",
     sectionAltText: "#09090b", sectionAltMuted: "#a1a1aa",
     sectionAltCardBg: "#ffffff", sectionAltCardBorder: "#e4e4e7",
     ctaBg: "#09090b", ctaHover: "#27272a", ctaText: "#ffffff",
@@ -90,9 +100,9 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#6366f1", trustColor: "#a1a1aa",
   },
   "dtc-bold": {
-    heroBg: "#09090b", heroText: "#fde047", sectionAltBg: "#fde047",
-    sectionAltText: "#09090b", sectionAltMuted: "#3f3f46",
-    sectionAltCardBg: "#09090b", sectionAltCardBorder: "#09090b",
+    heroBg: "#09090b", heroText: "#fde047", sectionBg: "#09090b", sectionAltBg: "#18181b",
+    sectionAltText: "#fde047", sectionAltMuted: "#a1a1aa",
+    sectionAltCardBg: "#18181b", sectionAltCardBorder: "#27272a",
     ctaBg: "#fde047", ctaHover: "#facc15", ctaText: "#09090b",
     headingColor: "#09090b", bodyColor: "#27272a", mutedColor: "#52525b",
     accentBg: "#fde047", cardBg: "#ffffff", cardBorder: "#09090b",
@@ -101,7 +111,7 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#fbbf24", trustColor: "#71717a",
   },
   "editorial-apple": {
-    heroBg: "#ffffff", heroText: "#171717", sectionAltBg: "#f5f5f5",
+    heroBg: "#ffffff", heroText: "#171717", sectionBg: "#ffffff", sectionAltBg: "#f5f5f5",
     sectionAltText: "#171717", sectionAltMuted: "#a3a3a3",
     sectionAltCardBg: "#ffffff", sectionAltCardBorder: "#e5e5e5",
     ctaBg: "#2563eb", ctaHover: "#1d4ed8", ctaText: "#ffffff",
@@ -112,7 +122,7 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#3b82f6", trustColor: "#a3a3a3",
   },
   "modern-ecommerce": {
-    heroBg: "#f5f5f4", heroText: "#1c1917", sectionAltBg: "#ffffff",
+    heroBg: "linear-gradient(180deg,#f5f5f4 0%,#fafaf9 100%)", heroText: "#1c1917", sectionBg: "#fafaf9", sectionAltBg: "#ffffff",
     sectionAltText: "#1c1917", sectionAltMuted: "#78716c",
     sectionAltCardBg: "#fafaf9", sectionAltCardBorder: "#e7e5e4",
     ctaBg: "#065f46", ctaHover: "#064e3b", ctaText: "#fafaf9",
@@ -123,7 +133,7 @@ const themeCSS: Record<LandingTheme, ThemeColors> = {
     starColor: "#047857", trustColor: "#a8a29e",
   },
   "story-soft": {
-    heroBg: "#fff1f2", heroText: "#4c0519", sectionAltBg: "#ffffff",
+    heroBg: "linear-gradient(135deg,#fff1f2 0%,#fff7ed 55%,#fffbeb 100%)", heroText: "#4c0519", sectionBg: "#fffbeb", sectionAltBg: "#ffffff",
     sectionAltText: "#4c0519", sectionAltMuted: "#9f1239",
     sectionAltCardBg: "#ffffff", sectionAltCardBorder: "#ffe4e6",
     ctaBg: "#881337", ctaHover: "#4c0519", ctaText: "#fff1f2",
@@ -179,6 +189,13 @@ export function generateShopifyCustomLiquid(
   const benefits = getBlock("benefits");
   const features = getBlock("features");
   const testimonials = getBlock("testimonials");
+  const comparisonTable = getBlock("comparison_table");
+  const resultsStats = getBlock("results_stats");
+  const shippingTimeline = getBlock("shipping_timeline");
+  const marqueeBenefits = getBlock("marquee_benefits");
+  const emojiBenefits = getBlock("emoji_benefits");
+  const bundleOffer = getBlock("bundle_offer");
+  const faqCod = getBlock("faq_cod");
   const faq = getBlock("faq");
   const offer = getBlock("offer");
   const cta = getBlock("cta");
@@ -187,8 +204,9 @@ export function generateShopifyCustomLiquid(
   const fallbackPrice = product?.price ? `$${product.price.toLocaleString("es-CL")}` : "";
   const productName = product?.name || hero?.title || "Producto";
   const button = `<div class="nexsell-cta-wrap">
-    {% if product %}
-      <form action="/cart/add" method="post"><input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}"><button type="submit" class="nexsell-btn">Comprar ahora — {{ product.price | money }}</button></form>
+    {% assign nexsell_variant = product.selected_or_first_available_variant %}
+    {% if product and nexsell_variant %}
+      <form action="/cart/add" method="post"><input type="hidden" name="id" value="{{ nexsell_variant.id }}"><button type="submit" class="nexsell-btn" {% unless nexsell_variant.available %}disabled{% endunless %}>{% if nexsell_variant.available %}Comprar ahora — {{ product.price | money }}{% else %}Agotado{% endif %}</button></form>
     {% else %}
       <a href="/collections/all" class="nexsell-btn">Comprar ahora${fallbackPrice ? ` — ${escapeHtml(fallbackPrice)}` : ""}</a>
     {% endif %}
@@ -200,15 +218,23 @@ export function generateShopifyCustomLiquid(
     const src = blockImage(block, index);
     return src ? `<div class="nexsell-section-image"><img src="${escapeHtml(src)}" alt="${escapeHtml(block?.title || productName)}" loading="lazy"></div>` : "";
   };
+  const plainItems = (items: Block["items"]) => Array.isArray(items) ? items.map((item) => typeof item === "string" ? item : item?.text || item?.q || "").filter(Boolean) : [];
 
   const sectionList = [
     hero && `<section class="nexsell-hero"><div class="nexsell-container nexsell-hero-grid"><div><h1 class="nexsell-h1">${escapeHtml(hero.title || productName)}</h1><p class="nexsell-subtitle">${escapeHtml(typeof hero.content === "string" ? hero.content : "")}</p>${button}</div>${imageUrl ? `<div class="nexsell-hero-img-wrap"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(productName)}" class="nexsell-hero-img" loading="lazy"></div>` : ""}</div></section>`,
     benefits && `<section class="nexsell-section-alt"><div class="nexsell-container-sm"><h2 class="nexsell-h2">${escapeHtml(benefits.title || "Beneficios")}</h2>${sectionImage(benefits, 1)}${textItems(benefits.content).map((item) => `<div class="nexsell-benefit-card"><span class="nexsell-check">✓</span><p>${escapeHtml(item)}</p></div>`).join("")}</div></section>`,
+    emojiBenefits && `<section class="nexsell-section"><div class="nexsell-container"><div class="nexsell-emoji-grid">${(emojiBenefits.items || []).map((item: any) => `<div class="nexsell-emoji-card"><span>${escapeHtml(item.emoji || "✓")}</span><p>${escapeHtml(item.text || "")}</p></div>`).join("")}</div></div></section>`,
+    marqueeBenefits && `<section class="nexsell-marquee"><div>${plainItems(marqueeBenefits.items).map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div></section>`,
     features && `<section class="nexsell-section"><div class="nexsell-container-sm"><h2 class="nexsell-h2">${escapeHtml(features.title || "Características")}</h2>${sectionImage(features, 2)}${textItems(features.content).map((item) => `<div class="nexsell-feature-item"><span class="nexsell-check">✓</span><span>${escapeHtml(item)}</span></div>`).join("")}</div></section>`,
+    resultsStats && `<section class="nexsell-section"><div class="nexsell-container"><h2 class="nexsell-h2">${escapeHtml(resultsStats.title || "Resultados comprobados")}</h2>${resultsStats.caption ? `<p class="nexsell-center-muted">${escapeHtml(resultsStats.caption)}</p>` : ""}<div class="nexsell-stats-grid">${(resultsStats.stats || []).map((stat) => `<div class="nexsell-stat-card"><strong>${escapeHtml(String(stat.percentage))}${String(stat.percentage).includes("%") ? "" : "%"}</strong><span>${escapeHtml(stat.text || "")}</span></div>`).join("")}</div></div></section>`,
     testimonials && `<section class="nexsell-section-alt"><div class="nexsell-container"><h2 class="nexsell-h2">${escapeHtml(testimonials.title || "Clientes felices")}</h2><div class="nexsell-testimonials-grid">${textItems(testimonials.content).map((item) => `<div class="nexsell-testimonial-card"><div class="nexsell-stars">★★★★★</div><p class="nexsell-testimonial-text">“${escapeHtml(item)}”</p><div class="nexsell-author-label">Cliente verificado</div></div>`).join("")}</div></div></section>`,
+    comparisonTable && `<section class="nexsell-section"><div class="nexsell-container-sm"><h2 class="nexsell-h2">${escapeHtml(comparisonTable.title || "Compáranos")}</h2><div class="nexsell-table"><div class="nexsell-table-head"><span></span><strong>${escapeHtml(comparisonTable.us_label || productName)}</strong><strong>${escapeHtml(comparisonTable.others_label || "Otros")}</strong></div>${(comparisonTable.rows || []).map((row) => `<div class="nexsell-table-row"><span>${escapeHtml(row.benefit || "")}</span><b>${row.us ? "✓" : "—"}</b><b>${row.others ? "✓" : "—"}</b></div>`).join("")}</div></div></section>`,
+    shippingTimeline && `<section class="nexsell-section-alt"><div class="nexsell-container"><h2 class="nexsell-h2">${escapeHtml(shippingTimeline.title || "Cómo recibirás tu pedido")}</h2><div class="nexsell-timeline">${(shippingTimeline.steps || []).map((step, i) => `<div class="nexsell-timeline-step"><span>${i + 1}</span><strong>${escapeHtml(step.top || "")}</strong><small>${escapeHtml(step.bottom || "")}</small></div>`).join("")}</div></div></section>`,
+    bundleOffer && `<section class="nexsell-section"><div class="nexsell-container"><h2 class="nexsell-h2">${escapeHtml(bundleOffer.title || "Elige tu pack")}</h2><div class="nexsell-bundles-grid">${(bundleOffer.options || []).slice(0, 3).map((opt) => `<div class="nexsell-bundle-card">${opt.badge ? `<small>${escapeHtml(opt.badge)}</small>` : ""}<h3>${escapeHtml(opt.label || "")}</h3><strong>${escapeHtml(opt.price || "")}</strong>${opt.compare_price ? `<del>${escapeHtml(opt.compare_price)}</del>` : ""}${opt.savings ? `<p>${escapeHtml(opt.savings)}</p>` : ""}${button}</div>`).join("")}</div></div></section>`,
     offer && `<section class="nexsell-offer-section"><div class="nexsell-container-narrow"><h2 class="nexsell-h2">${escapeHtml(offer.title || "Oferta especial")}</h2><p class="nexsell-offer-subtitle">${escapeHtml(typeof offer.content === "string" ? offer.content : "")}</p>${button}</div></section>`,
     guarantee && `<section class="nexsell-section"><div class="nexsell-container-narrow"><div class="nexsell-guarantee-card"><span class="nexsell-guarantee-icon">🛡️</span><div><h3 class="nexsell-guarantee-title">${escapeHtml(guarantee.title || "Garantía")}</h3><p>${escapeHtml(typeof guarantee.content === "string" ? guarantee.content : "")}</p></div></div></div></section>`,
     faq && Array.isArray(faq.content) && `<section class="nexsell-section-alt"><div class="nexsell-container-narrow"><h2 class="nexsell-h2">${escapeHtml(faq.title || "Preguntas frecuentes")}</h2>${faq.content.map((item: any) => typeof item === "string" ? `<details class="nexsell-faq-item"><summary>${escapeHtml(item)}</summary></details>` : `<details class="nexsell-faq-item"><summary>${escapeHtml(item.q || "")}</summary><div class="nexsell-faq-answer">${escapeHtml(item.a || "")}</div></details>`).join("")}</div></section>`,
+    faqCod && `<section class="nexsell-section-alt"><div class="nexsell-container-narrow"><h2 class="nexsell-h2">${escapeHtml(faqCod.title || "Preguntas frecuentes")}</h2>${((faqCod.items || faqCod.content || []) as any[]).map((item: any) => `<details class="nexsell-faq-item"><summary>${escapeHtml(item.q || item.text || "")}</summary><div class="nexsell-faq-answer">${escapeHtml(item.a || "")}</div></details>`).join("")}</div></section>`,
     `<section class="nexsell-final-cta"><div class="nexsell-container-narrow"><h2 class="nexsell-h2">${escapeHtml(cta?.title || "¿Listo para comprar?")}</h2><p class="nexsell-offer-subtitle">${escapeHtml(typeof cta?.content === "string" ? cta.content : "")}</p>${button}</div></section>`,
   ].filter(Boolean).join("\n");
 
@@ -639,8 +665,8 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 /* Nexsell Landing — Shopify Section Styles */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
-.nexsell-landing, .nexsell-landing * { margin: 0; padding: 0; box-sizing: border-box; }
-.nexsell-landing { font-family: 'Inter', system-ui, sans-serif; color: ${t.bodyColor}; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.nexsell-landing, .nexsell-landing * { margin: 0 !important; padding: 0; box-sizing: border-box; }
+.nexsell-landing { font-family: 'Inter', system-ui, sans-serif !important; color: ${t.bodyColor} !important; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-wrap:anywhere; word-break:break-word; }
 .nexsell-landing img { max-width: 100%; height: auto; }
 .nexsell-landing a { text-decoration: none; }
 
@@ -648,19 +674,21 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 .nexsell-container-sm { max-width: 768px; margin: 0 auto; }
 .nexsell-container-narrow { max-width: 640px; margin: 0 auto; }
 
-.nexsell-h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(36px, 5vw, 60px); font-weight: 800; line-height: 1.1; margin-bottom: 20px; color: ${t.heroText}; }
-.nexsell-h2 { font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 40px; }
+.nexsell-h1 { font-family: 'Space Grotesk', sans-serif !important; font-size: clamp(36px, 5vw, 60px) !important; font-weight: 800 !important; line-height: 1.1 !important; margin-bottom: 20px !important; color: ${t.heroText} !important; }
+.nexsell-h2 { font-family: 'Space Grotesk', sans-serif !important; font-size: 32px !important; font-weight: 700 !important; text-align: center; margin-bottom: 40px !important; color: ${t.headingColor} !important; }
 .nexsell-subtitle { font-size: 18px; line-height: 1.7; max-width: 600px; margin-bottom: 32px; opacity: 0.85; }
 
 /* Hero */
-.nexsell-hero { padding: 80px 24px; background: ${t.heroBg}; color: ${t.heroText}; }
+.nexsell-hero { padding: 80px 24px; background: ${t.heroBg} !important; color: ${t.heroText} !important; }
 .nexsell-hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
 .nexsell-hero-img-wrap { text-align: center; }
 .nexsell-hero-img { max-height: 480px; width: 100%; max-width: 400px; object-fit: cover; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
 
 /* Sections */
-.nexsell-section { padding: 64px 24px; background: #ffffff; }
-.nexsell-section-alt { padding: 64px 24px; background: ${t.sectionAltBg}; }
+.nexsell-section { padding: 64px 24px; background: ${t.sectionBg} !important; }
+.nexsell-section-alt { padding: 64px 24px; background: ${t.sectionAltBg} !important; }
+.nexsell-section-image { width:100%; border-radius:16px; overflow:hidden; box-shadow:0 10px 35px rgba(0,0,0,.12); margin-bottom:32px !important; background:${t.cardBg}; }
+.nexsell-section-image img { width:100%; display:block; object-fit:contain; }
 
 /* Benefits */
 .nexsell-benefit-card { display: flex; align-items: flex-start; gap: 16px; padding: 24px; background: ${t.sectionAltCardBg}; border: 1px solid ${t.sectionAltCardBorder}; border-radius: 12px; margin-bottom: 12px; }
@@ -669,6 +697,29 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 
 /* Features */
 .nexsell-feature-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; color: ${t.bodyColor}; }
+
+/* Shrine LATAM / advanced ecommerce blocks */
+.nexsell-emoji-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.nexsell-emoji-card { padding:20px; border:1px solid ${t.cardBorder}; border-radius:16px; background:${t.cardBg}; text-align:center; }
+.nexsell-emoji-card span { display:block; font-size:28px; margin-bottom:8px !important; }
+.nexsell-emoji-card p { color:${t.bodyColor}; font-weight:700; font-size:14px; }
+.nexsell-marquee { overflow:hidden; background:${t.ctaBg} !important; color:${t.ctaText} !important; padding:14px 0; }
+.nexsell-marquee div { display:flex; gap:42px; justify-content:center; flex-wrap:wrap; font-weight:800; letter-spacing:.02em; }
+.nexsell-center-muted { text-align:center; color:${t.mutedColor}; margin:-24px auto 32px !important; max-width:620px; }
+.nexsell-stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+.nexsell-stat-card { padding:28px; border:1px solid ${t.cardBorder}; border-radius:18px; background:${t.cardBg}; text-align:center; }
+.nexsell-stat-card strong { display:block; font-family:'Space Grotesk',sans-serif; font-size:44px; line-height:1; color:${t.ctaBg}; margin-bottom:10px !important; }
+.nexsell-stat-card span { color:${t.bodyColor}; font-weight:700; }
+.nexsell-table { overflow:hidden; border:1px solid ${t.cardBorder}; border-radius:18px; background:${t.cardBg}; }
+.nexsell-table-head,.nexsell-table-row { display:grid; grid-template-columns:2fr 1fr 1fr; align-items:center; gap:12px; padding:16px 18px; border-bottom:1px solid ${t.cardBorder}; }
+.nexsell-table-head { background:${t.accentBg}; color:${t.headingColor}; }
+.nexsell-table-row span { color:${t.bodyColor}; }
+.nexsell-table-row b { text-align:center; color:${t.ctaBg}; font-size:20px; }
+.nexsell-timeline { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.nexsell-timeline-step { padding:22px; border:1px solid ${t.sectionAltCardBorder}; border-radius:18px; background:${t.sectionAltCardBg}; text-align:center; }
+.nexsell-timeline-step span { display:inline-flex; width:34px; height:34px; align-items:center; justify-content:center; border-radius:999px; background:${t.ctaBg}; color:${t.ctaText}; font-weight:800; margin-bottom:10px !important; }
+.nexsell-timeline-step strong { display:block; color:${t.headingColor}; margin-bottom:4px !important; }
+.nexsell-timeline-step small { color:${t.mutedColor}; }
 
 /* Testimonials */
 .nexsell-testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
@@ -702,6 +753,10 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 .nexsell-bundles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
 .nexsell-bundle-card { padding: 24px; background: ${t.sectionAltCardBg}; border: 1px solid ${t.sectionAltCardBorder}; border-radius: 12px; text-align: center; }
 .nexsell-bundle-card p { font-size: 14px; line-height: 1.6; color: ${t.bodyColor}; }
+.nexsell-bundle-card h3 { font-family:'Space Grotesk',sans-serif; font-size:20px; color:${t.headingColor}; margin-bottom:10px !important; }
+.nexsell-bundle-card strong { display:block; font-size:30px; color:${t.ctaBg}; margin-bottom:6px !important; }
+.nexsell-bundle-card del { display:block; color:${t.mutedColor}; margin-bottom:8px !important; }
+.nexsell-bundle-card small { display:inline-block; padding:4px 10px; border-radius:999px; background:${t.urgencyBg}; color:${t.urgencyText}; font-weight:800; margin-bottom:12px !important; }
 
 /* Offer / Urgency */
 .nexsell-offer-section { padding: 64px 24px; background: ${t.accentBg}; text-align: center; }
@@ -723,8 +778,9 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 
 /* CTA Button */
 .nexsell-cta-wrap { text-align: center; }
-.nexsell-btn { display: inline-block; background: ${t.ctaBg}; color: ${t.ctaText}; padding: 16px 48px; border-radius: 8px; text-decoration: none; font-size: 18px; font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,0.15); border: none; cursor: pointer; transition: background 0.2s; }
-.nexsell-btn:hover { background: ${t.ctaHover}; }
+.nexsell-btn { display: inline-flex !important; align-items:center; justify-content:center; background: ${t.ctaBg} !important; color: ${t.ctaText} !important; padding: 16px 48px !important; border-radius: 12px !important; text-decoration: none !important; font-size: 18px !important; font-weight: 800 !important; box-shadow: 0 4px 14px rgba(0,0,0,0.15); border: none !important; cursor: pointer; transition: transform 0.2s, filter 0.2s; min-height:54px; }
+.nexsell-btn:hover { filter: brightness(.95); transform: translateY(-1px); color:${t.ctaText} !important; }
+.nexsell-btn[disabled] { opacity:.55; cursor:not-allowed; }
 
 /* Trust */
 .nexsell-trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; font-size: 12px; color: ${t.trustColor}; margin-top: 16px; }
@@ -734,6 +790,9 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
   .nexsell-h1 { font-size: 32px !important; }
   .nexsell-h2 { font-size: 26px !important; }
   .nexsell-hero, .nexsell-section, .nexsell-section-alt, .nexsell-offer-section, .nexsell-final-cta { padding: 48px 16px !important; }
+  .nexsell-emoji-grid, .nexsell-stats-grid, .nexsell-timeline { grid-template-columns: 1fr 1fr !important; }
+  .nexsell-table-head,.nexsell-table-row { grid-template-columns:1.5fr .7fr .7fr; padding:14px 10px; font-size:13px; }
+  .nexsell-btn { width:100%; padding:14px 20px !important; }
 }
 @media (max-width: 768px) {
   .nexsell-hero-grid { grid-template-columns: 1fr !important; }
