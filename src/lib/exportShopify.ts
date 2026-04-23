@@ -752,6 +752,10 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 .nexsell-bundles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
 .nexsell-bundle-card { padding: 24px; background: ${t.sectionAltCardBg}; border: 1px solid ${t.sectionAltCardBorder}; border-radius: 12px; text-align: center; }
 .nexsell-bundle-card p { font-size: 14px; line-height: 1.6; color: ${t.bodyColor}; }
+.nexsell-bundle-card h3 { font-family:'Space Grotesk',sans-serif; font-size:20px; color:${t.headingColor}; margin-bottom:10px !important; }
+.nexsell-bundle-card strong { display:block; font-size:30px; color:${t.ctaBg}; margin-bottom:6px !important; }
+.nexsell-bundle-card del { display:block; color:${t.mutedColor}; margin-bottom:8px !important; }
+.nexsell-bundle-card small { display:inline-block; padding:4px 10px; border-radius:999px; background:${t.urgencyBg}; color:${t.urgencyText}; font-weight:800; margin-bottom:12px !important; }
 
 /* Offer / Urgency */
 .nexsell-offer-section { padding: 64px 24px; background: ${t.accentBg}; text-align: center; }
@@ -773,8 +777,9 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 
 /* CTA Button */
 .nexsell-cta-wrap { text-align: center; }
-.nexsell-btn { display: inline-block; background: ${t.ctaBg}; color: ${t.ctaText}; padding: 16px 48px; border-radius: 8px; text-decoration: none; font-size: 18px; font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,0.15); border: none; cursor: pointer; transition: background 0.2s; }
-.nexsell-btn:hover { background: ${t.ctaHover}; }
+.nexsell-btn { display: inline-flex !important; align-items:center; justify-content:center; background: ${t.ctaBg} !important; color: ${t.ctaText} !important; padding: 16px 48px !important; border-radius: 12px !important; text-decoration: none !important; font-size: 18px !important; font-weight: 800 !important; box-shadow: 0 4px 14px rgba(0,0,0,0.15); border: none !important; cursor: pointer; transition: transform 0.2s, filter 0.2s; min-height:54px; }
+.nexsell-btn:hover { filter: brightness(.95); transform: translateY(-1px); color:${t.ctaText} !important; }
+.nexsell-btn[disabled] { opacity:.55; cursor:not-allowed; }
 
 /* Trust */
 .nexsell-trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; font-size: 12px; color: ${t.trustColor}; margin-top: 16px; }
@@ -784,6 +789,9 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
   .nexsell-h1 { font-size: 32px !important; }
   .nexsell-h2 { font-size: 26px !important; }
   .nexsell-hero, .nexsell-section, .nexsell-section-alt, .nexsell-offer-section, .nexsell-final-cta { padding: 48px 16px !important; }
+  .nexsell-emoji-grid, .nexsell-stats-grid, .nexsell-timeline { grid-template-columns: 1fr 1fr !important; }
+  .nexsell-table-head,.nexsell-table-row { grid-template-columns:1.5fr .7fr .7fr; padding:14px 10px; font-size:13px; }
+  .nexsell-btn { width:100%; padding:14px 20px !important; }
 }
 @media (max-width: 768px) {
   .nexsell-hero-grid { grid-template-columns: 1fr !important; }
