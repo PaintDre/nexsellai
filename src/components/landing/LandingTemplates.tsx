@@ -140,15 +140,16 @@ export const landingTemplates: LandingTemplate[] = [
   {
     id: "shrine-latam",
     name: "Shrine Pro LATAM",
-    description: "Avanzada con timeline de envío, comparativa, resultados y bundles",
+    description: "Template profesional para vender en Shopify: trust, envío, comparativa, resultados y bundles",
     sections: [
       "hero", "emoji_benefits", "benefits", "results_stats",
       "before_after_slider", "comparison_table", "marquee_benefits",
       "testimonials", "shipping_timeline", "bundle_offer", "faq_cod", "cta",
     ],
-    theme: "bold",
+    theme: "modern-ecommerce",
     premium: true,
     requiredPlan: "pro",
+    recommended: true,
     styleTag: "LATAM",
   },
 ];
