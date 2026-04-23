@@ -209,7 +209,7 @@ export function generateShopifyLiquid(
   const addToCartForm = `
     <div class="nexsell-cta-wrap">
       {% if nexsell_product != blank and nexsell_variant != blank %}
-        <form action="/cart/add" method="post" enctype="multipart/form-data" class="nexsell-cart-form" data-type="add-to-cart-form">
+        <form action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data" class="nexsell-cart-form" data-type="add-to-cart-form">
           <input type="hidden" name="id" value="{{ nexsell_variant.id }}">
           <input type="hidden" name="quantity" value="1">
           <button type="submit" name="add" class="nexsell-btn" {% unless nexsell_variant.available %}disabled aria-disabled="true"{% endunless %}>
