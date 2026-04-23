@@ -510,6 +510,7 @@ export function generateShopifyLiquid(
       { type: "textarea", id: "hero_subtitle", label: "Subtítulo", default: (typeof hero?.content === 'string' ? hero.content : "") },
       { type: "image_picker", id: "hero_image", label: "Imagen del producto" },
       { type: "header", content: "Call to Action" },
+      { type: "product", id: "connected_product", label: "Producto para el botón de compra" },
       { type: "text", id: "cta_label", label: "Texto del botón CTA", default: "Comprar ahora" },
       { type: "url", id: "cta_url", label: "URL del botón (si no hay producto)", default: "#" },
       { type: "header", content: "Secciones" },
@@ -555,7 +556,9 @@ export function generateShopifyLiquid(
     }],
   };
 
-  return `<style>
+  return `${productResolver}
+
+<style>
 ${css}
 </style>
 
