@@ -259,7 +259,8 @@ export function generateShopifyLiquid(
 ): string {
   const t = themeCSS[theme];
   const getBlock = (type: string) => blocks.find((b) => b.type === type);
-  const productResolver = `{% assign nexsell_product = product | default: section.settings.connected_product %}`;
+  const productResolver = `{% assign nexsell_product = product | default: section.settings.connected_product %}
+{% assign nexsell_variant = nexsell_product.selected_or_first_available_variant %}`;
 
   const hero = getBlock("hero");
   const benefits = getBlock("benefits");
@@ -290,12 +291,11 @@ export function generateShopifyLiquid(
   // Add-to-Cart CTA
   const addToCartForm = `
     <div class="nexsell-cta-wrap">
-      {% assign nexsell_variant = nexsell_product.selected_or_first_available_variant %}
-      {% if nexsell_product and nexsell_variant %}
-        <form action="/cart/add" method="post" enctype="multipart/form-data" class="nexsell-cart-form">
+      {% if nexsell_product != blank and nexsell_variant != blank %}
+        <form action="/cart/add" method="post" enctype="multipart/form-data" class="nexsell-cart-form" data-type="add-to-cart-form">
           <input type="hidden" name="id" value="{{ nexsell_variant.id }}">
           <input type="hidden" name="quantity" value="1">
-          <button type="submit" class="nexsell-btn" {% unless nexsell_variant.available %}disabled aria-disabled="true"{% endunless %}>
+          <button type="submit" name="add" class="nexsell-btn" {% unless nexsell_variant.available %}disabled aria-disabled="true"{% endunless %}>
             {% if nexsell_variant.available %}
               {{ section.settings.cta_label | default: "Comprar ahora" }} — {{ nexsell_variant.price | money }}
             {% else %}
@@ -304,9 +304,7 @@ export function generateShopifyLiquid(
           </button>
         </form>
       {% else %}
-        <a href="{{ section.settings.cta_url | default: '#' }}" class="nexsell-btn">
-          {{ section.settings.cta_label | default: "Comprar ahora" }}
-        </a>
+        <div class="nexsell-product-warning">Selecciona un producto en la configuración de esta sección para activar el botón de compra.</div>
       {% endif %}
       ${trustHTML}
     </div>`;
