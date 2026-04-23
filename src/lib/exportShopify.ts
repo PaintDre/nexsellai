@@ -861,7 +861,7 @@ export async function exportShopifyZip(
 
   const liquid = generateShopifyLiquid(blocks, product, theme, productImage, allImageUrls);
   sectionsFolder.file("nexsell-landing.liquid", liquid);
-  customLiquidFolder.file("nexsell-copy-paste.liquid", generateShopifyCustomLiquid(blocks, theme, productImage, allImageUrls));
+  customLiquidFolder.file("nexsell-copy-paste.liquid", generateShopifyCustomLiquid(blocks, product, theme, productImage, allImageUrls));
 
   const template = generateShopifyTemplate();
   templatesFolder.file("page.nexsell.json", template);
