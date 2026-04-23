@@ -664,8 +664,8 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 /* Nexsell Landing — Shopify Section Styles */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
-.nexsell-landing, .nexsell-landing * { margin: 0; padding: 0; box-sizing: border-box; }
-.nexsell-landing { font-family: 'Inter', system-ui, sans-serif; color: ${t.bodyColor}; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.nexsell-landing, .nexsell-landing * { margin: 0 !important; padding: 0; box-sizing: border-box; }
+.nexsell-landing { font-family: 'Inter', system-ui, sans-serif !important; color: ${t.bodyColor} !important; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-wrap:anywhere; word-break:break-word; }
 .nexsell-landing img { max-width: 100%; height: auto; }
 .nexsell-landing a { text-decoration: none; }
 
@@ -673,19 +673,21 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 .nexsell-container-sm { max-width: 768px; margin: 0 auto; }
 .nexsell-container-narrow { max-width: 640px; margin: 0 auto; }
 
-.nexsell-h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(36px, 5vw, 60px); font-weight: 800; line-height: 1.1; margin-bottom: 20px; color: ${t.heroText}; }
-.nexsell-h2 { font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 700; text-align: center; margin-bottom: 40px; }
+.nexsell-h1 { font-family: 'Space Grotesk', sans-serif !important; font-size: clamp(36px, 5vw, 60px) !important; font-weight: 800 !important; line-height: 1.1 !important; margin-bottom: 20px !important; color: ${t.heroText} !important; }
+.nexsell-h2 { font-family: 'Space Grotesk', sans-serif !important; font-size: 32px !important; font-weight: 700 !important; text-align: center; margin-bottom: 40px !important; color: ${t.headingColor} !important; }
 .nexsell-subtitle { font-size: 18px; line-height: 1.7; max-width: 600px; margin-bottom: 32px; opacity: 0.85; }
 
 /* Hero */
-.nexsell-hero { padding: 80px 24px; background: ${t.heroBg}; color: ${t.heroText}; }
+.nexsell-hero { padding: 80px 24px; background: ${t.heroBg} !important; color: ${t.heroText} !important; }
 .nexsell-hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
 .nexsell-hero-img-wrap { text-align: center; }
 .nexsell-hero-img { max-height: 480px; width: 100%; max-width: 400px; object-fit: cover; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
 
 /* Sections */
-.nexsell-section { padding: 64px 24px; background: #ffffff; }
-.nexsell-section-alt { padding: 64px 24px; background: ${t.sectionAltBg}; }
+.nexsell-section { padding: 64px 24px; background: ${t.sectionBg} !important; }
+.nexsell-section-alt { padding: 64px 24px; background: ${t.sectionAltBg} !important; }
+.nexsell-section-image { width:100%; border-radius:16px; overflow:hidden; box-shadow:0 10px 35px rgba(0,0,0,.12); margin-bottom:32px !important; background:${t.cardBg}; }
+.nexsell-section-image img { width:100%; display:block; object-fit:contain; }
 
 /* Benefits */
 .nexsell-benefit-card { display: flex; align-items: flex-start; gap: 16px; padding: 24px; background: ${t.sectionAltCardBg}; border: 1px solid ${t.sectionAltCardBorder}; border-radius: 12px; margin-bottom: 12px; }
