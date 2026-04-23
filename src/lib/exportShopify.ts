@@ -166,6 +166,7 @@ export function generateShopifyLiquid(
 ): string {
   const t = themeCSS[theme];
   const getBlock = (type: string) => blocks.find((b) => b.type === type);
+  const productResolver = `{% assign nexsell_product = product | default: section.settings.connected_product %}`;
 
   const hero = getBlock("hero");
   const benefits = getBlock("benefits");
@@ -196,11 +197,11 @@ export function generateShopifyLiquid(
   // Add-to-Cart CTA
   const addToCartForm = `
     <div class="nexsell-cta-wrap">
-      {% if product %}
+      {% if nexsell_product %}
         <form action="/cart/add" method="post">
-          <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+          <input type="hidden" name="id" value="{{ nexsell_product.variants.first.id }}">
           <button type="submit" class="nexsell-btn">
-            {{ section.settings.cta_label | default: "Comprar ahora" }} — {% if product %}{{ product.price | money }}{% endif %}
+            {{ section.settings.cta_label | default: "Comprar ahora" }} — {{ nexsell_product.price | money }}
           </button>
         </form>
       {% else %}
