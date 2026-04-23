@@ -188,15 +188,17 @@
     "groupAccount": "Account"
   },
   "exportDialog": {
-    "title": "Export to Shopify",
+    "title": "Download Shopify template",
     "copied": "Copied",
-    "downloadLiquid": "Download Liquid template",
+    "downloadLiquid": "Download Shopify template",
     "liquidDownloaded": "✅ Shopify template downloaded",
-    "liquidInstructions": "Upload files to your theme: sections/nexsell-landing.liquid and templates/page.nexsell.json"
+    "liquidInstructions": "No app install or OAuth required. Upload files to your theme: sections/nexsell-landing.liquid and templates/page.nexsell.json",
+    "advancedTitle": "Optional automatic publishing",
+    "advancedDescription": "Only use this if you want to authorize Nexsell in Shopify. Shopify will show it as a connected app."
   },
   "shopify": {
     "connectTitle": "Connect Shopify Store",
-    "connectDescription": "Connect your Shopify store to export landings directly.",
+    "connectDescription": "Advanced feature: authorize Nexsell to publish automatically. To avoid installed apps, use the template download.",
     "enterDomain": "Enter your store URL",
     "connectWithOAuth": "Connect with Shopify",
     "connectedTo": "Connected to {{domain}}",
@@ -207,7 +209,7 @@
     "disconnected": "Shopify disconnected",
     "connected": "Shopify store connected",
     "exportToShopify": "Export to Shopify",
-    "connectAndExport": "Connect Shopify & export",
+    "connectAndExport": "Connect and publish automatically",
     "exportSuccess": "✅ Page created on Shopify",
     "exportError": "Error exporting to Shopify",
     "viewPage": "View page"
