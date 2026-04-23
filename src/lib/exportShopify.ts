@@ -166,6 +166,7 @@ export function generateShopifyLiquid(
 ): string {
   const t = themeCSS[theme];
   const getBlock = (type: string) => blocks.find((b) => b.type === type);
+  const productResolver = `{% assign nexsell_product = product | default: section.settings.connected_product %}`;
 
   const hero = getBlock("hero");
   const benefits = getBlock("benefits");
@@ -196,11 +197,11 @@ export function generateShopifyLiquid(
   // Add-to-Cart CTA
   const addToCartForm = `
     <div class="nexsell-cta-wrap">
-      {% if product %}
+      {% if nexsell_product %}
         <form action="/cart/add" method="post">
-          <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+          <input type="hidden" name="id" value="{{ nexsell_product.variants.first.id }}">
           <button type="submit" class="nexsell-btn">
-            {{ section.settings.cta_label | default: "Comprar ahora" }} — {% if product %}{{ product.price | money }}{% endif %}
+            {{ section.settings.cta_label | default: "Comprar ahora" }} — {{ nexsell_product.price | money }}
           </button>
         </form>
       {% else %}
@@ -509,6 +510,7 @@ export function generateShopifyLiquid(
       { type: "textarea", id: "hero_subtitle", label: "Subtítulo", default: (typeof hero?.content === 'string' ? hero.content : "") },
       { type: "image_picker", id: "hero_image", label: "Imagen del producto" },
       { type: "header", content: "Call to Action" },
+      { type: "product", id: "connected_product", label: "Producto para el botón de compra" },
       { type: "text", id: "cta_label", label: "Texto del botón CTA", default: "Comprar ahora" },
       { type: "url", id: "cta_url", label: "URL del botón (si no hay producto)", default: "#" },
       { type: "header", content: "Secciones" },
@@ -554,7 +556,9 @@ export function generateShopifyLiquid(
     }],
   };
 
-  return `<style>
+  return `${productResolver}
+
+<style>
 ${css}
 </style>
 
@@ -692,6 +696,23 @@ export function generateShopifyTemplate(): string {
   }, null, 2);
 }
 
+export function generateShopifyProductTemplate(): string {
+  return JSON.stringify({
+    sections: {
+      main: {
+        type: "main-product",
+        disabled: true,
+        settings: {},
+      },
+      "nexsell-landing": {
+        type: "nexsell-landing",
+        settings: {},
+      },
+    },
+    order: ["main", "nexsell-landing"],
+  }, null, 2);
+}
+
 /**
  * Generate a README with installation instructions.
  */
@@ -707,21 +728,29 @@ function generateReadme(): string {
 3. Sube los archivos:
    - \`sections/nexsell-landing.liquid\` → carpeta **sections/**
    - \`templates/page.nexsell.json\` → carpeta **templates/**
+   - \`templates/product.nexsell.json\` → carpeta **templates/**
 
-### 2. Crear la página
+### 2. Usarlo como landing de producto recomendada
+
+1. Ve a **Productos** y abre el producto que quieres vender
+2. En **Theme template**, selecciona \`product.nexsell\`
+3. Guarda el producto
+4. El botón de compra usará ese producto automáticamente
+
+### 3. Usarlo como página independiente
 
 1. Ve a **Tienda Online → Páginas**
 2. Crea una nueva página
 3. En **"Plantilla"** (template), selecciona \`page.nexsell\`
 4. Guarda la página
 
-### 3. Personalizar en el Theme Editor
+### 4. Personalizar en el Theme Editor
 
 1. Ve a **Tienda Online → Temas → Personalizar**
 2. Navega a tu nueva página
 3. Edita títulos, textos, imágenes y CTA desde el panel lateral
 
-### 4. Conectar un producto (opcional)
+### 5. Conectar un producto en página independiente (opcional)
 
 Si quieres que el botón "Comprar ahora" agregue un producto al carrito:
 - En el Theme Editor, selecciona un producto en la configuración de la sección
@@ -758,6 +787,9 @@ export async function exportShopifyZip(
 
   const template = generateShopifyTemplate();
   templatesFolder.file("page.nexsell.json", template);
+
+  const productTemplate = generateShopifyProductTemplate();
+  templatesFolder.file("product.nexsell.json", productTemplate);
 
   zip.file("README.md", generateReadme());
 
