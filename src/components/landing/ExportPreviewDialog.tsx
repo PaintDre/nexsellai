@@ -7,10 +7,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, Store } from "lucide-react";
+import { Check, Copy, Download, Loader2, Store } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generateLandingHTML, normalizeImageUrl } from "@/lib/exportLanding";
-import { exportShopifyZip } from "@/lib/exportShopify";
+import { exportShopifyZip, generateShopifyCustomLiquid } from "@/lib/exportShopify";
 import type { LandingTheme } from "@/components/landing/themes";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -46,6 +46,7 @@ const ExportPreviewDialog = ({
   const [shopifyExporting, setShopifyExporting] = useState(false);
   const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [liquidExporting, setLiquidExporting] = useState(false);
+  const [copiedLiquid, setCopiedLiquid] = useState(false);
 
   const checkConnection = async () => {
     if (!user) return;
@@ -99,6 +100,14 @@ const ExportPreviewDialog = ({
     } finally {
       setLiquidExporting(false);
     }
+  };
+
+  const handleCopyLiquid = async () => {
+    const liquid = generateShopifyCustomLiquid(blocks, product, theme, productImage, allImageUrls);
+    await navigator.clipboard.writeText(liquid);
+    setCopiedLiquid(true);
+    toast({ title: t("exportDialog.liquidCopied"), description: t("exportDialog.copyInstructions") });
+    window.setTimeout(() => setCopiedLiquid(false), 1800);
   };
 
   const handleExportToShopify = async () => {
@@ -177,10 +186,29 @@ ${bodyContent}
             )}
           </div>
           <DialogFooter className="flex-col gap-3 sm:flex-col sm:justify-start">
+            <div className="w-full rounded-lg border bg-primary/5 p-3 space-y-3">
+              <div>
+                <p className="text-xs font-medium text-foreground">{t("exportDialog.easyTitle")}</p>
+                <p className="text-xs text-muted-foreground">{t("exportDialog.easyDescription")}</p>
+              </div>
+              <Button
+                size="sm"
+                onClick={handleCopyLiquid}
+                className="w-full sm:w-auto"
+              >
+                {copiedLiquid ? (
+                  <Check className="h-4 w-4 mr-1" />
+                ) : (
+                  <Copy className="h-4 w-4 mr-1" />
+                )}
+                {copiedLiquid ? t("exportDialog.copied") : t("exportDialog.copyLiquid")}
+              </Button>
+            </div>
             <Button
               size="sm"
               onClick={handleDownloadLiquid}
               disabled={liquidExporting}
+              variant="outline"
               className="w-full sm:w-auto"
             >
               {liquidExporting ? (
