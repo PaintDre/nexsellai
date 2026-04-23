@@ -192,7 +192,7 @@
     "copied": "Copiado",
     "downloadLiquid": "Descargar template Shopify",
     "liquidDownloaded": "✅ Plantilla Shopify descargada",
-    "liquidInstructions": "No instala apps ni usa OAuth. Sube los archivos a tu tema: sections/nexsell-landing.liquid y templates/page.nexsell.json",
+    "liquidInstructions": "No instala apps ni usa OAuth. Sube sections/nexsell-landing.liquid y templates/product.nexsell.json a tu tema; también incluye page.nexsell.json para páginas independientes.",
     "advancedTitle": "Publicación automática opcional",
     "advancedDescription": "Solo usa esta opción si quieres autorizar Nexsell en Shopify. Shopify la mostrará como app conectada."
   },
