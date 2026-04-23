@@ -409,24 +409,7 @@ const GenerateLanding = () => {
               <span className="text-xs">·</span>
               <span className="text-xs">{t("credits.balance", "Saldo")}: <strong className="tabular-nums">{balance}</strong></span>
             </div>
-            {generationStep !== "idle" && (
-              <div className="space-y-3 p-4 rounded-lg border bg-muted/50">
-                {generating && generationStep !== "done" && (
-                  <div className="flex items-start gap-3 p-3 rounded-md border border-primary/30 bg-primary/5">
-                    <Loader2 className="h-5 w-5 animate-spin text-primary mt-0.5 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-primary">{t("generateLanding.queueTitle")}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">{t("generateLanding.queueDesc")}</p>
-                    </div>
-                  </div>
-                )}
-                <div className="flex items-center gap-2">
-                  {generationStep === "done" ? <Check className="h-4 w-4 text-emerald-500" /> : <Loader2 className="h-4 w-4 animate-spin text-primary" />}
-                  <span className="text-sm font-medium">{stepLabels[generationStep]}</span>
-                </div>
-                <Progress value={progress} className="h-2" />
-              </div>
-            )}
+            {renderGenerationStatus()}
             <Button onClick={handleGenerate} disabled={generating || !canGenerate || !hasEnoughImagesForTemplate} className="w-full min-h-[44px]" size="lg">
               {generating ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {t("common.generating")}</> : <><Sparkles className="h-4 w-4 mr-2" /> {t("generateLanding.generateButton")}</>}
             </Button>
@@ -523,33 +506,7 @@ const GenerateLanding = () => {
           </div>
 
           {/* Generation progress */}
-          {generationStep !== "idle" && (
-            <div className="space-y-3 p-4 rounded-lg border bg-muted/50">
-              {generating && generationStep !== "done" && (
-                <div className="flex items-start gap-3 p-3 rounded-md border border-primary/30 bg-primary/5">
-                  <Loader2 className="h-5 w-5 animate-spin text-primary mt-0.5 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-primary">{t("generateLanding.queueTitle")}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{t("generateLanding.queueDesc")}</p>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-center gap-2">
-                {generationStep === "done" ? (
-                  <Check className="h-4 w-4 text-emerald-500" />
-                ) : (
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                )}
-                <span className="text-sm font-medium">{stepLabels[generationStep]}</span>
-              </div>
-              <Progress value={progress} className="h-2" />
-              {generationStep === "images" && (
-                <p className="text-xs text-muted-foreground">
-                  {t("generateLanding.imagesHint")}
-                </p>
-              )}
-            </div>
-          )}
+          {renderGenerationStatus()}
 
           <Button onClick={handleGenerate} disabled={generating || !canGenerate || !hasEnoughImagesForTemplate} className="w-full min-h-[44px]" size="lg">
             {generating ? (
