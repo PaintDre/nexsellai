@@ -201,18 +201,18 @@ export function generateShopifyCustomLiquid(
   const cta = getBlock("cta");
   const guarantee = getBlock("guarantee");
   const imageUrl = normalizeImageUrl(productImage || allImageUrls[0] || "");
-  const fallbackPrice = product?.price ? `$${product.price.toLocaleString("es-CL")}` : "";
   const productName = product?.name || hero?.title || "Producto";
   const button = `<div class="nexsell-cta-wrap">
-    {% assign nexsell_variant = product.selected_or_first_available_variant %}
-    {% if product and nexsell_variant %}
-      <form action="/cart/add" method="post" enctype="multipart/form-data" class="nexsell-cart-form">
+    {% if nexsell_product != blank and nexsell_variant != blank %}
+      <form action="/cart/add" method="post" enctype="multipart/form-data" class="nexsell-cart-form" data-type="add-to-cart-form">
         <input type="hidden" name="id" value="{{ nexsell_variant.id }}">
         <input type="hidden" name="quantity" value="1">
-        <button type="submit" class="nexsell-btn" {% unless nexsell_variant.available %}disabled aria-disabled="true"{% endunless %}>{% if nexsell_variant.available %}Comprar ahora — {{ nexsell_variant.price | money }}{% else %}Agotado{% endif %}</button>
+        <button type="submit" name="add" class="nexsell-btn" {% unless nexsell_variant.available %}disabled aria-disabled="true"{% endunless %}>
+          {% if nexsell_variant.available %}Comprar ahora — {{ nexsell_variant.price | money }}{% else %}Agotado{% endif %}
+        </button>
       </form>
     {% else %}
-      <a href="/collections/all" class="nexsell-btn">Comprar ahora${fallbackPrice ? ` — ${escapeHtml(fallbackPrice)}` : ""}</a>
+      <div class="nexsell-product-warning">Selecciona esta landing en una página de producto de Shopify para activar el botón de compra.</div>
     {% endif %}
     <div class="nexsell-trust"><span>🚚 Envío seguro</span><span>🛡️ Compra protegida</span><span>🔒 Pago seguro</span></div>
   </div>`;
@@ -242,7 +242,9 @@ export function generateShopifyCustomLiquid(
     `<section class="nexsell-final-cta"><div class="nexsell-container-narrow"><h2 class="nexsell-h2">${escapeHtml(cta?.title || "¿Listo para comprar?")}</h2><p class="nexsell-offer-subtitle">${escapeHtml(typeof cta?.content === "string" ? cta.content : "")}</p>${button}</div></section>`,
   ].filter(Boolean).join("\n");
 
-  return `<style>${generateShopifyCSS(theme)}</style>\n<div class="nexsell-landing nexsell-custom-liquid">\n${sectionList}\n</div>`;
+  return `{% assign nexsell_product = product %}
+{% assign nexsell_variant = nexsell_product.selected_or_first_available_variant %}
+<style>${generateShopifyCSS(theme)}</style>\n<div class="nexsell-landing nexsell-custom-liquid">\n${sectionList}\n</div>`;
 }
 
 /**
@@ -257,7 +259,8 @@ export function generateShopifyLiquid(
 ): string {
   const t = themeCSS[theme];
   const getBlock = (type: string) => blocks.find((b) => b.type === type);
-  const productResolver = `{% assign nexsell_product = product | default: section.settings.connected_product %}`;
+  const productResolver = `{% assign nexsell_product = product | default: section.settings.connected_product %}
+{% assign nexsell_variant = nexsell_product.selected_or_first_available_variant %}`;
 
   const hero = getBlock("hero");
   const benefits = getBlock("benefits");
@@ -288,12 +291,11 @@ export function generateShopifyLiquid(
   // Add-to-Cart CTA
   const addToCartForm = `
     <div class="nexsell-cta-wrap">
-      {% assign nexsell_variant = nexsell_product.selected_or_first_available_variant %}
-      {% if nexsell_product and nexsell_variant %}
-        <form action="/cart/add" method="post" enctype="multipart/form-data" class="nexsell-cart-form">
+      {% if nexsell_product != blank and nexsell_variant != blank %}
+        <form action="/cart/add" method="post" enctype="multipart/form-data" class="nexsell-cart-form" data-type="add-to-cart-form">
           <input type="hidden" name="id" value="{{ nexsell_variant.id }}">
           <input type="hidden" name="quantity" value="1">
-          <button type="submit" class="nexsell-btn" {% unless nexsell_variant.available %}disabled aria-disabled="true"{% endunless %}>
+          <button type="submit" name="add" class="nexsell-btn" {% unless nexsell_variant.available %}disabled aria-disabled="true"{% endunless %}>
             {% if nexsell_variant.available %}
               {{ section.settings.cta_label | default: "Comprar ahora" }} — {{ nexsell_variant.price | money }}
             {% else %}
@@ -302,9 +304,7 @@ export function generateShopifyLiquid(
           </button>
         </form>
       {% else %}
-        <a href="{{ section.settings.cta_url | default: '#' }}" class="nexsell-btn">
-          {{ section.settings.cta_label | default: "Comprar ahora" }}
-        </a>
+        <div class="nexsell-product-warning">Selecciona un producto en la configuración de esta sección para activar el botón de compra.</div>
       {% endif %}
       ${trustHTML}
     </div>`;
@@ -501,12 +501,14 @@ export function generateShopifyLiquid(
       {% if section.settings.offer_subtitle != blank %}
         <p class="nexsell-offer-subtitle">{{ section.settings.offer_subtitle }}</p>
       {% endif %}
-      {% if product %}
+      {% if nexsell_product != blank %}
         <div class="nexsell-price-compare">
-          <span class="nexsell-price-old">{{ product.compare_at_price | money }}</span>
-          <span class="nexsell-price-new">{{ product.price | money }}</span>
-          {% if product.compare_at_price > product.price %}
-            <span class="nexsell-discount-badge">-{{ product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price }}%</span>
+          {% if nexsell_variant.compare_at_price > nexsell_variant.price %}
+            <span class="nexsell-price-old">{{ nexsell_variant.compare_at_price | money }}</span>
+          {% endif %}
+          <span class="nexsell-price-new">{{ nexsell_variant.price | money }}</span>
+          {% if nexsell_variant.compare_at_price > nexsell_variant.price %}
+            <span class="nexsell-discount-badge">-{{ nexsell_variant.compare_at_price | minus: nexsell_variant.price | times: 100 | divided_by: nexsell_variant.compare_at_price }}%</span>
           {% endif %}
         </div>
       {% endif %}
@@ -675,10 +677,11 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 /* Nexsell Landing — Shopify Section Styles */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
-.nexsell-landing, .nexsell-landing * { margin: 0 !important; padding: 0; box-sizing: border-box; }
-.nexsell-landing { font-family: 'Inter', system-ui, sans-serif !important; color: ${t.bodyColor} !important; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-wrap:anywhere; word-break:break-word; }
+.nexsell-landing { margin: 0 !important; padding: 0 !important; font-family: 'Inter', system-ui, sans-serif !important; color: ${t.bodyColor} !important; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-wrap:anywhere; word-break:break-word; }
+.nexsell-landing * { box-sizing: border-box; }
 .nexsell-landing img { max-width: 100%; height: auto; }
 .nexsell-landing a { text-decoration: none; }
+.nexsell-landing p, .nexsell-landing h1, .nexsell-landing h2, .nexsell-landing h3 { margin-top: 0; }
 
 .nexsell-container { max-width: 960px; margin: 0 auto; }
 .nexsell-container-sm { max-width: 768px; margin: 0 auto; }
@@ -791,6 +794,7 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 .nexsell-btn { display: inline-flex !important; align-items:center; justify-content:center; background: ${t.ctaBg} !important; color: ${t.ctaText} !important; padding: 16px 48px !important; border-radius: 12px !important; text-decoration: none !important; font-size: 18px !important; font-weight: 800 !important; box-shadow: 0 4px 14px rgba(0,0,0,0.15); border: none !important; cursor: pointer; transition: transform 0.2s, filter 0.2s; min-height:54px; }
 .nexsell-btn:hover { filter: brightness(.95); transform: translateY(-1px); color:${t.ctaText} !important; }
 .nexsell-btn[disabled] { opacity:.55; cursor:not-allowed; }
+.nexsell-product-warning { display:inline-flex; max-width:520px; justify-content:center; padding:14px 18px; border-radius:12px; background:${t.urgencyBg}; color:${t.urgencyText}; font-size:14px; font-weight:700; }
 
 /* Trust */
 .nexsell-trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; font-size: 12px; color: ${t.trustColor}; margin-top: 16px; }
