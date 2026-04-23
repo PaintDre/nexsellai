@@ -201,18 +201,18 @@ export function generateShopifyCustomLiquid(
   const cta = getBlock("cta");
   const guarantee = getBlock("guarantee");
   const imageUrl = normalizeImageUrl(productImage || allImageUrls[0] || "");
-  const fallbackPrice = product?.price ? `$${product.price.toLocaleString("es-CL")}` : "";
   const productName = product?.name || hero?.title || "Producto";
   const button = `<div class="nexsell-cta-wrap">
-    {% assign nexsell_variant = product.selected_or_first_available_variant %}
-    {% if product and nexsell_variant %}
-      <form action="/cart/add" method="post" enctype="multipart/form-data" class="nexsell-cart-form">
+    {% if nexsell_product != blank and nexsell_variant != blank %}
+      <form action="/cart/add" method="post" enctype="multipart/form-data" class="nexsell-cart-form" data-type="add-to-cart-form">
         <input type="hidden" name="id" value="{{ nexsell_variant.id }}">
         <input type="hidden" name="quantity" value="1">
-        <button type="submit" class="nexsell-btn" {% unless nexsell_variant.available %}disabled aria-disabled="true"{% endunless %}>{% if nexsell_variant.available %}Comprar ahora — {{ nexsell_variant.price | money }}{% else %}Agotado{% endif %}</button>
+        <button type="submit" name="add" class="nexsell-btn" {% unless nexsell_variant.available %}disabled aria-disabled="true"{% endunless %}>
+          {% if nexsell_variant.available %}Comprar ahora — {{ nexsell_variant.price | money }}{% else %}Agotado{% endif %}
+        </button>
       </form>
     {% else %}
-      <a href="/collections/all" class="nexsell-btn">Comprar ahora${fallbackPrice ? ` — ${escapeHtml(fallbackPrice)}` : ""}</a>
+      <div class="nexsell-product-warning">Selecciona esta landing en una página de producto de Shopify para activar el botón de compra.</div>
     {% endif %}
     <div class="nexsell-trust"><span>🚚 Envío seguro</span><span>🛡️ Compra protegida</span><span>🔒 Pago seguro</span></div>
   </div>`;
@@ -242,7 +242,9 @@ export function generateShopifyCustomLiquid(
     `<section class="nexsell-final-cta"><div class="nexsell-container-narrow"><h2 class="nexsell-h2">${escapeHtml(cta?.title || "¿Listo para comprar?")}</h2><p class="nexsell-offer-subtitle">${escapeHtml(typeof cta?.content === "string" ? cta.content : "")}</p>${button}</div></section>`,
   ].filter(Boolean).join("\n");
 
-  return `<style>${generateShopifyCSS(theme)}</style>\n<div class="nexsell-landing nexsell-custom-liquid">\n${sectionList}\n</div>`;
+  return `{% assign nexsell_product = product %}
+{% assign nexsell_variant = nexsell_product.selected_or_first_available_variant %}
+<style>${generateShopifyCSS(theme)}</style>\n<div class="nexsell-landing nexsell-custom-liquid">\n${sectionList}\n</div>`;
 }
 
 /**
