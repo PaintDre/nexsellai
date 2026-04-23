@@ -186,15 +186,12 @@ ${bodyContent}
             )}
           </div>
           <DialogFooter className="flex-col gap-3 sm:flex-col sm:justify-start">
-            <div className="w-full rounded-lg border bg-primary/5 p-3 space-y-3">
-              <div>
-                <p className="text-xs font-medium text-foreground">{t("exportDialog.easyTitle")}</p>
-                <p className="text-xs text-muted-foreground">{t("exportDialog.easyDescription")}</p>
-              </div>
+            <div className="w-full rounded-lg border bg-primary/5 p-4 space-y-3">
+              <p className="text-sm text-muted-foreground">{t("exportDialog.easyDescription")}</p>
               <Button
-                size="sm"
+                size="lg"
                 onClick={handleCopyLiquid}
-                className="w-full sm:w-auto"
+                className="w-full"
               >
                 {copiedLiquid ? (
                   <Check className="h-4 w-4 mr-1" />
@@ -204,44 +201,22 @@ ${bodyContent}
                 {copiedLiquid ? t("exportDialog.copied") : t("exportDialog.copyLiquid")}
               </Button>
             </div>
-            <Button
-              size="sm"
-              onClick={handleDownloadLiquid}
-              disabled={liquidExporting}
-              variant="outline"
-              className="w-full sm:w-auto"
-            >
-              {liquidExporting ? (
-                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-              ) : (
-                <Download className="h-4 w-4 mr-1" />
-              )}
-              {t("exportDialog.downloadLiquid")}
-            </Button>
             <div className="w-full rounded-lg border bg-muted/30 p-3 space-y-2">
               <p className="text-xs font-medium text-foreground">{t("exportDialog.advancedTitle")}</p>
-              <p className="text-xs text-muted-foreground">{t("exportDialog.advancedDescription")}</p>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={handleExportToShopify}
-                disabled={shopifyExporting}
+                onClick={handleDownloadLiquid}
+                disabled={liquidExporting}
                 className="w-full sm:w-auto"
               >
-                {shopifyExporting ? (
+                {liquidExporting ? (
                   <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                 ) : (
-                  <Store className="h-4 w-4 mr-1" />
+                  <Download className="h-4 w-4 mr-1" />
                 )}
-                {shopifyConnected
-                  ? t("shopify.exportToShopify")
-                  : t("shopify.connectAndExport")}
+                {t("exportDialog.downloadLiquid")}
               </Button>
-              {shopifyConnected && shopifyDomain && (
-                <p className="text-xs text-muted-foreground">
-                  {t("shopify.connectedTo", { domain: shopifyDomain })}
-                </p>
-              )}
             </div>
           </DialogFooter>
         </DialogContent>
