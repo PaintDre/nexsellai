@@ -38,9 +38,9 @@ const GenerateLanding = () => {
   const [hasOffer, setHasOffer] = useState(false);
   const [guarantee, setGuarantee] = useState("Garantía de satisfacción de 30 días");
   const [generating, setGenerating] = useState(false);
-  const [theme, setTheme] = useState<LandingTheme>("clean");
+  const [theme, setTheme] = useState<LandingTheme>("modern-ecommerce");
   const [autoImages, setAutoImages] = useState(true);
-  const [templateId, setTemplateId] = useState("completa");
+  const [templateId, setTemplateId] = useState("shrine-latam");
   const [generationStatus, setGenerationStatus] = useState<GenerationStatus>("idle");
   const [generationDetail, setGenerationDetail] = useState<"copy" | "images" | null>(null);
   const [progress, setProgress] = useState(0);
@@ -49,6 +49,17 @@ const GenerateLanding = () => {
   const [showInsufficient, setShowInsufficient] = useState(false);
 
   const isPaidPlan = profile?.plan === "starter" || profile?.plan === "pro";
+
+  useEffect(() => {
+    if (!profile) return;
+    if (profile.plan === "pro") {
+      setTemplateId("shrine-latam");
+      setTheme("modern-ecommerce");
+    } else {
+      setTemplateId("completa");
+      setTheme("clean");
+    }
+  }, [profile?.plan]);
 
   useEffect(() => {
     if (!user || !id) return;
