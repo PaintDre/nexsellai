@@ -788,6 +788,9 @@ export async function exportShopifyZip(
   const template = generateShopifyTemplate();
   templatesFolder.file("page.nexsell.json", template);
 
+  const productTemplate = generateShopifyProductTemplate();
+  templatesFolder.file("product.nexsell.json", productTemplate);
+
   zip.file("README.md", generateReadme());
 
   return zip.generateAsync({ type: "blob" });
