@@ -190,6 +190,11 @@
   "exportDialog": {
     "title": "Descargar template Shopify",
     "copied": "Copiado",
+    "copyLiquid": "Copiar Liquid para Shopify",
+    "liquidCopied": "Liquid copiado para Shopify",
+    "easyTitle": "Instalación fácil en Shopify",
+    "easyDescription": "Pega este código en una sección Liquid personalizado. Está adaptado para Shopify y mantiene el diseño de Nexsell con CSS encapsulado e imágenes absolutas.",
+    "copyInstructions": "Ve a Shopify → Temas → Personalizar → Agregar sección → Liquid personalizado y pega el código.",
     "downloadLiquid": "Descargar template Shopify",
     "liquidDownloaded": "✅ Plantilla Shopify descargada",
     "liquidInstructions": "No instala apps ni usa OAuth. Para hacerlo fácil, copia custom-liquid/nexsell-copy-paste.liquid en una sección Liquid personalizado. Los archivos sections/templates quedan como opción avanzada.",
