@@ -241,7 +241,7 @@ export function generateShopifyLiquid(
       </div>
       {% if section.settings.hero_image != blank %}
         <div class="nexsell-hero-img-wrap">
-          <img src="{{ section.settings.hero_image | image_url: width: 800 }}" alt="{{ section.settings.hero_title }}" class="nexsell-hero-img" loading="lazy">
+          {{ section.settings.hero_image | image_url: width: 800 | image_tag: loading: 'lazy', class: 'nexsell-hero-img', alt: section.settings.hero_title, widths: '400, 600, 800, 1200' }}
         </div>
       {% endif %}
     </div>
