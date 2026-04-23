@@ -528,7 +528,6 @@ export function generateShopifyLiquid(
       { type: "header", content: "Call to Action" },
       { type: "product", id: "connected_product", label: "Producto para el botón de compra" },
       { type: "text", id: "cta_label", label: "Texto del botón CTA", default: "Comprar ahora" },
-      { type: "url", id: "cta_url", label: "URL del botón (si no hay producto)", default: "#" },
       { type: "header", content: "Secciones" },
       { type: "text", id: "benefits_title", label: "Título de beneficios", default: benefits?.title || "Beneficios" },
       { type: "text", id: "features_title", label: "Título de características", default: features?.title || "Características" },
