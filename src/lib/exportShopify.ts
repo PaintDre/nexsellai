@@ -770,19 +770,7 @@ export function generateShopifyProductTemplate(): string {
 function generateReadme(): string {
   return `# Nexsell Landing — Shopify Template
 
-## Opción recomendada: instalación fácil sin tocar código
-
-1. Ve a **Shopify Admin → Tienda Online → Temas → Personalizar**
-2. Abre el producto o página donde quieres poner la landing
-3. Haz clic en **Agregar sección → Liquid personalizado / Custom liquid**
-4. Copia el contenido de **custom-liquid/nexsell-copy-paste.liquid**
-5. Pégalo en esa sección y guarda
-
-Esta opción evita el error del editor de código y no instala ninguna app.
-
-## Opción avanzada: template nativo del tema
-
-Usa esta opción solo si sabes editar archivos del tema.
+## Instalación recomendada: sección nativa del tema
 
 ### 1. Crear/subir archivos en tu tema de Shopify
 
@@ -794,7 +782,7 @@ Usa esta opción solo si sabes editar archivos del tema.
    - **product.nexsell.json** para productos
    - **page.nexsell.json** para páginas independientes
 
-Importante: no pegues el archivo completo de sección dentro de "Custom liquid". Para "Custom liquid" usa únicamente **custom-liquid/nexsell-copy-paste.liquid**.
+Importante: no pegues este archivo dentro de "Custom liquid". Esta exportación está pensada para instalarse como sección nativa del tema.
 
 ### 2. Usarlo como landing de producto
 
@@ -847,11 +835,9 @@ export async function exportShopifyZip(
 
   const sectionsFolder = zip.folder("sections")!;
   const templatesFolder = zip.folder("templates")!;
-  const customLiquidFolder = zip.folder("custom-liquid")!;
 
   const liquid = generateShopifyLiquid(blocks, product, theme, productImage, allImageUrls);
   sectionsFolder.file("nexsell-landing.liquid", liquid);
-  customLiquidFolder.file("nexsell-copy-paste.liquid", generateShopifyCustomLiquid(blocks, product, theme, productImage, allImageUrls));
 
   const template = generateShopifyTemplate();
   templatesFolder.file("page.nexsell.json", template);
