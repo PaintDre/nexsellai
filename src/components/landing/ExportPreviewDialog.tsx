@@ -166,7 +166,7 @@ ${bodyContent}
               {t("exportDialog.title")}
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 min-h-0 rounded-lg border overflow-hidden bg-white">
+          <div className="flex-1 min-h-0 rounded-lg border overflow-hidden bg-background">
             {blobUrl && (
               <iframe
                 src={blobUrl}
@@ -176,12 +176,12 @@ ${bodyContent}
               />
             )}
           </div>
-          <DialogFooter className="flex-row gap-2 sm:justify-between">
+          <DialogFooter className="flex-col gap-3 sm:flex-col sm:justify-start">
             <Button
-              variant="outline"
               size="sm"
               onClick={handleDownloadLiquid}
               disabled={liquidExporting}
+              className="w-full sm:w-auto"
             >
               {liquidExporting ? (
                 <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -190,27 +190,32 @@ ${bodyContent}
               )}
               {t("exportDialog.downloadLiquid")}
             </Button>
-            <Button
-              size="sm"
-              onClick={handleExportToShopify}
-              disabled={shopifyExporting}
-              className="bg-[#96bf48] hover:bg-[#7ea63d] text-white"
-            >
-              {shopifyExporting ? (
-                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-              ) : (
-                <Store className="h-4 w-4 mr-1" />
+            <div className="w-full rounded-lg border bg-muted/30 p-3 space-y-2">
+              <p className="text-xs font-medium text-foreground">{t("exportDialog.advancedTitle")}</p>
+              <p className="text-xs text-muted-foreground">{t("exportDialog.advancedDescription")}</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExportToShopify}
+                disabled={shopifyExporting}
+                className="w-full sm:w-auto"
+              >
+                {shopifyExporting ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <Store className="h-4 w-4 mr-1" />
+                )}
+                {shopifyConnected
+                  ? t("shopify.exportToShopify")
+                  : t("shopify.connectAndExport")}
+              </Button>
+              {shopifyConnected && shopifyDomain && (
+                <p className="text-xs text-muted-foreground">
+                  {t("shopify.connectedTo", { domain: shopifyDomain })}
+                </p>
               )}
-              {shopifyConnected
-                ? t("shopify.exportToShopify")
-                : t("shopify.connectAndExport")}
-            </Button>
+            </div>
           </DialogFooter>
-          {shopifyConnected && shopifyDomain && (
-            <p className="text-xs text-muted-foreground text-center -mt-1">
-              {t("shopify.connectedTo", { domain: shopifyDomain })}
-            </p>
-          )}
         </DialogContent>
       </Dialog>
 
