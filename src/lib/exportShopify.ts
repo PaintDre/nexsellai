@@ -769,20 +769,35 @@ export function generateShopifyProductTemplate(): string {
  * Generate a README with installation instructions.
  */
 function generateReadme(): string {
-  return `# Nexsell Landing — Shopify Section
+  return `# Nexsell Landing — Shopify Template
 
-## Instalación
+## Opción recomendada: instalación fácil sin tocar código
 
-### 1. Subir archivos a tu tema de Shopify
+1. Ve a **Shopify Admin → Tienda Online → Temas → Personalizar**
+2. Abre el producto o página donde quieres poner la landing
+3. Haz clic en **Agregar sección → Liquid personalizado / Custom liquid**
+4. Copia el contenido de **custom-liquid/nexsell-copy-paste.liquid**
+5. Pégalo en esa sección y guarda
+
+Esta opción evita el error del editor de código y no instala ninguna app.
+
+## Opción avanzada: template nativo del tema
+
+Usa esta opción solo si sabes editar archivos del tema.
+
+### 1. Crear/subir archivos en tu tema de Shopify
 
 1. Ve a **Shopify Admin → Tienda Online → Temas**
 2. Haz clic en **"..." → Editar código**
-3. Sube los archivos:
-   - \`sections/nexsell-landing.liquid\` → carpeta **sections/**
-   - \`templates/page.nexsell.json\` → carpeta **templates/**
-   - \`templates/product.nexsell.json\` → carpeta **templates/**
+3. En **sections**, crea un archivo llamado exactamente **nexsell-landing.liquid**
+4. Copia dentro el contenido de **sections/nexsell-landing.liquid**
+5. En **templates**, sube o crea:
+   - **product.nexsell.json** para productos
+   - **page.nexsell.json** para páginas independientes
 
-### 2. Usarlo como landing de producto recomendada
+Importante: no pegues el archivo completo de sección dentro de "Custom liquid". Para "Custom liquid" usa únicamente **custom-liquid/nexsell-copy-paste.liquid**.
+
+### 2. Usarlo como landing de producto
 
 1. Ve a **Productos** y abre el producto que quieres vender
 2. En **Theme template**, selecciona \`product.nexsell\`
@@ -809,7 +824,7 @@ Si quieres que el botón "Comprar ahora" agregue un producto al carrito:
 
 ## Notas
 
-- El CSS está incluido dentro de la sección Liquid
+- El CSS está incluido en los archivos
 - Las imágenes usan URLs públicas; puedes reemplazarlas desde el Theme Editor
 - El formulario Add-to-Cart funciona automáticamente con cualquier producto de tu tienda
 - Todos los textos son editables desde el Theme Editor de Shopify
