@@ -186,10 +186,29 @@ ${bodyContent}
             )}
           </div>
           <DialogFooter className="flex-col gap-3 sm:flex-col sm:justify-start">
+            <div className="w-full rounded-lg border bg-primary/5 p-3 space-y-3">
+              <div>
+                <p className="text-xs font-medium text-foreground">{t("exportDialog.easyTitle")}</p>
+                <p className="text-xs text-muted-foreground">{t("exportDialog.easyDescription")}</p>
+              </div>
+              <Button
+                size="sm"
+                onClick={handleCopyLiquid}
+                className="w-full sm:w-auto"
+              >
+                {copiedLiquid ? (
+                  <Check className="h-4 w-4 mr-1" />
+                ) : (
+                  <Copy className="h-4 w-4 mr-1" />
+                )}
+                {copiedLiquid ? t("exportDialog.copied") : t("exportDialog.copyLiquid")}
+              </Button>
+            </div>
             <Button
               size="sm"
               onClick={handleDownloadLiquid}
               disabled={liquidExporting}
+              variant="outline"
               className="w-full sm:w-auto"
             >
               {liquidExporting ? (
