@@ -154,6 +154,58 @@ function escapeSchemaDefault(str: string): string {
   return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function textItems(content: Block["content"]): string[] {
+  return Array.isArray(content) ? content.filter((item): item is string => typeof item === "string") : [];
+}
+
+function generateShopifyCustomLiquid(
+  blocks: Block[],
+  theme: LandingTheme = "clean",
+  productImage?: string | null,
+  allImageUrls: string[] = []
+): string {
+  const getBlock = (type: string) => blocks.find((b) => b.type === type);
+  const hero = getBlock("hero");
+  const benefits = getBlock("benefits");
+  const features = getBlock("features");
+  const testimonials = getBlock("testimonials");
+  const faq = getBlock("faq");
+  const offer = getBlock("offer");
+  const cta = getBlock("cta");
+  const guarantee = getBlock("guarantee");
+  const imageUrl = normalizeImageUrl(productImage || allImageUrls[0] || "");
+  const button = `<div class="nexsell-cta-wrap">
+    {% if product %}
+      <form action="/cart/add" method="post"><input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}"><button type="submit" class="nexsell-btn">Comprar ahora — {{ product.price | money }}</button></form>
+    {% else %}
+      <a href="/collections/all" class="nexsell-btn">Comprar ahora</a>
+    {% endif %}
+    <div class="nexsell-trust"><span>🚚 Envío seguro</span><span>🛡️ Compra protegida</span><span>🔒 Pago seguro</span></div>
+  </div>`;
+
+  const sectionList = [
+    hero && `<section class="nexsell-hero"><div class="nexsell-container nexsell-hero-grid"><div><h1 class="nexsell-h1">${escapeHtml(hero.title || "")}</h1><p class="nexsell-subtitle">${escapeHtml(typeof hero.content === "string" ? hero.content : "")}</p>${button}</div>${imageUrl ? `<div class="nexsell-hero-img-wrap"><img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(hero.title || "Producto")}" class="nexsell-hero-img" loading="lazy"></div>` : ""}</div></section>`,
+    benefits && `<section class="nexsell-section-alt"><div class="nexsell-container-sm"><h2 class="nexsell-h2">${escapeHtml(benefits.title || "Beneficios")}</h2>${textItems(benefits.content).map((item) => `<div class="nexsell-benefit-card"><span class="nexsell-check">✓</span><p>${escapeHtml(item)}</p></div>`).join("")}</div></section>`,
+    features && `<section class="nexsell-section"><div class="nexsell-container-sm"><h2 class="nexsell-h2">${escapeHtml(features.title || "Características")}</h2>${textItems(features.content).map((item) => `<div class="nexsell-feature-item"><span class="nexsell-check">✓</span><span>${escapeHtml(item)}</span></div>`).join("")}</div></section>`,
+    testimonials && `<section class="nexsell-section-alt"><div class="nexsell-container"><h2 class="nexsell-h2">${escapeHtml(testimonials.title || "Clientes felices")}</h2><div class="nexsell-testimonials-grid">${textItems(testimonials.content).map((item) => `<div class="nexsell-testimonial-card"><div class="nexsell-stars">★★★★★</div><p class="nexsell-testimonial-text">“${escapeHtml(item)}”</p><div class="nexsell-author-label">Cliente verificado</div></div>`).join("")}</div></div></section>`,
+    offer && `<section class="nexsell-offer-section"><div class="nexsell-container-narrow"><h2 class="nexsell-h2">${escapeHtml(offer.title || "Oferta especial")}</h2><p class="nexsell-offer-subtitle">${escapeHtml(typeof offer.content === "string" ? offer.content : "")}</p>${button}</div></section>`,
+    guarantee && `<section class="nexsell-section"><div class="nexsell-container-narrow"><div class="nexsell-guarantee-card"><span class="nexsell-guarantee-icon">🛡️</span><div><h3 class="nexsell-guarantee-title">${escapeHtml(guarantee.title || "Garantía")}</h3><p>${escapeHtml(typeof guarantee.content === "string" ? guarantee.content : "")}</p></div></div></div></section>`,
+    faq && Array.isArray(faq.content) && `<section class="nexsell-section-alt"><div class="nexsell-container-narrow"><h2 class="nexsell-h2">${escapeHtml(faq.title || "Preguntas frecuentes")}</h2>${faq.content.map((item: any) => typeof item === "string" ? `<details class="nexsell-faq-item"><summary>${escapeHtml(item)}</summary></details>` : `<details class="nexsell-faq-item"><summary>${escapeHtml(item.q || "")}</summary><div class="nexsell-faq-answer">${escapeHtml(item.a || "")}</div></details>`).join("")}</div></section>`,
+    `<section class="nexsell-final-cta"><div class="nexsell-container-narrow"><h2 class="nexsell-h2">${escapeHtml(cta?.title || "¿Listo para comprar?")}</h2><p class="nexsell-offer-subtitle">${escapeHtml(typeof cta?.content === "string" ? cta.content : "")}</p>${button}</div></section>`,
+  ].filter(Boolean).join("\n");
+
+  return `<style>${generateShopifyCSS(theme)}</style>\n<div class="nexsell-landing">\n${sectionList}\n</div>`;
+}
+
 /**
  * Generate a complete Shopify Liquid section file from landing blocks.
  */
