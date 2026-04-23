@@ -501,12 +501,14 @@ export function generateShopifyLiquid(
       {% if section.settings.offer_subtitle != blank %}
         <p class="nexsell-offer-subtitle">{{ section.settings.offer_subtitle }}</p>
       {% endif %}
-      {% if product %}
+      {% if nexsell_product != blank %}
         <div class="nexsell-price-compare">
-          <span class="nexsell-price-old">{{ product.compare_at_price | money }}</span>
-          <span class="nexsell-price-new">{{ product.price | money }}</span>
-          {% if product.compare_at_price > product.price %}
-            <span class="nexsell-discount-badge">-{{ product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price }}%</span>
+          {% if nexsell_variant.compare_at_price > nexsell_variant.price %}
+            <span class="nexsell-price-old">{{ nexsell_variant.compare_at_price | money }}</span>
+          {% endif %}
+          <span class="nexsell-price-new">{{ nexsell_variant.price | money }}</span>
+          {% if nexsell_variant.compare_at_price > nexsell_variant.price %}
+            <span class="nexsell-discount-badge">-{{ nexsell_variant.compare_at_price | minus: nexsell_variant.price | times: 100 | divided_by: nexsell_variant.compare_at_price }}%</span>
           {% endif %}
         </div>
       {% endif %}
