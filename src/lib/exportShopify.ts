@@ -697,6 +697,29 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 /* Features */
 .nexsell-feature-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; color: ${t.bodyColor}; }
 
+/* Shrine LATAM / advanced ecommerce blocks */
+.nexsell-emoji-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.nexsell-emoji-card { padding:20px; border:1px solid ${t.cardBorder}; border-radius:16px; background:${t.cardBg}; text-align:center; }
+.nexsell-emoji-card span { display:block; font-size:28px; margin-bottom:8px !important; }
+.nexsell-emoji-card p { color:${t.bodyColor}; font-weight:700; font-size:14px; }
+.nexsell-marquee { overflow:hidden; background:${t.ctaBg} !important; color:${t.ctaText} !important; padding:14px 0; }
+.nexsell-marquee div { display:flex; gap:42px; justify-content:center; flex-wrap:wrap; font-weight:800; letter-spacing:.02em; }
+.nexsell-center-muted { text-align:center; color:${t.mutedColor}; margin:-24px auto 32px !important; max-width:620px; }
+.nexsell-stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+.nexsell-stat-card { padding:28px; border:1px solid ${t.cardBorder}; border-radius:18px; background:${t.cardBg}; text-align:center; }
+.nexsell-stat-card strong { display:block; font-family:'Space Grotesk',sans-serif; font-size:44px; line-height:1; color:${t.ctaBg}; margin-bottom:10px !important; }
+.nexsell-stat-card span { color:${t.bodyColor}; font-weight:700; }
+.nexsell-table { overflow:hidden; border:1px solid ${t.cardBorder}; border-radius:18px; background:${t.cardBg}; }
+.nexsell-table-head,.nexsell-table-row { display:grid; grid-template-columns:2fr 1fr 1fr; align-items:center; gap:12px; padding:16px 18px; border-bottom:1px solid ${t.cardBorder}; }
+.nexsell-table-head { background:${t.accentBg}; color:${t.headingColor}; }
+.nexsell-table-row span { color:${t.bodyColor}; }
+.nexsell-table-row b { text-align:center; color:${t.ctaBg}; font-size:20px; }
+.nexsell-timeline { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.nexsell-timeline-step { padding:22px; border:1px solid ${t.sectionAltCardBorder}; border-radius:18px; background:${t.sectionAltCardBg}; text-align:center; }
+.nexsell-timeline-step span { display:inline-flex; width:34px; height:34px; align-items:center; justify-content:center; border-radius:999px; background:${t.ctaBg}; color:${t.ctaText}; font-weight:800; margin-bottom:10px !important; }
+.nexsell-timeline-step strong { display:block; color:${t.headingColor}; margin-bottom:4px !important; }
+.nexsell-timeline-step small { color:${t.mutedColor}; }
+
 /* Testimonials */
 .nexsell-testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
 .nexsell-testimonial-card { padding: 24px; background: ${t.sectionAltCardBg}; border: 1px solid ${t.sectionAltCardBorder}; border-radius: 12px; }
