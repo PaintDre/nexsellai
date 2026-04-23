@@ -6,6 +6,15 @@ interface Block {
   title?: string;
   content?: string | string[] | Array<{ q: string; a: string }>;
   image_url?: string;
+  steps?: Array<{ icon?: string; top?: string; bottom?: string }>;
+  rows?: Array<{ benefit: string; us?: boolean; others?: boolean }>;
+  us_label?: string;
+  others_label?: string;
+  caption?: string;
+  stats?: Array<{ percentage: number | string; text: string }>;
+  text?: string;
+  items?: Array<string | { emoji?: string; text?: string; q?: string; a?: string }>;
+  options?: Array<{ label: string; price: string; compare_price?: string; badge?: string; savings?: string }>;
 }
 
 interface ThemeColors {
