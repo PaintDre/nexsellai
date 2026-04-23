@@ -192,7 +192,7 @@
     "copied": "Copied",
     "downloadLiquid": "Download Shopify template",
     "liquidDownloaded": "✅ Shopify template downloaded",
-    "liquidInstructions": "No app install or OAuth required. Upload sections/nexsell-landing.liquid and templates/product.nexsell.json to your theme; page.nexsell.json is also included for standalone pages.",
+    "liquidInstructions": "No app install or OAuth required. For the easy flow, copy custom-liquid/nexsell-copy-paste.liquid into a Custom liquid section. The sections/templates files remain as the advanced option.",
     "advancedTitle": "Optional automatic publishing",
     "advancedDescription": "Only use this if you want to authorize Nexsell in Shopify. Shopify will show it as a connected app."
   },
