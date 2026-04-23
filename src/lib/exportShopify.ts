@@ -677,10 +677,11 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 /* Nexsell Landing — Shopify Section Styles */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
-.nexsell-landing, .nexsell-landing * { margin: 0 !important; padding: 0; box-sizing: border-box; }
-.nexsell-landing { font-family: 'Inter', system-ui, sans-serif !important; color: ${t.bodyColor} !important; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-wrap:anywhere; word-break:break-word; }
+.nexsell-landing { margin: 0 !important; padding: 0 !important; font-family: 'Inter', system-ui, sans-serif !important; color: ${t.bodyColor} !important; line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-wrap:anywhere; word-break:break-word; }
+.nexsell-landing * { box-sizing: border-box; }
 .nexsell-landing img { max-width: 100%; height: auto; }
 .nexsell-landing a { text-decoration: none; }
+.nexsell-landing p, .nexsell-landing h1, .nexsell-landing h2, .nexsell-landing h3 { margin-top: 0; }
 
 .nexsell-container { max-width: 960px; margin: 0 auto; }
 .nexsell-container-sm { max-width: 768px; margin: 0 auto; }
@@ -793,6 +794,7 @@ export function generateShopifyCSS(theme: LandingTheme = "clean"): string {
 .nexsell-btn { display: inline-flex !important; align-items:center; justify-content:center; background: ${t.ctaBg} !important; color: ${t.ctaText} !important; padding: 16px 48px !important; border-radius: 12px !important; text-decoration: none !important; font-size: 18px !important; font-weight: 800 !important; box-shadow: 0 4px 14px rgba(0,0,0,0.15); border: none !important; cursor: pointer; transition: transform 0.2s, filter 0.2s; min-height:54px; }
 .nexsell-btn:hover { filter: brightness(.95); transform: translateY(-1px); color:${t.ctaText} !important; }
 .nexsell-btn[disabled] { opacity:.55; cursor:not-allowed; }
+.nexsell-product-warning { display:inline-flex; max-width:520px; justify-content:center; padding:14px 18px; border-radius:12px; background:${t.urgencyBg}; color:${t.urgencyText}; font-size:14px; font-weight:700; }
 
 /* Trust */
 .nexsell-trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; font-size: 12px; color: ${t.trustColor}; margin-top: 16px; }
