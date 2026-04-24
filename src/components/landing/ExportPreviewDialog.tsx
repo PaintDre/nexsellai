@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -7,12 +7,15 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, Store } from "lucide-react";
+import { Download, Loader2, Store, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generateLandingHTML } from "@/lib/exportLanding";
-import { exportShopifyZip } from "@/lib/exportShopify";
+import { exportShopifyZip, generateShopifyLiquid, generateShopifyProductTemplate } from "@/lib/exportShopify";
 import type { LandingTheme } from "@/components/landing/themes";
 import { useTranslation } from "react-i18next";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import ShopifyConnectDialog from "@/components/landing/ShopifyConnectDialog";
 
 interface ExportPreviewDialogProps {
   open: boolean;
