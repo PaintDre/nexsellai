@@ -1,46 +1,38 @@
+# Aplicar los 4 cambios al exportador Shopify (literal)
 
+Aplico los 4 cambios exactamente como los especificaste en `src/lib/exportShopify.ts`. Te dejé claro en la pregunta los riesgos: procedo bajo tu confirmación de "aplicar tal cual".
 
-## Objetivo
+## Cambios a realizar (un solo archivo)
 
-Permitir al admin **subir un archivo de video** (en lugar de solo pegar una URL) en el catálogo Dropi. El video se guarda en un bucket de Supabase Storage y la URL pública se almacena en `dropi_products.video_url` para reproducirlo/descargarlo después.
+**Archivo:** `src/lib/exportShopify.ts`
 
-## Cambios
+### CHANGE 1 — Fallback de imagen hero (alrededor de líneas 242-246)
 
-### 1. Storage — nuevo bucket `dropi-videos`
-Migración SQL para crear bucket público (límite ~100MB, MIME `video/*`) con RLS:
-- **SELECT** público (cualquiera puede ver el video).
-- **INSERT/UPDATE/DELETE** solo `admin` o `super_admin`.
+Reemplazo el bloque actual del hero image (que usa `image_url | image_tag`) por la versión simple con `<img src=...>` y le añado una rama `{% elsif section.settings.hero_image_url != blank %}` que pinta una imagen externa por URL si no se subió `image_picker`.
 
-### 2. `src/pages/AdminDropiCatalog.tsx`
-En la columna "Video" de cada producto, reemplazar el input de URL por un control con dos opciones:
-- **Subir archivo** (botón con icono Upload → `<input type="file" accept="video/*">`).
-- **Pegar URL** (mantener el input actual como alternativa).
+### CHANGE 2 — Nuevo `addToCartForm` (líneas 209-227)
 
-Flujo de subida:
-1. Validar que sea video y < 100MB.
-2. `supabase.storage.from('dropi-videos').upload(<productId>/<uuid>.<ext>, file)` con barra de progreso (spinner).
-3. Obtener `getPublicUrl` y hacer `update` en `dropi_products.video_url`.
-4. Si ya existía un video subido en el bucket, eliminar el anterior para no acumular basura.
-5. Mostrar un mini-preview `<video>` cuando ya hay video, con botón para reemplazar/eliminar.
+Reemplazo el `addToCartForm` actual (que usa `nexsell_product` + `routes.cart_add_url`) por la versión que pediste:
 
-La columna "Video" pasará a mostrar un thumbnail/check + acciones (subir, copiar URL, eliminar).
+- Si existe `product` (template de producto), usa `{% form 'product', product %}` con `product.variants.first.id` y `product.price`.
+- Si no, fallback a un `<a href="{{ section.settings.cta_url | default: '#' }}">`.
 
-### 3. Sin cambios en `DropiProduct.tsx`
-Ya consume `product.video_url` con `<video src=...>` y un botón de descarga — funcionará automáticamente con la URL pública del bucket.
+### CHANGE 3 — Nueva setting `hero_image_url` en el schema (línea 527)
 
-### 4. i18n
-Añadir claves: `dropi.uploadVideo`, `dropi.uploadingVideo`, `dropi.videoTooLarge`, `dropi.replaceVideo`, `dropi.removeVideo` en `es/en/pt`.
+Agrego justo después de `hero_image`:
 
-## Notas técnicas
+```ts
+{ type: "text", id: "hero_image_url", label: "URL imagen externa (Supabase)", default: escapeSchemaDefault(heroImgSrc) },
+```
 
-- El bucket es **público** para que el `<video>` cargue sin firmar URLs (mismo patrón que `product-images` y `dropi-ads`).
-- Path: `{product_id}/{uuid}.{ext}` para aislar archivos por producto.
-- Se mantiene la opción de URL externa por compatibilidad con el catálogo importado vía Excel (Dropbox, etc.).
-- Límite recomendado 100 MB por archivo (configurable en el bucket).
+### CHANGE 4 — `generateShopifyProductTemplate`
 
-## Archivos tocados
+Esta función **ya existe** en líneas 749-759 con exactamente la firma que pediste. No se duplica. `generateShopifyTemplate()` se mantiene intacto (lo usa `exportShopifyZip`).
 
-- `supabase/migrations/...` (nuevo bucket + policies)
-- `src/pages/AdminDropiCatalog.tsx`
-- `src/i18n/locales/{es,en,pt}.json`
+## Riesgos conocidos (te lo recordé y aceptaste)
 
+1. `**section.settings.cta_url**` se referencia en CHANGE 2 pero **no se agrega al schema**. Shopify previamente rechazó esta setting con `FileSaveError: Invalid schema setting cta_url`. Si Shopify vuelve a fallar al guardar el `.liquid`, el siguiente paso será agregar `{ type: "url", id: "cta_url", label: "URL del CTA" }` al schema (sin `default`, porque ese era el problema original).
+2. `**{% form 'product', product %}**` solo tiene la variable `product` disponible en templates de producto. En `page.nexsell.json` (página independiente) caerá al fallback `<a href="#">` y no agregará al carrito.
+3. La setting `connected_product` queda en el schema pero deja de usarse en el form (queda huérfana, sin efecto).  
+  
+estamos intentando cambiar el formato de exportado asi que si ves algun error trata de limpiar lo que sobra y agrega lo nuevo que estamos intentando para hacer funcionar esto como landing de producto ahora
