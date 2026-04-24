@@ -172,6 +172,21 @@ const ExportPreviewDialog = ({
               <p className="text-sm text-muted-foreground">{t("exportDialog.easyDescription")}</p>
               <Button
                 size="lg"
+                variant="default"
+                onClick={handleExportToShopify}
+                disabled={shopifyUploading}
+                className="w-full"
+              >
+                {shopifyUploading ? (
+                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4 mr-1" />
+                )}
+                Subir directo a Shopify
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
                 onClick={handleDownloadShopifySection}
                 disabled={shopifyExporting}
                 className="w-full"
@@ -187,6 +202,14 @@ const ExportPreviewDialog = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <ShopifyConnectDialog
+        open={showConnectDialog}
+        onOpenChange={setShowConnectDialog}
+        onConnected={() => {
+          setShopifyConnected(true);
+          setShowConnectDialog(false);
+        }}
+      />
     </>
   );
 };
