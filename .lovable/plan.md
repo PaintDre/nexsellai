@@ -1,38 +1,32 @@
-# Aplicar los 4 cambios al exportador Shopify (literal)
 
-Aplico los 4 cambios exactamente como los especificaste en `src/lib/exportShopify.ts`. Te dejé claro en la pregunta los riesgos: procedo bajo tu confirmación de "aplicar tal cual".
 
-## Cambios a realizar (un solo archivo)
+# Agregar acción `export-theme` a la Edge Function
 
-**Archivo:** `src/lib/exportShopify.ts`
+Agrego un nuevo bloque de acción en `supabase/functions/shopify-export/index.ts` para subir el archivo Liquid (`sections/nexsell-landing.liquid`) y la plantilla de producto (`templates/product.nexsell.json`) directamente al tema activo de la tienda Shopify del usuario vía Theme API.
 
-### CHANGE 1 — Fallback de imagen hero (alrededor de líneas 242-246)
+## Cambios
 
-Reemplazo el bloque actual del hero image (que usa `image_url | image_tag`) por la versión simple con `<img src=...>` y le añado una rama `{% elsif section.settings.hero_image_url != blank %}` que pinta una imagen externa por URL si no se subió `image_picker`.
+**Archivo:** `supabase/functions/shopify-export/index.ts`
 
-### CHANGE 2 — Nuevo `addToCartForm` (líneas 209-227)
+Inserto el bloque `if (action === "export-theme")` exactamente como lo especificaste, ubicado **después** del bloque `create-page` y **antes** del `return` final de "Invalid action". No toco los bloques existentes (`oauth-start`, `create-page`, `disconnect`).
 
-Reemplazo el `addToCartForm` actual (que usa `nexsell_product` + `routes.cart_add_url`) por la versión que pediste:
+### Lo que hace el nuevo bloque
 
-- Si existe `product` (template de producto), usa `{% form 'product', product %}` con `product.variants.first.id` y `product.price`.
-- Si no, fallback a un `<a href="{{ section.settings.cta_url | default: '#' }}">`.
+1. **Auth check**: ya cubierto por el código superior (valida JWT y extrae `userId`).
+2. **Cargar conexión Shopify**: lee `shopify_connections` con service role para obtener `store_domain` y `access_token`. Si no existe → 400.
+3. **Validar payload**: requiere `liquidContent` y `templateContent` en el body. Si falta alguno → 400.
+4. **Obtener tema activo**: `GET /admin/api/2024-01/themes.json` y filtra `role === "main"`. Si no hay tema principal → 400.
+5. **Subir 2 assets en paralelo** vía `PUT /themes/{id}/assets.json`:
+   - `sections/nexsell-landing.liquid` ← `liquidContent`
+   - `templates/product.nexsell.json` ← `templateContent`
+6. **Respuesta exitosa**: `{ success: true, themeName, storeDomain }`.
 
-### CHANGE 3 — Nueva setting `hero_image_url` en el schema (línea 527)
+### Despliegue
 
-Agrego justo después de `hero_image`:
+Tras escribir el archivo, despliego la función con `supabase--deploy_edge_functions` para `shopify-export`.
 
-```ts
-{ type: "text", id: "hero_image_url", label: "URL imagen externa (Supabase)", default: escapeSchemaDefault(heroImgSrc) },
-```
+## Notas / próximos pasos (no en este turno)
 
-### CHANGE 4 — `generateShopifyProductTemplate`
+- El frontend todavía debe llamar a esta acción. No tocaré `src/lib/exportShopify.ts` ni la UI de exportación en este cambio — solo agregamos el endpoint server-side. Cuando confirmes que la función queda desplegada, el siguiente paso será conectar el botón de "Exportar al tema" en la UI para que invoque `shopify-export` con `{ action: "export-theme", liquidContent, templateContent }`.
+- La Edge Function no requiere migraciones ni nuevos secretos: usa `SHOPIFY_API_KEY/SECRET` + el `access_token` ya almacenado en `shopify_connections` por el flujo OAuth existente.
 
-Esta función **ya existe** en líneas 749-759 con exactamente la firma que pediste. No se duplica. `generateShopifyTemplate()` se mantiene intacto (lo usa `exportShopifyZip`).
-
-## Riesgos conocidos (te lo recordé y aceptaste)
-
-1. `**section.settings.cta_url**` se referencia en CHANGE 2 pero **no se agrega al schema**. Shopify previamente rechazó esta setting con `FileSaveError: Invalid schema setting cta_url`. Si Shopify vuelve a fallar al guardar el `.liquid`, el siguiente paso será agregar `{ type: "url", id: "cta_url", label: "URL del CTA" }` al schema (sin `default`, porque ese era el problema original).
-2. `**{% form 'product', product %}**` solo tiene la variable `product` disponible en templates de producto. En `page.nexsell.json` (página independiente) caerá al fallback `<a href="#">` y no agregará al carrito.
-3. La setting `connected_product` queda en el schema pero deja de usarse en el form (queda huérfana, sin efecto).  
-  
-estamos intentando cambiar el formato de exportado asi que si ves algun error trata de limpiar lo que sobra y agrega lo nuevo que estamos intentando para hacer funcionar esto como landing de producto ahora
