@@ -40,7 +40,24 @@ const ExportPreviewDialog = ({
 }: ExportPreviewDialogProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [shopifyExporting, setShopifyExporting] = useState(false);
+  const [shopifyConnected, setShopifyConnected] = useState(false);
+  const [showConnectDialog, setShowConnectDialog] = useState(false);
+  const [shopifyUploading, setShopifyUploading] = useState(false);
+
+  useEffect(() => {
+    if (!open || !user) return;
+    const check = async () => {
+      const { data } = await supabase
+        .from("shopify_connections_safe" as any)
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setShopifyConnected(!!data);
+    };
+    check();
+  }, [open, user]);
 
   const htmlContent = useMemo(() => {
     if (!open) return "";
@@ -77,6 +94,56 @@ const ExportPreviewDialog = ({
       toast({ title: t("common.error"), variant: "destructive" });
     } finally {
       setShopifyExporting(false);
+    }
+  };
+
+  const handleExportToShopify = async () => {
+    if (!shopifyConnected) {
+      setShowConnectDialog(true);
+      return;
+    }
+    setShopifyUploading(true);
+    try {
+      const liquidContent = generateShopifyLiquid(
+        blocks,
+        product,
+        theme,
+        productImage,
+        allImageUrls
+      );
+      const templateContent = generateShopifyProductTemplate();
+
+      const { data, error } = await supabase.functions.invoke("shopify-export", {
+        body: {
+          action: "export-theme",
+          liquidContent,
+          templateContent,
+        },
+      });
+
+      if (error || data?.error) {
+        toast({
+          title: "Error al exportar",
+          description: data?.error || error?.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "✅ Landing subida a Shopify",
+        description: `Tema: ${data.themeName}. Ahora asigná la plantilla "product.nexsell" a tu producto en Shopify Admin.`,
+        duration: 8000,
+      });
+      onOpenChange(false);
+    } catch (err: any) {
+      toast({
+        title: "Error al exportar",
+        description: err?.message || "Error inesperado",
+        variant: "destructive",
+      });
+    } finally {
+      setShopifyUploading(false);
     }
   };
 
