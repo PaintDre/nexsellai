@@ -208,20 +208,17 @@ export function generateShopifyLiquid(
   // Add-to-Cart CTA
   const addToCartForm = `
     <div class="nexsell-cta-wrap">
-      {% if nexsell_product != blank and nexsell_variant != blank %}
-        <form action="{{ routes.cart_add_url }}" method="post" enctype="multipart/form-data" class="nexsell-cart-form" data-type="add-to-cart-form">
-          <input type="hidden" name="id" value="{{ nexsell_variant.id }}">
-          <input type="hidden" name="quantity" value="1">
-          <button type="submit" name="add" class="nexsell-btn" {% unless nexsell_variant.available %}disabled aria-disabled="true"{% endunless %}>
-            {% if nexsell_variant.available %}
-              {{ section.settings.cta_label | default: "Comprar ahora" }} — {{ nexsell_variant.price | money }}
-            {% else %}
-              Agotado
-            {% endif %}
+      {% if product %}
+        {% form 'product', product %}
+          <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+          <button type="submit" name="add" class="nexsell-btn">
+            {{ section.settings.cta_label | default: "Comprar ahora" }} — {{ product.price | money }}
           </button>
-        </form>
+        {% endform %}
       {% else %}
-        <div class="nexsell-product-warning">Selecciona un producto en la configuración de esta sección para activar el botón de compra.</div>
+        <a href="{{ section.settings.cta_url | default: '#' }}" class="nexsell-btn">
+          {{ section.settings.cta_label | default: "Comprar ahora" }}
+        </a>
       {% endif %}
       ${trustHTML}
     </div>`;
@@ -241,7 +238,11 @@ export function generateShopifyLiquid(
       </div>
       {% if section.settings.hero_image != blank %}
         <div class="nexsell-hero-img-wrap">
-          {{ section.settings.hero_image | image_url: width: 800 | image_tag: loading: 'lazy', class: 'nexsell-hero-img', alt: section.settings.hero_title, widths: '400, 600, 800, 1200' }}
+          <img src="{{ section.settings.hero_image | image_url: width: 800 }}" alt="{{ section.settings.hero_title }}" class="nexsell-hero-img" loading="lazy">
+        </div>
+      {% elsif section.settings.hero_image_url != blank %}
+        <div class="nexsell-hero-img-wrap">
+          <img src="{{ section.settings.hero_image_url }}" alt="{{ section.settings.hero_title }}" class="nexsell-hero-img" loading="lazy">
         </div>
       {% endif %}
     </div>
@@ -525,6 +526,7 @@ export function generateShopifyLiquid(
       { type: "text", id: "hero_title", label: "Título principal", default: hero?.title || "" },
       { type: "textarea", id: "hero_subtitle", label: "Subtítulo", default: (typeof hero?.content === 'string' ? hero.content : "") },
       { type: "image_picker", id: "hero_image", label: "Imagen del producto" },
+      { type: "text", id: "hero_image_url", label: "URL imagen externa (Supabase)", default: escapeSchemaDefault(heroImgSrc) },
       { type: "header", content: "Call to Action" },
       { type: "product", id: "connected_product", label: "Producto para el botón de compra" },
       { type: "text", id: "cta_label", label: "Texto del botón CTA", default: "Comprar ahora" },
