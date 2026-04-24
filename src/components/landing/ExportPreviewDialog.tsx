@@ -43,20 +43,32 @@ const ExportPreviewDialog = ({
   const { user } = useAuth();
   const [shopifyExporting, setShopifyExporting] = useState(false);
   const [shopifyConnected, setShopifyConnected] = useState(false);
+  const [shopifyDomain, setShopifyDomain] = useState<string | null>(null);
   const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [shopifyUploading, setShopifyUploading] = useState(false);
 
-  useEffect(() => {
-    if (!open || !user) return;
-    const check = async () => {
-      const { data } = await supabase
-        .from("shopify_connections_safe" as any)
-        .select("user_id")
+  const checkConnection = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from("shopify_connections")
+        .select("id, store_domain, shop_name")
         .eq("user_id", user.id)
         .maybeSingle();
+      if (error) {
+        console.error("[checkConnection] error:", error);
+        return;
+      }
       setShopifyConnected(!!data);
-    };
-    check();
+      setShopifyDomain(data ? ((data as any).shop_name || (data as any).store_domain) : null);
+    } catch (err) {
+      console.error("[checkConnection] unexpected error:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (!open || !user) return;
+    checkConnection();
   }, [open, user]);
 
   const htmlContent = useMemo(() => {
