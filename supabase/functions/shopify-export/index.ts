@@ -144,6 +144,119 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (action === "export-theme") {
+      const serviceClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+
+      const { data: connection } = await serviceClient
+        .from("shopify_connections")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+
+      if (!connection) {
+        return new Response(
+          JSON.stringify({ error: "No Shopify connection found" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const { liquidContent, templateContent } = body;
+      if (!liquidContent || !templateContent) {
+        return new Response(
+          JSON.stringify({ error: "Missing liquidContent or templateContent" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Step 1: Get the active (main) theme
+      const themesRes = await fetch(
+        `https://${connection.store_domain}/admin/api/2024-01/themes.json`,
+        {
+          headers: {
+            "X-Shopify-Access-Token": connection.access_token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!themesRes.ok) {
+        const errorText = await themesRes.text();
+        return new Response(
+          JSON.stringify({ error: "Failed to fetch Shopify themes", details: errorText }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const themesData = await themesRes.json();
+      const mainTheme = themesData.themes?.find((t: any) => t.role === "main");
+
+      if (!mainTheme) {
+        return new Response(
+          JSON.stringify({ error: "No active theme found in Shopify store" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const themeId = mainTheme.id;
+      const assetsUrl = `https://${connection.store_domain}/admin/api/2024-01/themes/${themeId}/assets.json`;
+      const shopifyHeaders = {
+        "X-Shopify-Access-Token": connection.access_token,
+        "Content-Type": "application/json",
+      };
+
+      // Step 2: Upload section and product template in parallel
+      const [sectionRes, templateRes] = await Promise.all([
+        fetch(assetsUrl, {
+          method: "PUT",
+          headers: shopifyHeaders,
+          body: JSON.stringify({
+            asset: {
+              key: "sections/nexsell-landing.liquid",
+              value: liquidContent,
+            },
+          }),
+        }),
+        fetch(assetsUrl, {
+          method: "PUT",
+          headers: shopifyHeaders,
+          body: JSON.stringify({
+            asset: {
+              key: "templates/product.nexsell.json",
+              value: templateContent,
+            },
+          }),
+        }),
+      ]);
+
+      if (!sectionRes.ok) {
+        const errorText = await sectionRes.text();
+        return new Response(
+          JSON.stringify({ error: "Failed to upload Liquid section", details: errorText }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (!templateRes.ok) {
+        const errorText = await templateRes.text();
+        return new Response(
+          JSON.stringify({ error: "Failed to upload product template", details: errorText }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          themeName: mainTheme.name,
+          storeDomain: connection.store_domain,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     if (action === "disconnect") {
       const { error } = await supabase
         .from("shopify_connections")
