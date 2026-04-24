@@ -217,9 +217,10 @@ const ExportPreviewDialog = ({
       <ShopifyConnectDialog
         open={showConnectDialog}
         onOpenChange={setShowConnectDialog}
-        onConnected={() => {
+        onConnected={async () => {
           setShopifyConnected(true);
           setShowConnectDialog(false);
+          setTimeout(() => handleExportToShopify(), 300);
         }}
       />
     </>
