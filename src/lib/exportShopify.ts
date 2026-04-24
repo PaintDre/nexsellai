@@ -526,6 +526,7 @@ export function generateShopifyLiquid(
       { type: "text", id: "hero_title", label: "Título principal", default: hero?.title || "" },
       { type: "textarea", id: "hero_subtitle", label: "Subtítulo", default: (typeof hero?.content === 'string' ? hero.content : "") },
       { type: "image_picker", id: "hero_image", label: "Imagen del producto" },
+      { type: "text", id: "hero_image_url", label: "URL imagen externa (Supabase)", default: escapeSchemaDefault(heroImgSrc) },
       { type: "header", content: "Call to Action" },
       { type: "product", id: "connected_product", label: "Producto para el botón de compra" },
       { type: "text", id: "cta_label", label: "Texto del botón CTA", default: "Comprar ahora" },
