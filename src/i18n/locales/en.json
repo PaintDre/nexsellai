@@ -639,10 +639,10 @@
         "name": "Starter",
         "description": "Launch and validate products with AI",
         "features": [
-          "300 credits / month",
-          "≈ 12 landings with AI images",
-          "≈ 60 individual banners",
-          "≈ 10 full AIDA packs",
+          "200 credits / month",
+          "≈ 8 landings with AI images",
+          "≈ 40 individual banners",
+          "≈ 6 full AIDA packs",
           "Dropi image generation",
           "Shopify export",
           "Priority support"
@@ -652,10 +652,10 @@
         "name": "Pro",
         "description": "For sellers scaling with ads",
         "features": [
-          "1500 credits / month",
-          "≈ 60 landings with AI images",
-          "≈ 300 individual banners",
-          "≈ 50 full AIDA packs",
+          "1000 credits / month",
+          "≈ 40 landings with AI images",
+          "≈ 200 individual banners",
+          "≈ 33 full AIDA packs",
           "Massive Dropi generation (images + ads)",
           "Unlimited variants & regenerations within budget",
           "Full ZIP and Shopify export",
@@ -863,10 +863,10 @@
       },
       {
         "name": "Starter",
-        "landings": "300 credits / mo · unlimited landings",
+        "landings": "200 credits / mo · unlimited landings",
         "features": [
-          "≈ 30 text landings or 12 with AI images",
-          "≈ 60 individual banners",
+          "≈ 20 text landings or 8 with AI images",
+          "≈ 40 individual banners",
           "All 4 visual themes",
           "AI images inside blocks",
           "Shopify connection (OAuth)",
@@ -876,10 +876,10 @@
       },
       {
         "name": "Pro",
-        "landings": "1,500 credits / mo · unlimited landings",
+        "landings": "1,000 credits / mo · unlimited landings",
         "features": [
-          "≈ 150 text landings or 60 with AI images",
-          "≈ 300 individual banners",
+          "≈ 100 text landings or 40 with AI images",
+          "≈ 200 individual banners",
           "Unlimited psychological angles",
           "A/B CTA variants",
           "Bundles and comparisons",

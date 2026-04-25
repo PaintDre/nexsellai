@@ -639,10 +639,10 @@
         "name": "Starter",
         "description": "Para lançar e validar produtos com IA",
         "features": [
-          "300 créditos / mês",
-          "≈ 12 landings com imagens IA",
-          "≈ 60 banners individuais",
-          "≈ 10 packs AIDA completos",
+          "200 créditos / mês",
+          "≈ 8 landings com imagens IA",
+          "≈ 40 banners individuais",
+          "≈ 6 packs AIDA completos",
           "Geração de imagens Dropi",
           "Exportar para Shopify",
           "Suporte prioritário"
@@ -652,10 +652,10 @@
         "name": "Pro",
         "description": "Para vendedores que escalam com ads",
         "features": [
-          "1500 créditos / mês",
-          "≈ 60 landings com imagens IA",
-          "≈ 300 banners individuais",
-          "≈ 50 packs AIDA completos",
+          "1000 créditos / mês",
+          "≈ 40 landings com imagens IA",
+          "≈ 200 banners individuais",
+          "≈ 33 packs AIDA completos",
           "Geração massiva Dropi (imagens + ads)",
           "Variações e regerações ilimitadas dentro do orçamento",
           "Exportar ZIP completo e Shopify",
@@ -863,10 +863,10 @@
       },
       {
         "name": "Starter",
-        "landings": "300 créditos / mês · landings ilimitadas",
+        "landings": "200 créditos / mês · landings ilimitadas",
         "features": [
-          "≈ 30 landings de texto ou 12 com imagens IA",
-          "≈ 60 banners individuais",
+          "≈ 20 landings de texto ou 8 com imagens IA",
+          "≈ 40 banners individuais",
           "Os 4 temas visuais",
           "Imagens IA nos blocos",
           "Conexão Shopify (OAuth)",
@@ -876,10 +876,10 @@
       },
       {
         "name": "Pro",
-        "landings": "1.500 créditos / mês · landings ilimitadas",
+        "landings": "1.000 créditos / mês · landings ilimitadas",
         "features": [
-          "≈ 150 landings de texto ou 60 com imagens IA",
-          "≈ 300 banners individuais",
+          "≈ 100 landings de texto ou 40 com imagens IA",
+          "≈ 200 banners individuais",
           "Ângulos psicológicos ilimitados",
           "Variantes A/B de CTA",
           "Bundles e comparações",
