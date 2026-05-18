@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
@@ -64,6 +65,16 @@ const Login = () => {
 
   return (
     <AuthLayout title={t("auth.login.title")} subtitle={t("auth.login.subtitle")}>
+      <Helmet>
+        <title>Iniciar sesión | Nexsell</title>
+        <meta name="description" content="Accede a tu cuenta Nexsell y continúa generando landings y banners IA para tu ecommerce." />
+        <link rel="canonical" href="https://nexsellai.com/login" />
+        <meta property="og:title" content="Iniciar sesión | Nexsell" />
+        <meta property="og:description" content="Accede a tu cuenta Nexsell y continúa generando landings y banners IA para tu ecommerce." />
+        <meta property="og:url" content="https://nexsellai.com/login" />
+        <meta name="twitter:title" content="Iniciar sesión | Nexsell" />
+        <meta name="twitter:description" content="Accede a tu cuenta Nexsell y continúa generando landings y banners IA para tu ecommerce." />
+      </Helmet>
       <form onSubmit={handleLogin} className="space-y-5">
         <div className="space-y-2">
           <Label htmlFor="email">{t("auth.login.email")}</Label>
