@@ -260,6 +260,13 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
   return (
     <div ref={revealRef} className="min-h-screen landing-container" style={{ fontFamily: "'Inter', sans-serif", overflowWrap: "anywhere", wordBreak: "break-word" }}>
 
+      {/* ═══ URGENCY BAR (v2) — top sticky bar ═══ */}
+      {urgencyBar && (
+        <div className="w-full bg-emerald-600 text-white py-2 px-4 text-center text-sm font-medium tracking-wide">
+          <span>{typeof urgencyBar.content === "string" ? urgencyBar.content : (urgencyBar.title || "Oferta por tiempo limitado")}</span>
+        </div>
+      )}
+
       {/* ═══ HERO ═══ */}
       {hero && (
         <EditableSection blockType="hero" blockTitle={hero.title} className={`relative overflow-hidden py-20 md:py-28 ${heroStyle.bgClass}`}>
