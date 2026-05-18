@@ -1086,7 +1086,6 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     let userPlan = plan || "free";
-    let userIdForCharge: string | null = null;
 
     // ── Auth & Plan Validation (unchanged) ──
     if (!demo) {
@@ -1130,7 +1129,6 @@ serve(async (req) => {
         }
       }
 
-      userIdForCharge = user.id;
       // Server-authoritative credit charge.
       const chargeResult = await chargeCredits(supabase, user.id, "landing_text", null, { pipeline_version: "v2" });
       if (!chargeResult.success) {
