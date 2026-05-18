@@ -130,6 +130,11 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
   const emojiBenefits = getBlock("emoji_benefits");
   const bundleOffer = getBlock("bundle_offer");
   const faqCod = getBlock("faq_cod");
+
+  // ── v2 conversion blocks ──
+  const urgencyBar = getBlock("urgency_bar");
+  const stickyCta = getBlock("sticky_cta");
+  const socialProofCarousel = getBlock("social_proof_carousel");
   const productImages = (product as any)?.images as string[] | undefined;
 
   const microItems: string[] = microcopy
