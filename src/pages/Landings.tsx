@@ -293,6 +293,14 @@ const Landings = () => {
           theme={((selectedLanding as any).theme || "clean") as LandingTheme}
           productImage={getProductImageUrls(selectedLanding.product)[0] || null}
           allImageUrls={getProductImageUrls(selectedLanding.product)}
+          landingId={selectedLanding.id}
+          existingShopifyPageId={(selectedLanding as any).shopify_page_id || null}
+          existingShopifyHandle={(selectedLanding as any).shopify_page_handle || null}
+          onPublished={({ pageId, handle }) => {
+            setLandings(prev => prev.map(l => l.id === selectedLanding.id
+              ? ({ ...l, shopify_page_id: pageId, shopify_page_handle: handle, shopify_synced_at: new Date().toISOString() } as any)
+              : l));
+          }}
         />
       )}
     </div>

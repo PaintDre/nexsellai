@@ -761,6 +761,116 @@ export function generateShopifyProductTemplate(): string {
 }
 
 /**
+ * Generate a Shopify page template JSON with section settings + blocks
+ * pre-populated from the landing content, so the published page renders
+ * the full landing even before the merchant opens the Theme Editor.
+ *
+ * Returns the JSON string to upload as `templates/page.nexsell-{handle}.json`.
+ */
+export function generateShopifyPageTemplate(
+  blocks: Block[],
+  product: { name: string; price: number } | null,
+  productImage?: string | null,
+  allImageUrls: string[] = []
+): string {
+  const getBlock = (type: string) => blocks.find((b) => b.type === type);
+  const heroImg = normalizeImageUrl(productImage || (allImageUrls[0] || "") || "");
+
+  const hero = getBlock("hero");
+  const benefits = getBlock("benefits");
+  const features = getBlock("features");
+  const testimonials = getBlock("testimonials");
+  const objections = getBlock("objections");
+  const faq = getBlock("faq");
+  const comparison = getBlock("comparison");
+  const bundles = getBlock("bundles");
+  const offer = getBlock("offer");
+  const urgency = getBlock("urgency");
+  const guarantee = getBlock("guarantee");
+  const cta = getBlock("cta");
+
+  const sectionBlocks: Record<string, any> = {};
+  const blockOrder: string[] = [];
+  let counter = 0;
+  const addBlock = (type: string, settings: Record<string, any>) => {
+    const id = `b${counter++}`;
+    sectionBlocks[id] = { type, settings };
+    blockOrder.push(id);
+  };
+
+  if (benefits && Array.isArray(benefits.content)) {
+    (benefits.content as string[]).forEach((text) => addBlock("benefit", { text }));
+  }
+  if (features && Array.isArray(features.content)) {
+    (features.content as string[]).forEach((text) => addBlock("feature", { text }));
+  }
+  if (testimonials && Array.isArray(testimonials.content)) {
+    (testimonials.content as string[]).forEach((text) => addBlock("testimonial", { text }));
+  }
+  if (objections && Array.isArray(objections.content)) {
+    (objections.content as any[]).forEach((item) => {
+      const text = typeof item === "string" ? item : (item?.text || "");
+      if (text) addBlock("objection", { text });
+    });
+  }
+  if (faq && Array.isArray(faq.content)) {
+    (faq.content as any[]).forEach((item) => {
+      if (typeof item === "string") {
+        addBlock("faq_item", { question: item, answer: "" });
+      } else if (item?.q) {
+        addBlock("faq_item", { question: item.q, answer: item.a || "" });
+      }
+    });
+  }
+  if (comparison && Array.isArray(comparison.content)) {
+    const items = comparison.content as string[];
+    const half = Math.ceil(items.length / 2);
+    items.slice(0, half).forEach((text) => addBlock("comparison_pro", { text }));
+    items.slice(half).forEach((text) => addBlock("comparison_con", { text }));
+  }
+  if (bundles && Array.isArray(bundles.content)) {
+    (bundles.content as string[]).forEach((text) => addBlock("bundle", { text }));
+  }
+
+  const settings: Record<string, any> = {
+    hero_title: hero?.title || product?.name || "",
+    hero_subtitle: typeof hero?.content === "string" ? hero.content : "",
+    hero_image_url: heroImg,
+    cta_label: "Comprar ahora",
+    benefits_title: benefits?.title || "Beneficios",
+    features_title: features?.title || "Características",
+    testimonials_title: testimonials?.title || "Lo que dicen nuestros clientes",
+    objections_title: objections?.title || "¿Aún tienes dudas?",
+    faq_title: faq?.title || "Preguntas frecuentes",
+    comparison_title: comparison?.title || "¿Por qué elegirnos?",
+    bundles_title: bundles?.title || "Packs disponibles",
+    offer_title: offer?.title || "",
+    offer_subtitle: typeof offer?.content === "string" ? offer.content : "",
+    urgency_text: typeof urgency?.content === "string" ? urgency.content : urgency?.title || "",
+    guarantee_title: guarantee?.title || "Garantía",
+    guarantee_text: typeof guarantee?.content === "string" ? guarantee.content : "",
+    final_cta_title: cta?.title || "¿Listo para probarlo?",
+    final_cta_subtitle: typeof cta?.content === "string" ? cta.content : "",
+    trust_shipping: "Envío seguro",
+    trust_protected: "Compra protegida",
+    trust_secure: "Pago 100% seguro",
+    trust_cards: "Tarjetas aceptadas",
+  };
+
+  return JSON.stringify({
+    sections: {
+      main: {
+        type: "nexsell-landing",
+        settings,
+        blocks: sectionBlocks,
+        block_order: blockOrder,
+      },
+    },
+    order: ["main"],
+  }, null, 2);
+}
+
+/**
  * Generate a README with installation instructions.
  */
 function generateReadme(): string {

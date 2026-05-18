@@ -7,10 +7,10 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, Store, Upload } from "lucide-react";
+import { Download, Loader2, Store, Upload, ExternalLink, Globe, Copy, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { generateLandingHTML } from "@/lib/exportLanding";
-import { exportShopifyZip, generateShopifyLiquid, generateShopifyProductTemplate } from "@/lib/exportShopify";
+import { exportShopifyZip, generateShopifyLiquid, generateShopifyProductTemplate, generateShopifyPageTemplate } from "@/lib/exportShopify";
 import type { LandingTheme } from "@/components/landing/themes";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +26,10 @@ interface ExportPreviewDialogProps {
   theme: LandingTheme;
   productImage: string | null;
   allImageUrls: string[];
+  landingId?: string;
+  existingShopifyPageId?: string | null;
+  existingShopifyHandle?: string | null;
+  onPublished?: (info: { pageId: string; handle: string; pageUrl: string }) => void;
 }
 
 const ExportPreviewDialog = ({
@@ -37,6 +41,10 @@ const ExportPreviewDialog = ({
   theme,
   productImage,
   allImageUrls,
+  landingId,
+  existingShopifyPageId,
+  existingShopifyHandle,
+  onPublished,
 }: ExportPreviewDialogProps) => {
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -46,6 +54,9 @@ const ExportPreviewDialog = ({
   const [shopifyDomain, setShopifyDomain] = useState<string | null>(null);
   const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [shopifyUploading, setShopifyUploading] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishedUrl, setPublishedUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const checkConnection = async () => {
     if (!user) return;
@@ -159,6 +170,66 @@ const ExportPreviewDialog = ({
     }
   };
 
+  const handlePublishPage = async () => {
+    if (!shopifyConnected) {
+      setShowConnectDialog(true);
+      return;
+    }
+    if (!landingId) {
+      toast({ title: "Falta landingId", variant: "destructive" });
+      return;
+    }
+    setPublishing(true);
+    try {
+      const liquidContent = generateShopifyLiquid(blocks, product, theme, productImage, allImageUrls);
+      const templateContent = generateShopifyPageTemplate(blocks, product, productImage, allImageUrls);
+
+      const { data, error } = await supabase.functions.invoke("shopify-export", {
+        body: {
+          action: "publish-page",
+          landingId,
+          pageTitle: landingName,
+          handle: existingShopifyHandle || landingName,
+          liquidContent,
+          templateContent,
+          existingPageId: existingShopifyPageId || null,
+        },
+      });
+
+      if (error || data?.error) {
+        toast({
+          title: "Error al publicar",
+          description: data?.error || error?.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setPublishedUrl(data.pageUrl);
+      onPublished?.({ pageId: String(data.pageId), handle: data.handle, pageUrl: data.pageUrl });
+      toast({
+        title: data.isUpdate ? "✅ Página actualizada en Shopify" : "✅ Página publicada en Shopify",
+        description: `Live en ${data.pageUrl}`,
+        duration: 8000,
+      });
+    } catch (err: any) {
+      toast({
+        title: "Error al publicar",
+        description: err?.message || "Error inesperado",
+        variant: "destructive",
+      });
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const copyUrl = async () => {
+    if (!publishedUrl) return;
+    await navigator.clipboard.writeText(publishedUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
@@ -181,35 +252,77 @@ const ExportPreviewDialog = ({
           </div>
           <DialogFooter className="flex-col gap-3 sm:flex-col sm:justify-start">
             <div className="w-full rounded-lg border bg-primary/5 p-4 space-y-3">
-              <p className="text-sm text-muted-foreground">{t("exportDialog.easyDescription")}</p>
+              <div className="flex items-start gap-2">
+                <Globe className="h-4 w-4 mt-0.5 text-primary shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold">Publicar como página en Shopify</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Crea una página real en tu tienda. Editable desde el Theme Editor.
+                    {shopifyDomain && ` Conectado a ${shopifyDomain}.`}
+                  </p>
+                </div>
+              </div>
               <Button
                 size="lg"
                 variant="default"
-                onClick={handleExportToShopify}
-                disabled={shopifyUploading}
+                onClick={handlePublishPage}
+                disabled={publishing || !landingId}
                 className="w-full"
               >
-                {shopifyUploading ? (
+                {publishing ? (
                   <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                 ) : (
-                  <Upload className="h-4 w-4 mr-1" />
+                  <Globe className="h-4 w-4 mr-1" />
                 )}
-                Subir directo a Shopify
+                {existingShopifyPageId ? "Actualizar página en Shopify" : "Publicar página en Shopify"}
               </Button>
+              {publishedUrl && (
+                <div className="rounded-md border bg-background p-3 flex items-center gap-2">
+                  <a
+                    href={publishedUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline truncate flex-1 flex items-center gap-1"
+                  >
+                    <ExternalLink className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{publishedUrl}</span>
+                  </a>
+                  <Button size="sm" variant="ghost" onClick={copyUrl} className="h-7 px-2 shrink-0">
+                    {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                  </Button>
+                </div>
+              )}
+              <div className="border-t pt-3 space-y-2">
+                <p className="text-xs text-muted-foreground">Otras opciones:</p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleExportToShopify}
+                  disabled={shopifyUploading}
+                  className="w-full"
+                >
+                  {shopifyUploading ? (
+                    <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
+                  ) : (
+                    <Upload className="h-3.5 w-3.5 mr-1" />
+                  )}
+                  Instalar template de producto (product.nexsell)
+                </Button>
               <Button
-                size="lg"
+                  size="sm"
                 variant="outline"
                 onClick={handleDownloadShopifySection}
                 disabled={shopifyExporting}
                 className="w-full"
               >
                 {shopifyExporting ? (
-                  <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
                 ) : (
-                  <Download className="h-4 w-4 mr-1" />
+                    <Download className="h-3.5 w-3.5 mr-1" />
                 )}
                 {t("exportDialog.downloadLiquid")}
               </Button>
+              </div>
             </div>
           </DialogFooter>
         </DialogContent>
@@ -220,7 +333,7 @@ const ExportPreviewDialog = ({
         onConnected={async () => {
           setShopifyConnected(true);
           setShowConnectDialog(false);
-          setTimeout(() => handleExportToShopify(), 300);
+          setTimeout(() => handlePublishPage(), 300);
         }}
       />
     </>
