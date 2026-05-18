@@ -1071,8 +1071,9 @@ serve(async (req) => {
   try {
     const { product, mode, intensity, hasOffer, guarantee, plan, demo, currency, country_code, template_id, sections } = await req.json();
 
-    const openaiKey = Deno.env.get("NexsellAi");
-    if (!openaiKey) {
+    // Pipeline v2: usa Lovable AI Gateway. Fallback al secret legacy NexsellAi si LOVABLE_API_KEY no existiera.
+    const aiKey = Deno.env.get("LOVABLE_API_KEY") || Deno.env.get("NexsellAi");
+    if (!aiKey) {
       return new Response(JSON.stringify({ error: "Server API key not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -1085,6 +1086,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     let userPlan = plan || "free";
+    let userIdForCharge: string | null = null;
 
     // ── Auth & Plan Validation (unchanged) ──
     if (!demo) {
@@ -1128,8 +1130,9 @@ serve(async (req) => {
         }
       }
 
+      userIdForCharge = user.id;
       // Server-authoritative credit charge.
-      const chargeResult = await chargeCredits(supabase, user.id, "landing_text");
+      const chargeResult = await chargeCredits(supabase, user.id, "landing_text", null, { pipeline_version: "v2" });
       if (!chargeResult.success) {
         if (chargeResult.error === "insufficient_credits") {
           return insufficientCreditsResponse(chargeResult, corsHeaders, "landing_text");
@@ -1156,25 +1159,43 @@ serve(async (req) => {
       sections: Array.isArray(sections) ? sections : undefined,
     };
 
-    // ── Step 1: Strategy Planner ──
-    console.log("Step 1: Running planner...");
-    const strategy = await runPlannerStep(openaiKey, params);
-    console.log("Planner result:", JSON.stringify(strategy).slice(0, 200));
+    // ============ Pipeline v2 ============
+    const pipelineStart = Date.now();
+    const pack = getCategoryPack(product?.category || "");
 
-    // ── Step 2: Block Generator ──
-    console.log("Step 2: Running generator...");
-    const rawBlocks = await runGeneratorStep(openaiKey, params, strategy);
-    console.log("Generator produced", rawBlocks.length, "blocks");
+    // Step 1 — Market Research
+    console.log("[v2] step 1/5 research");
+    const insights = await runResearchStep(aiKey, params, pack);
 
-    // ── Step 3: Critic / QA Pass ──
-    const validatedPreCritic = validateBlocksForPlan(rawBlocks, userPlan);
-    console.log("Step 3: Running critic...");
-    const refinedBlocks = await runCriticStep(openaiKey, validatedPreCritic, userPlan);
+    // Step 2 — Strategy
+    console.log("[v2] step 2/5 strategy");
+    const strategy = await runPlannerStep(aiKey, params, insights, pack);
 
-    // ── Final validation & strip metadata ──
-    const finalBlocks = stripMeta(validateBlocksForPlan(refinedBlocks, userPlan));
+    // Step 3 — Blocks generator
+    console.log("[v2] step 3/5 generator");
+    const rawBlocks = await runGeneratorStep(aiKey, params, strategy, insights, pack);
+    const validatedPre = validateBlocksForPlan(rawBlocks, userPlan);
 
-    return new Response(JSON.stringify({ blocks: finalBlocks }), {
+    // Step 4 — Soft critic (just collects issues)
+    console.log("[v2] step 4/5 critic-soft");
+    const issues = await runCriticStep(aiKey, validatedPre, userPlan);
+
+    // Step 5 — Polish (applies issues)
+    console.log("[v2] step 5/5 polish");
+    const polished = await runPolishStep(aiKey, validatedPre, issues, userPlan);
+
+    const finalBlocks = stripMeta(validateBlocksForPlan(polished, userPlan));
+    const totalMs = Date.now() - pipelineStart;
+    console.log(`[v2] pipeline complete in ${totalMs}ms — ${finalBlocks.length} blocks, ${issues.length} critic issues`);
+
+    return new Response(JSON.stringify({
+      blocks: finalBlocks,
+      _meta: {
+        pipeline_version: "v2",
+        generation_time_ms: totalMs,
+        critic_issues_count: issues.length,
+      },
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
