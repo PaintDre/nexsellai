@@ -296,9 +296,10 @@ const Landings = () => {
           landingId={selectedLanding.id}
           existingShopifyPageId={(selectedLanding as any).shopify_page_id || null}
           existingShopifyHandle={(selectedLanding as any).shopify_page_handle || null}
-          onPublished={({ pageId, handle }) => {
+          existingShopifyProductId={(selectedLanding as any).shopify_product_id || null}
+          onPublished={({ pageId, handle, shopifyProductId }) => {
             setLandings(prev => prev.map(l => l.id === selectedLanding.id
-              ? ({ ...l, shopify_page_id: pageId, shopify_page_handle: handle, shopify_synced_at: new Date().toISOString() } as any)
+              ? ({ ...l, shopify_page_id: pageId, shopify_page_handle: handle, shopify_product_id: shopifyProductId ?? (l as any).shopify_product_id, shopify_synced_at: new Date().toISOString() } as any)
               : l));
           }}
         />
