@@ -160,6 +160,90 @@ function getDefaultStrategy(params: PromptParams): Strategy {
   };
 }
 
+// ─── Prompt Packs por Categoría ──────────────────────────────────────────────
+// Inyectados en planner y generator para subir calidad del copy por nicho.
+
+interface CategoryPack {
+  tone: string;
+  avoid: string[];
+  hook_examples: string[];
+  block_emphasis: string;
+}
+
+const CATEGORY_PACKS: Record<string, CategoryPack> = {
+  home: {
+    tone: "cálido y aspiracional, enfocado en confort y transformación del hogar",
+    avoid: ["promesas médicas", "exageraciones técnicas"],
+    hook_examples: [
+      "Convierte tu casa en el lugar donde siempre quisiste estar",
+      "Pequeños detalles que cambian cómo se siente tu hogar",
+    ],
+    block_emphasis: "benefits + before_after_slider + faq fuertes",
+  },
+  fitness: {
+    tone: "motivacional pero honesto, sin promesas de resultados garantizados",
+    avoid: ["cifras médicas exactas", '"perderás X kilos"', "fechas específicas de resultados"],
+    hook_examples: [
+      "Diseñado para acompañarte cuando la motivación falla",
+      "Tu mejor versión empieza con una decisión simple",
+    ],
+    block_emphasis: "results_stats (rangos) + objections + guarantee",
+  },
+  beauty: {
+    tone: "sensorial, cuidadoso, libre de promesas absolutas",
+    avoid: ['"sin arrugas"', '"resultados instantáneos"', "lenguaje médico"],
+    hook_examples: [
+      "El ritual diario que tu piel agradece",
+      "Cuidado real, sin promesas imposibles",
+    ],
+    block_emphasis: "social_proof_carousel + faq + bundle_offer",
+  },
+  gadget: {
+    tone: "claro, técnico-amigable, lleno de pruebas concretas de utilidad",
+    avoid: ["jerga innecesaria", "promesas de marca sin evidencia"],
+    hook_examples: [
+      "Una solución pequeña para un problema que repites todos los días",
+      "Diseñado para hacer lo que prometes, sin complicaciones",
+    ],
+    block_emphasis: "features + comparison_table + urgency_bar",
+  },
+  pets: {
+    tone: "afectivo, cercano, con foco en bienestar animal",
+    avoid: ["claims veterinarios sin respaldo", "promesas de cura"],
+    hook_examples: [
+      "Hecho para los que tratamos a nuestras mascotas como familia",
+      "Lo que tu mascota merece, sin complicaciones para ti",
+    ],
+    block_emphasis: "testimonials suaves + faq + guarantee",
+  },
+  saas: {
+    tone: "directo, orientado a ROI y onboarding rápido",
+    avoid: ["jerga corporativa vacía", "promesas de productividad medidas"],
+    hook_examples: [
+      "Menos clics, más resultados",
+      "Lo configuras en minutos, lo notas el primer día",
+    ],
+    block_emphasis: "benefits + features + faq",
+  },
+};
+
+function getCategoryPack(category: string): CategoryPack {
+  return CATEGORY_PACKS[category?.toLowerCase()] || {
+    tone: "profesional, cercano, con foco en beneficios concretos",
+    avoid: ["claims sin respaldo", "promesas imposibles"],
+    hook_examples: ["Diseñado para resolver lo que más te importa"],
+    block_emphasis: "benefits + faq + cta",
+  };
+}
+
+function formatPackForPrompt(pack: CategoryPack): string {
+  return `## CATEGORY PACK
+- Tone: ${pack.tone}
+- Avoid: ${pack.avoid.join(" | ")}
+- Hook reference style: ${pack.hook_examples.join(" / ")}
+- Block emphasis hint: ${pack.block_emphasis}`;
+}
+
 // ─── Planner Prompt ─────────────────────────────────────────────────────────
 
 function buildPlannerPrompt(params: PromptParams): string {
