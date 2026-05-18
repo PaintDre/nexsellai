@@ -62,12 +62,15 @@ interface Strategy {
 function getPlanConfig(plan: string): PlanConfig {
   const configs: Record<string, PlanConfig> = {
     free: {
-      blockTypes: ["hero", "benefits", "cta"],
+      blockTypes: ["hero", "benefits", "urgency_bar", "cta", "sticky_cta"],
       blockCount: 3,
       limit: 1,
     },
     starter: {
-      blockTypes: ["hero", "benefits", "features", "testimonials", "objections", "faq", "urgency", "cta"],
+      blockTypes: [
+        "hero", "benefits", "features", "testimonials", "social_proof_carousel",
+        "objections", "faq", "urgency", "urgency_bar", "cta", "sticky_cta",
+      ],
       blockCount: 8,
       limit: 10,
     },
@@ -80,6 +83,8 @@ function getPlanConfig(plan: string): PlanConfig {
         "shipping_timeline", "comparison_table", "results_stats",
         "before_after_slider", "marquee_benefits", "emoji_benefits",
         "bundle_offer", "faq_cod",
+        // v2 advanced conversion blocks
+        "social_proof_carousel", "urgency_bar", "sticky_cta",
       ],
       blockCount: 21,
       limit: 100,
