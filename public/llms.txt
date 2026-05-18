@@ -1,0 +1,14 @@
+# Nexsell
+
+> Nexsell genera landing pages y banners para ecommerce con inteligencia artificial. Conecta con Shopify, optimiza copy y crea packs de banners verticales en minutos.
+
+## Pages
+
+- [Home](/): Resumen del producto, beneficios, ejemplos y preguntas frecuentes.
+- [Pricing](/pricing): Planes Free, Starter y Pro con créditos mensuales para generar landings y banners.
+- [Register](/register): Crear cuenta gratuita para generar y publicar landings.
+- [Login](/login): Iniciar sesión en la plataforma.
+
+## Optional
+
+- [Forgot password](/forgot-password): Recuperar contraseña por correo.
