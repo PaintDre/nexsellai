@@ -680,6 +680,8 @@ const ADVANCED_BLOCK_TYPES = new Set([
   "shipping_timeline", "comparison_table", "results_stats",
   "before_after_slider", "marquee_benefits", "emoji_benefits",
   "bundle_offer", "faq_cod",
+  // v2 advanced — may have empty title (urgency bar, sticky cta…)
+  "urgency_bar", "sticky_cta", "social_proof_carousel",
 ]);
 
 function sanitizeBlock(block: unknown): Block | null {
