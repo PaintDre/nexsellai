@@ -130,6 +130,11 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
   const emojiBenefits = getBlock("emoji_benefits");
   const bundleOffer = getBlock("bundle_offer");
   const faqCod = getBlock("faq_cod");
+
+  // ── v2 conversion blocks ──
+  const urgencyBar = getBlock("urgency_bar");
+  const stickyCta = getBlock("sticky_cta");
+  const socialProofCarousel = getBlock("social_proof_carousel");
   const productImages = (product as any)?.images as string[] | undefined;
 
   const microItems: string[] = microcopy
@@ -254,6 +259,13 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
 
   return (
     <div ref={revealRef} className="min-h-screen landing-container" style={{ fontFamily: "'Inter', sans-serif", overflowWrap: "anywhere", wordBreak: "break-word" }}>
+
+      {/* ═══ URGENCY BAR (v2) — top sticky bar ═══ */}
+      {urgencyBar && (
+        <div className="w-full bg-emerald-600 text-white py-2 px-4 text-center text-sm font-medium tracking-wide">
+          <span>{typeof urgencyBar.content === "string" ? urgencyBar.content : (urgencyBar.title || "Oferta por tiempo limitado")}</span>
+        </div>
+      )}
 
       {/* ═══ HERO ═══ */}
       {hero && (
@@ -932,6 +944,46 @@ const LandingRenderer = ({ blocks: rawBlocks, product, imagePreview, theme = "cl
           overflow-x: hidden;
         }
       `}</style>
+
+      {/* ═══ SOCIAL PROOF CAROUSEL (v2) ═══ */}
+      {socialProofCarousel && Array.isArray(socialProofCarousel.items || socialProofCarousel.content) && (
+        <EditableSection blockType="social_proof_carousel" blockTitle={socialProofCarousel.title} className={`py-12 md:py-16 ${t.sectionAltBg}`}>
+          <div className="max-w-6xl mx-auto px-4">
+            {socialProofCarousel.title && (
+              <h2 className={`text-2xl md:text-3xl font-bold text-center mb-8 ${t.sectionAltHeading}`}>{socialProofCarousel.title}</h2>
+            )}
+            <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4 scrollbar-thin">
+              {((socialProofCarousel.items || socialProofCarousel.content) as any[]).map((item, i) => {
+                const text = typeof item === "string" ? item : (item?.text || item?.quote || "");
+                const author = typeof item === "object" ? (item?.author || item?.name || "") : "";
+                return (
+                  <div key={i} className={`min-w-[280px] md:min-w-[340px] snap-center p-6 rounded-xl ${t.sectionAltCardBg} border ${t.sectionAltCardBorder} shadow-sm`}>
+                    <div className="flex gap-1 mb-3 text-amber-400" aria-hidden>{"★★★★★"}</div>
+                    <p className={`text-sm md:text-base mb-4 ${t.sectionAltBody}`} style={{ overflowWrap: "anywhere" }}>"{text}"</p>
+                    {author && <p className={`text-xs font-medium ${t.sectionAltMuted}`}>— {author}</p>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </EditableSection>
+      )}
+
+      {/* ═══ STICKY CTA (v2) — fixed bottom on mobile ═══ */}
+      {stickyCta && (
+        <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-white/95 backdrop-blur-sm border-t border-gray-200 px-4 py-3 shadow-lg">
+          <button
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl transition-colors min-h-[48px] text-base"
+            onClick={() => {
+              const ctaEl = document.querySelector('[data-block-type="cta"]');
+              if (ctaEl) ctaEl.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            {typeof stickyCta.content === "string" ? stickyCta.content : (stickyCta.title || "Quiero pedirlo ahora")}
+          </button>
+        </div>
+      )}
+
     </div>
   );
 };

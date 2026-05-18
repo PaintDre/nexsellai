@@ -1,175 +1,126 @@
-# Roadmap: Nexsell → Landing Pro + Shopify Nativo
+# Plan de Ejecución — Sprint 1: Pipeline IA v2 + Calidad de Landings
 
-Norte estratégico: que el cliente genere una landing en Nexsell, la edite a su gusto, y con un solo clic aparezca publicada en su Shopify **idéntica a lo que vio en Nexsell**, con Add to Cart, variantes, bundles y upsells funcionando contra su catálogo real.
+## Objetivo del Sprint
 
-Esta fase 1 cubre landings. Banners y resto del ecosistema vienen en fases posteriores (ya las dejo mapeadas al final).
+Elevar la calidad del copy y diseño de las landings generadas con un pipeline IA expandido y bloques nuevos, dejando la base lista para Sprint 2 (editor canvas) y Sprint 3 (bridge Shopify nativo).
 
----
+## Alcance
 
-## Diagnóstico actual (qué tenemos hoy)
+### 1. Pipeline IA v2 en `generate-landing`
+
+Reemplazar el flujo actual por una secuencia de 5 pasos:
 
 ```text
-[Producto] → generate-landing (Strategy → Blocks → Critic)
-            → blocks[] guardados en tabla landings
-            → LandingRenderer (React)
-            → /p/:slug público en Nexsell
-            → Export Shopify:
-                · exportShopify.ts (ZIP Liquid/JSON)
-                · shopify-export edge fn (OAuth + API push)
-                  scopes: write_content, write_themes, read_products
+Input (producto + audiencia + intensidad + offer)
+   │
+   ▼
+[1] Market Research  →  gemini-3-flash-preview
+   │   (insights de categoría, dolores, lenguaje del cliente, objeciones)
+   ▼
+[2] Strategy         →  gpt-5-mini
+   │   (ángulo de venta, promesa, hook principal, orden de bloques AIDA)
+   ▼
+[3] Blocks v2        →  gemini-3-flash-preview
+   │   (genera bloques con _meta, copy, CTAs, variantes A/B)
+   ▼
+[4] Critic           →  gpt-5.2
+   │   (revisa claridad, fricción, longitud, prohíbe precios hardcodeados)
+   ▼
+[5] Polish           →  gpt-5-mini
+       (aplica fixes del crítico, devuelve JSON final validado con Zod)
 ```
 
-Fortalezas: AIDA 7 bloques, 3 pasos IA con crítico, 4 temas, editor inline, OAuth Shopify ya conectado.
+- Cada paso loguea tiempo y tokens para métricas.
+- Si Critic detecta errores graves, Polish reintenta con feedback (máx. 1 reintento).
+- Output final compatible con `LandingRenderer` actual (no rompe landings existentes).
 
-Brechas que limitan ser "profesional":
+### 2. Prompt packs por categoría
 
-1. **El push a Shopify NO replica visualmente la landing 1:1** — se exporta como page HTML/Liquid sin secciones editables ni Add to Cart real.
-2. **Sin bridge de productos**: la landing usa el producto interno de Nexsell, no el `product_id` real de Shopify → no hay carrito ni variantes.
-3. **Editor visual limitado**: solo edición inline de texto, no reordenar bloques, no cambiar imágenes desde el canvas, no preview multi-device sincronizado.
-4. **Pipeline IA estancado**: 3 pasos rígidos, sin variantes A/B, sin bloques especializados por categoría (skincare ≠ electrónica ≠ moda).
-5. **Sin métricas de conversión** post-publicación que retroalimenten la IA.
+Nuevo `key` en `system_config`: `landing_prompt_packs`.
 
----
+- Pack por categoría existente (`home`, `fitness`, `beauty`, `gadget`, `pets`) con:
+  - tono de voz
+  - palabras prohibidas
+  - estructura recomendada de bloques
+  - ejemplos de hooks
+- El edge function lee el pack según `product.category` y lo inyecta en Strategy + Blocks.
+- Editable desde `SuperAdminConfig` (ya existe la UI para system_config).
 
-## Fase 1 — Landing Pro (4 sprints, ~6 semanas)
+### 3. Nuevos bloques en `LandingRenderer`
 
-### Sprint 1 · Núcleo de generación IA v2
+Agregar render para tipos nuevos que el IA podrá usar:
 
-Objetivo: subir calidad de copy y estructura sin tocar UI todavía.
+- `social_proof_carousel` — testimonios en carrusel con avatar + estrellas
+- `comparison_table` — "nosotros vs. competencia"
+- `urgency_bar` — barra superior con countdown/stock
+- `sticky_cta` — CTA pegado abajo en mobile
+- `before_after` — ya existe `BeforeAfterSlider`, integrar como bloque
+- `bundle_offer` — combo con precio tachado (sin hardcodear, usa `product.price`)
 
-- **Pipeline IA expandido a 5 pasos**:
-  ```text
-  1. Market Research  → análisis de categoría + ángulos ganadores (web search opcional)
-  2. Strategy         → AIDA + hooks + objeciones + bundle logic
-  3. Blocks v2        → 12 bloques disponibles (vs 7 actuales)
-  4. Critic           → revisa coherencia + score por bloque
-  5. Polish           → reescribe bloques con score < 7
-  ```
-- **Nuevos bloques**: `social_proof_carousel`, `comparison_table`, `urgency_bar`, `sticky_cta`, `video_testimonial`, `before_after`, `bundle_offer`.
-- **Prompt packs por categoría** en `system_config` (skincare, suplementos, moda, hogar, electrónica, mascotas) con tono, objeciones y formatos específicos.
-- **Modelo**: `google/gemini-3-flash-preview` para velocidad + `openai/gpt-5.2` para el paso Critic/Polish.
-- **Variantes**: cada generación produce 2 variantes (A/B) del bloque hero y CTA principal.
+Cada bloque respeta el theme actual y `object-contain` en imágenes.
 
-### Sprint 2 · Editor visual completo
+### 4. Validación estricta de output
 
-Objetivo: que el usuario pueda llevar la landing al estado exacto que quiere antes de publicar.
+- Esquema Zod en `generate-landing` que valida cada bloque antes de guardar.
+- Si falla validación → reintento con Polish, si vuelve a fallar → error claro al usuario.
+- Strip automático de `_meta` antes de guardar en DB (ya documentado en memory).
 
-- **Canvas drag-and-drop** de bloques (reordenar, ocultar, duplicar) usando `dnd-kit`.
-- **Panel lateral** por bloque: editar texto inline + cambiar imagen (subir / elegir banner generado / asset library) + ajustar color de acento del bloque + toggle de visibilidad.
-- **Preview sincronizado** desktop/tablet/mobile en tiempo real (iframe ya existe, agregar split-view).
-- **Re-generar bloque individual** con IA ("rehazme solo el hero", "dame otro CTA más urgente").
-- **Versionado mejorado**: ya hay 20 auto-versiones, agregar diff visual y "restaurar bloque" granular.
+### 5. Métricas básicas
 
-### Sprint 3 · Bridge Nexsell ↔ Shopify (la pieza clave)
+Nuevo evento en `credit_transactions.metadata`:
 
-Objetivo: que cada producto/landing de Nexsell quede **mapeado a un producto real de Shopify** para habilitar carrito.
+- `pipeline_version: "v2"`
+- `generation_time_ms`
+- `critic_issues_count`
+- `retries`
 
-- **Sync de catálogo Shopify**: tras OAuth, importar productos (id, handle, variantes, precios, imágenes) y guardarlos en nueva tabla `shopify_products` linkeada al `user_id`.
-- **Wizard "Conectar producto"**: al crear landing, opcionalmente vincular el `product.id` de Nexsell con un `shopify_product_id` (o crear uno nuevo en Shopify desde Nexsell vía API).
-- **Render Liquid con datos reales**: en el export, los bloques de precio/variantes/CTA leen `{{ product.price }}`, `{{ product.variants }}`, etc. en vez de hardcodear.
-- **Add to Cart, Buy Now, Bundles los tres habilitados**:
-  - Add to Cart con selector de variantes (AJAX cart drawer del theme).
-  - Buy Now → `/cart/{{ variant.id }}:1?checkout`.
-  - Bundle: `cart/add.js` múltiples variantes en una llamada (2x1, combos).
-- **Scope extra requerido**: agregar `write_products`, `write_draft_orders` al OAuth (ya tenemos `read_products`).
+Permite medir mejora vs pipeline actual sin tabla nueva.
 
-### Sprint 4 · Push 1:1 a Shopify (que se vea idéntico)
+## Lo que NO se toca en este sprint
 
-Objetivo: clic en "Publicar a Shopify" → landing aparece en la tienda viéndose exactamente igual.
-
-- **Estrategia híbrida (recomendada)**:
-  1. Generar una **section Liquid `nexsell-landing.liquid**` que se instala una vez en el tema del cliente (vía Theme API). Esta section es un "runtime" que renderiza cualquier landing de Nexsell.
-  2. Para cada landing, crear/actualizar una **page** en Shopify con un template `page.nexsell-{slug}.json` que referencia esa section y le pasa los `blocks[]` como settings JSON.
-  3. Los assets (imágenes, banners) se suben a Shopify Files vía Asset API → URLs absolutas en el theme del cliente (no más dependencia de Supabase storage para el render final).
-- **Ventajas**:
-  - 1:1 visual garantizado (misma section, mismo CSS, mismos datos).
-  - Editable desde el theme editor de Shopify (cada bloque expone settings).
-  - Re-publish actualiza solo el `page.json`, no rompe el theme.
-- **Fallback ZIP**: se mantiene el export ZIP actual para tiendas no conectadas o usuarios que prefieren instalar a mano.
-- **Estado de publicación** en UI: "Publicado en Shopify · ver en tienda · re-publicar · despublicar".
-
----
+- Editor canvas drag-and-drop → Sprint 2
+- Bridge Shopify producto/sección → Sprint 3
+- Banners → fase posterior
+- Schema de DB (nada de migraciones, sólo `system_config` insert)
 
 ## Detalles técnicos
 
-### Schema nuevo (migraciones)
+**Archivos a modificar:**
 
-```sql
--- Productos importados de Shopify
-create table shopify_products (
-  id uuid primary key default gen_random_uuid(),
-  user_id uuid not null,
-  shopify_product_id text not null,
-  handle text not null,
-  title text not null,
-  variants jsonb not null default '[]',
-  images jsonb not null default '[]',
-  synced_at timestamptz not null default now(),
-  unique(user_id, shopify_product_id)
-);
+- `supabase/functions/generate-landing/index.ts` — reescritura del pipeline
+- `supabase/functions/_shared/` — nuevo `landing-prompts.ts` con prompt packs y helpers de pasos
+- `src/components/landing/LandingRenderer.tsx` — render de 6 bloques nuevos
+- `src/components/landing/themes.ts` — verificar que los nuevos bloques heredan tokens
+- Migración SQL: `INSERT INTO system_config (key, value)` para `landing_prompt_packs`
 
--- Mapeo landing ↔ producto Shopify + estado publicación
-alter table landings
-  add column shopify_product_id text,
-  add column shopify_page_id text,
-  add column shopify_published_at timestamptz,
-  add column shopify_status text default 'not_published';
+**Modelos via Lovable AI Gateway** (sin API key extra):
 
--- Variantes A/B
-alter table landings
-  add column variants jsonb default '[]'; -- [{block_id, variant_a, variant_b, winning}]
-```
+- `google/gemini-3-flash-preview` — research + blocks (rápido, barato)
+- `openai/gpt-5-mini` — strategy + polish (balance)
+- `openai/gpt-5.2` — critic (precisión)
 
-### Edge functions nuevas / actualizadas
+**Compatibilidad:**
 
-- `shopify-sync-products` (nueva): pull catálogo del cliente vía Admin API.
-- `shopify-publish-landing` (nueva): instala section si falta, sube assets, crea/actualiza page + template.
-- `generate-landing` (actualizar): pipeline de 5 pasos, prompt packs por categoría, variantes A/B.
-- `regenerate-block` (nueva): regenerar bloque individual con contexto del resto.
+- Landings existentes siguen renderizándose igual.
+- Si el IA devuelve sólo bloques viejos, todo funciona.
+- `template_id` y `theme` actuales se mantienen.
 
-### Modelos IA por paso (Lovable AI Gateway)
+## Verificación al terminar
 
+1. Generar una landing de prueba con cada categoría desde `/products/:id/generate`.
+2. Confirmar que aparecen al menos 2 bloques nuevos.
+3. Revisar logs de `generate-landing` que muestran los 5 pasos.
+4. Validar que el render no rompe en mobile (375px) ni desktop.
+5. Verificar `credit_transactions.metadata.pipeline_version === "v2"`.
 
-| Paso            | Modelo                          | Razón                           |
-| --------------- | ------------------------------- | ------------------------------- |
-| Market research | `google/gemini-3-flash-preview` | rápido + buen contexto largo    |
-| Strategy        | `openai/gpt-5.2`                | mejor razonamiento estructurado |
-| Blocks          | `google/gemini-3-flash-preview` | volumen + velocidad             |
-| Critic          | `openai/gpt-5.2`                | precisión en scoring            |
-| Polish          | `openai/gpt-5-mini`             | balance costo/calidad           |
+## Estimación
 
+~4–6 horas de trabajo del agente, una sola tanda. Te aviso al terminar para que pruebes generando una landing real.
 
-### Métricas de éxito (instrumentar desde Sprint 1)
+## Pregunta antes de arrancar
 
-- % de landings que llegan a "Publicado en Shopify" sobre las generadas.
-- Tiempo medio de generación + edición hasta publicar.
-- CR de la landing en Shopify (`landing_views` + eventos `add_to_cart` desde Shopify webhook `carts/create`).
-- NPS in-app post-publicación ("¿quedó como querías?" 1-10).
-- Tasa de re-generación de bloques (señal de calidad IA).
-
----
-
-## Fases posteriores (mapeadas, no se ejecutan ahora)
-
-- **Fase 2 · Banners Pro**: nuevos templates AIDA verticales/cuadrados/historias, motor de composición con capas editables post-IA, A/B de creativos, integración directa con Meta Ads (subir creativos vía API).
-- **Fase 3 · Ecosistema unificado**: campaña = landing + 3 banners + email + ads, todo coherente desde un solo brief.
-- **Fase 4 · Analytics & optimización**: dashboard de CR por landing/bloque, sugerencias IA basadas en datos reales, auto-ganador A/B.
-- **Fase 5 · Marketplace**: templates pre-armados por nicho, instalables en 1 clic.
-
----
-
-## Qué necesito de ti para arrancar Sprint 1
-
-1. Confirmar que vamos con la **estrategia híbrida section+page** para Shopify (es la única que garantiza 1:1 visual y mantiene editable).  
-Necesito que antes de ejecutar me expliques si esta seccion va a funcionar donde los clientes podran cambiar sus productos por otro que tengan ademas de mostar la landing en su web con su Link y todo dentro de su shopify no dentro de nexsell
-2. ¿Activamos también la creación de productos en Shopify desde Nexsell (requiere scope `write_products`), o solo vinculamos productos ya existentes en la tienda del cliente?  
-podemos agregar los productos que tenga el cliente 
-3. ¿Mantenemos los 4 temas actuales (Minimal/Bold/Clean/Warm) o agregamos 2 más orientados a nichos (Beauty/Tech) en Sprint 2 agregalos
-
-Cuando me confirmes, arranco implementando Sprint 1 (pipeline IA v2 + prompt packs por categoría).  
+**suave** (sólo sugiere mejoras y Polish las aplica sin bloquear)? Recomiendo **suave** para no aumentar tiempo de generación en >40s.  
   
-necesito saber si es mejor que hagamos que el cliente cuando quiera le servicio entre y se registre luego de eso obtener su coneccion de shopify para asi el administrar sus productos y otros para hacer sus banners y landing con los que tiene.
+ademas de eso [https://readdy.ai/landing/website-builder?utm_id=23810024593&utm_source=google&utm_medium=cpc&utm_content=&utm_term=_&utm_adgroup=&gad_source=1&gad_campaignid=23805587495&gbraid=0AAAABAld9b35VlNAh-zfBKZ4GURSVuq1k&gclid=CjwKCAjw8arQBhB9EiwAfIKdQrjRbRjyICmefzobkU-H5BJ9zwILhb9gacNTOWzPWXoT2MLd2RI3bBoCMooQAvD_BwE](https://readdy.ai/landing/website-builder?utm_id=23810024593&utm_source=google&utm_medium=cpc&utm_content=&utm_term=_&utm_adgroup=&gad_source=1&gad_campaignid=23805587495&gbraid=0AAAABAld9b35VlNAh-zfBKZ4GURSVuq1k&gclid=CjwKCAjw8arQBhB9EiwAfIKdQrjRbRjyICmefzobkU-H5BJ9zwILhb9gacNTOWzPWXoT2MLd2RI3bBoCMooQAvD_BwE) investiga esa web y revisala para ver si hacemos el mismo servicio para que apliquemos algunas ideas
 
-  
-  
-aparte de esto no ejecutes dime lo que te pdi y luego te mando el promp para ejecutar este roadmap 
+&nbsp;
