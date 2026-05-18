@@ -257,10 +257,6 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (action === "disconnect") {
-      // handled below
-    }
-
     if (action === "publish-page") {
       const serviceClient = createClient(
         Deno.env.get("SUPABASE_URL")!,
@@ -441,7 +437,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (action === "disconnect-real") {
+    if (action === "disconnect") {
       const { error } = await supabase
         .from("shopify_connections")
         .delete()
