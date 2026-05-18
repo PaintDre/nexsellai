@@ -464,6 +464,10 @@ export type Database = {
           product_id: string
           published: boolean
           published_at: string | null
+          shopify_page_handle: string | null
+          shopify_page_id: string | null
+          shopify_product_id: string | null
+          shopify_synced_at: string | null
           slug: string | null
           theme: string
           updated_at: string
@@ -481,6 +485,10 @@ export type Database = {
           product_id: string
           published?: boolean
           published_at?: string | null
+          shopify_page_handle?: string | null
+          shopify_page_id?: string | null
+          shopify_product_id?: string | null
+          shopify_synced_at?: string | null
           slug?: string | null
           theme?: string
           updated_at?: string
@@ -498,6 +506,10 @@ export type Database = {
           product_id?: string
           published?: boolean
           published_at?: string | null
+          shopify_page_handle?: string | null
+          shopify_page_id?: string | null
+          shopify_product_id?: string | null
+          shopify_synced_at?: string | null
           slug?: string | null
           theme?: string
           updated_at?: string
