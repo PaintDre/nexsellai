@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -111,6 +112,16 @@ const Pricing = () => {
 
   return (
     <div className="p-5 md:p-8 lg:p-10 space-y-8">
+      <Helmet>
+        <title>Planes y precios | Nexsell</title>
+        <meta name="description" content="Compara los planes Free, Starter y Pro de Nexsell. Créditos mensuales para generar landings y banners IA para tu ecommerce." />
+        <link rel="canonical" href="https://nexsellai.com/pricing" />
+        <meta property="og:title" content="Planes y precios | Nexsell" />
+        <meta property="og:description" content="Compara los planes Free, Starter y Pro de Nexsell. Créditos mensuales para generar landings y banners IA para tu ecommerce." />
+        <meta property="og:url" content="https://nexsellai.com/pricing" />
+        <meta name="twitter:title" content="Planes y precios | Nexsell" />
+        <meta name="twitter:description" content="Compara los planes Free, Starter y Pro de Nexsell. Créditos mensuales para generar landings y banners IA para tu ecommerce." />
+      </Helmet>
       <div className="text-center max-w-xl mx-auto space-y-3">
         <h1 className="text-2xl md:text-3xl font-bold font-display">{t("pricing.title")}</h1>
         <p className="text-sm text-muted-foreground">{t("pricing.subtitle")}</p>

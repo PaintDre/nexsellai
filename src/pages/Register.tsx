@@ -85,6 +85,16 @@ const Register = () => {
 
   return (
     <AuthLayout title={t("auth.register.title")} subtitle={t("auth.register.subtitle")}>
+      <Helmet>
+        <title>Crear cuenta gratis | Nexsell</title>
+        <meta name="description" content="Regístrate gratis en Nexsell y empieza a generar landing pages y banners IA optimizados para tu ecommerce en minutos." />
+        <link rel="canonical" href="https://nexsellai.com/register" />
+        <meta property="og:title" content="Crear cuenta gratis | Nexsell" />
+        <meta property="og:description" content="Regístrate gratis en Nexsell y empieza a generar landing pages y banners IA optimizados para tu ecommerce en minutos." />
+        <meta property="og:url" content="https://nexsellai.com/register" />
+        <meta name="twitter:title" content="Crear cuenta gratis | Nexsell" />
+        <meta name="twitter:description" content="Regístrate gratis en Nexsell y empieza a generar landing pages y banners IA optimizados para tu ecommerce en minutos." />
+      </Helmet>
       <form onSubmit={handleRegister} className="space-y-5">
         <div className="space-y-2">
           <Label htmlFor="name">{t("auth.register.fullName")}</Label>
