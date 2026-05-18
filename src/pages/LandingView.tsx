@@ -652,6 +652,7 @@ const LandingView = () => {
         landingId={landing.id}
         existingShopifyPageId={(landing as any).shopify_page_id || null}
         existingShopifyHandle={(landing as any).shopify_page_handle || null}
+        existingShopifyProductId={(landing as any).shopify_product_id || null}
       />
 
       {/* Image Generation Dialog */}
