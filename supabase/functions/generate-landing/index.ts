@@ -712,13 +712,23 @@ async function runResearchStep(apiKey: string, params: PromptParams, pack: Categ
 
 // ─── Pipeline Steps ─────────────────────────────────────────────────────────
 
-async function runPlannerStep(apiKey: string, params: PromptParams): Promise<Strategy> {
+async function runPlannerStep(apiKey: string, params: PromptParams, insights: ResearchInsights, pack: CategoryPack): Promise<Strategy> {
   const t0 = Date.now();
   try {
     console.log(`[planner] start — product="${params.product.name}" plan=${params.plan}`);
-    const prompt = buildPlannerPrompt(params);
-    const raw = await callOpenAI(
+    const base = buildPlannerPrompt(params);
+    const prompt = `${base}
+
+${formatPackForPrompt(pack)}
+
+## RESEARCH INSIGHTS (use them when shaping strategy)
+- Audience pains: ${insights.audience_pains.join(" | ")}
+- Customer language: ${insights.customer_language.join(" | ")}
+- Category objections: ${insights.category_objections.join(" | ")}
+- Competitive angle: ${insights.competitive_angle}`;
+    const raw = await callAI(
       apiKey,
+      MODELS.strategy,
       prompt,
       `Analyze this product and create a strategy: "${params.product.name}"`,
       0.6,
@@ -751,13 +761,23 @@ async function runPlannerStep(apiKey: string, params: PromptParams): Promise<Str
   }
 }
 
-async function runGeneratorStep(apiKey: string, params: PromptParams, strategy: Strategy): Promise<unknown[]> {
+async function runGeneratorStep(apiKey: string, params: PromptParams, strategy: Strategy, insights: ResearchInsights, pack: CategoryPack): Promise<unknown[]> {
   const t0 = Date.now();
   try {
     console.log(`[generator] start — plan=${params.plan} intensity=${params.intensity}`);
-    const prompt = buildGeneratorPrompt(params, strategy);
-    const raw = await callOpenAI(
+    const base = buildGeneratorPrompt(params, strategy);
+    const prompt = `${base}
+
+${formatPackForPrompt(pack)}
+
+## CUSTOMER VOICE (use these phrases verbatim where natural)
+${insights.customer_language.map((s) => `- "${s}"`).join("\n")}
+
+## AUDIENCE PAINS (reference them in hero/benefits/objections)
+${insights.audience_pains.map((s) => `- ${s}`).join("\n")}`;
+    const raw = await callAI(
       apiKey,
+      MODELS.generator,
       prompt,
       `Generate the landing page blocks for "${params.product.name}".`,
       0.8,
@@ -776,28 +796,99 @@ async function runGeneratorStep(apiKey: string, params: PromptParams, strategy: 
   }
 }
 
-async function runCriticStep(apiKey: string, blocks: Block[], plan: string): Promise<Block[]> {
+// ─── SOFT Critic ─────────────────────────────────────────────────────────────
+// El crítico ya no reescribe. Solo devuelve { issues: [{block_type, issue, fix_hint}] }.
+// Polish (paso 5) decide qué aplicar. Esto baja el tiempo total y evita pérdidas de copy.
+
+interface CriticIssue {
+  block_type: string;
+  issue: string;
+  fix_hint: string;
+}
+
+async function runCriticStep(apiKey: string, blocks: Block[], plan: string): Promise<CriticIssue[]> {
   const t0 = Date.now();
   try {
-    console.log(`[critic] start — refining ${blocks.length} blocks (plan=${plan})`);
-    const prompt = buildCriticPrompt(plan);
-    const blocksJson = JSON.stringify({ blocks });
-    const raw = await callOpenAI(
+    console.log(`[critic-soft] start — auditing ${blocks.length} blocks (plan=${plan})`);
+    const prompt = `You are a senior conversion-copy QA reviewer.
+
+You will receive a JSON object with a "blocks" array. Audit it and return ONLY a JSON object:
+{ "issues": [ { "block_type": "<type>", "issue": "<short>", "fix_hint": "<actionable>" } ] }
+
+Flag (max 8 issues, prioritize the most impactful):
+1. Repetition across blocks (same openers, same phrases).
+2. Fake urgency ("solo quedan 3", "últimas horas").
+3. Unsupported claims ("ganarás X", medical promises).
+4. Fake social proof (specific names, dates, exact numbers).
+5. CTAs without benefit reminder or unclear action.
+6. Tone inconsistencies.
+7. Awkward flow between blocks.
+8. Hardcoded prices that should reference product price.
+
+Plan: ${plan}.
+If everything looks good return { "issues": [] }.
+Return ONLY JSON.`;
+    const raw = await callAI(
       apiKey,
+      MODELS.critic,
       prompt,
-      `Review and refine these landing blocks:\n${blocksJson}`,
-      0.3,
-      { label: "critic", maxRetries: 2 },
+      `Audit:\n${JSON.stringify({ blocks })}`,
+      0.2,
+      { label: "critic-soft", maxRetries: 1 },
     );
-    const refined = parseBlocks(raw);
-    if (refined.length > 0) {
-      console.log(`[critic] done in ${Date.now() - t0}ms — returned ${refined.length} refined blocks`);
-      return refined as Block[];
+    const parsed = JSON.parse(raw);
+    const issues: CriticIssue[] = Array.isArray(parsed.issues)
+      ? parsed.issues.slice(0, 8).map((i: unknown) => {
+          const o = (i || {}) as Record<string, unknown>;
+          return {
+            block_type: String(o.block_type || ""),
+            issue: String(o.issue || ""),
+            fix_hint: String(o.fix_hint || ""),
+          };
+        }).filter((i: CriticIssue) => i.issue.length > 0)
+      : [];
+    console.log(`[critic-soft] done in ${Date.now() - t0}ms — ${issues.length} issues found`);
+    return issues;
+  } catch (e) {
+    console.warn(`[critic-soft] failed after ${Date.now() - t0}ms — skipping:`, e instanceof Error ? e.message : String(e));
+    return [];
+  }
+}
+
+async function runPolishStep(apiKey: string, blocks: Block[], issues: CriticIssue[], plan: string): Promise<Block[]> {
+  if (issues.length === 0) {
+    console.log(`[polish] no issues — skipping`);
+    return blocks;
+  }
+  const t0 = Date.now();
+  try {
+    console.log(`[polish] applying ${issues.length} issues to ${blocks.length} blocks`);
+    const prompt = `You are a senior copy editor. You will receive landing blocks and a list of issues.
+Apply the fix_hints to the affected blocks. Keep:
+- The same block types, order and count.
+- FAQ items as [{q,a}], arrays as arrays, strings as strings.
+- All structured fields (steps, rows, options, items, stats, etc.) intact.
+- Same JSON shape as input: { "blocks": [...] }.
+
+Do NOT add or remove blocks. Plan: ${plan}.
+Return ONLY the polished JSON.`;
+    const raw = await callAI(
+      apiKey,
+      MODELS.polish,
+      prompt,
+      `Blocks:\n${JSON.stringify({ blocks })}\n\nIssues:\n${JSON.stringify(issues)}`,
+      0.3,
+      { label: "polish", maxRetries: 1 },
+    );
+    const polished = parseBlocks(raw);
+    if (polished.length > 0) {
+      console.log(`[polish] done in ${Date.now() - t0}ms — ${polished.length} blocks returned`);
+      return polished as Block[];
     }
-    console.warn(`[critic] empty/invalid after ${Date.now() - t0}ms — keeping generator output`);
+    console.warn(`[polish] empty output — keeping original blocks`);
     return blocks;
   } catch (e) {
-    console.warn(`[critic] failed after ${Date.now() - t0}ms — keeping generator output:`, e instanceof Error ? e.message : String(e));
+    console.warn(`[polish] failed after ${Date.now() - t0}ms — keeping original:`, e instanceof Error ? e.message : String(e));
     return blocks;
   }
 }
