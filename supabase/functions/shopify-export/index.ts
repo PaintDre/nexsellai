@@ -283,6 +283,7 @@ Deno.serve(async (req) => {
         liquidContent,
         templateContent,
         existingPageId,
+        skipProductCreation,
       } = body;
 
       if (!landingId || !pageTitle || !liquidContent || !templateContent) {
@@ -291,6 +292,23 @@ Deno.serve(async (req) => {
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
+
+      // Helper: structured step log
+      const steps: Array<{ key: string; label: string; status: "success" | "error" | "skipped"; durationMs: number; detail?: string; error?: string }> = [];
+      const runStep = async <T,>(key: string, label: string, fn: () => Promise<T>): Promise<T> => {
+        const t0 = Date.now();
+        try {
+          const result = await fn();
+          steps.push({ key, label, status: "success", durationMs: Date.now() - t0 });
+          return result;
+        } catch (e: any) {
+          steps.push({ key, label, status: "error", durationMs: Date.now() - t0, error: e?.message || String(e) });
+          throw e;
+        }
+      };
+      const skipStep = (key: string, label: string, detail?: string) => {
+        steps.push({ key, label, status: "skipped", durationMs: 0, detail });
+      };
 
       // Sanitize handle (Shopify allows lowercase alphanumerics + dashes)
       const baseHandle = (requestedHandle || pageTitle)
@@ -303,138 +321,247 @@ Deno.serve(async (req) => {
         .slice(0, 60) || "nexsell-landing";
       const templateSuffix = `nexsell-${baseHandle}`.slice(0, 50);
 
-      // 1. Get active theme
-      const themesRes = await fetch(
-        `https://${connection.store_domain}/admin/api/2024-01/themes.json`,
-        { headers: { "X-Shopify-Access-Token": connection.access_token } }
-      );
-      if (!themesRes.ok) {
-        return new Response(
-          JSON.stringify({ error: "Failed to fetch themes", details: await themesRes.text() }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      const themesData = await themesRes.json();
-      const mainTheme = themesData.themes?.find((t: any) => t.role === "main");
-      if (!mainTheme) {
-        return new Response(
-          JSON.stringify({ error: "No active theme found" }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      const themeId = mainTheme.id;
-      const assetsUrl = `https://${connection.store_domain}/admin/api/2024-01/themes/${themeId}/assets.json`;
       const shopifyHeaders = {
         "X-Shopify-Access-Token": connection.access_token,
         "Content-Type": "application/json",
       };
+      const apiBase = `https://${connection.store_domain}/admin/api/2024-01`;
 
-      // 2. Upload section + page template in parallel
-      const [sectionRes, templateRes] = await Promise.all([
-        fetch(assetsUrl, {
-          method: "PUT",
-          headers: shopifyHeaders,
-          body: JSON.stringify({
-            asset: { key: "sections/nexsell-landing.liquid", value: liquidContent },
-          }),
-        }),
-        fetch(assetsUrl, {
-          method: "PUT",
-          headers: shopifyHeaders,
-          body: JSON.stringify({
-            asset: { key: `templates/page.${templateSuffix}.json`, value: templateContent },
-          }),
-        }),
-      ]);
-
-      if (!sectionRes.ok) {
-        return new Response(
-          JSON.stringify({ error: "Section upload failed", details: await sectionRes.text() }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (!templateRes.ok) {
-        return new Response(
-          JSON.stringify({ error: "Template upload failed", details: await templateRes.text() }),
-          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-
-      // 3. Create or update Shopify Page
-      let pageId = existingPageId;
-      let pageData: any = null;
-
-      const pagePayload = {
-        page: {
-          title: pageTitle,
-          handle: baseHandle,
-          template_suffix: templateSuffix,
-          published: true,
-          body_html: "",
-        },
-      };
-
-      if (pageId) {
-        const updateRes = await fetch(
-          `https://${connection.store_domain}/admin/api/2024-01/pages/${pageId}.json`,
-          { method: "PUT", headers: shopifyHeaders, body: JSON.stringify({ page: { id: pageId, ...pagePayload.page } }) }
-        );
-        if (!updateRes.ok) {
-          // Page may have been deleted in Shopify — fall back to create
-          const createRes = await fetch(
-            `https://${connection.store_domain}/admin/api/2024-01/pages.json`,
-            { method: "POST", headers: shopifyHeaders, body: JSON.stringify(pagePayload) }
-          );
-          if (!createRes.ok) {
-            return new Response(
-              JSON.stringify({ error: "Page create failed", details: await createRes.text() }),
-              { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
+      try {
+        // Step 0: Load landing + product
+        const { landing, product, existingShopifyProductId } = await runStep(
+          "load",
+          "Cargar landing y producto",
+          async () => {
+            const { data: landing, error } = await serviceClient
+              .from("landings")
+              .select("id, user_id, product_id, shopify_product_id")
+              .eq("id", landingId)
+              .eq("user_id", userId)
+              .single();
+            if (error || !landing) throw new Error("Landing no encontrada");
+            const { data: product } = await serviceClient
+              .from("products")
+              .select("id, name, description, price, images, category")
+              .eq("id", landing.product_id)
+              .single();
+            return { landing, product, existingShopifyProductId: landing.shopify_product_id };
           }
-          pageData = await createRes.json();
-        } else {
-          pageData = await updateRes.json();
-        }
-      } else {
-        const createRes = await fetch(
-          `https://${connection.store_domain}/admin/api/2024-01/pages.json`,
-          { method: "POST", headers: shopifyHeaders, body: JSON.stringify(pagePayload) }
         );
-        if (!createRes.ok) {
-          return new Response(
-            JSON.stringify({ error: "Page create failed", details: await createRes.text() }),
-            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
+
+        // Step 1: Create or reuse Shopify product
+        let shopifyProductId: string | null = existingShopifyProductId || null;
+        if (skipProductCreation) {
+          skipStep("product", "Crear producto en Shopify", "Omitido por configuración");
+        } else if (shopifyProductId) {
+          skipStep("product", "Crear producto en Shopify", `Ya existe (ID ${shopifyProductId})`);
+        } else if (!product) {
+          skipStep("product", "Crear producto en Shopify", "Sin producto asociado");
+        } else {
+          shopifyProductId = await runStep("product", "Crear producto en Shopify", async () => {
+            const images = (product.images || []).slice(0, 8).map((src: string) => ({ src }));
+            const res = await fetch(`${apiBase}/products.json`, {
+              method: "POST",
+              headers: shopifyHeaders,
+              body: JSON.stringify({
+                product: {
+                  title: product.name,
+                  body_html: product.description || "",
+                  vendor: "Nexsell",
+                  product_type: product.category || "General",
+                  status: "active",
+                  images,
+                  variants: [
+                    { price: String(product.price ?? 0), inventory_management: null, requires_shipping: true },
+                  ],
+                },
+              }),
+            });
+            if (!res.ok) throw new Error(`Shopify: ${await res.text()}`);
+            const json = await res.json();
+            const id = String(json.product?.id || "");
+            if (!id) throw new Error("Shopify no devolvió product.id");
+            return id;
+          });
         }
-        pageData = await createRes.json();
+
+        // Step 2: Get active theme
+        const { themeId, themeName } = await runStep("theme", "Obtener tema activo", async () => {
+          const res = await fetch(`${apiBase}/themes.json`, { headers: shopifyHeaders });
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
+          const mainTheme = data.themes?.find((t: any) => t.role === "main");
+          if (!mainTheme) throw new Error("No active theme found");
+          return { themeId: mainTheme.id, themeName: mainTheme.name };
+        });
+        const assetsUrl = `${apiBase}/themes/${themeId}/assets.json`;
+
+        // Step 3: Upload section
+        await runStep("section", "Subir sección Liquid", async () => {
+          const res = await fetch(assetsUrl, {
+            method: "PUT",
+            headers: shopifyHeaders,
+            body: JSON.stringify({ asset: { key: "sections/nexsell-landing.liquid", value: liquidContent } }),
+          });
+          if (!res.ok) throw new Error(await res.text());
+        });
+
+        // Step 4: Upload template
+        await runStep("template", "Subir template JSON", async () => {
+          const res = await fetch(assetsUrl, {
+            method: "PUT",
+            headers: shopifyHeaders,
+            body: JSON.stringify({ asset: { key: `templates/page.${templateSuffix}.json`, value: templateContent } }),
+          });
+          if (!res.ok) throw new Error(await res.text());
+        });
+
+        // Step 5: Create or update page
+        const finalPage = await runStep(
+          "page",
+          existingPageId ? "Actualizar página en Shopify" : "Crear página en Shopify",
+          async () => {
+            const pagePayload = {
+              page: {
+                title: pageTitle,
+                handle: baseHandle,
+                template_suffix: templateSuffix,
+                published: true,
+                body_html: "",
+              },
+            };
+            let pageData: any = null;
+            if (existingPageId) {
+              const updateRes = await fetch(
+                `${apiBase}/pages/${existingPageId}.json`,
+                { method: "PUT", headers: shopifyHeaders, body: JSON.stringify({ page: { id: existingPageId, ...pagePayload.page } }) }
+              );
+              if (updateRes.ok) {
+                pageData = await updateRes.json();
+              } else {
+                const createRes = await fetch(`${apiBase}/pages.json`, { method: "POST", headers: shopifyHeaders, body: JSON.stringify(pagePayload) });
+                if (!createRes.ok) throw new Error(await createRes.text());
+                pageData = await createRes.json();
+              }
+            } else {
+              const createRes = await fetch(`${apiBase}/pages.json`, { method: "POST", headers: shopifyHeaders, body: JSON.stringify(pagePayload) });
+              if (!createRes.ok) throw new Error(await createRes.text());
+              pageData = await createRes.json();
+            }
+            return pageData.page;
+          }
+        );
+
+        const pageUrl = `https://${connection.store_domain}/pages/${finalPage.handle}`;
+
+        // Step 6: persist tracking
+        await runStep("persist", "Guardar referencia en Nexsell", async () => {
+          const update: any = {
+            shopify_page_id: String(finalPage.id),
+            shopify_page_handle: finalPage.handle,
+            shopify_synced_at: new Date().toISOString(),
+          };
+          if (shopifyProductId) update.shopify_product_id = shopifyProductId;
+          const { error } = await serviceClient
+            .from("landings")
+            .update(update)
+            .eq("id", landingId)
+            .eq("user_id", userId);
+          if (error) throw new Error(error.message);
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            pageId: finalPage.id,
+            handle: finalPage.handle,
+            pageUrl,
+            themeName,
+            shopifyProductId,
+            isUpdate: !!existingPageId,
+            steps,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      } catch (err: any) {
+        return new Response(
+          JSON.stringify({ success: false, error: err?.message || "Error inesperado", steps }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
+    }
 
-      const finalPage = pageData.page;
-      const pageUrl = `https://${connection.store_domain}/pages/${finalPage.handle}`;
-
-      // 4. Save tracking info back to landings table
+    if (action === "sync-product") {
+      const serviceClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+      const { landingId } = body;
+      if (!landingId) {
+        return new Response(JSON.stringify({ error: "Missing landingId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const { data: connection } = await serviceClient
+        .from("shopify_connections")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+      if (!connection) {
+        return new Response(JSON.stringify({ error: "No Shopify connection" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const { data: landing } = await serviceClient
+        .from("landings")
+        .select("id, product_id, shopify_product_id")
+        .eq("id", landingId)
+        .eq("user_id", userId)
+        .single();
+      if (!landing?.shopify_product_id) {
+        return new Response(JSON.stringify({ error: "Landing sin producto Shopify enlazado" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const { data: product } = await serviceClient
+        .from("products")
+        .select("name, description, price, images")
+        .eq("id", landing.product_id)
+        .single();
+      if (!product) {
+        return new Response(JSON.stringify({ error: "Producto no encontrado" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const shopifyHeaders = {
+        "X-Shopify-Access-Token": connection.access_token,
+        "Content-Type": "application/json",
+      };
+      const apiBase = `https://${connection.store_domain}/admin/api/2024-01`;
+      // 1. Update product core fields
+      const updateRes = await fetch(`${apiBase}/products/${landing.shopify_product_id}.json`, {
+        method: "PUT",
+        headers: shopifyHeaders,
+        body: JSON.stringify({
+          product: {
+            id: Number(landing.shopify_product_id),
+            title: product.name,
+            body_html: product.description || "",
+            images: (product.images || []).slice(0, 8).map((src: string) => ({ src })),
+          },
+        }),
+      });
+      if (!updateRes.ok) {
+        return new Response(JSON.stringify({ error: "Update product failed", details: await updateRes.text() }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const updateJson = await updateRes.json();
+      // 2. Update price on first variant
+      const variantId = updateJson.product?.variants?.[0]?.id;
+      if (variantId) {
+        await fetch(`${apiBase}/variants/${variantId}.json`, {
+          method: "PUT",
+          headers: shopifyHeaders,
+          body: JSON.stringify({ variant: { id: variantId, price: String(product.price ?? 0) } }),
+        });
+      }
       await serviceClient
         .from("landings")
-        .update({
-          shopify_page_id: String(finalPage.id),
-          shopify_page_handle: finalPage.handle,
-          shopify_synced_at: new Date().toISOString(),
-        })
+        .update({ shopify_synced_at: new Date().toISOString() })
         .eq("id", landingId)
         .eq("user_id", userId);
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          pageId: finalPage.id,
-          handle: finalPage.handle,
-          pageUrl,
-          themeName: mainTheme.name,
-          isUpdate: !!existingPageId,
-        }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ success: true, productId: landing.shopify_product_id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     if (action === "disconnect") {
