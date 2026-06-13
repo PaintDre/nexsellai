@@ -1,126 +1,160 @@
-# Plan de Ejecución — Sprint 1: Pipeline IA v2 + Calidad de Landings
+# Nexsell 2.0 — Roadmap de evolución (5 fases · 8–10 semanas)
 
-## Objetivo del Sprint
+Foco: **landing pública que venda** + **suite IA pro** (video desde foto de producto, influencers/avatares IA, agentes que orquestan todo). Mantenemos identidad Emerald/Navy, pero la evolucionamos: nueva paleta extendida, tipografía y secciones que comuniquen claramente qué puede hacer un dropshipper con Nexsell.
 
-Elevar la calidad del copy y diseño de las landings generadas con un pipeline IA expandido y bloques nuevos, dejando la base lista para Sprint 2 (editor canvas) y Sprint 3 (bridge Shopify nativo).
+---
 
-## Alcance
+## Nota sobre "HighField"
 
-### 1. Pipeline IA v2 en `generate-landing`
+No encuentro un proveedor llamado **HighField** en mi catálogo de conectores ni en la web como API de avatares/video. Lo más probable es que te refieras a uno de estos:
 
-Reemplazar el flujo actual por una secuencia de 5 pasos:
+- **HeyGen** → avatares hablando, influencers IA, lipsync, traducción de video. Está disponible como conector MCP en Lovable.
+- **Hedra** → avatares cantando/hablando desde foto + audio.
+- **Higgsfield** → modelo de video con cámara cinematográfica controlable (Soul, DoP).
 
-```text
-Input (producto + audiencia + intensidad + offer)
-   │
-   ▼
-[1] Market Research  →  gemini-3-flash-preview
-   │   (insights de categoría, dolores, lenguaje del cliente, objeciones)
-   ▼
-[2] Strategy         →  gpt-5-mini
-   │   (ángulo de venta, promesa, hook principal, orden de bloques AIDA)
-   ▼
-[3] Blocks v2        →  gemini-3-flash-preview
-   │   (genera bloques con _meta, copy, CTAs, variantes A/B)
-   ▼
-[4] Critic           →  gpt-5.2
-   │   (revisa claridad, fricción, longitud, prohíbe precios hardcodeados)
-   ▼
-[5] Polish           →  gpt-5-mini
-       (aplica fixes del crítico, devuelve JSON final validado con Zod)
-```
+**Antes de Fase 3 te confirmo cuál es.** El plan está armado de forma que el proveedor de video/avatar es intercambiable (todo pasa por edge function `generate-video-ai`).
 
-- Cada paso loguea tiempo y tokens para métricas.
-- Si Critic detecta errores graves, Polish reintenta con feedback (máx. 1 reintento).
-- Output final compatible con `LandingRenderer` actual (no rompe landings existentes).
+---
 
-### 2. Prompt packs por categoría
+## Fase 1 · Nueva Landing Pública de Venta (semana 1–2)
 
-Nuevo `key` en `system_config`: `landing_prompt_packs`.
+**Objetivo:** convertir visitas frías en signups. Hoy la landing no comunica con claridad qué hace ni para quién.
 
-- Pack por categoría existente (`home`, `fitness`, `beauty`, `gadget`, `pets`) con:
-  - tono de voz
-  - palabras prohibidas
-  - estructura recomendada de bloques
-  - ejemplos de hooks
-- El edge function lee el pack según `product.category` y lo inyecta en Strategy + Blocks.
-- Editable desde `SuperAdminConfig` (ya existe la UI para system_config).
+Estructura nueva (10 secciones, mobile-first):
 
-### 3. Nuevos bloques en `LandingRenderer`
+1. **Hero** con video loop (producto real generándose → landing terminada en 8 seg) + headline orientado a dropshippers
+2. **"En 60 segundos tienes tu landing"** — demo interactivo (3 inputs → preview)
+3. **Para quién es** — 3 cards: Dropshipper, Tienda Shopify, Marca emergente
+4. **Cómo funciona** — 4 pasos animados (Producto → IA Copy → Banner → Publicar)
+5. **Showcase real** — grid 6–8 landings generadas (jala de `landings` con flag `featured`)
+6. **Comparativa** — "Sin Nexsell vs Con Nexsell" (tiempo, costo, conversión)
+7. **Casos de éxito** — 3 testimonios con métricas reales
+8. **Pricing** rediseñado con toggle mensual/anual + badge "más vendido"
+9. **FAQ** (10 preguntas dropshipper-focused)
+10. **CTA final** + footer pro
 
-Agregar render para tipos nuevos que el IA podrá usar:
+Entregables:
 
-- `social_proof_carousel` — testimonios en carrusel con avatar + estrellas
-- `comparison_table` — "nosotros vs. competencia"
-- `urgency_bar` — barra superior con countdown/stock
-- `sticky_cta` — CTA pegado abajo en mobile
-- `before_after` — ya existe `BeforeAfterSlider`, integrar como bloque
-- `bundle_offer` — combo con precio tachado (sin hardcodear, usa `product.price`)
+- Direcciones visuales (3 opciones rendered) → eliges → construyo
+- Nueva paleta extendida (Emerald base + acentos cálidos para CTAs)
+- Tipografía revisada (probable: **Geist** display + **Inter** body, o **Space Grotesk** + **DM Sans**)
+- 8–12 imágenes nuevas (hero, mockups, ilustraciones de proceso) generadas con Gemini 3 Pro Image
+- Copy nuevo en ES (orientado a "dropshippers LATAM que quieren vender más sin pelearse con diseño")
+- SEO: title/meta/OG/JSON-LD + `llms.txt`
 
-Cada bloque respeta el theme actual y `object-contain` en imágenes.
+---
 
-### 4. Validación estricta de output
+## Fase 2 · Onboarding + Dashboard claro (semana 3)
 
-- Esquema Zod en `generate-landing` que valida cada bloque antes de guardar.
-- Si falla validación → reintento con Polish, si vuelve a fallar → error claro al usuario.
-- Strip automático de `_meta` antes de guardar en DB (ya documentado en memory).
+Sin esto, los nuevos signups de Fase 1 se pierden.
 
-### 5. Métricas básicas
+- **Tour de 3 pasos** post-confirmación (Welcome → Crea producto → Genera primera landing)
+- **Dashboard rediseñado**: stats arriba (landings, banners restantes, visitas), CTA principal "Crear nueva landing", últimas 4 landings con preview
+- **Empty states** ilustrados (en lugar de mensajes secos)
+- **Tooltips contextuales** explicando cada generación IA y cuántos créditos consume
+- Microcopy en español pulido en toda la app
 
-Nuevo evento en `credit_transactions.metadata`:
+---
 
-- `pipeline_version: "v2"`
-- `generation_time_ms`
-- `critic_issues_count`
-- `retries`
+## Fase 3 · Suite IA pro — Video desde foto del producto (semana 4–5)
 
-Permite medir mejora vs pipeline actual sin tabla nueva.
+**El feature estrella.** Subes una foto de producto → IA genera un video de 5–10 seg listo para Instagram/TikTok/Shopify.
 
-## Lo que NO se toca en este sprint
+Pipeline:
 
-- Editor canvas drag-and-drop → Sprint 2
-- Bridge Shopify producto/sección → Sprint 3
-- Banners → fase posterior
-- Schema de DB (nada de migraciones, sólo `system_config` insert)
+1. **Edge function `generate-product-video**` recibe `product_id` + `style` (unboxing, showcase, lifestyle, problema-solución)
+2. **Paso A** — Gemini 3 Pro analiza la foto y genera un guión visual (escenas, ángulos, movimiento de cámara)
+3. **Paso B** — Modelo de video (Higgsfield/Veo/Kling vía Lovable AI Gateway, o tu API HighField si confirmas) genera el clip
+4. **Paso C** — Subimos a bucket `product-videos` + registramos en tabla nueva `product_videos` (con campos `style`, `duration`, `credits_charged`, `status`)
+5. **UI** — Nueva sección "Videos" en sidebar con galería, regenerar, descargar MP4, compartir directo a WhatsApp/IG
+
+Cobertura de créditos:
+
+- Plan Free: 0 videos/mes
+- Plan Pro: 5 videos/mes
+- Plan Business: 20 videos/mes
+- Configurables en `system_config`
+
+---
+
+## Fase 4 · Influencers IA + Avatares hablando (semana 6–7)
+
+Si confirmas HeyGen/Hedra:
+
+- **Generador de "influencer IA"**: el usuario elige género/edad/estilo → creamos avatar persistente por usuario (tabla `ai_avatars`)
+- **Script-to-video**: el avatar lee el copy de la landing (gancho + CTA) en español neutro, mexicano o argentino
+- **Lipsync** sobre la foto del producto (formato vertical 9:16)
+- **Biblioteca de hooks** pre-escritos por la IA (50 ganchos virales para dropshipping) que el avatar puede leer
+- Se integra al editor de landing como bloque nuevo: **Video Hero con Avatar**
+
+Si no usamos HeyGen, esta fase se reemplaza por:
+
+- **Pack de templates de video sin avatar**: text-to-video con b-roll generado + voiceover (ElevenLabs vía conector)
+
+---
+
+## Fase 5 · Agentes IA orquestadores + crecimiento del SaaS (semana 8–10)
+
+El paso de "herramienta" a "co-piloto":
+
+- **Agente "Lanzador"**: en un solo prompt el usuario dice *"vendo gorras térmicas a mujeres 25–45 en México"* → el agente genera producto + landing + 3 banners + 1 video + texto para anuncio Meta/TikTok
+- Implementado con AI SDK + tool calling (`stepCountIs(50)`), 6 tools: `createProduct`, `generateLanding`, `generateBanner`, `generateVideo`, `generateAd`, `publishToShopify`
+- **Panel de "Campañas"** que agrupa todo lo generado en una unidad vendible
+- **Analytics consolidado**: vistas + CTR + conversión por campaña
+- **Sistema de referidos** + códigos de descuento (crecimiento)
+- **Email marketing automatizado**: secuencia de 5 emails post-signup (ya tenemos infra, falta contenido)
+
+---
 
 ## Detalles técnicos
 
-**Archivos a modificar:**
+**Tablas nuevas:**
 
-- `supabase/functions/generate-landing/index.ts` — reescritura del pipeline
-- `supabase/functions/_shared/` — nuevo `landing-prompts.ts` con prompt packs y helpers de pasos
-- `src/components/landing/LandingRenderer.tsx` — render de 6 bloques nuevos
-- `src/components/landing/themes.ts` — verificar que los nuevos bloques heredan tokens
-- Migración SQL: `INSERT INTO system_config (key, value)` para `landing_prompt_packs`
+- `product_videos` (id, user_id, product_id, video_url, style, duration_sec, provider, credits_charged, status, created_at)
+- `ai_avatars` (id, user_id, provider_avatar_id, preview_url, voice_id, language, created_at)
+- `campaigns` (id, user_id, name, product_id, landing_id, banner_ids[], video_ids[], status, created_at) — Fase 5
+- `featured_landings` flag en tabla `landings` para showcase de Fase 1
 
-**Modelos via Lovable AI Gateway** (sin API key extra):
+Todas con GRANTs + RLS por `user_id = auth.uid()` y políticas para `super_admin`.
 
-- `google/gemini-3-flash-preview` — research + blocks (rápido, barato)
-- `openai/gpt-5-mini` — strategy + polish (balance)
-- `openai/gpt-5.2` — critic (precisión)
+**Edge functions nuevas:**
 
-**Compatibilidad:**
+- `generate-product-video` (Fase 3)
+- `generate-avatar-video` (Fase 4, si HeyGen)
+- `agent-campaign-launcher` (Fase 5, con tool calling y `stepCountIs(50)`)
 
-- Landings existentes siguen renderizándose igual.
-- Si el IA devuelve sólo bloques viejos, todo funciona.
-- `template_id` y `theme` actuales se mantienen.
+**Modelos IA:**
 
-## Verificación al terminar
+- Texto/copy/scripts: `google/gemini-3-flash-preview` (default) y `gemini-3.1-pro-preview` para Fase 5 agente
+- Imágenes: `google/gemini-3-pro-image-preview` (calidad) y `gemini-3.1-flash-image-preview` (volumen)
+- Video: a confirmar tras aclaración de "HighField"
 
-1. Generar una landing de prueba con cada categoría desde `/products/:id/generate`.
-2. Confirmar que aparecen al menos 2 bloques nuevos.
-3. Revisar logs de `generate-landing` que muestran los 5 pasos.
-4. Validar que el render no rompe en mobile (375px) ni desktop.
-5. Verificar `credit_transactions.metadata.pipeline_version === "v2"`.
+**Seguridad:**
 
-## Estimación
+- Todas las claves server-side (LOVABLE_API_KEY, y la de HighField/HeyGen si aplica)
+- Rate-limit por usuario y por plan en cada edge function
+- Logs de uso en `credit_transactions` con acción específica (`video_generation`, `avatar_generation`, `agent_campaign`)
 
-~4–6 horas de trabajo del agente, una sola tanda. Te aviso al terminar para que pruebes generando una landing real.
+**Restricciones que aplicaré (como pediste):**
 
-## Pregunta antes de arrancar
+- Free no genera video ni avatares
+- Avatares: máx 1 por usuario en Pro, 3 en Business
+- Videos: máx 30 seg de duración total
+- Influencers IA limitados al tono profesional (sin contenido sensible)
 
-**suave** (sólo sugiere mejoras y Polish las aplica sin bloquear)? Recomiendo **suave** para no aumentar tiempo de generación en >40s.  
+---
+
+## Qué necesito de ti antes de empezar
+
+1. **Confirmar qué es "HighField"** (HeyGen / Hedra / Higgsfield / otro) y tener la API key lista para guardarla como secret cuando lleguemos a Fase 3
+2. **Aprobar este plan** (o pedir cambios de orden/alcance)
+3. **Confirmar** que arranco Fase 1 mostrándote 3 direcciones visuales de la nueva landing
+
+Cuando apruebes el plan paso a build mode y empiezo por Fase 1.  
   
-ademas de eso [https://readdy.ai/landing/website-builder?utm_id=23810024593&utm_source=google&utm_medium=cpc&utm_content=&utm_term=_&utm_adgroup=&gad_source=1&gad_campaignid=23805587495&gbraid=0AAAABAld9b35VlNAh-zfBKZ4GURSVuq1k&gclid=CjwKCAjw8arQBhB9EiwAfIKdQrjRbRjyICmefzobkU-H5BJ9zwILhb9gacNTOWzPWXoT2MLd2RI3bBoCMooQAvD_BwE](https://readdy.ai/landing/website-builder?utm_id=23810024593&utm_source=google&utm_medium=cpc&utm_content=&utm_term=_&utm_adgroup=&gad_source=1&gad_campaignid=23805587495&gbraid=0AAAABAld9b35VlNAh-zfBKZ4GURSVuq1k&gclid=CjwKCAjw8arQBhB9EiwAfIKdQrjRbRjyICmefzobkU-H5BJ9zwILhb9gacNTOWzPWXoT2MLd2RI3bBoCMooQAvD_BwE) investiga esa web y revisala para ver si hacemos el mismo servicio para que apliquemos algunas ideas
+1.[higgsfield.ai](http://higgsfield.ai) esa es la web que esperas  
+donde te dejo la api key  
+2. como podria pedir cambios porque quiero que trabajes con el link que te pase.  
+3. arranquemos desde el inicio para que todo fluya bien.
 
 &nbsp;
