@@ -3,6 +3,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Logo from "@/components/Logo";
 const BannerShowcaseGallery = lazy(() => import("@/components/landing/BannerShowcaseGallery").then(m => ({ default: m.BannerShowcaseGallery })));
+import heroLandingMockup from "@/assets/hero-landing-mockup.jpg";
+import aiVideoTeaser from "@/assets/ai-video-teaser.jpg";
+import aiInfluencerTeaser from "@/assets/ai-influencer-teaser.jpg";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,6 +65,7 @@ const Index = () => {
   const aiSuiteItems = t("indexPage.aiSuiteItems", { returnObjects: true }) as { tag: string; title: string; desc: string }[];
   const audienceIcons = [Users, Store, Briefcase];
   const aiSuiteIcons = [Video, Mic2, Bot];
+  const aiSuiteImages = [aiVideoTeaser, aiInfluencerTeaser, null];
   const renderCell = (v: string | boolean) => {
     if (v === true) return <CheckCircle2 className="h-5 w-5 text-primary mx-auto" />;
     if (v === false) return <Minus className="h-5 w-5 text-muted-foreground/50 mx-auto" />;
@@ -322,50 +326,20 @@ const Index = () => {
               <div className="absolute inset-0 -m-6 bg-gradient-to-tr from-primary/25 via-amber/15 to-primary/10 rounded-[2rem] blur-2xl animate-glow-pulse -z-10" />
 
               <div className="relative rounded-2xl border border-border/60 bg-card shadow-2xl shadow-primary/20 overflow-hidden hero-parallax">
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-border/60 bg-muted/40">
-                  <div className="flex gap-1.5">
-                    <div className="h-3 w-3 rounded-full bg-destructive/60" />
-                    <div className="h-3 w-3 rounded-full bg-warning/60" />
-                    <div className="h-3 w-3 rounded-full bg-primary/60" />
-                  </div>
-                  <div className="flex-1 mx-2">
-                    <div className="h-6 rounded-md bg-background/80 border border-border/40 flex items-center gap-1.5 px-3">
-                      <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                      <span className="text-[10px] sm:text-xs text-muted-foreground truncate">nexsell.app/p/mi-producto</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-5 sm:p-6 space-y-4">
-                  {/* Generating indicator */}
-                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                    <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-                    Generando con IA…
-                    <div className="flex-1 h-1 rounded-full bg-muted/60 overflow-hidden ml-2">
-                      <div className="h-full bg-gradient-to-r from-primary to-amber generating-bar" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-7 w-3/4 rounded bg-gradient-to-r from-primary/30 to-primary/5" />
-                    <div className="h-7 w-1/2 rounded bg-gradient-to-r from-primary/20 to-transparent" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-3 w-full rounded bg-muted" />
-                    <div className="h-3 w-5/6 rounded bg-muted" />
-                  </div>
-                  <div className="h-36 rounded-xl bg-gradient-to-br from-primary/15 via-accent/30 to-secondary/30 flex items-center justify-center relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent animate-gradient" />
-                    <ImagePlus className="h-12 w-12 text-primary/40 relative" />
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="h-11 flex-1 rounded-lg bg-muted/60" />
-                    <div className="h-11 px-5 rounded-lg flex items-center justify-center shadow-md" style={{ background: "var(--gradient-cta)", boxShadow: "var(--shadow-amber)" }}>
-                      <span className="text-xs font-bold tracking-wide text-amber-foreground">{t("indexPage.buyButton")}</span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 pt-1">
-                    <div className="h-14 rounded-lg bg-muted/60" />
-                    <div className="h-14 rounded-lg bg-muted/60" />
-                    <div className="h-14 rounded-lg bg-muted/60" />
+                <img
+                  src={heroLandingMockup}
+                  alt="Ejemplo de landing generada por Nexsell con IA"
+                  width={1280}
+                  height={960}
+                  className="w-full h-auto block"
+                  fetchPriority="high"
+                />
+                {/* Generating overlay strip */}
+                <div className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/85 backdrop-blur-md border border-border/60 shadow-lg">
+                  <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                  <span className="text-[10px] sm:text-xs font-medium text-foreground">Generando con IA…</span>
+                  <div className="w-16 h-1 rounded-full bg-muted/60 overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-primary to-amber generating-bar" />
                   </div>
                 </div>
               </div>
@@ -905,6 +879,7 @@ const Index = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
             {aiSuiteItems.map((item, i) => {
               const Icon = aiSuiteIcons[i] || Sparkles;
+              const img = aiSuiteImages[i];
               return (
                 <div
                   key={item.title}
@@ -912,6 +887,19 @@ const Index = () => {
                   style={{ transitionDelay: `${i * 60}ms` }}
                 >
                   <div aria-hidden className="absolute -top-12 -right-12 h-32 w-32 bg-amber/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  {img && (
+                    <div className="relative mb-4 -mx-6 -mt-6 overflow-hidden">
+                      <img
+                        src={img}
+                        alt={item.title}
+                        loading="lazy"
+                        width={1024}
+                        height={1024}
+                        className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
+                    </div>
+                  )}
                   <div className="flex items-start justify-between mb-5 relative">
                     <div className="relative h-12 w-12 rounded-xl flex items-center justify-center shadow-lg shadow-amber/20" style={{ background: "var(--gradient-cta)" }}>
                       <Icon className="h-6 w-6 text-amber-foreground" />
