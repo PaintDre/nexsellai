@@ -18,6 +18,7 @@ import {
   Sparkles, Zap, Code2, ShoppingCart, ArrowRight, Loader2,
   CheckCircle2, Upload, Wand2, Download,
   ImagePlus, X, XCircle, Image, FileCode, Layers, Star, Rocket, Menu, Video, Play,
+  Users, Store, Briefcase, Minus, Bot, Mic2,
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PRODUCT_CATEGORIES } from "@/lib/constants";
@@ -55,6 +56,17 @@ const Index = () => {
   const steps = t("indexPage.steps", { returnObjects: true }) as { title: string; desc: string }[];
   const plans = t("indexPage.plans", { returnObjects: true }) as { name: string; landings: string; features: string[] }[];
   const faqs = t("indexPage.faqs", { returnObjects: true }) as { q: string; a: string }[];
+  const audiences = t("indexPage.audiences", { returnObjects: true }) as { title: string; desc: string; tag: string }[];
+  const compareCols = t("indexPage.compareCols", { returnObjects: true }) as string[];
+  const compareRows = t("indexPage.compareRows", { returnObjects: true }) as { feature: string; nex: string | boolean; alt1: string | boolean; alt2: string | boolean }[];
+  const aiSuiteItems = t("indexPage.aiSuiteItems", { returnObjects: true }) as { tag: string; title: string; desc: string }[];
+  const audienceIcons = [Users, Store, Briefcase];
+  const aiSuiteIcons = [Video, Mic2, Bot];
+  const renderCell = (v: string | boolean) => {
+    if (v === true) return <CheckCircle2 className="h-5 w-5 text-primary mx-auto" />;
+    if (v === false) return <Minus className="h-5 w-5 text-muted-foreground/50 mx-auto" />;
+    return <span className="text-sm font-medium">{v}</span>;
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
