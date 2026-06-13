@@ -303,6 +303,73 @@
       radial-gradient(at 50% 100%, hsl(var(--primary) / 0.12) 0px, transparent 55%);
   }
 
+  /* ── Nexsell 2.0 — Hero mesh with amber accent ── */
+  .bg-mesh-hero {
+    background-image:
+      radial-gradient(at 18% 8%, hsl(var(--primary) / 0.22) 0px, transparent 50%),
+      radial-gradient(at 82% 28%, hsl(var(--amber) / 0.18) 0px, transparent 55%),
+      radial-gradient(at 50% 100%, hsl(var(--primary) / 0.10) 0px, transparent 60%);
+  }
+
+  /* ── Amber CTA — warmth on a cool palette, magnetic feel ── */
+  .cta-amber {
+    position: relative;
+    overflow: hidden;
+    background: var(--gradient-cta);
+    color: hsl(var(--amber-foreground));
+    font-weight: 600;
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease;
+    box-shadow: var(--shadow-amber);
+  }
+  .cta-amber::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 35%, hsl(0 0% 100% / 0.4) 50%, transparent 65%);
+    transform: translateX(-120%);
+    transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+  .cta-amber:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 50px -12px hsl(var(--amber) / 0.6);
+  }
+  .cta-amber:hover::before { transform: translateX(120%); }
+  .cta-amber:active { transform: translateY(0) scale(0.98); }
+
+  /* Subtle amber text accent */
+  .text-amber-brand { color: hsl(var(--amber)); }
+  .bg-amber-brand { background-color: hsl(var(--amber)); }
+  .border-amber-brand { border-color: hsl(var(--amber) / 0.4); }
+
+  /* Grid background pattern for dark hero (Linear-style) */
+  .bg-grid-dark {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.4) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.4) 1px, transparent 1px);
+    background-size: 56px 56px;
+    background-position: -1px -1px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black 30%, transparent 75%);
+  }
+
+  /* Animated cursor for hero mockup */
+  @keyframes cursor-trail {
+    0% { transform: translate(0, 0); opacity: 0; }
+    10% { opacity: 1; }
+    50% { transform: translate(40px, 20px); opacity: 1; }
+    100% { transform: translate(0, 0); opacity: 0; }
+  }
+  .cursor-trail { animation: cursor-trail 4s ease-in-out infinite; }
+
+  /* Generating shimmer bar */
+  @keyframes generating-bar {
+    0% { width: 0%; }
+    60% { width: 78%; }
+    100% { width: 100%; }
+  }
+  .generating-bar { animation: generating-bar 3.5s ease-in-out infinite; }
+
   /* Gradient text */
   .text-gradient-primary {
     background: linear-gradient(120deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.7) 50%, hsl(var(--primary)) 100%);
