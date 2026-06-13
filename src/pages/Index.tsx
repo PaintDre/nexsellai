@@ -417,6 +417,42 @@ const Index = () => {
 
       {/* ── 2. PROBLEMA / SOLUCIÓN ── */}
       <section className="py-20 lg:py-28">
+        <div className="container mx-auto px-4 max-w-7xl mb-16 lg:mb-24">
+          {/* ── AUDIENCE / FOR WHOM ── */}
+          <div className="text-center mb-12 reveal-on-scroll">
+            <Badge variant="secondary" className="mb-4">¿Para quién?</Badge>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-display tracking-tight">
+              {t("indexPage.audienceTitle")}
+            </h2>
+            <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
+              {t("indexPage.audienceSubtitle")}
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {audiences.map((a, i) => {
+              const Icon = audienceIcons[i] || Users;
+              return (
+                <div
+                  key={a.title}
+                  className="reveal-on-scroll group relative rounded-2xl border border-border/40 bg-card/60 backdrop-blur-md p-6 hover:bg-card hover:border-primary/30 hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/10"
+                  style={{ transitionDelay: `${i * 60}ms` }}
+                >
+                  <div className="flex items-start justify-between mb-5">
+                    <div className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <Icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <Badge className="bg-amber/10 text-amber-brand border border-amber/30 text-[10px] uppercase tracking-wide">
+                      {a.tag}
+                    </Badge>
+                  </div>
+                  <h3 className="font-display font-semibold text-lg mb-2 tracking-tight">{a.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{a.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center mb-14 reveal-on-scroll">
             <Badge variant="secondary" className="mb-4 bg-muted/80">El problema</Badge>
