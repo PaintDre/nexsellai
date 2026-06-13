@@ -65,6 +65,7 @@ const Index = () => {
   const aiSuiteItems = t("indexPage.aiSuiteItems", { returnObjects: true }) as { tag: string; title: string; desc: string }[];
   const audienceIcons = [Users, Store, Briefcase];
   const aiSuiteIcons = [Video, Mic2, Bot];
+  const aiSuiteImages = [aiVideoTeaser, aiInfluencerTeaser, null];
   const renderCell = (v: string | boolean) => {
     if (v === true) return <CheckCircle2 className="h-5 w-5 text-primary mx-auto" />;
     if (v === false) return <Minus className="h-5 w-5 text-muted-foreground/50 mx-auto" />;
@@ -878,6 +879,7 @@ const Index = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
             {aiSuiteItems.map((item, i) => {
               const Icon = aiSuiteIcons[i] || Sparkles;
+              const img = aiSuiteImages[i];
               return (
                 <div
                   key={item.title}
@@ -885,6 +887,19 @@ const Index = () => {
                   style={{ transitionDelay: `${i * 60}ms` }}
                 >
                   <div aria-hidden className="absolute -top-12 -right-12 h-32 w-32 bg-amber/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  {img && (
+                    <div className="relative mb-4 -mx-6 -mt-6 overflow-hidden">
+                      <img
+                        src={img}
+                        alt={item.title}
+                        loading="lazy"
+                        width={1024}
+                        height={1024}
+                        className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
+                    </div>
+                  )}
                   <div className="flex items-start justify-between mb-5 relative">
                     <div className="relative h-12 w-12 rounded-xl flex items-center justify-center shadow-lg shadow-amber/20" style={{ background: "var(--gradient-cta)" }}>
                       <Icon className="h-6 w-6 text-amber-foreground" />
