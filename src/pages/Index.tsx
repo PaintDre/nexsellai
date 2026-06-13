@@ -616,6 +616,57 @@ const Index = () => {
 
       {/* ── 6. DEMO GENERATOR ── */}
       <section id="demo" className="py-20 lg:py-28 relative overflow-hidden cv-auto">
+        {/* ── COMPARISON TABLE ── */}
+        <div className="container mx-auto px-4 max-w-5xl mb-20 lg:mb-28 relative">
+          <div className="text-center mb-12 reveal-on-scroll">
+            <Badge variant="secondary" className="mb-4">Comparativa</Badge>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-display tracking-tight">
+              {t("indexPage.compareTitle")}
+            </h2>
+            <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
+              {t("indexPage.compareSubtitle")}
+            </p>
+          </div>
+          <div className="reveal-on-scroll overflow-hidden rounded-2xl border border-border/40 bg-card/60 backdrop-blur-md shadow-xl shadow-primary/5">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border/40 bg-muted/30">
+                    {compareCols.map((col, i) => (
+                      <th
+                        key={i}
+                        className={cn(
+                          "px-4 py-4 text-left font-display font-semibold tracking-tight",
+                          i === 0 && "text-muted-foreground text-xs uppercase",
+                          i === 1 && "text-primary text-center bg-primary/5",
+                          i > 1 && "text-muted-foreground text-center"
+                        )}
+                      >
+                        {i === 1 ? (
+                          <span className="inline-flex items-center gap-1.5">
+                            <Sparkles className="h-4 w-4" />
+                            {col}
+                          </span>
+                        ) : col}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {compareRows.map((row, i) => (
+                    <tr key={i} className="border-b border-border/30 last:border-0 hover:bg-muted/20 transition-colors">
+                      <td className="px-4 py-4 font-medium text-foreground">{row.feature}</td>
+                      <td className="px-4 py-4 text-center bg-primary/5">{renderCell(row.nex)}</td>
+                      <td className="px-4 py-4 text-center text-muted-foreground">{renderCell(row.alt1)}</td>
+                      <td className="px-4 py-4 text-center text-muted-foreground">{renderCell(row.alt2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <div aria-hidden className="absolute inset-0 -z-10 bg-mesh-glow opacity-60" />
         <div className="container mx-auto px-4 max-w-3xl relative">
           <div className="text-center mb-10 reveal-on-scroll">
