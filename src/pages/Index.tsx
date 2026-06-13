@@ -17,7 +17,7 @@ import AnimatedCounter from "@/components/landing/AnimatedCounter";
 import {
   Sparkles, Zap, Code2, ShoppingCart, ArrowRight, Loader2,
   CheckCircle2, Upload, Wand2, Download,
-  ImagePlus, X, XCircle, Image, FileCode, Layers, Star, Rocket, Menu,
+  ImagePlus, X, XCircle, Image, FileCode, Layers, Star, Rocket, Menu, Video, Play,
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PRODUCT_CATEGORIES } from "@/lib/constants";
@@ -138,7 +138,7 @@ const Index = () => {
   ];
 
   return (
-    <div ref={revealRef} className="min-h-screen bg-background overflow-x-hidden">
+    <div ref={revealRef} className="dark min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* ── NAV ── */}
       <nav
         className={cn(
@@ -219,28 +219,31 @@ const Index = () => {
       {/* ── 1. HERO ── */}
       <section id="top" className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden">
         {/* Animated background blobs */}
-        <div aria-hidden className="absolute inset-0 -z-10 bg-mesh-glow" />
-        <div aria-hidden className="absolute -top-32 -left-20 h-72 w-72 bg-primary/15 blur-3xl animate-blob" />
-        <div aria-hidden className="absolute -top-10 right-0 h-80 w-80 bg-accent/40 blur-3xl animate-blob" style={{ animationDelay: "-5s" }} />
-        <div aria-hidden className="absolute bottom-0 left-1/3 h-64 w-64 bg-primary/10 blur-3xl animate-blob" style={{ animationDelay: "-10s" }} />
+        <div aria-hidden className="absolute inset-0 -z-20 bg-mesh-hero" />
+        <div aria-hidden className="absolute inset-0 -z-10 bg-grid-dark opacity-50" />
+        <div aria-hidden className="absolute -top-32 -left-20 h-72 w-72 bg-primary/20 blur-3xl animate-blob" />
+        <div aria-hidden className="absolute -top-10 right-0 h-80 w-80 bg-amber/20 blur-3xl animate-blob" style={{ animationDelay: "-5s" }} />
+        <div aria-hidden className="absolute bottom-0 left-1/3 h-64 w-64 bg-primary/15 blur-3xl animate-blob" style={{ animationDelay: "-10s" }} />
 
         <div className="container mx-auto px-4 max-w-7xl relative">
           <div className="grid lg:grid-cols-[1.1fr,1fr] gap-12 lg:gap-16 items-center">
             <div className="text-center lg:text-left page-in">
               <Badge
                 variant="secondary"
-                className="mb-6 text-xs sm:text-sm px-4 py-1.5 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/15 transition-colors gap-2"
+                className="mb-6 text-xs sm:text-sm px-4 py-1.5 bg-amber/10 text-amber-brand border border-amber/30 hover:bg-amber/15 transition-colors gap-2"
               >
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-primary opacity-75 animate-ping" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-amber-brand opacity-75 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-brand" />
                 </span>
                 {t("indexPage.badge")}
               </Badge>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold font-display tracking-tight leading-[1.05]">
                 {t("indexPage.heroTitle")}
-                <span className="block text-gradient-primary">{t("indexPage.heroTitleHighlight")}</span>
+                <span className="block bg-gradient-to-r from-primary via-emerald-400 to-amber-brand bg-clip-text text-transparent">
+                  {t("indexPage.heroTitleHighlight")}
+                </span>
               </h1>
 
               <p className="mt-6 text-base sm:text-lg lg:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
@@ -270,15 +273,18 @@ const Index = () => {
               </div>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-                <Button size="lg" className="btn-magnetic text-base px-8 h-12 group shadow-lg shadow-primary/20" asChild>
+                <Button size="lg" className="cta-amber text-base px-8 h-12 group hover:text-amber-foreground" asChild>
                   <a href="#demo">
                     <Sparkles className="h-5 w-5" />
                     {t("indexPage.tryFree")}
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </a>
                 </Button>
-                <Button size="lg" variant="outline" className="text-base px-8 h-12 backdrop-blur-sm bg-card/50 border-border/60 hover:bg-card lift-on-hover" asChild>
-                  <a href="#how">{t("indexPage.seeHow")}</a>
+                <Button size="lg" variant="outline" className="text-base px-8 h-12 backdrop-blur-sm bg-card/40 border-border/60 hover:bg-card lift-on-hover gap-2" asChild>
+                  <a href="#how">
+                    <Play className="h-4 w-4 text-primary" />
+                    {t("indexPage.seeHow")}
+                  </a>
                 </Button>
               </div>
 
@@ -301,9 +307,9 @@ const Index = () => {
 
             {/* Mockup */}
             <div className="relative mx-auto lg:mx-0 w-full max-w-md lg:max-w-none">
-              <div className="absolute inset-0 -m-6 bg-gradient-to-tr from-primary/20 via-accent/30 to-primary/10 rounded-[2rem] blur-2xl animate-glow-pulse -z-10" />
+              <div className="absolute inset-0 -m-6 bg-gradient-to-tr from-primary/25 via-amber/15 to-primary/10 rounded-[2rem] blur-2xl animate-glow-pulse -z-10" />
 
-              <div className="relative rounded-2xl border border-border/60 bg-card shadow-2xl shadow-primary/10 overflow-hidden hero-parallax">
+              <div className="relative rounded-2xl border border-border/60 bg-card shadow-2xl shadow-primary/20 overflow-hidden hero-parallax">
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-border/60 bg-muted/40">
                   <div className="flex gap-1.5">
                     <div className="h-3 w-3 rounded-full bg-destructive/60" />
@@ -318,6 +324,14 @@ const Index = () => {
                   </div>
                 </div>
                 <div className="p-5 sm:p-6 space-y-4">
+                  {/* Generating indicator */}
+                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+                    <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                    Generando con IA…
+                    <div className="flex-1 h-1 rounded-full bg-muted/60 overflow-hidden ml-2">
+                      <div className="h-full bg-gradient-to-r from-primary to-amber generating-bar" />
+                    </div>
+                  </div>
                   <div className="space-y-2">
                     <div className="h-7 w-3/4 rounded bg-gradient-to-r from-primary/30 to-primary/5" />
                     <div className="h-7 w-1/2 rounded bg-gradient-to-r from-primary/20 to-transparent" />
@@ -332,8 +346,8 @@ const Index = () => {
                   </div>
                   <div className="flex gap-3">
                     <div className="h-11 flex-1 rounded-lg bg-muted/60" />
-                    <div className="h-11 px-5 rounded-lg bg-primary flex items-center justify-center shadow-md shadow-primary/30">
-                      <span className="text-xs font-bold text-primary-foreground tracking-wide">{t("indexPage.buyButton")}</span>
+                    <div className="h-11 px-5 rounded-lg flex items-center justify-center shadow-md" style={{ background: "var(--gradient-cta)", boxShadow: "var(--shadow-amber)" }}>
+                      <span className="text-xs font-bold tracking-wide text-amber-foreground">{t("indexPage.buyButton")}</span>
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 pt-1">
@@ -354,8 +368,15 @@ const Index = () => {
                 {t("indexPage.timeBadge")}
               </div>
               <div className="hidden sm:flex absolute top-1/2 -right-8 lg:-right-10 -translate-y-1/2 glass-card text-xs font-semibold px-3 py-2 rounded-xl items-center gap-1.5 animate-float-slow" style={{ animationDelay: "-2s" }}>
-                <Rocket className="h-3.5 w-3.5 text-primary" />
-                +127%
+                <Rocket className="h-3.5 w-3.5 text-amber-brand" />
+                +127% conversión
+              </div>
+              {/* Video IA teaser (Fase 3) */}
+              <div className="absolute -bottom-6 right-2 sm:right-6 glass-card text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5 animate-float-slower border border-amber/30" style={{ animationDelay: "-3s" }}>
+                <span className="relative flex h-5 w-5 items-center justify-center rounded-md" style={{ background: "var(--gradient-cta)" }}>
+                  <Video className="h-3 w-3 text-amber-foreground" />
+                </span>
+                <span>Video IA <span className="text-amber-brand">próximamente</span></span>
               </div>
             </div>
           </div>

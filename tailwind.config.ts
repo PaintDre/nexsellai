@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "sans-serif"],
-        display: ["Space Grotesk", "sans-serif"],
+        sans: ["Manrope", "Inter", "sans-serif"],
+        display: ["Sora", "Space Grotesk", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -26,6 +27,15 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+        },
+        amber: {
+          DEFAULT: "hsl(var(--amber))",
+          foreground: "hsl(var(--amber-foreground))",
+          glow: "hsl(var(--amber-glow))",
+        },
+        brand: {
+          emerald: "hsl(var(--brand-emerald))",
+          navy: "hsl(var(--brand-navy))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",

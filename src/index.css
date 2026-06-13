@@ -48,36 +48,52 @@
     --success: 152 55% 38%;
     --warning: 38 92% 50%;
     --info: 217 91% 60%;
+
+    /* ── Nexsell 2.0 brand accents ── */
+    --amber: 38 92% 50%;
+    --amber-foreground: 220 25% 8%;
+    --amber-glow: 38 92% 60%;
+    --brand-emerald: 152 55% 38%;
+    --brand-navy: 220 30% 8%;
+    --gradient-hero: linear-gradient(135deg, hsl(220 30% 5%) 0%, hsl(220 25% 9%) 50%, hsl(152 25% 8%) 100%);
+    --gradient-cta: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(28 95% 55%) 100%);
+    --gradient-emerald: linear-gradient(135deg, hsl(152 55% 38%) 0%, hsl(160 60% 45%) 100%);
+    --shadow-amber: 0 10px 40px -10px hsl(38 92% 50% / 0.45);
+    --shadow-emerald: 0 10px 40px -10px hsl(152 55% 38% / 0.45);
   }
 
   .dark {
-    --background: 220 20% 6%;
+    --background: 215 28% 7%;
     --foreground: 220 10% 92%;
 
-    --card: 220 20% 9%;
+    --card: 220 24% 10%;
     --card-foreground: 220 10% 92%;
 
-    --popover: 220 20% 9%;
+    --popover: 220 24% 10%;
     --popover-foreground: 220 10% 92%;
 
-    --primary: 152 45% 48%;
+    --primary: 152 55% 45%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 18% 14%;
+    --secondary: 220 22% 13%;
     --secondary-foreground: 220 10% 92%;
 
-    --muted: 220 18% 12%;
-    --muted-foreground: 220 8% 52%;
+    --muted: 220 22% 11%;
+    --muted-foreground: 220 10% 62%;
 
-    --accent: 152 30% 14%;
-    --accent-foreground: 152 45% 70%;
+    --accent: 152 30% 13%;
+    --accent-foreground: 152 50% 72%;
 
     --destructive: 0 62% 40%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 18% 14%;
-    --input: 220 18% 14%;
-    --ring: 152 45% 48%;
+    --border: 220 22% 16%;
+    --input: 220 22% 16%;
+    --ring: 152 55% 45%;
+
+    --amber: 38 95% 55%;
+    --amber-foreground: 220 30% 6%;
+    --amber-glow: 38 95% 65%;
 
     --sidebar-background: 220 25% 4%;
     --sidebar-foreground: 220 10% 65%;
@@ -97,7 +113,7 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Manrope', 'Inter', system-ui, sans-serif;
     overflow-wrap: break-word;
     word-wrap: break-word;
     -webkit-font-smoothing: antialiased;
@@ -105,8 +121,9 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
-    letter-spacing: -0.02em;
+    font-family: 'Sora', 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: -0.025em;
+    font-weight: 700;
   }
 }
 
@@ -285,6 +302,73 @@
       radial-gradient(at 88% 22%, hsl(var(--accent) / 0.7) 0px, transparent 50%),
       radial-gradient(at 50% 100%, hsl(var(--primary) / 0.12) 0px, transparent 55%);
   }
+
+  /* ── Nexsell 2.0 — Hero mesh with amber accent ── */
+  .bg-mesh-hero {
+    background-image:
+      radial-gradient(at 18% 8%, hsl(var(--primary) / 0.22) 0px, transparent 50%),
+      radial-gradient(at 82% 28%, hsl(var(--amber) / 0.18) 0px, transparent 55%),
+      radial-gradient(at 50% 100%, hsl(var(--primary) / 0.10) 0px, transparent 60%);
+  }
+
+  /* ── Amber CTA — warmth on a cool palette, magnetic feel ── */
+  .cta-amber {
+    position: relative;
+    overflow: hidden;
+    background: var(--gradient-cta);
+    color: hsl(var(--amber-foreground));
+    font-weight: 600;
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms ease;
+    box-shadow: var(--shadow-amber);
+  }
+  .cta-amber::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 35%, hsl(0 0% 100% / 0.4) 50%, transparent 65%);
+    transform: translateX(-120%);
+    transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+  .cta-amber:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 22px 50px -12px hsl(var(--amber) / 0.6);
+  }
+  .cta-amber:hover::before { transform: translateX(120%); }
+  .cta-amber:active { transform: translateY(0) scale(0.98); }
+
+  /* Subtle amber text accent */
+  .text-amber-brand { color: hsl(var(--amber)); }
+  .bg-amber-brand { background-color: hsl(var(--amber)); }
+  .border-amber-brand { border-color: hsl(var(--amber) / 0.4); }
+
+  /* Grid background pattern for dark hero (Linear-style) */
+  .bg-grid-dark {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.4) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.4) 1px, transparent 1px);
+    background-size: 56px 56px;
+    background-position: -1px -1px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, black 30%, transparent 75%);
+  }
+
+  /* Animated cursor for hero mockup */
+  @keyframes cursor-trail {
+    0% { transform: translate(0, 0); opacity: 0; }
+    10% { opacity: 1; }
+    50% { transform: translate(40px, 20px); opacity: 1; }
+    100% { transform: translate(0, 0); opacity: 0; }
+  }
+  .cursor-trail { animation: cursor-trail 4s ease-in-out infinite; }
+
+  /* Generating shimmer bar */
+  @keyframes generating-bar {
+    0% { width: 0%; }
+    60% { width: 78%; }
+    100% { width: 100%; }
+  }
+  .generating-bar { animation: generating-bar 3.5s ease-in-out infinite; }
 
   /* Gradient text */
   .text-gradient-primary {
