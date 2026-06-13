@@ -888,6 +888,46 @@ const Index = () => {
 
       {/* ── 9. CTA FINAL ── */}
       <section className="py-20 lg:py-28 relative overflow-hidden cv-auto">
+        {/* ── AI SUITE TEASER ── */}
+        <div className="container mx-auto px-4 max-w-7xl mb-20 lg:mb-28 relative">
+          <div className="text-center mb-12 reveal-on-scroll">
+            <Badge className="mb-4 bg-amber/10 text-amber-brand border border-amber/30 gap-2">
+              <Rocket className="h-3 w-3" />
+              {t("indexPage.aiSuiteBadge")}
+            </Badge>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-display tracking-tight">
+              {t("indexPage.aiSuiteTitle")}
+            </h2>
+            <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
+              {t("indexPage.aiSuiteSubtitle")}
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
+            {aiSuiteItems.map((item, i) => {
+              const Icon = aiSuiteIcons[i] || Sparkles;
+              return (
+                <div
+                  key={item.title}
+                  className="reveal-on-scroll group relative rounded-2xl border border-amber/20 bg-gradient-to-br from-card via-card to-amber/[0.03] backdrop-blur-md p-6 hover:border-amber/40 hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-amber/10 overflow-hidden"
+                  style={{ transitionDelay: `${i * 60}ms` }}
+                >
+                  <div aria-hidden className="absolute -top-12 -right-12 h-32 w-32 bg-amber/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="flex items-start justify-between mb-5 relative">
+                    <div className="relative h-12 w-12 rounded-xl flex items-center justify-center shadow-lg shadow-amber/20" style={{ background: "var(--gradient-cta)" }}>
+                      <Icon className="h-6 w-6 text-amber-foreground" />
+                    </div>
+                    <Badge variant="outline" className="text-[10px] uppercase tracking-wide border-amber/30 text-amber-brand">
+                      {item.tag}
+                    </Badge>
+                  </div>
+                  <h3 className="font-display font-semibold text-lg mb-2 tracking-tight relative">{item.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed relative">{item.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/10 via-background to-accent/30" />
         <div aria-hidden className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 bg-primary/20 blur-3xl rounded-full animate-glow-pulse" />
 
