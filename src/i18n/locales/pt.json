@@ -890,6 +890,91 @@
         ]
       }
     ],
+    "audienceTitle": "Feito para quem realmente vende",
+    "audienceSubtitle": "Se o seu dia é lançar produtos e campanhas, Nexsell é o seu copiloto.",
+    "audiences": [
+      {
+        "title": "Dropshippers LATAM",
+        "desc": "Lance um novo produto toda semana sem pagar designers. Landing + banners + ads em minutos.",
+        "tag": "Mais popular"
+      },
+      {
+        "title": "Lojas E-commerce",
+        "desc": "Dobre o ROAS no Meta e TikTok com landings AIDA otimizadas para conversão mobile.",
+        "tag": "Maior ROAS"
+      },
+      {
+        "title": "Agências e freelancers",
+        "desc": "Entregue 10× mais rápido com sua marca: white-label no plano Pro em breve.",
+        "tag": "Pro"
+      }
+    ],
+    "compareTitle": "Por que Nexsell vs. o resto",
+    "compareSubtitle": "O que custa de verdade lançar 1 produto.",
+    "compareCols": [
+      "",
+      "Nexsell",
+      "Shopify + Freelancer",
+      "Templates genéricos"
+    ],
+    "compareRows": [
+      {
+        "feature": "Tempo para lançar",
+        "nex": "60 segundos",
+        "alt1": "5–15 dias",
+        "alt2": "2–4 horas"
+      },
+      {
+        "feature": "Copy com estrutura AIDA",
+        "nex": true,
+        "alt1": "Depende",
+        "alt2": false
+      },
+      {
+        "feature": "Banners IA com seu produto real",
+        "nex": true,
+        "alt1": false,
+        "alt2": false
+      },
+      {
+        "feature": "Publicação direta no Shopify",
+        "nex": true,
+        "alt1": true,
+        "alt2": "Manual"
+      },
+      {
+        "feature": "Custo por lançamento",
+        "nex": "A partir de USD 0",
+        "alt1": "USD 200–800",
+        "alt2": "USD 49–199"
+      },
+      {
+        "feature": "Vídeo IA do produto",
+        "nex": "Em breve",
+        "alt1": false,
+        "alt2": false
+      }
+    ],
+    "aiSuiteBadge": "Em breve · Roadmap 2026",
+    "aiSuiteTitle": "A suíte IA que vem aí",
+    "aiSuiteSubtitle": "Estamos construindo a próxima geração do Nexsell. Assine hoje e tenha acesso antecipado.",
+    "aiSuiteItems": [
+      {
+        "tag": "Fase 3",
+        "title": "Vídeo IA do produto",
+        "desc": "Envie uma foto e gere um vídeo de marketing de 15–30s pronto para TikTok Ads, Reels e Shopify."
+      },
+      {
+        "tag": "Fase 4",
+        "title": "Influencers IA com voz",
+        "desc": "Avatares hiper-realistas que gravam seu pitch com lipsync em espanhol, inglês e português."
+      },
+      {
+        "tag": "Fase 5",
+        "title": "Agente Lançador",
+        "desc": "Um prompt e pronto: produto + landing + 3 banners + 1 vídeo + texto de anúncio para Meta e TikTok."
+      }
+    ],
     "faqTitle": "Perguntas Frequentes",
     "faqs": [
       {

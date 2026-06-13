@@ -18,6 +18,7 @@ import {
   Sparkles, Zap, Code2, ShoppingCart, ArrowRight, Loader2,
   CheckCircle2, Upload, Wand2, Download,
   ImagePlus, X, XCircle, Image, FileCode, Layers, Star, Rocket, Menu, Video, Play,
+  Users, Store, Briefcase, Minus, Bot, Mic2,
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { PRODUCT_CATEGORIES } from "@/lib/constants";
@@ -55,6 +56,17 @@ const Index = () => {
   const steps = t("indexPage.steps", { returnObjects: true }) as { title: string; desc: string }[];
   const plans = t("indexPage.plans", { returnObjects: true }) as { name: string; landings: string; features: string[] }[];
   const faqs = t("indexPage.faqs", { returnObjects: true }) as { q: string; a: string }[];
+  const audiences = t("indexPage.audiences", { returnObjects: true }) as { title: string; desc: string; tag: string }[];
+  const compareCols = t("indexPage.compareCols", { returnObjects: true }) as string[];
+  const compareRows = t("indexPage.compareRows", { returnObjects: true }) as { feature: string; nex: string | boolean; alt1: string | boolean; alt2: string | boolean }[];
+  const aiSuiteItems = t("indexPage.aiSuiteItems", { returnObjects: true }) as { tag: string; title: string; desc: string }[];
+  const audienceIcons = [Users, Store, Briefcase];
+  const aiSuiteIcons = [Video, Mic2, Bot];
+  const renderCell = (v: string | boolean) => {
+    if (v === true) return <CheckCircle2 className="h-5 w-5 text-primary mx-auto" />;
+    if (v === false) return <Minus className="h-5 w-5 text-muted-foreground/50 mx-auto" />;
+    return <span className="text-sm font-medium">{v}</span>;
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -405,6 +417,42 @@ const Index = () => {
 
       {/* ── 2. PROBLEMA / SOLUCIÓN ── */}
       <section className="py-20 lg:py-28">
+        <div className="container mx-auto px-4 max-w-7xl mb-16 lg:mb-24">
+          {/* ── AUDIENCE / FOR WHOM ── */}
+          <div className="text-center mb-12 reveal-on-scroll">
+            <Badge variant="secondary" className="mb-4">¿Para quién?</Badge>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-display tracking-tight">
+              {t("indexPage.audienceTitle")}
+            </h2>
+            <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
+              {t("indexPage.audienceSubtitle")}
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {audiences.map((a, i) => {
+              const Icon = audienceIcons[i] || Users;
+              return (
+                <div
+                  key={a.title}
+                  className="reveal-on-scroll group relative rounded-2xl border border-border/40 bg-card/60 backdrop-blur-md p-6 hover:bg-card hover:border-primary/30 hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-primary/10"
+                  style={{ transitionDelay: `${i * 60}ms` }}
+                >
+                  <div className="flex items-start justify-between mb-5">
+                    <div className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <Icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <Badge className="bg-amber/10 text-amber-brand border border-amber/30 text-[10px] uppercase tracking-wide">
+                      {a.tag}
+                    </Badge>
+                  </div>
+                  <h3 className="font-display font-semibold text-lg mb-2 tracking-tight">{a.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{a.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center mb-14 reveal-on-scroll">
             <Badge variant="secondary" className="mb-4 bg-muted/80">El problema</Badge>
@@ -568,6 +616,57 @@ const Index = () => {
 
       {/* ── 6. DEMO GENERATOR ── */}
       <section id="demo" className="py-20 lg:py-28 relative overflow-hidden cv-auto">
+        {/* ── COMPARISON TABLE ── */}
+        <div className="container mx-auto px-4 max-w-5xl mb-20 lg:mb-28 relative">
+          <div className="text-center mb-12 reveal-on-scroll">
+            <Badge variant="secondary" className="mb-4">Comparativa</Badge>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-display tracking-tight">
+              {t("indexPage.compareTitle")}
+            </h2>
+            <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
+              {t("indexPage.compareSubtitle")}
+            </p>
+          </div>
+          <div className="reveal-on-scroll overflow-hidden rounded-2xl border border-border/40 bg-card/60 backdrop-blur-md shadow-xl shadow-primary/5">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border/40 bg-muted/30">
+                    {compareCols.map((col, i) => (
+                      <th
+                        key={i}
+                        className={cn(
+                          "px-4 py-4 text-left font-display font-semibold tracking-tight",
+                          i === 0 && "text-muted-foreground text-xs uppercase",
+                          i === 1 && "text-primary text-center bg-primary/5",
+                          i > 1 && "text-muted-foreground text-center"
+                        )}
+                      >
+                        {i === 1 ? (
+                          <span className="inline-flex items-center gap-1.5">
+                            <Sparkles className="h-4 w-4" />
+                            {col}
+                          </span>
+                        ) : col}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {compareRows.map((row, i) => (
+                    <tr key={i} className="border-b border-border/30 last:border-0 hover:bg-muted/20 transition-colors">
+                      <td className="px-4 py-4 font-medium text-foreground">{row.feature}</td>
+                      <td className="px-4 py-4 text-center bg-primary/5">{renderCell(row.nex)}</td>
+                      <td className="px-4 py-4 text-center text-muted-foreground">{renderCell(row.alt1)}</td>
+                      <td className="px-4 py-4 text-center text-muted-foreground">{renderCell(row.alt2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <div aria-hidden className="absolute inset-0 -z-10 bg-mesh-glow opacity-60" />
         <div className="container mx-auto px-4 max-w-3xl relative">
           <div className="text-center mb-10 reveal-on-scroll">
@@ -789,6 +888,46 @@ const Index = () => {
 
       {/* ── 9. CTA FINAL ── */}
       <section className="py-20 lg:py-28 relative overflow-hidden cv-auto">
+        {/* ── AI SUITE TEASER ── */}
+        <div className="container mx-auto px-4 max-w-7xl mb-20 lg:mb-28 relative">
+          <div className="text-center mb-12 reveal-on-scroll">
+            <Badge className="mb-4 bg-amber/10 text-amber-brand border border-amber/30 gap-2">
+              <Rocket className="h-3 w-3" />
+              {t("indexPage.aiSuiteBadge")}
+            </Badge>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-display tracking-tight">
+              {t("indexPage.aiSuiteTitle")}
+            </h2>
+            <p className="text-muted-foreground mt-4 max-w-2xl mx-auto">
+              {t("indexPage.aiSuiteSubtitle")}
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
+            {aiSuiteItems.map((item, i) => {
+              const Icon = aiSuiteIcons[i] || Sparkles;
+              return (
+                <div
+                  key={item.title}
+                  className="reveal-on-scroll group relative rounded-2xl border border-amber/20 bg-gradient-to-br from-card via-card to-amber/[0.03] backdrop-blur-md p-6 hover:border-amber/40 hover:-translate-y-1 transition-all duration-300 shadow-sm hover:shadow-xl hover:shadow-amber/10 overflow-hidden"
+                  style={{ transitionDelay: `${i * 60}ms` }}
+                >
+                  <div aria-hidden className="absolute -top-12 -right-12 h-32 w-32 bg-amber/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="flex items-start justify-between mb-5 relative">
+                    <div className="relative h-12 w-12 rounded-xl flex items-center justify-center shadow-lg shadow-amber/20" style={{ background: "var(--gradient-cta)" }}>
+                      <Icon className="h-6 w-6 text-amber-foreground" />
+                    </div>
+                    <Badge variant="outline" className="text-[10px] uppercase tracking-wide border-amber/30 text-amber-brand">
+                      {item.tag}
+                    </Badge>
+                  </div>
+                  <h3 className="font-display font-semibold text-lg mb-2 tracking-tight relative">{item.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed relative">{item.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-br from-primary/10 via-background to-accent/30" />
         <div aria-hidden className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-96 w-96 bg-primary/20 blur-3xl rounded-full animate-glow-pulse" />
 
