@@ -193,7 +193,8 @@
     "groupMain": "Principal",
     "groupCreate": "Estudio Creativo IA",
     "groupMore": "Más",
-    "groupAccount": "Cuenta"
+    "groupAccount": "Cuenta",
+    "videos": "Videos IA"
   },
   "exportDialog": {
     "title": "Subir landing a Shopify",
