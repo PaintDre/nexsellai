@@ -975,22 +975,22 @@
         "alt2": false
       }
     ],
-    "aiSuiteBadge": "Coming soon · 2026 Roadmap",
-    "aiSuiteTitle": "The AI suite we're building next",
-    "aiSuiteSubtitle": "We're shipping the next generation of Nexsell. Subscribe today and get early access.",
+    "aiSuiteBadge": "AI Creative Studio · Evolving",
+    "aiSuiteTitle": "Your full creative studio, powered by AI",
+    "aiSuiteSubtitle": "Live now: AI product video. Next up: AI influencers and the all-in-one Launcher Agent.",
     "aiSuiteItems": [
       {
-        "tag": "Phase 3",
+        "tag": "Live",
         "title": "AI product video",
-        "desc": "Upload a photo and generate a 15–30s marketing video ready for TikTok Ads, Reels and Shopify."
+        "desc": "Upload a product photo and generate a cinematic 9:16 video ready for TikTok Ads, Reels and Shopify."
       },
       {
-        "tag": "Phase 4",
+        "tag": "Coming soon",
         "title": "AI influencers with voice",
         "desc": "Hyperrealistic avatars that record your pitch with lipsync in Spanish, English and Portuguese."
       },
       {
-        "tag": "Phase 5",
+        "tag": "Q3 2026",
         "title": "Launcher Agent",
         "desc": "One prompt, full funnel: product + landing + 3 banners + 1 video + ad copy for Meta and TikTok."
       }

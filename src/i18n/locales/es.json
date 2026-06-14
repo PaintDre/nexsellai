@@ -987,22 +987,22 @@
         "alt2": false
       }
     ],
-    "aiSuiteBadge": "Próximamente · Roadmap 2026",
-    "aiSuiteTitle": "La suite IA que viene en camino",
-    "aiSuiteSubtitle": "Estamos construyendo la próxima generación de Nexsell. Suscríbete hoy y tendrás acceso anticipado.",
+    "aiSuiteBadge": "Estudio Creativo IA · En evolución",
+    "aiSuiteTitle": "Tu estudio creativo completo, con IA",
+    "aiSuiteSubtitle": "Ya disponible: Video IA del producto. Próximamente: Influencers IA y Agente Lanzador todo-en-uno.",
     "aiSuiteItems": [
       {
-        "tag": "Fase 3",
+        "tag": "Disponible",
         "title": "Video IA del producto",
-        "desc": "Sube una foto y genera un video de marketing de 15–30s listo para TikTok Ads, Reels y Shopify."
+        "desc": "Sube una foto de tu producto y genera un video cinematográfico 9:16 listo para TikTok Ads, Reels y Shopify."
       },
       {
-        "tag": "Fase 4",
+        "tag": "Próximamente",
         "title": "Influencers IA con voz",
         "desc": "Crea avatares hiperrealistas que graban tu pitch con lipsync en español, inglés y portugués."
       },
       {
-        "tag": "Fase 5",
+        "tag": "Q3 2026",
         "title": "Agente Lanzador",
         "desc": "Un prompt y listo: producto + landing + 3 banners + 1 video + texto de ad para Meta y TikTok."
       }
