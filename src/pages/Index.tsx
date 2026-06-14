@@ -154,7 +154,7 @@ const Index = () => {
   ];
 
   return (
-    <div ref={revealRef} className="dark min-h-screen bg-background text-foreground overflow-x-hidden">
+    <div ref={revealRef} className="min-h-screen bg-background text-foreground overflow-x-hidden">
       {/* ── NAV ── */}
       <nav
         className={cn(
