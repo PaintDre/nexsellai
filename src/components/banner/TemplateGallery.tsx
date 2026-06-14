@@ -1,5 +1,6 @@
+import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import { bannerTemplates, type BannerTemplate } from "./templates";
+import { bannerTemplates } from "./templates";
 
 interface TemplateGalleryProps {
   selectedId: string;
@@ -97,9 +98,44 @@ const previewComponents: Record<string, React.FC> = {
 };
 
 export const TemplateGallery = ({ selectedId, onSelect }: TemplateGalleryProps) => {
+  const [filter, setFilter] = useState<"all" | "early" | "mid" | "late">("all");
+
+  const filtered = useMemo(() => {
+    if (filter === "all") return bannerTemplates;
+    if (filter === "early") return bannerTemplates.filter((t) => t.salesStage <= 2);
+    if (filter === "mid") return bannerTemplates.filter((t) => t.salesStage >= 3 && t.salesStage <= 5);
+    return bannerTemplates.filter((t) => t.salesStage >= 6);
+  }, [filter]);
+
+  const chips: { id: typeof filter; label: string }[] = [
+    { id: "all", label: `Todos (${bannerTemplates.length})` },
+    { id: "early", label: "🎯 Atención" },
+    { id: "mid", label: "💡 Interés" },
+    { id: "late", label: "🔥 Conversión" },
+  ];
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      {bannerTemplates.map((tpl) => {
+    <div className="space-y-4">
+      {/* Stage filter chips */}
+      <div className="flex flex-wrap gap-2">
+        {chips.map((c) => (
+          <button
+            key={c.id}
+            onClick={() => setFilter(c.id)}
+            className={cn(
+              "text-xs font-medium rounded-full px-3 py-1.5 border transition-all",
+              filter === c.id
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground",
+            )}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {filtered.map((tpl) => {
         const PreviewComponent = previewComponents[tpl.previewLayout];
         const isSelected = selectedId === tpl.id;
         return (
@@ -137,6 +173,7 @@ export const TemplateGallery = ({ selectedId, onSelect }: TemplateGalleryProps) 
           </button>
         );
       })}
+      </div>
     </div>
   );
 };
