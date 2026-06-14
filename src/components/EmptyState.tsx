@@ -69,19 +69,20 @@ const EmptyState = ({ icon: Icon, title, description, action, secondaryAction, c
         {(action || secondaryAction) && (
           <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
             {action && (
-            {action.to ? (
-              <Button asChild size="sm" className="press-on-active">
-                <Link to={action.to}>
+              action.to ? (
+                <Button asChild size="sm" className="press-on-active">
+                  <Link to={action.to}>
+                    {ActionIcon && <ActionIcon className="h-3.5 w-3.5 mr-1.5" />}
+                    {action.label}
+                  </Link>
+                </Button>
+              ) : (
+                <Button size="sm" onClick={action.onClick} className="press-on-active">
                   {ActionIcon && <ActionIcon className="h-3.5 w-3.5 mr-1.5" />}
                   {action.label}
-                </Link>
-              </Button>
-            ) : (
-              <Button size="sm" onClick={action.onClick} className="press-on-active">
-                {ActionIcon && <ActionIcon className="h-3.5 w-3.5 mr-1.5" />}
-                {action.label}
-              </Button>
-            ))}
+                </Button>
+              )
+            )}
             {secondaryAction && (
               secondaryAction.to ? (
                 <Button asChild size="sm" variant="ghost" className="text-muted-foreground hover:text-foreground">
