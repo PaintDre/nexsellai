@@ -36,14 +36,15 @@
 
     --radius: 0.625rem;
 
-    --sidebar-background: 220 22% 8%;
-    --sidebar-foreground: 220 10% 72%;
-    --sidebar-primary: 152 50% 45%;
+    /* Sidebar — Soft Mint Light surface */
+    --sidebar-background: 152 40% 98%;
+    --sidebar-foreground: 160 18% 32%;
+    --sidebar-primary: 160 84% 35%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 18% 14%;
-    --sidebar-accent-foreground: 220 10% 90%;
-    --sidebar-border: 220 18% 14%;
-    --sidebar-ring: 152 50% 45%;
+    --sidebar-accent: 152 60% 94%;
+    --sidebar-accent-foreground: 160 75% 22%;
+    --sidebar-border: 152 25% 90%;
+    --sidebar-ring: 160 84% 39%;
 
     --success: 160 84% 39%;
     --warning: 38 92% 50%;
