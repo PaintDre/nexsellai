@@ -184,7 +184,8 @@
     "pin": "Fixar menu",
     "unpin": "Desafixar menu",
     "groupMain": "Principal",
-    "groupCreate": "Criar",
+    "groupCreate": "Estúdio Criativo IA",
+    "groupMore": "Mais",
     "groupAccount": "Conta"
   },
   "exportDialog": {

@@ -184,7 +184,8 @@
     "pin": "Pin menu",
     "unpin": "Unpin menu",
     "groupMain": "Main",
-    "groupCreate": "Create",
+    "groupCreate": "AI Creative Studio",
+    "groupMore": "More",
     "groupAccount": "Account"
   },
   "exportDialog": {
