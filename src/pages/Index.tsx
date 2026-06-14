@@ -369,13 +369,17 @@ const Index = () => {
                 <Rocket className="h-3.5 w-3.5 text-amber-brand" />
                 +127% conversión
               </div>
-              {/* Video IA teaser (Fase 3) */}
-              <div className="absolute -bottom-6 right-2 sm:right-6 glass-card text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5 animate-float-slower border border-amber/30" style={{ animationDelay: "-3s" }}>
+              {/* Video IA teaser (Fase 3 - LIVE) */}
+              <Link
+                to="/videos"
+                className="absolute -bottom-6 right-2 sm:right-6 glass-card text-xs font-semibold px-3 py-2 rounded-xl flex items-center gap-1.5 animate-float-slower border border-amber/30 hover:border-amber/60 transition-colors"
+                style={{ animationDelay: "-3s" }}
+              >
                 <span className="relative flex h-5 w-5 items-center justify-center rounded-md" style={{ background: "var(--gradient-cta)" }}>
                   <Video className="h-3 w-3 text-amber-foreground" />
                 </span>
-                <span>Video IA <span className="text-amber-brand">próximamente</span></span>
-              </div>
+                <span>Video IA <span className="text-amber-brand">disponible</span></span>
+              </Link>
             </div>
           </div>
         </div>
