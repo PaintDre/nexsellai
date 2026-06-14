@@ -6,33 +6,33 @@
 
 @layer base {
   :root {
-    --background: 0 0% 99%;
-    --foreground: 220 20% 14%;
+    --background: 0 0% 100%;
+    --foreground: 160 25% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 14%;
+    --card-foreground: 160 25% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 14%;
+    --popover-foreground: 160 25% 12%;
 
-    --primary: 152 55% 38%;
+    --primary: 160 84% 39%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 95%;
-    --secondary-foreground: 220 20% 14%;
+    --secondary: 152 45% 96%;
+    --secondary-foreground: 160 25% 12%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 8% 52%;
+    --muted: 152 30% 97%;
+    --muted-foreground: 160 8% 45%;
 
-    --accent: 152 40% 94%;
-    --accent-foreground: 152 55% 28%;
+    --accent: 152 76% 95%;
+    --accent-foreground: 160 75% 25%;
 
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 12% 92%;
-    --input: 220 12% 90%;
-    --ring: 152 55% 38%;
+    --border: 152 20% 92%;
+    --input: 152 20% 90%;
+    --ring: 160 84% 39%;
 
     --radius: 0.625rem;
 
@@ -45,21 +45,21 @@
     --sidebar-border: 220 18% 14%;
     --sidebar-ring: 152 50% 45%;
 
-    --success: 152 55% 38%;
+    --success: 160 84% 39%;
     --warning: 38 92% 50%;
     --info: 217 91% 60%;
 
     /* ── Nexsell 2.0 brand accents ── */
     --amber: 38 92% 50%;
-    --amber-foreground: 220 25% 8%;
+    --amber-foreground: 0 0% 100%;
     --amber-glow: 38 92% 60%;
-    --brand-emerald: 152 55% 38%;
-    --brand-navy: 220 30% 8%;
-    --gradient-hero: linear-gradient(135deg, hsl(220 30% 5%) 0%, hsl(220 25% 9%) 50%, hsl(152 25% 8%) 100%);
+    --brand-emerald: 160 84% 39%;
+    --brand-navy: 160 25% 12%;
+    --gradient-hero: linear-gradient(135deg, hsl(152 76% 97%) 0%, hsl(0 0% 100%) 50%, hsl(38 92% 96%) 100%);
     --gradient-cta: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(28 95% 55%) 100%);
-    --gradient-emerald: linear-gradient(135deg, hsl(152 55% 38%) 0%, hsl(160 60% 45%) 100%);
+    --gradient-emerald: linear-gradient(135deg, hsl(160 84% 39%) 0%, hsl(165 75% 45%) 100%);
     --shadow-amber: 0 10px 40px -10px hsl(38 92% 50% / 0.45);
-    --shadow-emerald: 0 10px 40px -10px hsl(152 55% 38% / 0.45);
+    --shadow-emerald: 0 10px 40px -10px hsl(160 84% 39% / 0.35);
   }
 
   .dark {
