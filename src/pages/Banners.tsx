@@ -264,6 +264,10 @@ const Banners = () => {
             icon: Plus,
             onClick: () => setProductSelectorOpen(true),
           }}
+          secondaryAction={{
+            label: t("dashboard.quickActions.newProduct"),
+            to: "/products/new",
+          }}
         />
       ) : (
         <Tabs defaultValue="todos" className="space-y-4">
