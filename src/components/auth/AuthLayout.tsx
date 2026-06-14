@@ -1,4 +1,4 @@
-import { Sparkles, Zap, Shield } from "lucide-react";
+import { Sparkles, Zap, Shield, Quote } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Logo from "@/components/Logo";
 
@@ -46,6 +46,34 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
                 </div>
               );
             })}
+          </div>
+
+          {/* Social proof: testimonial + stats */}
+          <div className="mt-10 rounded-2xl border border-sidebar-border/40 bg-sidebar-accent/40 backdrop-blur p-5 max-w-md">
+            <Quote className="h-5 w-5 text-sidebar-primary mb-2" />
+            <p className="text-sm leading-relaxed text-sidebar-primary-foreground/90">
+              "{t("auth.layout.testimonialQuote")}"
+            </p>
+            <div className="mt-3 flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-[11px] font-bold text-primary-foreground">
+                CR
+              </div>
+              <div className="leading-tight">
+                <p className="text-xs font-semibold text-sidebar-primary-foreground">{t("auth.layout.testimonialAuthor")}</p>
+                <p className="text-[11px] text-sidebar-foreground">{t("auth.layout.testimonialRole")}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-2 gap-3 max-w-md">
+            <div className="rounded-xl border border-sidebar-border/30 bg-sidebar-accent/20 p-3">
+              <p className="text-lg font-bold font-display text-sidebar-primary-foreground">{t("auth.layout.stat1Value")}</p>
+              <p className="text-[11px] text-sidebar-foreground mt-0.5">{t("auth.layout.stat1Label")}</p>
+            </div>
+            <div className="rounded-xl border border-sidebar-border/30 bg-sidebar-accent/20 p-3">
+              <p className="text-lg font-bold font-display text-sidebar-primary-foreground">{t("auth.layout.stat2Value")}</p>
+              <p className="text-[11px] text-sidebar-foreground mt-0.5">{t("auth.layout.stat2Label")}</p>
+            </div>
           </div>
         </div>
 

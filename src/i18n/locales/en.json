@@ -108,7 +108,14 @@
       "feature1": "AI-generated landings in minutes",
       "feature2": "Professional banners for your products",
       "feature3": "Export, publish and sell without limits",
-      "copyright": "© {{year}} Nexsell. All rights reserved."
+      "copyright": "© {{year}} Nexsell. All rights reserved.",
+      "testimonialQuote": "In less than 5 minutes I had my first landing ready to sell. Nexsell saved me weeks of design work.",
+      "testimonialAuthor": "Camila R.",
+      "testimonialRole": "Dropshipper · LATAM",
+      "stat1Value": "+2,000",
+      "stat1Label": "landings generated",
+      "stat2Value": "4.9★",
+      "stat2Label": "average rating"
     },
     "forgotPassword": {
       "title": "Recover password",
