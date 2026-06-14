@@ -168,8 +168,7 @@ const Videos = () => {
               ? "Primero crea un producto con imagen para poder generar videos."
               : "Genera tu primer video desde una foto de producto (40 créditos)."
           }
-          actionLabel={productsWithImages.length > 0 ? "Crear primer video" : undefined}
-          onAction={productsWithImages.length > 0 ? () => setOpen(true) : undefined}
+          action={productsWithImages.length > 0 ? { label: "Crear primer video", onClick: () => setOpen(true), icon: Plus } : undefined}
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
