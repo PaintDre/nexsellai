@@ -103,15 +103,37 @@ const Dashboard = () => {
 
   return (
     <div className="page-in p-4 md:p-8 lg:p-10 space-y-6 md:space-y-8 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="space-y-1">
-        <h1 className="text-2xl md:text-3xl font-bold font-display tracking-tight">
-          {getGreeting()}, {profile?.full_name?.split(" ")[0] || t("common.user")}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {t("dashboard.productCount", { count: products.length })} · {t("dashboard.landingCount", { count: landings.length })}
-        </p>
-      </div>
+      {/* Hero */}
+      <section className="relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.08] via-background to-amber/[0.06] p-5 sm:p-7 md:p-8 shadow-sm">
+        <div aria-hidden className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-primary/15 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-amber/10 blur-3xl" />
+        <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0 space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="text-[10px] uppercase tracking-wide font-semibold">
+                {t("dashboard.stats.plan")}: {profile?.plan || "free"}
+              </Badge>
+              <Badge variant="outline" className="text-[10px] gap-1 border-primary/30 text-primary">
+                <Coins className="h-3 w-3" /> {balance}/{allowance}
+              </Badge>
+            </div>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold font-display tracking-tight">
+              {getGreeting()}, {profile?.full_name?.split(" ")[0] || t("common.user")}
+            </h1>
+            <p className="text-sm text-muted-foreground max-w-xl">
+              {t("dashboard.productCount", { count: products.length })} · {t("dashboard.landingCount", { count: landings.length })}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <Button asChild size="lg" className="shadow-md">
+              <Link to="/products/new"><Plus className="h-4 w-4 mr-1.5" /> {t("dashboard.quickActions.newProduct")}</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link to="/landings"><FileText className="h-4 w-4 mr-1.5" /> {t("dashboard.quickActions.myLandings")}</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
 
       {/* Quick Actions */}
       <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
