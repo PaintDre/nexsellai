@@ -41,13 +41,13 @@ export const MobileBottomNav = () => {
   const primary: NavItem[] = [
     { label: t("sidebar.dashboard"), icon: LayoutDashboard, href: "/dashboard" },
     { label: t("sidebar.products"), icon: Package, href: "/products" },
-    { label: t("sidebar.landings"), icon: FileText, href: "/landings" },
     { label: t("sidebar.banners"), icon: ImageIcon, href: "/banners" },
+    { label: "Dropi", icon: Package, href: "/dropi" },
   ];
 
   // Secondary items live in the "More" sheet.
   const secondary: NavItem[] = [
-    { label: "Dropi", icon: Package, href: "/dropi" },
+    { label: t("sidebar.landings"), icon: FileText, href: "/landings" },
     { label: t("sidebar.plans"), icon: CreditCard, href: "/pricing" },
     { label: t("sidebar.subscription"), icon: BadgeCheck, href: "/subscription" },
     { label: t("sidebar.settings"), icon: Settings, href: "/settings" },
