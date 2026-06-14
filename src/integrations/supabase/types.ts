@@ -29,6 +29,7 @@ export type Database = {
           script: string
           source_image_url: string
           status: string
+          storage_path: string | null
           thumbnail_url: string | null
           updated_at: string
           user_id: string
@@ -49,6 +50,7 @@ export type Database = {
           script: string
           source_image_url: string
           status?: string
+          storage_path?: string | null
           thumbnail_url?: string | null
           updated_at?: string
           user_id: string
@@ -69,6 +71,7 @@ export type Database = {
           script?: string
           source_image_url?: string
           status?: string
+          storage_path?: string | null
           thumbnail_url?: string | null
           updated_at?: string
           user_id?: string
