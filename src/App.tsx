@@ -44,6 +44,7 @@ const DropiProduct = lazy(() => import("./pages/DropiProduct"));
 const AdminDropiCatalog = lazy(() => import("./pages/AdminDropiCatalog"));
 const AdminDropiVideos = lazy(() => import("./pages/AdminDropiVideos"));
 const Subscription = lazy(() => import("./pages/Subscription"));
+const Videos = lazy(() => import("./pages/Videos"));
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,7 @@ const App = () => (
                   <Route path="/onboarding" element={<Onboarding />} />
                   <Route path="/dropi" element={<Dropi />} />
                   <Route path="/dropi/:id" element={<DropiProduct />} />
+                  <Route path="/videos" element={<Videos />} />
                 </Route>
                 <Route element={<AdminLayout />}>
                   <Route path="/admin" element={<AdminDashboard />} />
