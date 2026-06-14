@@ -147,7 +147,7 @@ export const SidebarContent = ({
         <div className="flex items-center gap-2.5 min-w-0">
           <Logo size={28} className="rounded-lg shrink-0" />
           {expanded && (
-            <span className="text-base font-bold font-display tracking-tight text-sidebar-primary-foreground truncate">
+            <span className="text-base font-bold font-display tracking-tight text-sidebar-accent-foreground truncate">
               Nexsell
             </span>
           )}
