@@ -44,7 +44,7 @@ interface SidebarContentProps {
   onTogglePin?: () => void;
 }
 
-type NavItem = { label: string; icon: any; href: string };
+type NavItem = { label: string; icon: any; href: string; badge?: string };
 
 export const SidebarContent = ({
   expanded = false,
@@ -68,9 +68,14 @@ export const SidebarContent = ({
     {
       label: t("sidebar.groupCreate"),
       items: [
+        { label: t("sidebar.banners"), icon: ImageIcon, href: "/banners", badge: "IA" },
+        { label: "Dropi", icon: Package, href: "/dropi", badge: "NUEVO" },
+      ],
+    },
+    {
+      label: t("sidebar.groupMore"),
+      items: [
         { label: t("sidebar.landings"), icon: FileText, href: "/landings" },
-        { label: t("sidebar.banners"), icon: ImageIcon, href: "/banners" },
-        { label: "Dropi", icon: Package, href: "/dropi" },
       ],
     },
     {
@@ -118,7 +123,16 @@ export const SidebarContent = ({
         <item.icon
           className={cn("h-[18px] w-[18px] shrink-0", active && "text-sidebar-primary")}
         />
-        {expanded && <span className="whitespace-nowrap truncate">{item.label}</span>}
+        {expanded && (
+          <>
+            <span className="whitespace-nowrap truncate flex-1">{item.label}</span>
+            {item.badge && (
+              <span className="ml-auto text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary">
+                {item.badge}
+              </span>
+            )}
+          </>
+        )}
       </Link>
     );
 
