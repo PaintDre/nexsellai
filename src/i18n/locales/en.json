@@ -193,7 +193,8 @@
     "groupMain": "Main",
     "groupCreate": "AI Creative Studio",
     "groupMore": "More",
-    "groupAccount": "Account"
+    "groupAccount": "Account",
+    "videos": "AI Videos"
   },
   "exportDialog": {
     "title": "Upload landing to Shopify",
