@@ -17,8 +17,11 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
   return (
     <div className="flex min-h-screen">
       {/* Branding panel */}
-      <div className="hidden md:flex md:w-[44%] lg:w-[40%] flex-col justify-between bg-sidebar p-10 lg:p-14 text-sidebar-primary-foreground">
-        <div>
+      <div className="relative hidden md:flex md:w-[44%] lg:w-[40%] flex-col justify-between bg-sidebar p-10 lg:p-14 text-sidebar-primary-foreground overflow-hidden">
+        {/* Decorative mint blobs */}
+        <div aria-hidden className="pointer-events-none absolute -top-32 -left-24 w-[420px] h-[420px] rounded-full bg-primary/20 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-40 -right-20 w-[360px] h-[360px] rounded-full bg-primary/10 blur-3xl" />
+        <div className="relative">
           <div className="flex items-center gap-2.5 mb-14">
             <Logo size={36} className="rounded-lg" />
             <span className="text-xl font-bold font-display tracking-tight">Nexsell</span>
@@ -46,7 +49,7 @@ const AuthLayout = ({ children, title, subtitle }: AuthLayoutProps) => {
           </div>
         </div>
 
-        <div className="mt-8 space-y-3">
+        <div className="relative mt-8 space-y-3">
           <div className="flex items-center gap-2">
             <a href="https://instagram.com/nexsellai" target="_blank" rel="noopener noreferrer" className="h-8 w-8 rounded-md flex items-center justify-center text-sidebar-foreground hover:text-sidebar-primary hover:bg-sidebar-accent transition-colors" title="Instagram">
               <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>

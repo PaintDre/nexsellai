@@ -142,6 +142,7 @@ const GenerateBanner = () => {
   const [loading, setLoading] = useState(false);
   const [generatedBanners, setGeneratedBanners] = useState<GeneratedBanner[]>([]);
   const [previewBanner, setPreviewBanner] = useState<GeneratedBanner | null>(null);
+  const [regeneratingIdx, setRegeneratingIdx] = useState<number | null>(null);
 
   const updateForm = useCallback(<K extends keyof FormState>(key: K, value: FormState[K]) => {
     setFormState((prev) => ({ ...prev, [key]: value }));
@@ -253,6 +254,44 @@ const GenerateBanner = () => {
   const handleDownload = useCallback(
     (banner: GeneratedBanner) => downloadBanner(banner, product?.name || "", formState.outputSize, t),
     [product?.name, formState.outputSize, t]
+  );
+
+  const handleRegenerateOne = useCallback(
+    async (idx: number) => {
+      if (!product) return;
+      const templateId = sequence[idx];
+      const singleCost = costOf("banner_single");
+      if (balance < singleCost) {
+        setShowInsufficient(true);
+        return;
+      }
+      setRegeneratingIdx(idx);
+      const toastId = toast.loading(t("ai.generatingBanners"));
+      try {
+        const { data, error } = await supabase.functions.invoke("generate-banner", {
+          body: buildBannerPayload(product, formState, templateId, idx, sequence.length),
+        });
+        if (error) {
+          if (isInsufficientCreditsError(error)) setShowInsufficient(true);
+          throw error;
+        }
+        if (data?.error) throw new Error(data.error);
+        setGeneratedBanners((prev) =>
+          prev.map((b, i) =>
+            i === idx
+              ? { ...b, imageUrl: data.imageUrl }
+              : b
+          )
+        );
+        toast.success(t("ai.readyTitle"), { id: toastId });
+        await refreshCredits();
+      } catch (err: any) {
+        toast.error(t("ai.errorTitle"), { id: toastId, description: err.message || t("generateBanner.generateError") });
+      } finally {
+        setRegeneratingIdx(null);
+      }
+    },
+    [product, sequence, formState, costOf, balance, t, refreshCredits],
   );
 
   const handleDownloadAll = useCallback(async () => {
@@ -690,9 +729,24 @@ const GenerateBanner = () => {
                             </div>
                           </div>
                           <div className="flex justify-end">
-                            <Button variant="outline" size="sm" onClick={() => handleDownload(banner)}>
-                              <Download className="h-3 w-3 mr-1" /> {t("common.download")}
-                            </Button>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleRegenerateOne(idx)}
+                                disabled={regeneratingIdx !== null}
+                              >
+                                {regeneratingIdx === idx ? (
+                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                ) : (
+                                  <Sparkles className="h-3 w-3 mr-1" />
+                                )}
+                                {t("common.regenerate")}
+                              </Button>
+                              <Button variant="outline" size="sm" onClick={() => handleDownload(banner)}>
+                                <Download className="h-3 w-3 mr-1" /> {t("common.download")}
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
