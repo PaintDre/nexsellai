@@ -20,7 +20,8 @@ export type CreditAction =
   | "dropi_regenerate_image"
   | "shopify_export"
   | "publish_landing"
-  | "product_video";
+  | "product_video"
+  | "influencer_video";
 
 // Hard-coded fallback costs (DB values in system_config win when present).
 const FALLBACK_COSTS: Record<CreditAction, number> = {
@@ -41,6 +42,7 @@ const FALLBACK_COSTS: Record<CreditAction, number> = {
   shopify_export: 0,
   publish_landing: 0,
   product_video: 40,
+  influencer_video: 60,
 };
 
 const FALLBACK_ALLOWANCES: Record<string, number> = {

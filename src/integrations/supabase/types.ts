@@ -14,6 +14,80 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_influencers: {
+        Row: {
+          created_at: string
+          credit_transaction_id: string | null
+          credits_charged: number
+          duration_sec: number | null
+          error_message: string | null
+          id: string
+          language: string
+          model_id: string | null
+          product_id: string | null
+          provider_request_id: string | null
+          script: string
+          source_image_url: string
+          status: string
+          storage_path: string | null
+          thumbnail_url: string | null
+          updated_at: string
+          user_id: string
+          video_url: string | null
+          voice_id: string
+        }
+        Insert: {
+          created_at?: string
+          credit_transaction_id?: string | null
+          credits_charged?: number
+          duration_sec?: number | null
+          error_message?: string | null
+          id?: string
+          language?: string
+          model_id?: string | null
+          product_id?: string | null
+          provider_request_id?: string | null
+          script: string
+          source_image_url: string
+          status?: string
+          storage_path?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+          voice_id?: string
+        }
+        Update: {
+          created_at?: string
+          credit_transaction_id?: string | null
+          credits_charged?: number
+          duration_sec?: number | null
+          error_message?: string | null
+          id?: string
+          language?: string
+          model_id?: string | null
+          product_id?: string | null
+          provider_request_id?: string | null
+          script?: string
+          source_image_url?: string
+          status?: string
+          storage_path?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+          voice_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_influencers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       banners: {
         Row: {
           created_at: string

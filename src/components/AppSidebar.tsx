@@ -17,6 +17,7 @@ import {
   Zap,
   Video,
   BadgeCheck,
+  Mic2,
   Pin,
   PinOff,
   ShieldAlert,
@@ -70,6 +71,7 @@ export const SidebarContent = ({
       items: [
         { label: t("sidebar.banners"), icon: ImageIcon, href: "/banners", badge: "IA" },
         { label: t("sidebar.videos"), icon: Video, href: "/videos", badge: "NUEVO" },
+        { label: t("sidebar.influencers"), icon: Mic2, href: "/influencers", badge: "BETA" },
         { label: "Dropi", icon: Package, href: "/dropi", badge: "NUEVO" },
       ],
     },
