@@ -193,7 +193,8 @@
     "groupMain": "Principal",
     "groupCreate": "Estúdio Criativo IA",
     "groupMore": "Mais",
-    "groupAccount": "Conta"
+    "groupAccount": "Conta",
+    "videos": "Vídeos IA"
   },
   "exportDialog": {
     "title": "Enviar landing para Shopify",
