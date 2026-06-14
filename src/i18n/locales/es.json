@@ -529,6 +529,29 @@
     "landingCount_one": "{{count}} landing",
     "landingCount_other": "{{count}} landings"
   },
+  "tour": {
+    "back": "Atrás",
+    "next": "Siguiente",
+    "skip": "Saltar",
+    "start": "Empezar ahora",
+    "replay": "Ver tour",
+    "s1": {
+      "title": "Bienvenido a Nexsell",
+      "desc": "Tu estudio creativo para vender más. Crea banners, videos y campañas con IA, todo en un solo lugar."
+    },
+    "s2": {
+      "title": "Banners con IA en segundos",
+      "desc": "Sube una imagen de tu producto y deja que la IA cree creatividades listas para Instagram, Facebook y TikTok."
+    },
+    "s3": {
+      "title": "Catálogo Dropi y videos",
+      "desc": "Explora productos ganadores, genera anuncios animados y crea avatares para tus campañas."
+    },
+    "s4": {
+      "title": "Empecemos por tu primer producto",
+      "desc": "Agrega un producto y desbloquearás todas las herramientas de IA en un solo flujo."
+    }
+  },
   "settings": {
     "title": "Ajustes",
     "account": {

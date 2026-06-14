@@ -529,6 +529,17 @@
     "landingCount_one": "{{count}} landing",
     "landingCount_other": "{{count}} landings"
   },
+  "tour": {
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "start": "Get started",
+    "replay": "Replay tour",
+    "s1": { "title": "Welcome to Nexsell", "desc": "Your AI creative studio to sell more. Build banners, videos and campaigns in one place." },
+    "s2": { "title": "AI banners in seconds", "desc": "Upload a product photo and let AI create assets ready for Instagram, Facebook and TikTok." },
+    "s3": { "title": "Dropi catalog & video ads", "desc": "Browse winning products, generate animated ads and create avatars for your campaigns." },
+    "s4": { "title": "Start with your first product", "desc": "Add a product and unlock every AI tool in a single flow." }
+  },
   "settings": {
     "title": "Settings",
     "account": {
