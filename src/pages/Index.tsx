@@ -53,6 +53,18 @@ const Index = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Force light mode on the public landing — brand is now Soft Mint Light
+  useEffect(() => {
+    const root = document.documentElement;
+    const hadDark = root.classList.contains("dark");
+    root.classList.remove("dark");
+    root.classList.add("light");
+    return () => {
+      root.classList.remove("light");
+      if (hadDark) root.classList.add("dark");
+    };
+  }, []);
+
   const problems = t("indexPage.problems", { returnObjects: true }) as { text: string; detail: string }[];
   const solutions = t("indexPage.solutions", { returnObjects: true }) as { text: string; detail: string }[];
   const benefits = t("indexPage.benefits", { returnObjects: true }) as { title: string; desc: string }[];
