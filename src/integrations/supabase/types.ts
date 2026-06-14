@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       ai_influencers: {
         Row: {
+          audio_url: string | null
           created_at: string
           credit_transaction_id: string | null
           credits_charged: number
@@ -26,7 +27,7 @@ export type Database = {
           model_id: string | null
           product_id: string | null
           provider_request_id: string | null
-          script: string
+          script: string | null
           source_image_url: string
           status: string
           storage_path: string | null
@@ -37,6 +38,7 @@ export type Database = {
           voice_id: string
         }
         Insert: {
+          audio_url?: string | null
           created_at?: string
           credit_transaction_id?: string | null
           credits_charged?: number
@@ -47,7 +49,7 @@ export type Database = {
           model_id?: string | null
           product_id?: string | null
           provider_request_id?: string | null
-          script: string
+          script?: string | null
           source_image_url: string
           status?: string
           storage_path?: string | null
@@ -58,6 +60,7 @@ export type Database = {
           voice_id?: string
         }
         Update: {
+          audio_url?: string | null
           created_at?: string
           credit_transaction_id?: string | null
           credits_charged?: number
@@ -68,7 +71,7 @@ export type Database = {
           model_id?: string | null
           product_id?: string | null
           provider_request_id?: string | null
-          script?: string
+          script?: string | null
           source_image_url?: string
           status?: string
           storage_path?: string | null
