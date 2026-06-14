@@ -16,6 +16,8 @@ import { useCredits } from "@/hooks/useCredits";
 import { Coins } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useTranslation } from "react-i18next";
+import ProductTour from "@/components/ProductTour";
+import { HelpCircle } from "lucide-react";
 
 type Product = Tables<"products">;
 type Landing = Tables<"landings">;
@@ -35,6 +37,7 @@ const Dashboard = () => {
   const [versionsCount, setVersionsCount] = useState(0);
   const [recentVersions, setRecentVersions] = useState<RecentVersion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tourOpen, setTourOpen] = useState(false);
 
   const getGreeting = () => {
     const h = new Date().getHours();
@@ -131,9 +134,19 @@ const Dashboard = () => {
             <Button asChild size="lg" variant="outline">
               <Link to="/landings"><FileText className="h-4 w-4 mr-1.5" /> {t("dashboard.quickActions.myLandings")}</Link>
             </Button>
+            <Button
+              size="lg"
+              variant="ghost"
+              onClick={() => setTourOpen(true)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <HelpCircle className="h-4 w-4 mr-1.5" /> {t("tour.replay")}
+            </Button>
           </div>
         </div>
       </section>
+
+      <ProductTour forceOpen={tourOpen} onClose={() => setTourOpen(false)} />
 
       {/* Quick Actions */}
       <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
