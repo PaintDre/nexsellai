@@ -51,7 +51,7 @@ const EmptyState = ({ icon: Icon, title, description, action, secondaryAction, c
       <CardContent className="relative flex flex-col items-center justify-center text-center px-5 py-12 sm:py-16">
         {/* Icon medallion */}
         <div className="relative mb-5">
-          <div className="absolute -inset-2 rounded-full bg-primary/15 blur-2xl animate-pulse-soft" aria-hidden />
+          <div className="absolute -inset-2 rounded-full bg-primary/15 blur-2xl animate-pulse" aria-hidden />
           <div className="relative flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl glass-card shadow-md border border-primary/15">
             <Icon className="h-6 w-6 sm:h-7 sm:w-7 text-primary" strokeWidth={1.75} />
           </div>
