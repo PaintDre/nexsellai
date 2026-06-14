@@ -13,10 +13,11 @@ const HF_AUTH = `Key ${HF_API_KEY}:${HF_API_SECRET}`;
 interface Body {
   product_id?: string;
   image_url: string;
-  script: string;
+  audio_url: string;
+  prompt?: string;
+  script?: string;
   voice_id?: string;
   language?: string;
-  extra_prompt?: string;
 }
 
 Deno.serve(async (req) => {
@@ -44,13 +45,8 @@ Deno.serve(async (req) => {
     }
 
     const body = (await req.json()) as Body;
-    if (!body.image_url || !body.script) {
-      return new Response(JSON.stringify({ error: "image_url and script required" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (body.script.length > 600) {
-      return new Response(JSON.stringify({ error: "script_too_long", max: 600 }), {
+    if (!body.image_url || !body.audio_url) {
+      return new Response(JSON.stringify({ error: "image_url and audio_url required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -59,7 +55,7 @@ Deno.serve(async (req) => {
     const language = body.language || "es";
 
     const charge = await chargeCredits(supabase, user.id, "influencer_video", body.product_id ?? null, {
-      voice_id: voiceId, language, script_len: body.script.length,
+      voice_id: voiceId, language,
     });
     if (!charge.success) {
       if (charge.error === "insufficient_credits") {
@@ -70,7 +66,10 @@ Deno.serve(async (req) => {
       });
     }
 
-    const modelId = "higgsfield-ai/speak/standard";
+    const modelId = "higgsfield-ai/speak";
+    const promptText = (body.prompt && body.prompt.trim().length > 0)
+      ? body.prompt.trim()
+      : "A person speaking naturally to the camera, expressive face, soft natural lighting, premium cinematic look.";
     const hfRes = await fetch(`https://platform.higgsfield.ai/${modelId}`, {
       method: "POST",
       headers: {
@@ -80,10 +79,8 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         image_url: body.image_url,
-        script: body.script,
-        voice_id: voiceId,
-        language,
-        ...(body.extra_prompt ? { prompt: body.extra_prompt } : {}),
+        audio_url: body.audio_url,
+        prompt: promptText,
       }),
     });
 
@@ -107,7 +104,8 @@ Deno.serve(async (req) => {
         user_id: user.id,
         product_id: body.product_id ?? null,
         source_image_url: body.image_url,
-        script: body.script,
+        script: body.script ?? body.prompt ?? null,
+        audio_url: body.audio_url,
         voice_id: voiceId,
         language,
         model_id: modelId,

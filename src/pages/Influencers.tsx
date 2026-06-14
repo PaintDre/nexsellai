@@ -18,7 +18,8 @@ import EmptyState from "@/components/EmptyState";
 interface InfluencerVideo {
   id: string;
   source_image_url: string;
-  script: string;
+  script: string | null;
+  audio_url?: string | null;
   voice_id: string;
   language: string;
   status: string;
@@ -51,7 +52,9 @@ const Influencers = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string>("");
   const [uploading, setUploading] = useState(false);
-  const [script, setScript] = useState("");
+  const [audioUrl, setAudioUrl] = useState<string>("");
+  const [uploadingAudio, setUploadingAudio] = useState(false);
+  const [prompt, setPrompt] = useState("");
   const [voiceId, setVoiceId] = useState<string>("spanish_female");
   const [submitting, setSubmitting] = useState(false);
 
@@ -98,13 +101,34 @@ const Influencers = () => {
     setUploading(false);
   };
 
+  const handleAudioUpload = async (file: File) => {
+    if (!user) return;
+    setUploadingAudio(true);
+    const ext = file.name.split(".").pop() ?? "mp3";
+    const path = `${user.id}/audio-${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(path, file, { upsert: true, contentType: file.type });
+    if (error) {
+      toast.error("No se pudo subir el audio", { description: error.message });
+      setUploadingAudio(false); return;
+    }
+    const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+    setAudioUrl(data.publicUrl);
+    setUploadingAudio(false);
+  };
+
   const handleSubmit = async () => {
     if (!imageUrl) { toast.error("Sube una foto del avatar primero"); return; }
-    if (script.trim().length < 10) { toast.error("Script muy corto"); return; }
+    if (!audioUrl) { toast.error("Sube el audio (mp3/wav) que dirá tu influencer"); return; }
     const voice = VOICES.find((v) => v.id === voiceId);
     setSubmitting(true);
     const { data, error } = await supabase.functions.invoke("generate-influencer-video", {
-      body: { image_url: imageUrl, script: script.trim(), voice_id: voiceId, language: voice?.lang ?? "es" },
+      body: {
+        image_url: imageUrl,
+        audio_url: audioUrl,
+        prompt: prompt.trim() || undefined,
+        voice_id: voiceId,
+        language: voice?.lang ?? "es",
+      },
     });
     setSubmitting(false);
     if (error || data?.error) {
@@ -118,7 +142,7 @@ const Influencers = () => {
     }
     toast.success("Video en cola", { description: "Tu influencer IA estará listo en 90-240s." });
     setOpen(false);
-    setScript(""); setImageUrl(""); setImageFile(null);
+    setPrompt(""); setImageUrl(""); setImageFile(null); setAudioUrl("");
     await fetchVideos();
   };
 
@@ -179,7 +203,9 @@ const Influencers = () => {
                 )}
               </div>
               <CardContent className="p-3 space-y-2">
-                <p className="text-xs text-muted-foreground line-clamp-2 italic">"{v.script}"</p>
+                {v.script && (
+                  <p className="text-xs text-muted-foreground line-clamp-2 italic">"{v.script}"</p>
+                )}
                 <div className="flex items-center gap-2 text-[11px]">
                   <Sparkles className="h-3 w-3 text-primary" />
                   <span className="font-medium">{VOICES.find((vv) => vv.id === v.voice_id)?.label ?? v.voice_id}</span>
@@ -209,7 +235,7 @@ const Influencers = () => {
               <Sparkles className="h-5 w-5 text-primary" /> Crear influencer IA
             </DialogTitle>
             <DialogDescription>
-              Sube una foto frontal del rostro y escribe el guion. Costo: {COST} créditos.
+              Sube una foto frontal del rostro y el audio (mp3/wav) que dirá tu avatar. Costo: {COST} créditos.
             </DialogDescription>
           </DialogHeader>
 
@@ -247,7 +273,40 @@ const Influencers = () => {
             </div>
 
             <div className="space-y-1.5">
-              <Label>Voz e idioma</Label>
+              <Label>Audio del guion (mp3 / wav, máx ~60s)</Label>
+              {audioUrl ? (
+                <div className="flex items-center gap-2">
+                  <audio src={audioUrl} controls className="flex-1 h-10" />
+                  <Button variant="ghost" size="sm" onClick={() => setAudioUrl("")}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center h-20 border-2 border-dashed border-border rounded-lg cursor-pointer hover:border-primary/50 transition-colors">
+                  {uploadingAudio ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  ) : (
+                    <>
+                      <Upload className="h-5 w-5 text-muted-foreground mb-1" />
+                      <span className="text-xs text-muted-foreground">Subir audio (mp3, wav, m4a)</span>
+                    </>
+                  )}
+                  <Input
+                    type="file"
+                    accept="audio/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleAudioUpload(f);
+                    }}
+                  />
+                </label>
+              )}
+              <p className="text-[10px] text-muted-foreground">Tip: graba el audio en tu celular o usa cualquier TTS (ElevenLabs, etc.).</p>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Idioma (referencia)</Label>
               <Select value={voiceId} onValueChange={setVoiceId}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -257,17 +316,17 @@ const Influencers = () => {
             </div>
 
             <div className="space-y-1.5">
-              <Label>Guion ({script.length}/600)</Label>
+              <Label>Descripción visual (opcional)</Label>
               <Textarea
-                value={script}
-                onChange={(e) => setScript(e.target.value.slice(0, 600))}
-                placeholder="Hola, soy María y quiero contarte por qué este producto cambió mi rutina diaria…"
-                rows={5}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value.slice(0, 300))}
+                placeholder="Mujer joven sonriente, mirando a cámara, fondo desenfocado tipo cafetería, luz natural cálida…"
+                rows={3}
               />
-              <p className="text-[10px] text-muted-foreground">Tip: 80-150 palabras para un video de ~30s.</p>
+              <p className="text-[10px] text-muted-foreground">Describe la escena/expresión. El audio define lo que dice.</p>
             </div>
 
-            <Button onClick={handleSubmit} disabled={submitting || !imageUrl || script.trim().length < 10} className="w-full">
+            <Button onClick={handleSubmit} disabled={submitting || !imageUrl || !audioUrl} className="w-full">
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Play className="h-4 w-4" /> Generar ({COST} créditos)</>}
             </Button>
           </div>
