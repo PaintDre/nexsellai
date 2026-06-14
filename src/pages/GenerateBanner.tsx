@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { useCredits, isInsufficientCreditsError } from "@/hooks/useCredits";
 import { InsufficientCreditsModal } from "@/components/credits/InsufficientCreditsModal";
+import { LiveBannerPreview } from "@/components/banner/LiveBannerPreview";
 
 type Product = Tables<"products">;
 
@@ -284,7 +285,7 @@ const GenerateBanner = () => {
   const formattedPrice = product.price != null ? `$${product.price.toLocaleString()} ${formState.currency}` : "";
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-5xl mx-auto space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
@@ -324,7 +325,8 @@ const GenerateBanner = () => {
           </CardContent>
         </Card>
       ) : (
-        <>
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_360px] gap-6">
+          <div className="space-y-6 min-w-0">
           {/* Step indicator */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1">
             {STEPS.map((s, i) => (
@@ -733,7 +735,23 @@ const GenerateBanner = () => {
               )}
             </div>
           )}
-        </>
+          </div>
+
+          {/* Live preview side panel — desktop only */}
+          <LiveBannerPreview
+            productName={product.name}
+            productImage={productImage}
+            formattedPrice={formattedPrice}
+            slogan={formState.customText}
+            description={formState.description}
+            sequence={sequence}
+            outputSize={formState.outputSize}
+            mode={formState.generationMode}
+            totalCost={totalCost}
+            balance={balance}
+            step={step}
+          />
+        </div>
       )}
 
       {/* Preview Modal */}
