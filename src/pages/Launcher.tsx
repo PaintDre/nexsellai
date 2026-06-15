@@ -100,6 +100,11 @@ export default function Launcher() {
   };
 
   const banners = ((job?.assets as { banners?: string[] } | null)?.banners) ?? [];
+  const bannersDone = Boolean(
+    (job?.steps_completed as Record<string, boolean> | null)?.banners,
+  );
+  const isGeneratingBanners =
+    launching || (job?.status === "running" && job?.current_step === "banners");
 
   return (
     <div className="page-in p-5 md:p-8 lg:p-10 space-y-6 max-w-6xl mx-auto">
@@ -236,12 +241,17 @@ export default function Launcher() {
               size="lg"
               className="w-full"
               onClick={handleLaunch}
-              disabled={launching || (job?.status === "running")}
+              disabled={isGeneratingBanners}
             >
-              {launching || job?.status === "running" ? (
+              {isGeneratingBanners ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   Generando banners…
+                </>
+              ) : bannersDone ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Banners listos · Volver a generar
                 </>
               ) : (
                 <>
