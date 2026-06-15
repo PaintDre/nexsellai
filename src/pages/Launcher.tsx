@@ -106,6 +106,91 @@ export default function Launcher() {
   const isGeneratingBanners =
     launching || (job?.status === "running" && job?.current_step === "banners");
 
+  const assets = (job?.assets ?? {}) as {
+    banners?: string[];
+    product_video_id?: string;
+    video_url?: string;
+    video_thumbnail?: string;
+  };
+  const videoDone = Boolean(
+    (job?.steps_completed as Record<string, boolean> | null)?.video,
+  );
+  const isGeneratingVideo =
+    job?.status === "running" && job?.current_step === "video";
+
+  // Poll product_videos while video step is in-flight
+  useEffect(() => {
+    if (!job?.id || !assets.product_video_id) return;
+    if (videoDone || assets.video_url) return;
+    let cancelled = false;
+    const tick = async () => {
+      try {
+        const { data } = await supabase.functions.invoke("check-product-video", {
+          body: { video_id: assets.product_video_id },
+        });
+        const v = (data as any)?.video;
+        if (!v || cancelled) return;
+        if (v.status === "completed" && v.video_url) {
+          const newAssets = {
+            ...assets,
+            video_url: v.video_url,
+            video_thumbnail: v.thumbnail_url ?? null,
+          };
+          const newSteps = {
+            ...((job.steps_completed as Record<string, boolean>) || {}),
+            video: true,
+          };
+          await supabase
+            .from("launch_jobs")
+            .update({
+              assets: newAssets,
+              steps_completed: newSteps,
+              current_step: "influencer",
+              status: "running",
+            })
+            .eq("id", job.id);
+        } else if (v.status === "failed" || v.status === "nsfw") {
+          await supabase
+            .from("launch_jobs")
+            .update({
+              status: "failed",
+              error_message: `video:${v.error_message ?? v.status}`,
+            })
+            .eq("id", job.id);
+        }
+      } catch (e) {
+        console.error("poll product video", e);
+      }
+    };
+    tick();
+    const id = setInterval(tick, 10000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [job?.id, assets.product_video_id, videoDone, assets.video_url]);
+
+  const handleGenerateVideo = async () => {
+    if (!selected || !job?.id) return;
+    try {
+      const { data, error } = await supabase.functions.invoke("launch-campaign", {
+        body: { productId: selected.id, jobId: job.id, step: "video" },
+      });
+      if (error) throw error;
+      toast.success("Video en cola, generando…");
+      // Re-fetch job to pick up product_video_id immediately
+      const { data: j } = await supabase
+        .from("launch_jobs")
+        .select("*")
+        .eq("id", job.id)
+        .maybeSingle();
+      if (j) setJob(j);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message ?? "No se pudo iniciar el video");
+    }
+  };
+
   return (
     <div className="page-in p-5 md:p-8 lg:p-10 space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center gap-3">
