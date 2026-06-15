@@ -18,6 +18,7 @@ import {
   Video,
   BadgeCheck,
   Mic2,
+  Rocket,
   Pin,
   PinOff,
   ShieldAlert,
