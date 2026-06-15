@@ -46,6 +46,7 @@ const AdminDropiVideos = lazy(() => import("./pages/AdminDropiVideos"));
 const Subscription = lazy(() => import("./pages/Subscription"));
 const Videos = lazy(() => import("./pages/Videos"));
 const Influencers = lazy(() => import("./pages/Influencers"));
+const Launcher = lazy(() => import("./pages/Launcher"));
 
 const queryClient = new QueryClient();
 
