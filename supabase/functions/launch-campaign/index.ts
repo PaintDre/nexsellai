@@ -60,7 +60,7 @@ serve(async (req) => {
       });
     }
 
-    const { productId, step } = await req.json().catch(() => ({}));
+    const { productId, step, jobId } = await req.json().catch(() => ({}));
     if (!productId || typeof productId !== "string") {
       return new Response(JSON.stringify({ error: "productId required" }), {
         status: 400,
@@ -88,6 +88,81 @@ serve(async (req) => {
       .select("currency, country_code")
       .eq("user_id", user.id)
       .maybeSingle();
+
+    // ====== STEP: VIDEO (5.3) ======
+    if (step === "video") {
+      if (!jobId) {
+        return new Response(JSON.stringify({ error: "jobId required for video step" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: existing } = await supabase
+        .from("launch_jobs")
+        .select("*")
+        .eq("id", jobId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (!existing) {
+        return new Response(JSON.stringify({ error: "job_not_found" }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const sourceImage = (product as any).images?.[0];
+      if (!sourceImage) {
+        return new Response(JSON.stringify({ error: "product_missing_image" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      await supabase
+        .from("launch_jobs")
+        .update({ status: "running", current_step: "video" })
+        .eq("id", jobId);
+
+      const vidRes = await fetch(`${SUPABASE_URL}/functions/v1/generate-product-video`, {
+        method: "POST",
+        headers: {
+          Authorization: authHeader,
+          "Content-Type": "application/json",
+          apikey: Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+        },
+        body: JSON.stringify({
+          product_id: product.id,
+          image_url: sourceImage,
+          style: "showcase",
+          duration: 5,
+          aspect_ratio: "9:16",
+        }),
+      });
+      const vidJson = await vidRes.json().catch(() => ({}));
+      if (!vidRes.ok || !(vidJson as any)?.video?.id) {
+        await supabase
+          .from("launch_jobs")
+          .update({
+            status: "failed",
+            error_message: `video:${(vidJson as any)?.error ?? `http_${vidRes.status}`}`,
+          })
+          .eq("id", jobId);
+        return new Response(
+          JSON.stringify({ error: (vidJson as any)?.error ?? "video_submit_failed", jobId }),
+          { status: vidRes.status >= 400 ? vidRes.status : 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+
+      const productVideoId = (vidJson as any).video.id as string;
+      const mergedAssets = { ...(existing.assets as Record<string, unknown> ?? {}), product_video_id: productVideoId };
+      await supabase
+        .from("launch_jobs")
+        .update({ assets: mergedAssets })
+        .eq("id", jobId);
+
+      return new Response(
+        JSON.stringify({ jobId, product_video_id: productVideoId, status: "queued" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
 
     // Create job
     const { data: job, error: jobErr } = await supabase
