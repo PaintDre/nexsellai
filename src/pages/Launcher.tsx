@@ -87,11 +87,7 @@ export default function Launcher() {
             icon={Package}
             title="No tienes productos aún"
             description="Crea un producto para poder lanzar una campaña."
-            action={
-              <Button asChild>
-                <Link to="/products/new">Crear producto</Link>
-              </Button>
-            }
+            action={{ label: "Crear producto", to: "/products/new" }}
           />
         ) : (
           <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
@@ -106,8 +102,8 @@ export default function Launcher() {
                   }`}
                 >
                   <div className="aspect-video bg-muted relative">
-                    {p.image_url ? (
-                      <img src={p.image_url} alt={p.name} className="w-full h-full object-contain" />
+                    {p.images?.[0] ? (
+                      <img src={p.images[0]} alt={p.name} className="w-full h-full object-contain" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
                         <Package className="h-8 w-8 text-muted-foreground/40" />
@@ -136,9 +132,9 @@ export default function Launcher() {
         <Card className="border-primary/30 bg-primary/5">
           <CardContent className="p-5 space-y-4">
             <div className="flex items-start gap-4">
-              {selected.image_url && (
+              {selected.images?.[0] && (
                 <img
-                  src={selected.image_url}
+                  src={selected.images[0]}
                   alt={selected.name}
                   className="h-20 w-20 rounded-lg object-contain bg-background"
                 />
