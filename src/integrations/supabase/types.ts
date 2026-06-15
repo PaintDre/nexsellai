@@ -602,6 +602,53 @@ export type Database = {
           },
         ]
       }
+      launch_jobs: {
+        Row: {
+          assets: Json
+          created_at: string
+          current_step: string
+          error_message: string | null
+          id: string
+          product_id: string | null
+          status: string
+          steps_completed: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          assets?: Json
+          created_at?: string
+          current_step?: string
+          error_message?: string | null
+          id?: string
+          product_id?: string | null
+          status?: string
+          steps_completed?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          assets?: Json
+          created_at?: string
+          current_step?: string
+          error_message?: string | null
+          id?: string
+          product_id?: string | null
+          status?: string
+          steps_completed?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "launch_jobs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_events: {
         Row: {
           created_at: string
