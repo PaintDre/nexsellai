@@ -73,6 +73,7 @@ export const SidebarContent = ({
         { label: t("sidebar.banners"), icon: ImageIcon, href: "/banners", badge: "IA" },
         { label: t("sidebar.videos"), icon: Video, href: "/videos", badge: "NUEVO" },
         { label: t("sidebar.influencers"), icon: Mic2, href: "/influencers", badge: "BETA" },
+        { label: "Lanzador", icon: Rocket, href: "/launcher", badge: "NUEVO" },
         { label: "Dropi", icon: Package, href: "/dropi", badge: "NUEVO" },
       ],
     },
