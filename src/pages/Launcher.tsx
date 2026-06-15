@@ -382,6 +382,43 @@ export default function Launcher() {
           )}
         </div>
       )}
+
+      {/* Video del producto (5.3) */}
+      {bannersDone && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <h2 className="text-lg font-semibold">Video del producto</h2>
+            {!videoDone && !assets.product_video_id && (
+              <Button onClick={handleGenerateVideo} disabled={isGeneratingVideo}>
+                <Video className="h-4 w-4 mr-2" />
+                Generar video (≈ 30–60s)
+              </Button>
+            )}
+          </div>
+
+          <Card className="bg-muted/30">
+            <CardContent className="p-4">
+              {assets.video_url ? (
+                <video
+                  src={assets.video_url}
+                  poster={assets.video_thumbnail ?? undefined}
+                  controls
+                  className="w-full max-w-sm mx-auto rounded-lg bg-black aspect-[9/16] object-contain"
+                />
+              ) : assets.product_video_id ? (
+                <div className="flex flex-col items-center justify-center gap-2 py-8 text-muted-foreground">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <p className="text-sm">Generando video con IA… esto puede tardar 30–90s.</p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-6">
+                  Pulsa "Generar video" para crear un clip vertical 9:16 a partir de la imagen del producto.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
