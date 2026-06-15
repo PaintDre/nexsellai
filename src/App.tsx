@@ -93,6 +93,7 @@ const App = () => (
                   <Route path="/dropi/:id" element={<DropiProduct />} />
                   <Route path="/videos" element={<Videos />} />
                   <Route path="/influencers" element={<Influencers />} />
+                  <Route path="/launcher" element={<Launcher />} />
                 </Route>
                 <Route element={<AdminLayout />}>
                   <Route path="/admin" element={<AdminDashboard />} />
