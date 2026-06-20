@@ -69,11 +69,11 @@ export const SidebarContent = ({
     {
       label: t("sidebar.groupCreate"),
       items: [
-        { label: t("sidebar.banners"), icon: ImageIcon, href: "/banners", badge: "DEMO" },
+        { label: t("sidebar.banners"), icon: ImageIcon, href: "/banners" },
+        { label: "Dropi", icon: Package, href: "/dropi" },
         { label: t("sidebar.videos"), icon: Video, href: "/videos", badge: "DEMO" },
         { label: t("sidebar.influencers"), icon: Mic2, href: "/influencers", badge: "DEMO" },
         { label: "Lanzador", icon: Rocket, href: "/launcher", badge: "DEMO" },
-        { label: "Dropi", icon: Package, href: "/dropi", badge: "DEMO" },
       ],
     },
     {
