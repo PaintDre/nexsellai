@@ -103,46 +103,9 @@ const Onboarding = () => {
         .single();
 
       if (productError) throw productError;
-      setProgress(25);
-
-      const { data: landingData, error: genError } = await supabase.functions.invoke("generate-landing", {
-        body: {
-          product,
-          mode: "aida",
-          intensity: "medium",
-          hasOffer: false,
-          guarantee: "Garantía de satisfacción de 30 días",
-          plan: profile.plan,
-          currency: (profile as any)?.currency || "USD",
-          country_code: (profile as any)?.country_code || null,
-        },
-      });
-
-      if (genError) throw genError;
-      setProgress(70);
-
-      const { error: insertError } = await supabase.from("landings").insert({
-        user_id: user.id,
-        product_id: product.id,
-        name: product.name,
-        mode: "aida" as any,
-        intensity: "medium" as any,
-        has_offer: false,
-        guarantee: "Garantía de satisfacción de 30 días",
-        blocks: landingData.blocks,
-        theme: "clean",
-      } as any);
-
-      if (insertError) throw insertError;
-
-      await supabase
-        .from("profiles")
-        .update({ landings_used: (profile.landings_used || 0) + 1 })
-        .eq("user_id", user.id);
-
       setProgress(100);
 
-      toast.success(t("onboarding.firstLandingReady"));
+      toast.success("Producto creado");
       setTimeout(() => navigate("/dashboard"), 1200);
     } catch (err: any) {
       toast.error(t("onboarding.generateError"), { description: err.message });
