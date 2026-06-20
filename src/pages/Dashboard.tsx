@@ -3,39 +3,25 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Tables } from "@/integrations/supabase/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Package, FileText, Zap, Eye, History, Plus, Image,
-  ArrowRight, Sparkles, Download, ImageIcon,
+  Package, Zap, Plus, ArrowRight, ImageIcon, Rocket, Video, Mic2,
+  Coins, HelpCircle,
 } from "lucide-react";
 import { useCredits } from "@/hooks/useCredits";
-import { Coins } from "lucide-react";
-import EmptyState from "@/components/EmptyState";
 import { useTranslation } from "react-i18next";
 import ProductTour from "@/components/ProductTour";
-import { HelpCircle } from "lucide-react";
 
 type Product = Tables<"products">;
-type Landing = Tables<"landings">;
-
-interface RecentVersion {
-  id: string;
-  created_at: string;
-  version_number: number;
-  landing_name: string;
-}
 
 const Dashboard = () => {
   const { t } = useTranslation();
   const { user, profile } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
-  const [landings, setLandings] = useState<Landing[]>([]);
-  const [versionsCount, setVersionsCount] = useState(0);
-  const [recentVersions, setRecentVersions] = useState<RecentVersion[]>([]);
   const [loading, setLoading] = useState(true);
   const [tourOpen, setTourOpen] = useState(false);
 
@@ -48,213 +34,155 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!user) return;
-    const load = async () => {
+    (async () => {
       try {
         setLoading(true);
-        const [prodRes, landRes, verCountRes] = await Promise.all([
-          supabase.from("products").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-          supabase.from("landings").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
-          supabase.from("landing_versions").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        ]);
-
-        if (prodRes.error) console.error("Error loading products:", prodRes.error);
-        if (landRes.error) console.error("Error loading landings:", landRes.error);
-        if (verCountRes.error) console.error("Error loading version count:", verCountRes.error);
-
-        setProducts(prodRes.data || []);
-        setLandings(landRes.data || []);
-        setVersionsCount(verCountRes.count || 0);
-
-        const { data: versions, error: versionsError } = await supabase
-          .from("landing_versions")
-          .select("id, created_at, version_number, landing_id")
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
           .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(5);
-
-        if (versionsError) console.error("Error loading recent versions:", versionsError);
-
-        if (versions && versions.length > 0) {
-          const landingIds = [...new Set(versions.map(v => v.landing_id))];
-          const { data: landingsData, error: landingsNamesError } = await supabase
-            .from("landings")
-            .select("id, name")
-            .in("id", landingIds);
-          if (landingsNamesError) console.error("Error loading landing names:", landingsNamesError);
-          const nameMap = new Map((landingsData || []).map(l => [l.id, l.name]));
-          setRecentVersions(versions.map(v => ({
-            id: v.id, created_at: v.created_at, version_number: v.version_number,
-            landing_name: nameMap.get(v.landing_id) || t("dashboard.deletedLanding"),
-          })));
-        }
-      } catch (err) {
-        console.error("Unexpected error loading dashboard:", err);
-        // TODO: surface toast to user
+          .order("created_at", { ascending: false });
+        if (error) console.error("Error loading products:", error);
+        setProducts(data || []);
       } finally {
         setLoading(false);
       }
-    };
-    load();
+    })();
   }, [user]);
 
   const { balance, allowance } = useCredits();
   const creditsPercent = allowance > 0 ? Math.min(100, (balance / allowance) * 100) : 0;
   const isNewUser = products.length === 0;
-  const hasNoLandings = products.length > 0 && landings.length === 0;
 
   if (loading) return <DashboardSkeleton />;
 
   return (
-    <div className="page-in p-4 md:p-8 lg:p-10 space-y-6 md:space-y-8 max-w-6xl mx-auto">
-      {/* Hero */}
-      <section className="relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.08] via-background to-amber/[0.06] p-5 sm:p-7 md:p-8 shadow-sm">
-        <div aria-hidden className="pointer-events-none absolute -top-16 -right-16 h-56 w-56 rounded-full bg-primary/15 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-10 h-48 w-48 rounded-full bg-amber/10 blur-3xl" />
-        <div className="relative flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-          <div className="min-w-0 space-y-2">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-[10px] uppercase tracking-wide font-semibold">
-                {t("dashboard.stats.plan")}: {profile?.plan || "free"}
-              </Badge>
-              <Badge variant="outline" className="text-[10px] gap-1 border-primary/30 text-primary">
-                <Coins className="h-3 w-3" /> {balance}/{allowance}
-              </Badge>
-            </div>
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold font-display tracking-tight">
-              {getGreeting()}, {profile?.full_name?.split(" ")[0] || t("common.user")}
-            </h1>
-            <p className="text-sm text-muted-foreground max-w-xl">
-              {t("dashboard.productCount", { count: products.length })} · {t("dashboard.landingCount", { count: landings.length })}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2 shrink-0">
-            <Button asChild size="lg" className="shadow-md">
-              <Link to="/products/new"><Plus className="h-4 w-4 mr-1.5" /> {t("dashboard.quickActions.newProduct")}</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link to="/landings"><FileText className="h-4 w-4 mr-1.5" /> {t("dashboard.quickActions.myLandings")}</Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="ghost"
-              onClick={() => setTourOpen(true)}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <HelpCircle className="h-4 w-4 mr-1.5" /> {t("tour.replay")}
-            </Button>
-          </div>
+    <div className="page-in p-5 md:p-10 lg:p-12 space-y-10 max-w-5xl mx-auto">
+      {/* Hero — Apple-style minimal */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary" className="text-[10px] uppercase tracking-wide font-semibold">
+            {profile?.plan || "free"}
+          </Badge>
+          <Badge variant="outline" className="text-[10px] gap-1 border-primary/30 text-primary">
+            <Coins className="h-3 w-3" /> {balance}/{allowance}
+          </Badge>
+        </div>
+        <h1 className="text-3xl md:text-5xl font-semibold font-display tracking-tight leading-[1.05]">
+          {getGreeting()},<br />
+          <span className="text-muted-foreground/80">
+            {profile?.full_name?.split(" ")[0] || t("common.user")}.
+          </span>
+        </h1>
+        <p className="text-base text-muted-foreground max-w-xl">
+          {t("dashboard.productCount", { count: products.length })}
+        </p>
+        <div className="flex flex-wrap gap-2 pt-2">
+          <Button asChild size="lg" className="rounded-full shadow-sm">
+            <Link to="/products/new"><Plus className="h-4 w-4 mr-1.5" /> {t("dashboard.quickActions.newProduct")}</Link>
+          </Button>
+          <Button asChild size="lg" variant="outline" className="rounded-full">
+            <Link to="/products"><Package className="h-4 w-4 mr-1.5" /> {t("sidebar.products")}</Link>
+          </Button>
+          <Button
+            size="lg"
+            variant="ghost"
+            onClick={() => setTourOpen(true)}
+            className="rounded-full text-muted-foreground hover:text-foreground"
+          >
+            <HelpCircle className="h-4 w-4 mr-1.5" /> {t("tour.replay")}
+          </Button>
         </div>
       </section>
 
       <ProductTour forceOpen={tourOpen} onClose={() => setTourOpen(false)} />
 
-      {/* Quick Actions */}
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
-        <QuickActionCard
-          to="/products/new"
-          icon={Plus}
-          title={t("dashboard.quickActions.newProduct")}
-          description={t("dashboard.quickActions.newProductDesc")}
-          variant="primary"
-        />
-        <QuickActionCard
-          to="/landings"
-          icon={FileText}
-          title={t("dashboard.quickActions.myLandings")}
-          description={t("dashboard.quickActions.landingsCount", { count: landings.length })}
-        />
-        <QuickActionCard
-          to="/banners"
-          icon={ImageIcon}
-          title={t("dashboard.quickActions.myBanners")}
-          description={t("dashboard.quickActions.bannersDesc")}
-        />
-      </div>
+      {/* Productivo */}
+      <section className="space-y-3">
+        <h2 className="text-xs uppercase tracking-wider text-muted-foreground/70 font-semibold px-1">
+          Productivo
+        </h2>
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+          <QuickActionCard
+            to="/products/new"
+            icon={Plus}
+            title={t("dashboard.quickActions.newProduct")}
+            description={t("dashboard.quickActions.newProductDesc")}
+            variant="primary"
+          />
+          <QuickActionCard
+            to="/products"
+            icon={Package}
+            title={t("sidebar.products")}
+            description={`${products.length} ${products.length === 1 ? "producto" : "productos"}`}
+          />
+        </div>
+      </section>
+
+      {/* Laboratorio (DEMO) */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-xs uppercase tracking-wider text-muted-foreground/70 font-semibold">
+            Laboratorio
+          </h2>
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground/60">
+            Demo · en desarrollo
+          </span>
+        </div>
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+          <QuickActionCard to="/banners" icon={ImageIcon} title={t("sidebar.banners")} description="Banners IA" demo />
+          <QuickActionCard to="/videos" icon={Video} title={t("sidebar.videos")} description="Video del producto" demo />
+          <QuickActionCard to="/influencers" icon={Mic2} title={t("sidebar.influencers")} description="Lipsync con avatar" demo />
+          <QuickActionCard to="/launcher" icon={Rocket} title="Lanzador" description="Campaña end-to-end" demo />
+          <QuickActionCard to="/dropi" icon={Package} title="Dropi" description="Catálogo de productos" demo />
+        </div>
+      </section>
 
       {/* Onboarding guide for new users */}
       {isNewUser && (
-        <Card className="border-primary/15 bg-accent/30">
+        <Card className="border-primary/15 bg-accent/30 rounded-2xl">
           <CardContent className="p-6">
-            <h2 className="text-base font-semibold font-display mb-4">{t("dashboard.onboarding.title")}</h2>
-            <div className="grid gap-3 sm:grid-cols-3">
-              {[
-                { step: 1, title: t("dashboard.onboarding.step1Title"), desc: t("dashboard.onboarding.step1Desc"), icon: Package, active: true },
-                { step: 2, title: t("dashboard.onboarding.step2Title"), desc: t("dashboard.onboarding.step2Desc"), icon: Sparkles, active: false },
-                { step: 3, title: t("dashboard.onboarding.step3Title"), desc: t("dashboard.onboarding.step3Desc"), icon: Download, active: false },
-              ].map(s => (
-                <div key={s.step} className={`flex items-start gap-3 p-3 rounded-lg transition-colors ${s.active ? "bg-primary/8" : "bg-muted/40"}`}>
-                  <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${s.active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-                    {s.step}
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm">{s.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{s.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <Button asChild size="sm" className="mt-4">
-              <Link to="/products/new"><Plus className="h-3.5 w-3.5 mr-1.5" /> {t("dashboard.onboarding.createFirst")}</Link>
+            <h2 className="text-base font-semibold font-display mb-2">Crea tu primer producto</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Sube nombre, precio e imagen para empezar a usar Nexsell.
+            </p>
+            <Button asChild size="sm" className="rounded-full">
+              <Link to="/products/new"><Plus className="h-3.5 w-3.5 mr-1.5" /> {t("dashboard.quickActions.newProduct")}</Link>
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {hasNoLandings && (
-        <Card className="border-primary/15 bg-accent/30">
-          <CardContent className="flex flex-col sm:flex-row items-center gap-4 p-5">
-            <Sparkles className="h-7 w-7 text-primary shrink-0" />
-            <div className="flex-1 text-center sm:text-left">
-              <h3 className="font-semibold text-sm">{t("dashboard.noLandings.title")}</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">{t("dashboard.noLandings.description")}</p>
-            </div>
-            <Button asChild size="sm">
-              <Link to="/products">{t("dashboard.noLandings.viewProducts")} <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Upgrade warnings */}
-      {/* Usage Stats */}
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <Card>
+      {/* Stats */}
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
+        <Card className="rounded-2xl">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-muted-foreground">{t("credits.title", "Créditos")}</span>
               <Coins className="h-3.5 w-3.5 text-primary" />
             </div>
-            <div className="text-xl sm:text-2xl font-bold font-display tabular-nums">
+            <div className="text-xl sm:text-2xl font-semibold font-display tabular-nums">
               {balance}<span className="text-xs sm:text-sm text-muted-foreground font-normal ml-0.5">/{allowance}</span>
             </div>
             <Progress value={creditsPercent} className="h-1.5 mt-2" />
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-muted-foreground">{t("dashboard.stats.landings")}</span>
-              <FileText className="h-3.5 w-3.5 text-muted-foreground/60" />
-            </div>
-            <div className="text-xl sm:text-2xl font-bold font-display tabular-nums">{landings.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
+        <Card className="rounded-2xl">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-muted-foreground">{t("dashboard.stats.products")}</span>
               <Package className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
-            <div className="text-xl sm:text-2xl font-bold font-display">{products.length}</div>
+            <div className="text-xl sm:text-2xl font-semibold font-display">{products.length}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-2xl">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-medium text-muted-foreground">{t("dashboard.stats.plan")}</span>
               <Zap className="h-3.5 w-3.5 text-muted-foreground/60" />
             </div>
-            <div className="text-xl sm:text-2xl font-bold font-display capitalize">{profile?.plan || "free"}</div>
+            <div className="text-xl sm:text-2xl font-semibold font-display capitalize">{profile?.plan || "free"}</div>
             {profile?.plan === "free" && (
               <Button variant="link" asChild className="px-0 text-primary text-xs h-auto p-0 mt-1">
                 <Link to="/pricing">{t("dashboard.stats.upgrade")}</Link>
@@ -264,96 +192,64 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Landings + Activity */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-semibold font-display">{t("dashboard.recentLandings")}</h2>
-            {landings.length > 0 && (
-              <Button variant="ghost" size="sm" asChild className="text-xs h-8">
-                <Link to="/landings">{t("dashboard.viewAll")} <ArrowRight className="h-3 w-3 ml-1" /></Link>
-              </Button>
-            )}
+      {/* Recent products */}
+      {products.length > 0 && (
+        <section className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-xs uppercase tracking-wider text-muted-foreground/70 font-semibold">
+              {t("sidebar.products")} · recientes
+            </h2>
+            <Button variant="ghost" size="sm" asChild className="text-xs h-8 rounded-full">
+              <Link to="/products">{t("dashboard.viewAll")} <ArrowRight className="h-3 w-3 ml-1" /></Link>
+            </Button>
           </div>
-          {landings.length === 0 ? (
-            <EmptyState
-              icon={FileText}
-              title={t("dashboard.noLandingsYet")}
-              description={t("dashboard.noLandingsHint")}
-            />
-          ) : (
-            <div className="space-y-2">
-              {landings.slice(0, 8).map((landing) => (
-                <Card key={landing.id} className="lift-on-hover group">
-                  <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5">
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent shrink-0">
-                        <FileText className="h-4 w-4 text-accent-foreground icon-pop" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="font-medium text-sm truncate">{landing.name}</h3>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(landing.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" })}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 flex-wrap">
-                      <Badge variant={landing.published ? "default" : "secondary"} className="text-[10px]">
-                        {landing.published ? t("dashboard.published") : t("dashboard.draft")}
-                      </Badge>
-                      <Badge variant="outline" className="capitalize text-[10px]">{landing.theme}</Badge>
-                      <Button variant="outline" size="sm" asChild className="h-8 min-h-[44px] sm:min-h-0 text-xs">
-                        <Link to={`/landings/${landing.id}/preview`}>
-                          <Eye className="h-3 w-3 mr-1" /> {t("common.view")}
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {recentVersions.length > 0 && (
-          <div>
-            <h2 className="text-base font-semibold font-display mb-3">{t("dashboard.activity")}</h2>
-            <div className="space-y-2">
-              {recentVersions.map((v) => (
-                <Card key={v.id}>
+          <div className="grid gap-2">
+            {products.slice(0, 5).map((p) => (
+              <Link key={p.id} to={`/products/${p.id}`} className="block">
+                <Card className="lift-on-hover rounded-xl">
                   <CardContent className="flex items-center gap-3 p-3">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted shrink-0">
-                      <History className="h-3.5 w-3.5 text-muted-foreground" />
+                    <div className="h-10 w-10 rounded-lg overflow-hidden bg-muted shrink-0 flex items-center justify-center">
+                      {p.images?.[0] ? (
+                        <img src={p.images[0]} alt={p.name} className="h-full w-full object-cover" loading="lazy" />
+                      ) : (
+                        <Package className="h-4 w-4 text-muted-foreground/50" />
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium truncate">{v.landing_name}</p>
-                      <p className="text-[11px] text-muted-foreground">
-                        v{v.version_number} · {new Date(v.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                      </p>
+                      <p className="text-sm font-medium truncate">{p.name}</p>
+                      <p className="text-[11px] text-muted-foreground capitalize">{p.category}</p>
                     </div>
+                    <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
                   </CardContent>
                 </Card>
-              ))}
-            </div>
+              </Link>
+            ))}
           </div>
-        )}
-      </div>
+        </section>
+      )}
     </div>
   );
 };
 
-/* Quick Action Card */
-const QuickActionCard = ({ to, icon: Icon, title, description, variant }: {
-  to: string; icon: React.ComponentType<{ className?: string }>; title: string; description: string; variant?: "primary";
+const QuickActionCard = ({ to, icon: Icon, title, description, variant, demo }: {
+  to: string; icon: React.ComponentType<{ className?: string }>; title: string; description: string;
+  variant?: "primary"; demo?: boolean;
 }) => (
   <Link to={to} className="group block press-on-active">
-    <Card className={`lift-on-hover ${variant === "primary" ? "border-primary/20 bg-accent/20" : ""}`}>
+    <Card className={`lift-on-hover rounded-2xl ${variant === "primary" ? "border-primary/20 bg-accent/30" : ""}`}>
       <CardContent className="flex items-center gap-3.5 p-4">
-        <div className={`flex h-9 w-9 items-center justify-center rounded-lg shrink-0 transition-colors ${variant === "primary" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+        <div className={`flex h-10 w-10 items-center justify-center rounded-xl shrink-0 transition-colors ${variant === "primary" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
           <Icon className="h-4 w-4 icon-pop" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-sm group-hover:text-primary transition-colors truncate">{title}</p>
+          <div className="flex items-center gap-2">
+            <p className="font-medium text-sm group-hover:text-primary transition-colors truncate">{title}</p>
+            {demo && (
+              <span className="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground/80 border border-border/60 shrink-0">
+                Demo
+              </span>
+            )}
+          </div>
           <p className="text-xs text-muted-foreground mt-0.5 truncate">{description}</p>
         </div>
         <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
@@ -362,21 +258,18 @@ const QuickActionCard = ({ to, icon: Icon, title, description, variant }: {
   </Link>
 );
 
-/* Skeleton */
 const DashboardSkeleton = () => (
-  <div className="p-5 md:p-8 lg:p-10 space-y-8 max-w-6xl mx-auto">
-    <div className="space-y-2">
-      <Skeleton className="h-8 w-64" />
+  <div className="p-5 md:p-10 lg:p-12 space-y-10 max-w-5xl mx-auto">
+    <div className="space-y-3">
+      <Skeleton className="h-5 w-32" />
+      <Skeleton className="h-14 w-80 max-w-full" />
       <Skeleton className="h-4 w-40" />
     </div>
-    <div className="grid gap-3 grid-cols-1 sm:grid-cols-3">
-      {[1, 2, 3].map(i => <Skeleton key={i} className="h-[72px] rounded-xl" />)}
+    <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+      {[1, 2].map(i => <Skeleton key={i} className="h-20 rounded-2xl" />)}
     </div>
-    <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
-      {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
-    </div>
-    <div className="space-y-2">
-      {[1, 2, 3].map(i => <Skeleton key={i} className="h-14 rounded-xl" />)}
+    <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
+      {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-2xl" />)}
     </div>
   </div>
 );
