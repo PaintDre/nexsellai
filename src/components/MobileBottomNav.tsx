@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Package,
-  FileText,
   ImageIcon,
   MoreHorizontal,
   CreditCard,
@@ -47,7 +46,6 @@ export const MobileBottomNav = () => {
 
   // Secondary items live in the "More" sheet.
   const secondary: NavItem[] = [
-    { label: t("sidebar.landings"), icon: FileText, href: "/landings" },
     { label: t("sidebar.plans"), icon: CreditCard, href: "/pricing" },
     { label: t("sidebar.subscription"), icon: BadgeCheck, href: "/subscription" },
     { label: t("sidebar.settings"), icon: Settings, href: "/settings" },
