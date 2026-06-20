@@ -4,7 +4,6 @@ import { useAuth } from "@/hooks/useAuth";
 import {
   LayoutDashboard,
   Package,
-  FileText,
   CreditCard,
   Settings,
   LogOut,
@@ -70,17 +69,11 @@ export const SidebarContent = ({
     {
       label: t("sidebar.groupCreate"),
       items: [
-        { label: t("sidebar.banners"), icon: ImageIcon, href: "/banners", badge: "IA" },
-        { label: t("sidebar.videos"), icon: Video, href: "/videos", badge: "NUEVO" },
-        { label: t("sidebar.influencers"), icon: Mic2, href: "/influencers", badge: "BETA" },
-        { label: "Lanzador", icon: Rocket, href: "/launcher", badge: "NUEVO" },
-        { label: "Dropi", icon: Package, href: "/dropi", badge: "NUEVO" },
-      ],
-    },
-    {
-      label: t("sidebar.groupMore"),
-      items: [
-        { label: t("sidebar.landings"), icon: FileText, href: "/landings" },
+        { label: t("sidebar.banners"), icon: ImageIcon, href: "/banners", badge: "DEMO" },
+        { label: t("sidebar.videos"), icon: Video, href: "/videos", badge: "DEMO" },
+        { label: t("sidebar.influencers"), icon: Mic2, href: "/influencers", badge: "DEMO" },
+        { label: "Lanzador", icon: Rocket, href: "/launcher", badge: "DEMO" },
+        { label: "Dropi", icon: Package, href: "/dropi", badge: "DEMO" },
       ],
     },
     {
@@ -132,7 +125,14 @@ export const SidebarContent = ({
           <>
             <span className="whitespace-nowrap truncate flex-1">{item.label}</span>
             {item.badge && (
-              <span className="ml-auto text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-primary/15 text-primary">
+              <span
+                className={cn(
+                  "ml-auto text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md",
+                  item.badge === "DEMO"
+                    ? "bg-muted text-muted-foreground/80 border border-border/60"
+                    : "bg-primary/15 text-primary",
+                )}
+              >
                 {item.badge}
               </span>
             )}
