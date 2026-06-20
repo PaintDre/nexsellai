@@ -6,12 +6,11 @@ import { Tables } from "@/integrations/supabase/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Sparkles, ImageIcon, FileText, Eye, Package, ChevronRight, ArrowRight } from "lucide-react";
+import { Pencil, ImageIcon, Package, ChevronRight } from "lucide-react";
 import { formatProductPrice } from "@/lib/countries";
 import { useTranslation } from "react-i18next";
 
 type Product = Tables<"products">;
-type Landing = Tables<"landings">;
 
 const ProductDetail = () => {
   const { t } = useTranslation();
@@ -19,7 +18,6 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
-  const [landings, setLandings] = useState<Landing[]>([]);
   const [bannerCount, setBannerCount] = useState(0);
 
   useEffect(() => {
@@ -30,9 +28,6 @@ const ProductDetail = () => {
         if (error || !data) { navigate("/products"); return; }
         setProduct(data);
       });
-
-    supabase.from("landings").select("*").eq("product_id", id).eq("user_id", user.id).order("created_at", { ascending: false })
-      .then(({ data }) => setLandings(data || []));
 
     supabase.from("banners").select("*", { count: "exact", head: true }).eq("product_id", id).eq("user_id", user.id)
       .then(({ count }) => setBannerCount(count || 0));
@@ -78,16 +73,12 @@ const ProductDetail = () => {
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <Button size="lg" asChild className="h-auto py-3.5 flex-col gap-0.5 press-on-active">
-          <Link to={`/products/${id}/generate`}>
-            <Sparkles className="h-4 w-4" />
-            <span className="font-semibold text-sm">{t("products.generateLanding")}</span>
-            <span className="text-[10px] opacity-70">{t("products.generateLandingDesc")}</span>
-          </Link>
-        </Button>
-        <Button size="lg" variant="secondary" asChild className="h-auto py-3.5 flex-col gap-0.5 press-on-active">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <Button size="lg" variant="secondary" asChild className="h-auto py-3.5 flex-col gap-0.5 press-on-active relative">
           <Link to={`/products/${id}/banner`}>
+            <span className="absolute top-2 right-2 text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-muted text-muted-foreground/80 border border-border/60">
+              Demo
+            </span>
             <ImageIcon className="h-4 w-4" />
             <span className="font-semibold text-sm">{t("products.generateBanners")}</span>
             <span className="text-[10px] opacity-70">{t("products.generateBannersDesc")}</span>
@@ -103,18 +94,7 @@ const ProductDetail = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <Card className="lift-on-hover">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
-              <FileText className="h-4 w-4 text-primary" />
-            </div>
-            <div>
-              <p className="text-xl font-bold font-display tabular-nums">{landings.length}</p>
-              <p className="text-[11px] text-muted-foreground">{t("products.landingsGenerated")}</p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 gap-3">
         <Card className="lift-on-hover">
           <CardContent className="p-4 flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 shrink-0">
@@ -127,54 +107,6 @@ const ProductDetail = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* CTA when no landings */}
-      {landings.length === 0 && (
-        <Card className="border-primary/15 bg-accent/30">
-          <CardContent className="flex flex-col sm:flex-row items-center gap-4 p-5">
-            <Sparkles className="h-7 w-7 text-primary shrink-0" />
-            <div className="flex-1 text-center sm:text-left">
-              <h3 className="font-semibold text-sm">{t("products.generateFirst")}</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">{t("products.generateFirstDesc")}</p>
-            </div>
-            <Button asChild size="sm">
-              <Link to={`/products/${id}/generate`}>{t("products.generateNow")} <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Landings List */}
-      {landings.length > 0 && (
-        <div>
-          <h2 className="text-base font-semibold font-display mb-3">{t("products.productLandings")}</h2>
-          <div className="space-y-2">
-            {landings.map((landing) => (
-              <Card key={landing.id} className="lift-on-hover group">
-                <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <FileText className="h-4 w-4 text-primary shrink-0" />
-                    <div className="min-w-0">
-                      <h3 className="font-medium text-sm truncate">{landing.name}</h3>
-                      <p className="text-[11px] text-muted-foreground">
-                        {new Date(landing.created_at).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" })}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Badge variant="secondary" className="capitalize text-[10px]">{landing.theme}</Badge>
-                    <Button variant="outline" size="sm" asChild className="h-8 text-xs">
-                      <Link to={`/landings/${landing.id}/preview`}>
-                        <Eye className="h-3 w-3 mr-1" /> {t("common.view")}
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };

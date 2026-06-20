@@ -16,14 +16,9 @@ const Register = lazy(() => import("./pages/Register"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Products = lazy(() => import("./pages/Products"));
 const ProductForm = lazy(() => import("./pages/ProductForm"));
-const GenerateLanding = lazy(() => import("./pages/GenerateLanding"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
-const Landings = lazy(() => import("./pages/Landings"));
-const LandingView = lazy(() => import("./pages/LandingView"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
-const LandingPreview = lazy(() => import("./pages/LandingPreview"));
-const LandingFullPreview = lazy(() => import("./pages/LandingFullPreview"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const AdminUsers = lazy(() => import("./pages/AdminUsers"));
 const AdminFreeUsers = lazy(() => import("./pages/AdminFreeUsers"));
@@ -69,7 +64,6 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/landing/preview" element={<LandingPreview />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/p/:slug" element={<PublicLanding />} />
@@ -79,10 +73,6 @@ const App = () => (
                   <Route path="/products/new" element={<ProductForm />} />
                   <Route path="/products/:id" element={<ProductDetail />} />
                   <Route path="/products/:id/edit" element={<ProductForm />} />
-                  <Route path="/products/:id/generate" element={<GenerateLanding />} />
-                  <Route path="/landings" element={<Landings />} />
-                  <Route path="/landings/:id" element={<LandingView />} />
-                  <Route path="/landings/:id/preview" element={<LandingFullPreview />} />
                   <Route path="/products/:id/banner" element={<GenerateBanner />} />
                   <Route path="/banners" element={<Banners />} />
                   <Route path="/pricing" element={<Pricing />} />
