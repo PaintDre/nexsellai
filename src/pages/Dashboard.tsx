@@ -102,7 +102,7 @@ const Dashboard = () => {
         <h2 className="text-xs uppercase tracking-wider text-muted-foreground/70 font-semibold px-1">
           Productivo
         </h2>
-        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
+        <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           <QuickActionCard
             to="/products/new"
             icon={Plus}
@@ -116,6 +116,8 @@ const Dashboard = () => {
             title={t("sidebar.products")}
             description={`${products.length} ${products.length === 1 ? "producto" : "productos"}`}
           />
+          <QuickActionCard to="/banners" icon={ImageIcon} title={t("sidebar.banners")} description="Banners IA" />
+          <QuickActionCard to="/dropi" icon={Package} title="Dropi" description="Catálogo de productos" />
         </div>
       </section>
 
@@ -130,11 +132,9 @@ const Dashboard = () => {
           </span>
         </div>
         <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-          <QuickActionCard to="/banners" icon={ImageIcon} title={t("sidebar.banners")} description="Banners IA" demo />
           <QuickActionCard to="/videos" icon={Video} title={t("sidebar.videos")} description="Video del producto" demo />
           <QuickActionCard to="/influencers" icon={Mic2} title={t("sidebar.influencers")} description="Lipsync con avatar" demo />
           <QuickActionCard to="/launcher" icon={Rocket} title="Lanzador" description="Campaña end-to-end" demo />
-          <QuickActionCard to="/dropi" icon={Package} title="Dropi" description="Catálogo de productos" demo />
         </div>
       </section>
 
